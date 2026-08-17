@@ -4,8 +4,6 @@ Build search-index.json from all HTML pages.
 Run from repo root: python scripts/build_index.py
 """
 import json
-import os
-import re
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -47,7 +45,7 @@ class PageParser(HTMLParser):
         if tag == 'title':
             self._in_title = False
         if tag in ('h1', 'h2', 'h3') and self._in_heading:
-            heading_text = ''.join(self._buf).strip()
+            heading_text = ' '.join(self._buf).strip()
             self._buf = []
             self._in_heading = False
             if self._heading_tag == 'h1' and not self._title:
@@ -107,7 +105,7 @@ def build(root='.', output='assets/search-index.json'):
         parts = html_file.parts
         if any(p in skip_dirs for p in parts):
             continue
-        rel = '/' + html_file.relative_to(root).as_posix()
+        rel = html_file.relative_to(root).as_posix()
         entries = extract_entries(str(html_file), href=rel)
         all_entries.extend(entries)
 

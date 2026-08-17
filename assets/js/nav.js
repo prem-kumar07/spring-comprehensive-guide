@@ -1,15 +1,28 @@
 (function () {
+  // Detect how many path segments deep we are to build a root-relative prefix.
+  // Pages are either at root (index.html) or one directory deep (spring-core/*.html).
+  const segs = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+  // On GitHub Pages project page the pathname starts with /spring-comprehensive-guide/...
+  // On localhost it starts directly with / or /spring-core/...
+  // Either way, if the last segment is a file, count dirs only.
+  const depth = segs.filter(s => !s.includes('.')).length;
+  // If we're one dir deep (e.g. /spring-comprehensive-guide/spring-core/lifecycle.html → depth=2
+  // on GH Pages, depth=1 on localhost), we need '../' to get back.
+  // Simple heuristic: if the pathname contains '/spring-core/', go up one level.
+  const inSubdir = window.location.pathname.includes('/spring-core/');
+  const ROOT = inSubdir ? '../' : './';
+
   const NAV = [
-    { label: 'Home', href: '/index.html' },
+    { label: 'Home', href: ROOT + 'index.html' },
     {
       group: 'Spring Core',
       items: [
-        { label: 'Overview',           href: '/spring-core/index.html' },
-        { label: 'Spring 5 Features',  href: '/spring-core/spring5-features.html' },
-        { label: 'Spring 6 Features',  href: '/spring-core/spring6-features.html' },
-        { label: 'Version Comparison', href: '/spring-core/version-comparison.html' },
-        { label: 'Bean Lifecycle',     href: '/spring-core/lifecycle.html' },
-        { label: 'Tooling & Setup',    href: '/spring-core/tooling.html' },
+        { label: 'Overview',           href: ROOT + 'spring-core/index.html' },
+        { label: 'Spring 5 Features',  href: ROOT + 'spring-core/spring5-features.html' },
+        { label: 'Spring 6 Features',  href: ROOT + 'spring-core/spring6-features.html' },
+        { label: 'Version Comparison', href: ROOT + 'spring-core/version-comparison.html' },
+        { label: 'Bean Lifecycle',     href: ROOT + 'spring-core/lifecycle.html' },
+        { label: 'Tooling & Setup',    href: ROOT + 'spring-core/tooling.html' },
       ],
     },
     { group: 'Spring Boot',  items: [], locked: true },
@@ -17,7 +30,6 @@
   ];
 
   function currentPath() {
-    // Normalize: strip leading domain, keep path
     return window.location.pathname.replace(/\/$/, '/index.html');
   }
 
@@ -27,13 +39,12 @@
 
     const logo = document.createElement('a');
     logo.className = 'logo';
-    logo.href = '/index.html';
+    logo.href = ROOT + 'index.html';
     logo.textContent = '🌱 Spring Guide';
     sidebar.appendChild(logo);
 
     NAV.forEach(entry => {
       if (entry.href) {
-        // Top-level link
         const a = document.createElement('a');
         a.className = 'nav-item' + (isActive(entry.href) ? ' active' : '');
         a.href = entry.href;
@@ -60,7 +71,6 @@
 
     document.body.prepend(sidebar);
 
-    // Hamburger
     const ham = document.getElementById('hamburger');
     if (ham) {
       ham.addEventListener('click', () => sidebar.classList.toggle('open'));
@@ -69,11 +79,11 @@
 
   function isActive(href) {
     const path = currentPath();
-    // Match exact or index fallback
-    return path === href || path === href.replace('/index.html', '/');
+    // Compare the filename/path portion only (strip prefix up to the last common directory)
+    const hrefEnd = href.replace(/^(\.\.\/|\.\/)+/, '');
+    return path.endsWith('/' + hrefEnd) || path.endsWith(hrefEnd);
   }
 
-  // Theme toggle
   function initTheme() {
     const saved = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
@@ -89,7 +99,6 @@
     }
   }
 
-  // Tab switching
   function initTabs() {
     document.querySelectorAll('.tabs').forEach(tabBar => {
       tabBar.querySelectorAll('.tab-btn').forEach(btn => {
@@ -103,6 +112,28 @@
         });
       });
     });
+
+    // I8: If URL has a hash anchor, activate the tab that contains the target element
+    const hash = window.location.hash;
+    if (hash) {
+      try {
+        const target = document.querySelector(hash);
+        if (target) {
+          const panel = target.closest('.tab-panel');
+          if (panel) {
+            const container = panel.closest('.tab-container');
+            if (container) {
+              container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+              container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+              panel.classList.add('active');
+              const btn = container.querySelector('[data-tab="' + panel.id + '"]');
+              if (btn) btn.classList.add('active');
+              setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+          }
+        }
+      } catch (e) {}
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {

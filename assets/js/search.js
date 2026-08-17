@@ -11,10 +11,12 @@ var e,t;e=this,t=function(){"use strict";function e(e,t){var n=Object.keys(e);if
 // ── Search UI ──────────────────────────────────────
 (function () {
   let fuse = null;
+  const inSubdir = window.location.pathname.includes('/spring-core/');
+  const ROOT = inSubdir ? '../' : './';
 
   async function loadIndex() {
     try {
-      const res = await fetch('/assets/search-index.json');
+      const res = await fetch(ROOT + 'assets/search-index.json');
       const data = await res.json();
       fuse = new Fuse(data, {
         keys: ['text', 'section', 'page'],
@@ -37,7 +39,7 @@ var e,t;e=this,t=function(){"use strict";function e(e,t){var n=Object.keys(e);if
     results.slice(0, 10).forEach(r => {
       const item = r.item;
       const a = document.createElement('a');
-      a.href = item.anchor ? item.href + '#' + item.anchor : item.href;
+      a.href = ROOT + (item.href || '').replace(/^\//, '') + (item.anchor ? '#' + item.anchor : '');
       a.innerHTML = `
         <div>${item.text.slice(0, 80)}</div>
         <div class="result-page">${item.page}</div>

@@ -1,1617 +1,1617 @@
 [
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
+    "href": "index.html",
     "section": "Spring Comprehensive Guide",
     "anchor": "",
     "text": "Spring Comprehensive Guide"
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
+    "href": "index.html",
     "section": "Spring Comprehensive Guide",
     "anchor": "",
     "text": "A complete reference for Spring Core, Spring Boot, and Spring AI — from basics to advanced, with working code examples, version comparisons, and quick cheatsheets."
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
+    "href": "index.html",
     "section": "Spring Core",
     "anchor": "",
     "text": "Spring Core"
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
+    "href": "index.html",
     "section": "Spring Core",
     "anchor": "",
     "text": "Covers Spring Framework 5.x and 6.x — IoC container, AOP, lifecycle, web, data, testing, and more. Spring Core Overview Spring 5 Features Spring 6 Features Version Comparison (5 → 6) Bean Lifecycle Deep-Dive Tooling & Local Setup"
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
-    "section": "Spring BootComing soon",
+    "href": "index.html",
+    "section": "Spring Boot Coming soon",
     "anchor": "",
-    "text": "Spring BootComing soon"
+    "text": "Spring Boot Coming soon"
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
-    "section": "Spring BootComing soon",
+    "href": "index.html",
+    "section": "Spring Boot Coming soon",
     "anchor": "",
     "text": "Spring Boot 3.x and 3.3.x features, auto-configuration, starters, Actuator, and more."
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
-    "section": "Spring AIComing soon",
+    "href": "index.html",
+    "section": "Spring AI Coming soon",
     "anchor": "",
-    "text": "Spring AIComing soon"
+    "text": "Spring AI Coming soon"
   },
   {
     "page": "Spring Comprehensive Guide",
-    "href": "/index.html",
-    "section": "Spring AIComing soon",
+    "href": "index.html",
+    "section": "Spring AI Coming soon",
     "anchor": "",
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring Core Framework",
     "anchor": "",
     "text": "Spring Core Framework"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring Core Framework",
     "anchor": "",
     "text": "Spring 5.3.x LTS Spring 6.2.x Current Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an Inversion of Control (IoC) container that manages object creation and wiring through Dependency Injection (DI) , letting you"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Module Architecture",
     "anchor": "",
     "text": "Module Architecture"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Module Architecture",
     "anchor": "",
     "text": "Spring is structured as a set of modules layered on top of the Core Container. Pick only what you need — each module is independently deployable as a Maven/Gradle dependency. Core Container IoC · DI · Beans Context · SpEL BeanFactory AOP & Aspects Proxies · AspectJ Web MVC · WebFlux REST · WebSocket"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Version Timeline",
     "anchor": "",
     "text": "Version Timeline"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Version Timeline",
     "anchor": "",
     "text": "Spring 5.x targets Java 8+ with javax.* namespaces (Jakarta EE 8). Spring 6.x requires Java 17+ and migrates to jakarta.* namespaces (Jakarta EE 9+). Spring 5.3.x is the LTS release receiving maintenance until 2024; Spring 6.x is the active development line. 5.0 Sep 2017 5.1 Sep 2018 5.2 Sep 2019 5."
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Explore the Guide",
     "anchor": "",
     "text": "Explore the Guide"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Explore the Guide",
     "anchor": "",
     "text": "Each section below covers a specific facet of Spring Core in depth — with code examples, version-diff panels, and cheatsheets."
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring 5 Features",
     "anchor": "",
     "text": "Spring 5 Features"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring 5 Features",
     "anchor": "",
     "text": "IoC, WebFlux, Kotlin support, testing improvements — Java 8+ baseline"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring 6 Features",
     "anchor": "",
     "text": "Spring 6 Features"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Spring 6 Features",
     "anchor": "",
     "text": "Jakarta EE 10, AOT compilation, virtual threads, HTTP client — Java 17+ required"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Version Comparison",
     "anchor": "",
     "text": "Version Comparison"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Version Comparison",
     "anchor": "",
     "text": "Side-by-side diff of Spring 5 vs 6 — namespace changes, removed APIs, migration guide"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Bean Lifecycle",
     "anchor": "",
     "text": "Bean Lifecycle"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Bean Lifecycle",
     "anchor": "",
     "text": "Full bean lifecycle deep-dive — instantiation, post-processing, init, use, destruction"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Tooling & Setup",
     "anchor": "",
     "text": "Tooling & Setup"
   },
   {
     "page": "Spring Core Framework",
-    "href": "/spring-core/index.html",
+    "href": "spring-core/index.html",
     "section": "Tooling & Setup",
     "anchor": "",
     "text": "Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices Java baseline reminder Spring 5.3.x requires Java 8 or higher and uses javax.* package names.\n      Spring 6.x requires Java 17 or higher and migrates all imports to jakarta.* .\n      Choose your branch based on y"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Spring Bean Lifecycle",
     "anchor": "",
     "text": "Spring Bean Lifecycle"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Spring Bean Lifecycle",
     "anchor": "",
     "text": "The Spring Bean Lifecycle is the complete sequence of steps that the Spring IoC container executes from the moment it creates a bean to the moment it destroys it. Understanding this lifecycle lets you hook into exactly the right phase — whether you need to validate configuration after injection, war"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Lifecycle Flow Diagram",
     "anchor": "",
     "text": "Lifecycle Flow Diagram"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Lifecycle Flow Diagram",
     "anchor": "",
     "text": "The diagram below shows all 14 stages in order. Color coding: blue = Aware interfaces, green = init callbacks, amber = BeanPostProcessor, red = destroy phase, gray = general stages. General Aware interfaces BeanPostProcessor Init callbacks Destroy phase 1 Instantiation (Constructor) 2 Populate Prope"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage-by-Stage Deep Dive",
     "anchor": "",
     "text": "Stage-by-Stage Deep Dive"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 1 — Instantiation (Constructor)",
     "anchor": "stage-1",
     "text": "Stage 1 — Instantiation (Constructor)"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 1 — Instantiation (Constructor)",
     "anchor": "stage-1",
     "text": "Spring calls the bean's constructor (or a factory method) to create the object instance. If you have multiple constructors, Spring uses the one annotated with @Autowired , or the single no-arg constructor by default. At this point no dependencies have been injected — the object is just allocated. im"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 2 — Populate Properties (Setter / Field Injection)",
     "anchor": "stage-2",
     "text": "Stage 2 — Populate Properties (Setter / Field Injection)"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 2 — Populate Properties (Setter / Field Injection)",
     "anchor": "stage-2",
     "text": "After construction, Spring resolves all @Autowired fields and setter methods. It also applies values from @Value expressions. This is when the bean's dependency graph is fully satisfied. import org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.beans.factory.annotatio"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 3 — BeanNameAware.setBeanName()",
     "anchor": "stage-3",
     "text": "Stage 3 — BeanNameAware.setBeanName()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 3 — BeanNameAware.setBeanName()",
     "anchor": "stage-3",
     "text": "If the bean implements BeanNameAware , Spring calls setBeanName(String name) passing the bean's registered name in the container. This is the first of the Aware interface callbacks and fires immediately after property population. import org.springframework.beans.factory.BeanNameAware;\nimport org.spr"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()",
     "anchor": "stage-4",
     "text": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()",
     "anchor": "stage-4",
     "text": "BeanClassLoaderAware gives the bean a reference to the ClassLoader used to load it. This is useful for frameworks that need to dynamically load classes by name using the same classloader as the bean. import org.springframework.beans.factory.BeanClassLoaderAware;\nimport org.springframework.stereotype"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 5 — BeanFactoryAware.setBeanFactory()",
     "anchor": "stage-5",
     "text": "Stage 5 — BeanFactoryAware.setBeanFactory()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 5 — BeanFactoryAware.setBeanFactory()",
     "anchor": "stage-5",
     "text": "BeanFactoryAware injects the owning BeanFactory into the bean. This lets a bean programmatically retrieve other beans from the container — though this is generally an anti-pattern since it couples your code to the Spring API. Prefer constructor injection. import org.springframework.beans.BeansExcept"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 6 — EnvironmentAware.setEnvironment()",
     "anchor": "stage-6",
     "text": "Stage 6 — EnvironmentAware.setEnvironment()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 6 — EnvironmentAware.setEnvironment()",
     "anchor": "stage-6",
     "text": "EnvironmentAware provides the bean with the Environment object, which gives access to property sources, profiles, and system properties. Useful for infrastructure beans that need to read configuration values programmatically. import org.springframework.context.EnvironmentAware;\nimport org.springfram"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 7 — ApplicationContextAware.setApplicationContext()",
     "anchor": "stage-7",
     "text": "Stage 7 — ApplicationContextAware.setApplicationContext()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 7 — ApplicationContextAware.setApplicationContext()",
     "anchor": "stage-7",
     "text": "ApplicationContextAware is the most commonly used Aware interface. It injects the full ApplicationContext , giving access to the entire bean registry, event publishing, message sources, and resource loading. A common pattern is a static holder so non-Spring code can access the context. import org.sp"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()",
     "anchor": "stage-8",
     "text": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()",
     "anchor": "stage-8",
     "text": "BeanPostProcessor is a container extension point: implementations are called for every bean in the context, not just beans that implement a specific interface. The postProcessBeforeInitialization hook fires after the Aware callbacks but before the bean's own init methods. You can return the original"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()",
     "anchor": "stage-9",
     "text": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()",
     "anchor": "stage-9",
     "text": "Two hooks fire at this stage in order: the JSR-250 @PostConstruct method first, then InitializingBean.afterPropertiesSet() . Both run after all dependencies have been injected. Use them to perform any initialization that requires access to injected dependencies — warming caches, opening connections,"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 10 — Custom init-method",
     "anchor": "stage-10",
     "text": "Stage 10 — Custom init-method"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 10 — Custom init-method",
     "anchor": "stage-10",
     "text": "A custom init method fires after afterPropertiesSet() . Declare it on a @Bean definition with initMethod , or in XML with init-method . This lets you hook lifecycle behavior into third-party classes you can't annotate. import org.springframework.context.annotation.Bean;\nimport org.springframework.co"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()",
     "anchor": "stage-11",
     "text": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()",
     "anchor": "stage-11",
     "text": "The second BeanPostProcessor hook fires after all init callbacks complete. This is when AOP proxies are typically installed — if the bean needs to be wrapped, the proxy replaces the original instance in the container from this point on. The object returned here is what callers will receive when they"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 12 — Bean Ready (In Use)",
     "anchor": "stage-12",
     "text": "Stage 12 — Bean Ready (In Use)"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 12 — Bean Ready (In Use)",
     "anchor": "stage-12",
     "text": "At this point the bean is fully initialized and stored in the container. Calls to applicationContext.getBean() or any injection point will receive this bean (or its proxy). The bean remains in this state until the container begins shutdown. import org.springframework.context.annotation.AnnotationCon"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 13 — @PreDestroy / DisposableBean.destroy()",
     "anchor": "stage-13",
     "text": "Stage 13 — @PreDestroy / DisposableBean.destroy()"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 13 — @PreDestroy / DisposableBean.destroy()",
     "anchor": "stage-13",
     "text": "When the container is closed (e.g., context.close() or JVM shutdown hook), Spring calls destroy callbacks in reverse order. The @PreDestroy method fires first, then DisposableBean.destroy() . Use these to release resources: close database connections, flush caches, stop background threads. import ja"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 14 — Custom destroy-method",
     "anchor": "stage-14",
     "text": "Stage 14 — Custom destroy-method"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Stage 14 — Custom destroy-method",
     "anchor": "stage-14",
     "text": "A custom destroy method fires after DisposableBean.destroy() . Declare it on a @Bean with destroyMethod . Spring also has a convention: if a bean has a close() or shutdown() method and no destroyMethod is specified, Spring infers it automatically for @Bean declarations. // Already shown in Stage 10 "
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Scope Comparison: Singleton vs Prototype",
     "anchor": "",
     "text": "Scope Comparison: Singleton vs Prototype"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "Scope Comparison: Singleton vs Prototype",
     "anchor": "",
     "text": "Bean scope fundamentally changes how much of the lifecycle the container manages. Singleton beans enjoy full lifecycle management. Prototype beans are handed off to the caller after creation — the container does not track them after that point. Aspect Singleton Prototype Created Once per container N"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "ApplicationContext vs BeanFactory",
     "anchor": "",
     "text": "ApplicationContext vs BeanFactory"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "ApplicationContext vs BeanFactory",
     "anchor": "",
     "text": "ApplicationContext is a superset of BeanFactory . In practice you always use ApplicationContext — the only reason to use BeanFactory directly is in highly resource-constrained environments (e.g., embedded devices) where eager initialization overhead matters. Feature BeanFactory ApplicationContext Be"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "⚡ Bean Lifecycle Cheatsheet",
     "anchor": "",
     "text": "⚡ Bean Lifecycle Cheatsheet"
   },
   {
     "page": "Spring Bean Lifecycle",
-    "href": "/spring-core/lifecycle.html",
+    "href": "spring-core/lifecycle.html",
     "section": "⚡ Bean Lifecycle Cheatsheet",
     "anchor": "",
     "text": "# Stage Hook / Interface / Annotation Singleton Prototype 1 Instantiation Constructor call ✅ ✅ 2 Populate Properties @Autowired , @Value , setter injection ✅ ✅ 3 BeanNameAware BeanNameAware.setBeanName() ✅ ✅ 4 BeanClassLoaderAware BeanClassLoaderAware.setBeanClassLoader() ✅ ✅ 5 BeanFactoryAware Bean"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
+    "href": "spring-core/spring5-features.html",
     "section": "Spring Framework 5 Features",
     "anchor": "",
     "text": "Spring Framework 5 Features"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
+    "href": "spring-core/spring5-features.html",
     "section": "Spring Framework 5 Features",
     "anchor": "",
     "text": "Spring 5.3.x LTS Java 8+ baseline • GA: Sep 2017 • LTS: Oct 2020 Spring Framework 5 represents a major generational leap — it moved to a Java 8+ baseline, introduced the fully reactive WebFlux stack built on Project Reactor, adopted JUnit 5 as a first-class testing citizen, added null-safety annotat"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Stereotype Annotations & Dependency Injection[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Stereotype Annotations & Dependency Injection [Basic]",
     "anchor": "",
-    "text": "Stereotype Annotations & Dependency Injection[Basic]"
+    "text": "Stereotype Annotations & Dependency Injection [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Stereotype Annotations & Dependency Injection[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Stereotype Annotations & Dependency Injection [Basic]",
     "anchor": "",
     "text": "@Component marks a class so the classpath scanner registers it as a Spring-managed bean. @Autowired instructs the container to resolve and inject a matching bean by type at the annotated field, constructor, or setter. @Value injects scalar values from property sources or Spring Expression Language ("
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "XML vs Annotation Configuration[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "XML vs Annotation Configuration [Basic]",
     "anchor": "",
-    "text": "XML vs Annotation Configuration[Basic]"
+    "text": "XML vs Annotation Configuration [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "XML vs Annotation Configuration[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "XML vs Annotation Configuration [Basic]",
     "anchor": "",
     "text": "Spring supports three configuration styles that can be freely mixed: legacy XML ( <bean> elements), annotation-driven classpath scanning ( @Component + @ComponentScan ), and Java-based configuration ( @Configuration + @Bean ). Modern projects almost exclusively use annotation or Java config, but XML"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Configuration, @Bean, @Conditional & @Profile[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Configuration, @Bean, @Conditional & @Profile [Intermediate]",
     "anchor": "",
-    "text": "@Configuration, @Bean, @Conditional & @Profile[Intermediate]"
+    "text": "@Configuration, @Bean, @Conditional & @Profile [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Configuration, @Bean, @Conditional & @Profile[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Configuration, @Bean, @Conditional & @Profile [Intermediate]",
     "anchor": "",
     "text": "A class annotated with @Configuration acts as a bean factory: its @Bean -annotated methods produce beans managed by the container. @Profile restricts a bean or configuration class to a named Spring profile (e.g. dev , prod ), and @Conditional evaluates arbitrary logic to decide whether to register a"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Constructor vs Field vs Setter Injection[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Constructor vs Field vs Setter Injection [Intermediate]",
     "anchor": "",
-    "text": "Constructor vs Field vs Setter Injection[Intermediate]"
+    "text": "Constructor vs Field vs Setter Injection [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Constructor vs Field vs Setter Injection[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Constructor vs Field vs Setter Injection [Intermediate]",
     "anchor": "",
     "text": "Spring supports three injection styles. Constructor injection (recommended by the Spring team since 5.0) makes dependencies mandatory and immutable, enables final fields, and simplifies unit testing. Field injection ( @Autowired on a field) is concise but hides dependencies, prevents final , and req"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Functional Bean Registration (GenericApplicationContext)[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Functional Bean Registration (GenericApplicationContext) [Advanced]",
     "anchor": "",
-    "text": "Functional Bean Registration (GenericApplicationContext)[Advanced]"
+    "text": "Functional Bean Registration (GenericApplicationContext) [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Functional Bean Registration (GenericApplicationContext)[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Functional Bean Registration (GenericApplicationContext) [Advanced]",
     "anchor": "",
     "text": "Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. GenericApplicationContext.registerBean() accepts a supplier lambda and optional customizers, making it possible to build a Spring context with zero classpath scanning — ideal for GraalVM n"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Lazy, @Primary, @Qualifier, @DependsOn[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Lazy, @Primary, @Qualifier, @DependsOn [Advanced]",
     "anchor": "",
-    "text": "@Lazy, @Primary, @Qualifier, @DependsOn[Advanced]"
+    "text": "@Lazy, @Primary, @Qualifier, @DependsOn [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Lazy, @Primary, @Qualifier, @DependsOn[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Lazy, @Primary, @Qualifier, @DependsOn [Advanced]",
     "anchor": "",
     "text": "@Primary designates the preferred candidate when multiple beans of the same type exist; @Qualifier targets a specific bean by name when @Primary is not specific enough. @Lazy defers bean initialization until first use (useful for heavy resources or circular-dependency breaking). @DependsOn forces th"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable [Basic]",
     "anchor": "",
-    "text": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable[Basic]"
+    "text": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable [Basic]",
     "anchor": "",
     "text": "@RestController is a composed annotation combining @Controller and @ResponseBody , so every method return value is serialized directly to the HTTP response body (JSON by default via Jackson). The @GetMapping / @PostMapping shortcuts bind HTTP methods to handler methods; @PathVariable extracts URI te"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T>[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T> [Intermediate]",
     "anchor": "",
-    "text": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T>[Intermediate]"
+    "text": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T> [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T>[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@ExceptionHandler, @ControllerAdvice & ResponseEntity<T> [Intermediate]",
     "anchor": "",
     "text": "@ExceptionHandler methods catch exceptions thrown by handler methods and produce a structured error response. When placed in a @ControllerAdvice class they apply globally across all controllers in the application. ResponseEntity<T> gives full control over the HTTP status code, headers, and body of t"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "HandlerInterceptor for Cross-Cutting Concerns[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "HandlerInterceptor for Cross-Cutting Concerns [Intermediate]",
     "anchor": "",
-    "text": "HandlerInterceptor for Cross-Cutting Concerns[Intermediate]"
+    "text": "HandlerInterceptor for Cross-Cutting Concerns [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "HandlerInterceptor for Cross-Cutting Concerns[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "HandlerInterceptor for Cross-Cutting Concerns [Intermediate]",
     "anchor": "",
     "text": "HandlerInterceptor hooks into the Spring MVC request lifecycle at three points: preHandle (before the handler method; return false to abort), postHandle (after the handler but before view rendering), and afterCompletion (after the full request, including any exceptions). Interceptors are registered "
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Async Request Processing: Callable<?> and DeferredResult<T>[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Async Request Processing: Callable<?> and DeferredResult<T> [Advanced]",
     "anchor": "",
-    "text": "Async Request Processing: Callable<?> and DeferredResult<T>[Advanced]"
+    "text": "Async Request Processing: Callable<?> and DeferredResult<T> [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Async Request Processing: Callable<?> and DeferredResult<T>[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Async Request Processing: Callable<?> and DeferredResult<T> [Advanced]",
     "anchor": "",
     "text": "Spring MVC can release the Servlet container thread while the response is still pending, allowing the container to handle more concurrent requests with fewer threads. Returning a Callable<T> offloads the work to Spring's task executor thread pool. DeferredResult<T> is more flexible — the result can "
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Reactive vs Imperative — Mono and Flux[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Reactive vs Imperative — Mono and Flux [Basic]",
     "anchor": "",
-    "text": "Reactive vs Imperative — Mono and Flux[Basic]"
+    "text": "Reactive vs Imperative — Mono and Flux [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Reactive vs Imperative — Mono and Flux[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Reactive vs Imperative — Mono and Flux [Basic]",
     "anchor": "",
     "text": "Spring WebFlux (introduced in Spring 5.0) is built on Project Reactor and implements the Reactive Streams specification. Instead of blocking threads while waiting for I/O, reactive code describes a pipeline of transformations over asynchronous data. Mono<T> represents a stream of zero or one item; F"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@RestController with Mono<T> Return Types[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@RestController with Mono<T> Return Types [Basic]",
     "anchor": "",
-    "text": "@RestController with Mono<T> Return Types[Basic]"
+    "text": "@RestController with Mono<T> Return Types [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@RestController with Mono<T> Return Types[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@RestController with Mono<T> Return Types [Basic]",
     "anchor": "",
     "text": "WebFlux reuses Spring MVC annotations like @RestController and @GetMapping . The key difference is that handler methods return Mono<T> (single result) or Flux<T> (collection), signaling to the framework that the response is asynchronous. The container subscribes to the publisher and writes the seria"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "WebClient — Reactive HTTP Client[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "WebClient — Reactive HTTP Client [Intermediate]",
     "anchor": "",
-    "text": "WebClient — Reactive HTTP Client[Intermediate]"
+    "text": "WebClient — Reactive HTTP Client [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "WebClient — Reactive HTTP Client[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "WebClient — Reactive HTTP Client [Intermediate]",
     "anchor": "",
     "text": "WebClient is the reactive, non-blocking replacement for the deprecated RestTemplate . It is part of spring-webflux and can be used even in traditional Spring MVC applications. It supports request/response streaming, exchange functions, and integrates with Reactor operators for composing complex HTTP"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Router Functions — Functional Web Endpoints[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Router Functions — Functional Web Endpoints [Advanced]",
     "anchor": "",
-    "text": "Router Functions — Functional Web Endpoints[Advanced]"
+    "text": "Router Functions — Functional Web Endpoints [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Router Functions — Functional Web Endpoints[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Router Functions — Functional Web Endpoints [Advanced]",
     "anchor": "",
     "text": "Spring 5 introduced a functional, lambda-based alternative to annotated controllers for WebFlux. A RouterFunction<ServerResponse> maps request predicates to HandlerFunction<ServerResponse> implementations. This style is entirely type-safe, easily unit-testable without a server, and composes naturall"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "JdbcTemplate Basics[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "JdbcTemplate Basics [Basic]",
     "anchor": "",
-    "text": "JdbcTemplate Basics[Basic]"
+    "text": "JdbcTemplate Basics [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "JdbcTemplate Basics[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "JdbcTemplate Basics [Basic]",
     "anchor": "",
     "text": "JdbcTemplate is Spring's classic JDBC abstraction that eliminates boilerplate resource management (opening/closing connections, catching SQLExceptions) while keeping full control of SQL. The three most common methods are query() for SELECT returning a list, queryForObject() for single-row SELECT, an"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Transactional — Propagation and Isolation[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Transactional — Propagation and Isolation [Intermediate]",
     "anchor": "",
-    "text": "@Transactional — Propagation and Isolation[Intermediate]"
+    "text": "@Transactional — Propagation and Isolation [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Transactional — Propagation and Isolation[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Transactional — Propagation and Isolation [Intermediate]",
     "anchor": "",
     "text": "Spring's @Transactional demarcates transaction boundaries declaratively via AOP proxy. The most important attributes are propagation (what happens when a transactional method calls another transactional method) and isolation (what concurrent transactions can see of each other's in-flight data). The "
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "NamedParameterJdbcTemplate & TransactionSynchronizationManager[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "NamedParameterJdbcTemplate & TransactionSynchronizationManager [Advanced]",
     "anchor": "",
-    "text": "NamedParameterJdbcTemplate & TransactionSynchronizationManager[Advanced]"
+    "text": "NamedParameterJdbcTemplate & TransactionSynchronizationManager [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "NamedParameterJdbcTemplate & TransactionSynchronizationManager[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "NamedParameterJdbcTemplate & TransactionSynchronizationManager [Advanced]",
     "anchor": "",
     "text": "NamedParameterJdbcTemplate replaces positional ? placeholders with named parameters like :name , making complex queries more readable and maintainable. TransactionSynchronizationManager provides programmatic access to the current transaction context and allows registering callbacks ( TransactionSync"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@SpringBootTest — Integration Testing[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@SpringBootTest — Integration Testing [Basic]",
     "anchor": "",
-    "text": "@SpringBootTest — Integration Testing[Basic]"
+    "text": "@SpringBootTest — Integration Testing [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@SpringBootTest — Integration Testing[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@SpringBootTest — Integration Testing [Basic]",
     "anchor": "",
     "text": "@SpringBootTest bootstraps the full Spring ApplicationContext (all beans, auto-configuration, and the embedded server if webEnvironment is set). Use it for end-to-end integration tests; avoid it for unit tests of individual classes because it is expensive. The test context is cached across test meth"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@WebMvcTest & MockMvc — Controller Slice Tests[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@WebMvcTest & MockMvc — Controller Slice Tests [Intermediate]",
     "anchor": "",
-    "text": "@WebMvcTest & MockMvc — Controller Slice Tests[Intermediate]"
+    "text": "@WebMvcTest & MockMvc — Controller Slice Tests [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@WebMvcTest & MockMvc — Controller Slice Tests[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@WebMvcTest & MockMvc — Controller Slice Tests [Intermediate]",
     "anchor": "",
     "text": "@WebMvcTest is a slice test that loads only the MVC layer — controllers, @ControllerAdvice , filters, and converters — without starting an actual HTTP server or loading service/repository beans. Dependencies that are not in the MVC layer must be provided as mocks. MockMvc executes requests against t"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@MockBean vs @SpyBean[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@MockBean vs @SpyBean [Intermediate]",
     "anchor": "",
-    "text": "@MockBean vs @SpyBean[Intermediate]"
+    "text": "@MockBean vs @SpyBean [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@MockBean vs @SpyBean[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@MockBean vs @SpyBean [Intermediate]",
     "anchor": "",
     "text": "@MockBean replaces a Spring bean in the application context with a Mockito mock (all methods return default values unless stubbed). @SpyBean wraps an existing Spring bean in a Mockito spy — real methods execute unless explicitly stubbed — making it useful when you want to test the real implementatio"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "WebTestClient, @TestConfiguration & Context Caching[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "WebTestClient, @TestConfiguration & Context Caching [Advanced]",
     "anchor": "",
-    "text": "WebTestClient, @TestConfiguration & Context Caching[Advanced]"
+    "text": "WebTestClient, @TestConfiguration & Context Caching [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "WebTestClient, @TestConfiguration & Context Caching[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "WebTestClient, @TestConfiguration & Context Caching [Advanced]",
     "anchor": "",
     "text": "WebTestClient is the reactive equivalent of MockMvc , used to test WebFlux controllers either against a running server or bound to the ApplicationContext directly. @TestConfiguration adds beans to the test context without replacing the production configuration. Spring caches the ApplicationContext b"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Nullable / @NonNull — Null-Safety Annotations[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Nullable / @NonNull — Null-Safety Annotations [Basic]",
     "anchor": "",
-    "text": "@Nullable / @NonNull — Null-Safety Annotations[Basic]"
+    "text": "@Nullable / @NonNull — Null-Safety Annotations [Basic]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "@Nullable / @NonNull — Null-Safety Annotations[Basic]",
+    "href": "spring-core/spring5-features.html",
+    "section": "@Nullable / @NonNull — Null-Safety Annotations [Basic]",
     "anchor": "",
     "text": "Spring 5 introduced package-level null-safety annotations ( @NonNullApi , @NonNullFields in org.springframework.lang ), making the entire Spring Framework API null-safe and IDE-verifiable. Individual parameters or return types that can legitimately be null are annotated with @Nullable . IDEs (Intell"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Kotlin Coroutines Support[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Kotlin Coroutines Support [Intermediate]",
     "anchor": "",
-    "text": "Kotlin Coroutines Support[Intermediate]"
+    "text": "Kotlin Coroutines Support [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Kotlin Coroutines Support[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Kotlin Coroutines Support [Intermediate]",
     "anchor": "",
     "text": "Spring 5 added first-class Kotlin support, and Spring 5.2 extended WebFlux to understand Kotlin coroutines — suspend functions and Flow — as a more ergonomic alternative to Mono / Flux . Under the covers Spring converts suspend functions to Reactor publishers automatically, so the runtime model rema"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "JUnit 5 (Jupiter) as First-Class Citizen[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "JUnit 5 (Jupiter) as First-Class Citizen [Intermediate]",
     "anchor": "",
-    "text": "JUnit 5 (Jupiter) as First-Class Citizen[Intermediate]"
+    "text": "JUnit 5 (Jupiter) as First-Class Citizen [Intermediate]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "JUnit 5 (Jupiter) as First-Class Citizen[Intermediate]",
+    "href": "spring-core/spring5-features.html",
+    "section": "JUnit 5 (Jupiter) as First-Class Citizen [Intermediate]",
     "anchor": "",
     "text": "Spring 5 dropped support for JUnit 4 in the core spring-test module and made JUnit 5 (Jupiter) the primary testing framework. The @ExtendWith(SpringExtension.class) annotation replaces JUnit 4's @RunWith(SpringJUnit4ClassRunner.class) . Spring Boot 2.1+ auto-applies SpringExtension via @SpringBootTe"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "ApplicationContext.registerBean() — Functional Style[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "ApplicationContext.registerBean() — Functional Style [Advanced]",
     "anchor": "",
-    "text": "ApplicationContext.registerBean() — Functional Style[Advanced]"
+    "text": "ApplicationContext.registerBean() — Functional Style [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "ApplicationContext.registerBean() — Functional Style[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "ApplicationContext.registerBean() — Functional Style [Advanced]",
     "anchor": "",
     "text": "Spring 5 added the registerBean() method to GenericApplicationContext as a functional bean registration API. Unlike @Bean methods (which rely on CGLIB proxying and reflection), this API is lambda-based, avoids annotation processing, and allows programmatic customization of every bean definition attr"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Classpath Scanning Improvements — Component Index[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Classpath Scanning Improvements — Component Index [Advanced]",
     "anchor": "",
-    "text": "Classpath Scanning Improvements — Component Index[Advanced]"
+    "text": "Classpath Scanning Improvements — Component Index [Advanced]"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
-    "section": "Classpath Scanning Improvements — Component Index[Advanced]",
+    "href": "spring-core/spring5-features.html",
+    "section": "Classpath Scanning Improvements — Component Index [Advanced]",
     "anchor": "",
     "text": "Spring 5.0 introduced a compile-time component index ( spring-context-indexer ) to replace expensive runtime classpath scanning. During the build, an annotation processor generates META-INF/spring.components listing all candidate components. At startup the container reads the index instead of scanni"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
+    "href": "spring-core/spring5-features.html",
     "section": "⚡ Spring 5 Cheatsheet",
     "anchor": "",
     "text": "⚡ Spring 5 Cheatsheet"
   },
   {
     "page": "Spring 5 Features",
-    "href": "/spring-core/spring5-features.html",
+    "href": "spring-core/spring5-features.html",
     "section": "⚡ Spring 5 Cheatsheet",
     "anchor": "",
     "text": "Annotation / Class Package Purpose @Component org.springframework.stereotype Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype Specialisation of @C"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
+    "href": "spring-core/spring6-features.html",
     "section": "Spring Framework 6 Features",
     "anchor": "",
     "text": "Spring Framework 6 Features"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
+    "href": "spring-core/spring6-features.html",
     "section": "Spring Framework 6 Features",
     "anchor": "",
     "text": "Spring 6.2.x Current Java 17+ baseline • GA: Nov 2022 • Jakarta EE 9+ Spring Framework 6 is the most significant release since Spring 5 — it raises the baseline to Java 17 and Jakarta EE 9+ , completing the javax.* → jakarta.* namespace migration. It adds first-class support for GraalVM native image"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages [Basic]",
     "anchor": "",
-    "text": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]"
+    "text": "javax.* → jakarta.* Namespace Migration — All Major Packages [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages [Basic]",
     "anchor": "",
     "text": "The most impactful change in Spring 6 is the complete migration from javax.* to jakarta.* namespaces, mandated by the transfer of Java EE to the Eclipse Foundation as Jakarta EE. Every import in your codebase that references a Java EE API must be updated. The most frequently touched packages are sho"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "pom.xml Dependency Updates for Jakarta EE 9+ [Intermediate]",
     "anchor": "",
-    "text": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]"
+    "text": "pom.xml Dependency Updates for Jakarta EE 9+ [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "pom.xml Dependency Updates for Jakarta EE 9+ [Intermediate]",
     "anchor": "",
     "text": "Switching to Jakarta EE 9+ requires updating your dependency coordinates in addition to renaming imports. The group IDs and artifact IDs for many APIs changed when the Eclipse Foundation took ownership. <!-- Spring 5 / Javax EE dependencies -->\n<dependency>\n  <groupId>javax.servlet</groupId>\n  <arti"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator [Intermediate]",
     "anchor": "",
-    "text": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]"
+    "text": "Automated Migration — OpenRewrite & Spring Boot Migrator [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator [Intermediate]",
     "anchor": "",
     "text": "The OpenRewrite project provides a recipe ( UpgradeSpringBoot_3_0 ) that automates the bulk of the migration: renaming all javax.* imports, updating POM dependencies, migrating deprecated API usages, and applying configuration property renames. The Spring Boot Migrator (SBM) is a CLI tool that appli"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records [Advanced]",
     "anchor": "",
-    "text": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]"
+    "text": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records [Advanced]",
     "anchor": "",
     "text": "Spring 6 targets Jakarta EE 9+ (moving to EE 10 with Spring 6.1). Jakarta EE 10 brought CDI 4.0, Servlet 6.0, and various API cleanups. Combined with Java 17's sealed classes and records, Spring 6 fully embraces these idioms. Entity classes can now be Java records (with some limitations), and @Async"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6) [Basic]",
     "anchor": "",
-    "text": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]"
+    "text": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6) [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6) [Basic]",
     "anchor": "",
     "text": "@HttpExchange lets you declare an HTTP client as a Java interface — similar to how Spring Data repositories work. You annotate a method with the HTTP method and URI; Spring generates a proxy implementation backed by either WebClient (reactive) or RestClient (synchronous, Spring 6.1+). This replaces "
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange [Basic]",
     "anchor": "",
-    "text": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]"
+    "text": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange [Basic]",
     "anchor": "",
     "text": "Spring 6 ships four convenience annotations — each is a specialization of @HttpExchange with the HTTP method pre-set. They mirror the server-side @GetMapping / @PostMapping annotations, making the client interface immediately readable. import org.springframework.web.service.annotation.*;\nimport org."
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "HttpServiceProxyFactory — Wiring the Client Proxy [Intermediate]",
     "anchor": "",
-    "text": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]"
+    "text": "HttpServiceProxyFactory — Wiring the Client Proxy [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "HttpServiceProxyFactory — Wiring the Client Proxy [Intermediate]",
     "anchor": "",
     "text": "HttpServiceProxyFactory creates the runtime proxy that implements your @HttpExchange interface. You configure it with an HTTP adapter — either WebClientAdapter (reactive) or RestClientAdapter (synchronous, Spring 6.1+) — and then ask it to create an instance of your interface. The resulting bean can"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Custom Headers, Error Handling, Timeout & Retry[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Custom Headers, Error Handling, Timeout & Retry [Advanced]",
     "anchor": "",
-    "text": "Custom Headers, Error Handling, Timeout & Retry[Advanced]"
+    "text": "Custom Headers, Error Handling, Timeout & Retry [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Custom Headers, Error Handling, Timeout & Retry[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Custom Headers, Error Handling, Timeout & Retry [Advanced]",
     "anchor": "",
     "text": "Advanced @HttpExchange usage involves per-request headers, structured error decoding, connect/read timeouts, and retry policies. These are configured on the underlying WebClient or RestClient rather than the interface itself, giving you full control over the HTTP transport behaviour. import org.spri"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Micrometer — Now Core in Spring 6 (Not Optional) [Basic]",
     "anchor": "",
-    "text": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]"
+    "text": "Micrometer — Now Core in Spring 6 (Not Optional) [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Micrometer — Now Core in Spring 6 (Not Optional) [Basic]",
     "anchor": "",
     "text": "Spring Framework 6 integrates Micrometer as a first-class dependency (not an optional add-on). Micrometer is the vendor-neutral instrumentation facade for JVM applications — it provides a single API to record metrics (counters, gauges, timers) and traces, then ships the data to any backend: Promethe"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@Observed — Automatic Method-Level Instrumentation[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@Observed — Automatic Method-Level Instrumentation [Intermediate]",
     "anchor": "",
-    "text": "@Observed — Automatic Method-Level Instrumentation[Intermediate]"
+    "text": "@Observed — Automatic Method-Level Instrumentation [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@Observed — Automatic Method-Level Instrumentation[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@Observed — Automatic Method-Level Instrumentation [Intermediate]",
     "anchor": "",
     "text": "The @Observed annotation (from Micrometer, usable in Spring 6 via AOP) wraps an entire method in an observation without any boilerplate code. When placed on a class, it applies to all public methods. Spring generates a timer metric and a trace span named after the class and method automatically. imp"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends [Intermediate]",
     "anchor": "",
-    "text": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]"
+    "text": "ObservationRegistry — Configuring Metrics & Tracing Backends [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends [Intermediate]",
     "anchor": "",
     "text": "ObservationRegistry is the central hub. You configure it once with metric and tracing handlers; then all observations flow to those backends. Spring Boot auto-configures this for common backends — in plain Spring 6 (without Boot) you configure it manually. import io.micrometer.core.instrument.MeterR"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Custom ObservationConvention & ObservationHandler[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Custom ObservationConvention & ObservationHandler [Advanced]",
     "anchor": "",
-    "text": "Custom ObservationConvention & ObservationHandler[Advanced]"
+    "text": "Custom ObservationConvention & ObservationHandler [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Custom ObservationConvention & ObservationHandler[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Custom ObservationConvention & ObservationHandler [Advanced]",
     "anchor": "",
     "text": "To customise what tags (key-values) appear on observations, implement ObservationConvention . To intercept observation lifecycle events (start, stop, error), implement ObservationHandler . These are the extension points for custom instrumentation that goes beyond what @Observed provides. import io.m"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "GraalVM Native Image — Why & What[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "GraalVM Native Image — Why & What [Basic]",
     "anchor": "",
-    "text": "GraalVM Native Image — Why & What[Basic]"
+    "text": "GraalVM Native Image — Why & What [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "GraalVM Native Image — Why & What[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "GraalVM Native Image — Why & What [Basic]",
     "anchor": "",
     "text": "A GraalVM native image is a standalone executable compiled ahead-of-time from Java bytecode. Unlike a JVM-based application that JIT-compiles at runtime, a native image is already fully compiled before deployment. The benefits are dramatic: startup in tens of milliseconds instead of seconds, and mem"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Spring AOT Processing — Build-Time vs. Runtime [Intermediate]",
     "anchor": "",
-    "text": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]"
+    "text": "Spring AOT Processing — Build-Time vs. Runtime [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Spring AOT Processing — Build-Time vs. Runtime [Intermediate]",
     "anchor": "",
     "text": "Spring 6 introduced Ahead-of-Time (AOT) processing as a build phase that runs before GraalVM compilation. During the AOT phase Spring analyzes the application context, generates optimized source code (bean factory code without reflection), and produces the hint files ( reflect-config.json , proxy-co"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@RuntimeHints — Declaring Reflection & Resource Needs [Intermediate]",
     "anchor": "",
-    "text": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]"
+    "text": "@RuntimeHints — Declaring Reflection & Resource Needs [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "@RuntimeHints — Declaring Reflection & Resource Needs [Intermediate]",
     "anchor": "",
     "text": "GraalVM's static analysis cannot discover reflection, proxies, serialization, or classpath resources used at runtime. You must declare these needs explicitly using RuntimeHints . Spring 6 provides @RegisterReflectionForBinding , @ImportRuntimeHints , and the RuntimeHintsRegistrar interface for this "
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints [Advanced]",
     "anchor": "",
-    "text": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]"
+    "text": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints [Advanced]",
     "anchor": "",
     "text": "Spring 6 provides dedicated test support for verifying that your RuntimeHintsRegistrar declares the correct hints. RuntimeHintsPredicates lets you assert that a type is registered for reflection, a resource pattern is included, or a proxy type is declared — without building a full native image. impo"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
     "anchor": "",
-    "text": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]"
+    "text": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
     "anchor": "",
     "text": "Spring 6 ships ProblemDetail — an implementation of RFC 7807 (Problem Details for HTTP APIs) . Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields ( type , title , status , detail , instance ) that API consumers can programmatically interpret. import or"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail [Intermediate]",
     "anchor": "",
-    "text": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]"
+    "text": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail [Intermediate]",
     "anchor": "",
     "text": "The ErrorResponse interface (implemented by ResponseEntityExceptionHandler and custom exceptions) unifies exception classes with the ProblemDetail they produce. Exceptions that implement ErrorResponse can carry their own ProblemDetail , making the error definition self-contained in the exception cla"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1) [Intermediate]",
     "anchor": "",
-    "text": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]"
+    "text": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1) [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1) [Intermediate]",
     "anchor": "",
     "text": "Spring 6.1 introduced RestClient — a modern, fluent, synchronous HTTP client that replaces the deprecated RestTemplate . Unlike WebClient (which is reactive), RestClient blocks until the response arrives, making it a drop-in conceptual replacement for RestTemplate in non-reactive applications. It sh"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21 [Advanced]",
     "anchor": "",
-    "text": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]"
+    "text": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21 [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21 [Advanced]",
     "anchor": "",
     "text": "Java 21 (LTS) made Project Loom's virtual threads generally available. Virtual threads are JVM-managed lightweight threads — millions can exist simultaneously without exhausting OS thread pools. Spring 6.1 added first-class support: you can configure Tomcat, Jetty, or Undertow to dispatch requests o"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2) [Basic]",
     "anchor": "",
-    "text": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]"
+    "text": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2) [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2) [Basic]",
     "anchor": "",
     "text": "Spring 6.2 introduced MockMvcTester — a new fluent, AssertJ-native entry point for MockMvc tests. The classic MockMvc API uses a DSL of static methods and result matchers; MockMvcTester returns an MvcTestResult that AssertJ's assertThat() can reason about directly — making errors much more readable "
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support [Intermediate]",
     "anchor": "",
-    "text": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]"
+    "text": "AOT Test Improvements — @TestRuntimeHints & Native Test Support [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support [Intermediate]",
     "anchor": "",
     "text": "Spring 6 adds testing infrastructure for verifying that AOT-generated configuration is correct. Tests can be run against the AOT-generated application context (simulating native mode) and RuntimeHintsRegistrar implementations can be validated with dedicated test support without a full native build. "
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ApplicationContextRunner — Testing Auto-Configurations [Advanced]",
     "anchor": "",
-    "text": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]"
+    "text": "ApplicationContextRunner — Testing Auto-Configurations [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "ApplicationContextRunner — Testing Auto-Configurations [Advanced]",
     "anchor": "",
     "text": "ApplicationContextRunner is the recommended way to test custom Spring Boot auto-configurations and @Conditional beans. It creates a lightweight application context programmatically, applies your configuration, and lets you assert which beans are present (or absent) — all without a full @SpringBootTe"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Constructor Injection — The Official Canonical Style in Spring 6 [Basic]",
     "anchor": "",
-    "text": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]"
+    "text": "Constructor Injection — The Official Canonical Style in Spring 6 [Basic]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Constructor Injection — The Official Canonical Style in Spring 6 [Basic]",
     "anchor": "",
     "text": "Spring 6 and the accompanying Spring team guidance make constructor injection the canonical and recommended injection style. Field injection (which requires reflection to set private fields) conflicts with GraalVM native image constraints. When there is a single constructor, @Autowired is optional —"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Annotation Processing — @ComponentScan with Component Index[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Annotation Processing — @ComponentScan with Component Index [Intermediate]",
     "anchor": "",
-    "text": "Annotation Processing — @ComponentScan with Component Index[Intermediate]"
+    "text": "Annotation Processing — @ComponentScan with Component Index [Intermediate]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "Annotation Processing — @ComponentScan with Component Index[Intermediate]",
+    "href": "spring-core/spring6-features.html",
+    "section": "Annotation Processing — @ComponentScan with Component Index [Intermediate]",
     "anchor": "",
     "text": "Spring 6 builds on the component index introduced in Spring 5.0 ( spring-context-indexer ). With Spring AOT, the index generation is now part of the AOT processing phase — the generated BeanFactoryRegistrations effectively replaces runtime classpath scanning entirely in native mode. In JVM mode the "
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "BeanDefinitionRegistry & Programmatic Container Configuration [Advanced]",
     "anchor": "",
-    "text": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]"
+    "text": "BeanDefinitionRegistry & Programmatic Container Configuration [Advanced]"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
-    "section": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]",
+    "href": "spring-core/spring6-features.html",
+    "section": "BeanDefinitionRegistry & Programmatic Container Configuration [Advanced]",
     "anchor": "",
     "text": "Spring 6 improves the programmatic container API. BeanDefinitionRegistry allows registering, removing, and querying bean definitions at any point before the context is refreshed. Combined with BeanDefinitionParserDelegate improvements, this is the foundation that framework authors use to support cus"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
+    "href": "spring-core/spring6-features.html",
     "section": "⚡ Spring 6 Cheatsheet",
     "anchor": "",
     "text": "⚡ Spring 6 Cheatsheet"
   },
   {
     "page": "Spring 6 Features",
-    "href": "/spring-core/spring6-features.html",
+    "href": "spring-core/spring6-features.html",
     "section": "⚡ Spring 6 Cheatsheet",
     "anchor": "",
     "text": "Annotation / Class Package Version Purpose @Component org.springframework.stereotype 5+ Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype 5+ Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype 5+ Spe"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Spring Tooling & Local Setup",
     "anchor": "",
     "text": "Spring Tooling & Local Setup"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Spring Tooling & Local Setup",
     "anchor": "",
     "text": "This page covers everything you need to go from zero to a running Spring Boot application — project generation, IDE configuration, build tools, hot reload, testing strategies, Actuator endpoints, and common errors. Whether you are using Maven or Gradle, IntelliJ or VS Code, the examples below give y"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "1. Spring Initializr",
     "anchor": "initializr",
     "text": "1. Spring Initializr"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "1. Spring Initializr",
     "anchor": "initializr",
     "text": "start.spring.io is the official project-generation tool. Fill in a short form and download a zip containing a ready-to-run project with the correct directory layout, wrapper scripts, and dependency declarations. Each field controls a distinct aspect of the generated project: Project — Choose Maven o"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Recommended Dependencies for Learning",
     "anchor": "",
     "text": "Recommended Dependencies for Learning"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Recommended Dependencies for Learning",
     "anchor": "",
     "text": "Dependency Group ID Purpose Spring Web org.springframework.boot REST APIs, MVC controllers, embedded Tomcat Spring Data JPA org.springframework.boot Database access via JPA/Hibernate with repository abstraction H2 Database com.h2database In-memory database — zero config, great for testing Spring Boo"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "Generatedpom.xml— Dependencies Block",
+    "href": "spring-core/tooling.html",
+    "section": "Generated pom.xml — Dependencies Block",
     "anchor": "",
-    "text": "Generatedpom.xml— Dependencies Block"
+    "text": "Generated pom.xml — Dependencies Block"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "Generatedpom.xml— Dependencies Block",
+    "href": "spring-core/tooling.html",
+    "section": "Generated pom.xml — Dependencies Block",
     "anchor": "",
     "text": "<dependencies>\n\n    <!-- Web: REST controllers + embedded Tomcat -->\n    <dependency>\n        <groupId>org.springframework.boot</groupId>\n        <artifactId>spring-boot-starter-web</artifactId>\n    </dependency>\n\n    <!-- JPA: ORM access via Hibernate -->\n    <dependency>\n        <groupId>org.sprin"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "2. IDE Setup Comparison",
     "anchor": "ide-setup",
     "text": "2. IDE Setup Comparison"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "2. IDE Setup Comparison",
     "anchor": "ide-setup",
     "text": "Both IntelliJ IDEA Ultimate and VS Code support Spring development. IntelliJ provides the deepest native integration; VS Code is free and sufficient for learning. Feature IntelliJ IDEA Ultimate VS Code + Spring Boot Extension Pack Spring bean graph Spring Explorer (built-in) — interactive bean depen"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "3. Maven vs Gradle",
     "anchor": "maven-vs-gradle",
     "text": "3. Maven vs Gradle"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "3. Maven vs Gradle",
     "anchor": "maven-vs-gradle",
     "text": "Both build tools are first-class citizens in the Spring ecosystem. Spring Initializr generates wrapper scripts for both, so neither requires a local installation. Below is the same task expressed in each tool."
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Adding a Dependency",
     "anchor": "",
     "text": "Adding a Dependency"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Adding a Dependency",
     "anchor": "",
     "text": "Maven — pom.xml <dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-starter-web</artifactId>\n</dependency> Gradle — build.gradle implementation 'org.springframework.boot:spring-boot-starter-web'"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Common Commands Side-by-Side",
     "anchor": "",
     "text": "Common Commands Side-by-Side"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Common Commands Side-by-Side",
     "anchor": "",
     "text": "Maven # Run tests\n./mvnw test\n\n# Build executable JAR\n./mvnw package\n\n# Run the application\n./mvnw spring-boot:run\n\n# Inspect dependency tree\n./mvnw dependency:tree Gradle # Run tests\n./gradlew test\n\n# Build executable JAR\n./gradlew build\n\n# Run the application\n./gradlew bootRun\n\n# Inspect dependenc"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "4. Running Locally — Step by Step",
     "anchor": "running-locally",
     "text": "4. Running Locally — Step by Step"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "4. Running Locally — Step by Step",
     "anchor": "running-locally",
     "text": "# 1. Generate project at start.spring.io (or IDE)\n#    Select: Maven, Java 21, Spring Web, Actuator, DevTools\n#    Click GENERATE and save the zip\n\n# 2. Unzip and enter directory\nunzip demo.zip\ncd demo\n\n# 3. Make wrapper executable (macOS / Linux)\nchmod +x mvnw\n\n# 4. Run the application\n./mvnw sprin"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Changing the Default Port",
     "anchor": "",
     "text": "Changing the Default Port"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Changing the Default Port",
     "anchor": "",
     "text": "By default Spring Boot listens on port 8080. To change it, add one line to src/main/resources/application.properties : server.port=8081 Then restart the application. Alternatively, pass it on the command line without touching the file: ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "5. Spring Boot DevTools — Hot Reload",
     "anchor": "devtools",
     "text": "5. Spring Boot DevTools — Hot Reload"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "5. Spring Boot DevTools — Hot Reload",
     "anchor": "devtools",
     "text": "DevTools monitors the JVM classpath for changes and triggers a fast restart — not a full JVM restart. It keeps the JVM alive, swaps only the application's own classes (the app classloader), and restarts the Spring context. This typically takes 1–3 seconds vs 5–20 seconds for a cold start."
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Add to pom.xml",
     "anchor": "",
     "text": "Add to pom.xml"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Add to pom.xml",
     "anchor": "",
     "text": "<!-- pom.xml -->\n<dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-devtools</artifactId>\n    <scope>runtime</scope>\n    <optional>true</optional>\n</dependency>"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "application.properties",
     "anchor": "",
     "text": "application.properties"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "application.properties",
     "anchor": "",
     "text": "# Enable classpath watcher and restart on change\nspring.devtools.restart.enabled=true\n\n# Enable LiveReload server (port 35729) — browser extension triggers refresh\nspring.devtools.livereload.enabled=true"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "How It Works",
     "anchor": "",
     "text": "How It Works"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "How It Works",
     "anchor": "",
     "text": "DevTools starts a file watcher on the classpath (your compiled classes). When your IDE saves and compiles a changed class, the watcher detects the update. DevTools discards the application classloader and creates a new one, reloading only your code (third-party library classes are kept). The Spring "
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "6. Testing Pyramid",
     "anchor": "testing",
     "text": "6. Testing Pyramid"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "6. Testing Pyramid",
     "anchor": "testing",
     "text": "Spring Boot provides test slice annotations that load only a subset of the application context — far faster than bootstrapping everything. The rule of thumb: use the narrowest slice that exercises your code path. Annotation Loads Speed Use when None (plain JUnit 5) Nothing — no Spring context Fastes"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Plain Unit Test — No Spring Context",
     "anchor": "",
     "text": "Plain Unit Test — No Spring Context"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Plain Unit Test — No Spring Context",
     "anchor": "",
     "text": "// No Spring annotation needed — instantiate directly\nclass PriceCalculatorTest {\n\n    private final PriceCalculator calculator = new PriceCalculator();\n\n    @Test\n    void shouldApplyDiscount() {\n        assertThat(calculator.withDiscount(100.0, 0.1)).isEqualTo(90.0);\n    }\n}"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@WebMvcTest— MVC Layer Only",
+    "href": "spring-core/tooling.html",
+    "section": "@WebMvcTest — MVC Layer Only",
     "anchor": "",
-    "text": "@WebMvcTest— MVC Layer Only"
+    "text": "@WebMvcTest — MVC Layer Only"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@WebMvcTest— MVC Layer Only",
+    "href": "spring-core/tooling.html",
+    "section": "@WebMvcTest — MVC Layer Only",
     "anchor": "",
     "text": "// @WebMvcTest loads controllers, filters, Jackson — but NOT service or repository beans\n@WebMvcTest(UserController.class)\nclass UserControllerTest {\n\n    @Autowired\n    private MockMvc mockMvc;\n\n    // Replace real service with Mockito mock — it is NOT in the MVC slice\n    @MockBean\n    private Use"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@DataJpaTest— JPA Slice with H2",
+    "href": "spring-core/tooling.html",
+    "section": "@DataJpaTest — JPA Slice with H2",
     "anchor": "",
-    "text": "@DataJpaTest— JPA Slice with H2"
+    "text": "@DataJpaTest — JPA Slice with H2"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@DataJpaTest— JPA Slice with H2",
+    "href": "spring-core/tooling.html",
+    "section": "@DataJpaTest — JPA Slice with H2",
     "anchor": "",
     "text": "// @DataJpaTest starts JPA, configures in-memory H2, and rolls back each test\n@DataJpaTest\nclass UserRepositoryTest {\n\n    @Autowired\n    private UserRepository userRepository;\n\n    @Test\n    void shouldSaveAndFindUser() {\n        User saved = userRepository.save(new User(\"Bob\"));\n        assertThat"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@SpringBootTest— Full Context Integration Test",
+    "href": "spring-core/tooling.html",
+    "section": "@SpringBootTest — Full Context Integration Test",
     "anchor": "",
-    "text": "@SpringBootTest— Full Context Integration Test"
+    "text": "@SpringBootTest — Full Context Integration Test"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
-    "section": "@SpringBootTest— Full Context Integration Test",
+    "href": "spring-core/tooling.html",
+    "section": "@SpringBootTest — Full Context Integration Test",
     "anchor": "",
     "text": "// Boots the complete application context — use sparingly\n@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)\nclass ApplicationIntegrationTest {\n\n    @Autowired\n    private TestRestTemplate restTemplate;\n\n    @Test\n    void healthEndpointShouldBeUp() {\n        ResponseEntity<"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "7. Actuator Endpoints",
     "anchor": "actuator",
     "text": "7. Actuator Endpoints"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "7. Actuator Endpoints",
     "anchor": "actuator",
     "text": "Spring Boot Actuator exposes operational information about a running application. By default only /actuator/health is exposed over HTTP. Expose additional endpoints via application.yml : management:\n  endpoints:\n    web:\n      exposure:\n        include: health,info,beans,conditions,env,mappings,metr"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Trying it Out",
     "anchor": "",
     "text": "Trying it Out"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Trying it Out",
     "anchor": "",
     "text": "# Health — shows component details\ncurl http://localhost:8080/actuator/health | python3 -m json.tool\n\n# List all registered beans (large output — pipe through grep)\ncurl -s http://localhost:8080/actuator/beans | python3 -m json.tool | grep '\"bean\"'\n\n# See all URL mappings\ncurl -s http://localhost:80"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "8. Common Errors and Fixes",
     "anchor": "common-errors",
     "text": "8. Common Errors and Fixes"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "8. Common Errors and Fixes",
     "anchor": "common-errors",
     "text": "The table below covers the most frequent errors encountered when starting with Spring Boot, their root cause, and the fastest fix. Error Cause Fix Web server failed to start. Port 8080 was already in use Another process (another Spring app, another server) is already listening on 8080 lsof -i:8080 t"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "9. Cheatsheet",
     "anchor": "cheatsheet",
     "text": "9. Cheatsheet"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "⚡ Spring Tooling Cheatsheet",
     "anchor": "",
     "text": "⚡ Spring Tooling Cheatsheet"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Maven Commands",
     "anchor": "",
     "text": "Maven Commands"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Maven Commands",
     "anchor": "",
     "text": "Command What it does ./mvnw spring-boot:run Run the application (no JAR needed) ./mvnw test Run all tests ./mvnw package Build executable JAR in target/ ./mvnw dependency:tree Print full dependency tree ./mvnw clean install Clean, build, and install to local .m2 cache"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Gradle Commands",
     "anchor": "",
     "text": "Gradle Commands"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Gradle Commands",
     "anchor": "",
     "text": "Command What it does ./gradlew bootRun Run the application ./gradlew test Run all tests ./gradlew build Build executable JAR in build/libs/ ./gradlew dependencies Print full dependency tree ./gradlew clean build Clean output dirs, then build"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Testing Annotations Quick Reference",
     "anchor": "",
     "text": "Testing Annotations Quick Reference"
   },
   {
     "page": "Spring Tooling & Local Setup",
-    "href": "/spring-core/tooling.html",
+    "href": "spring-core/tooling.html",
     "section": "Testing Annotations Quick Reference",
     "anchor": "",
     "text": "Annotation Loads Speed Use when None (plain JUnit 5) Nothing Fastest Pure logic, no Spring @WebMvcTest(Ctrl.class) MVC layer only Fast (< 3s) Controller endpoint tests @DataJpaTest JPA + in-memory DB Medium Repository tests @SpringBootTest Full context Slow (5–30s) Integration tests"
   },
   {
     "page": "Spring 5 vs 6 — Version Comparison",
-    "href": "/spring-core/version-comparison.html",
+    "href": "spring-core/version-comparison.html",
     "section": "Spring 5 vs Spring 6 — Feature Comparison",
     "anchor": "",
     "text": "Spring 5 vs Spring 6 — Feature Comparison"
   },
   {
     "page": "Spring 5 vs 6 — Version Comparison",
-    "href": "/spring-core/version-comparison.html",
+    "href": "spring-core/version-comparison.html",
     "section": "Spring 5 vs Spring 6 — Feature Comparison",
     "anchor": "",
     "text": "This page compares Spring Framework 5 and Spring Framework 6 across the major areas of change. Use the filters to narrow by category or change type. Click any row to expand a side-by-side code diff. Filter: All Categories Core Web Data Testing Tooling All Changes New Changed Removed Deprecated Featu"
