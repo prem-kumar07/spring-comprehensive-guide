@@ -611,6 +611,20 @@
   {
     "page": "Spring 5 Features",
     "href": "spring-core/spring5-features.html",
+    "section": "ModelAndView — Combining Model Data with View Resolution",
+    "anchor": "modelandview-combining-model-data-with-view-resolution",
+    "text": "ModelAndView — Combining Model Data with View Resolution"
+  },
+  {
+    "page": "Spring 5 Features",
+    "href": "spring-core/spring5-features.html",
+    "section": "ModelAndView — Combining Model Data with View Resolution",
+    "anchor": "modelandview-combining-model-data-with-view-resolution",
+    "text": "Spring 5 ModelAndView is a holder for both the model (data attributes) and view (name or View instance) returned from a controller handler method. Spring MVC's DispatcherServlet uses it to invoke ViewResolver and render the response. Basic Usage @Controller\npublic class GreetingController {\n\n    @Ge"
+  },
+  {
+    "page": "Spring 5 Features",
+    "href": "spring-core/spring5-features.html",
     "section": "Async Request Processing: Callable<?> and DeferredResult<T> [Advanced]",
     "anchor": "async-request-processing-callable-and-deferredresultt-advanced",
     "text": "Async Request Processing: Callable<?> and DeferredResult<T> [Advanced]"
