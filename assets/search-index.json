@@ -1239,6 +1239,370 @@
     "text": "Annotation / Class Package Version Purpose @Component org.springframework.stereotype 5+ Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype 5+ Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype 5+ Spe"
   },
   {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Spring Tooling & Local Setup",
+    "anchor": "",
+    "text": "Spring Tooling & Local Setup"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Spring Tooling & Local Setup",
+    "anchor": "",
+    "text": "This page covers everything you need to go from zero to a running Spring Boot application — project generation, IDE configuration, build tools, hot reload, testing strategies, Actuator endpoints, and common errors. Whether you are using Maven or Gradle, IntelliJ or VS Code, the examples below give y"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "1. Spring Initializr",
+    "anchor": "initializr",
+    "text": "1. Spring Initializr"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "1. Spring Initializr",
+    "anchor": "initializr",
+    "text": "start.spring.io is the official project-generation tool. Fill in a short form and download a zip containing a ready-to-run project with the correct directory layout, wrapper scripts, and dependency declarations. Each field controls a distinct aspect of the generated project: Project — Choose Maven o"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Recommended Dependencies for Learning",
+    "anchor": "",
+    "text": "Recommended Dependencies for Learning"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Recommended Dependencies for Learning",
+    "anchor": "",
+    "text": "Dependency Group ID Purpose Spring Web org.springframework.boot REST APIs, MVC controllers, embedded Tomcat Spring Data JPA org.springframework.boot Database access via JPA/Hibernate with repository abstraction H2 Database com.h2database In-memory database — zero config, great for testing Spring Boo"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Generatedpom.xml— Dependencies Block",
+    "anchor": "",
+    "text": "Generatedpom.xml— Dependencies Block"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Generatedpom.xml— Dependencies Block",
+    "anchor": "",
+    "text": "<dependencies>\n\n    <!-- Web: REST controllers + embedded Tomcat -->\n    <dependency>\n        <groupId>org.springframework.boot</groupId>\n        <artifactId>spring-boot-starter-web</artifactId>\n    </dependency>\n\n    <!-- JPA: ORM access via Hibernate -->\n    <dependency>\n        <groupId>org.sprin"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "2. IDE Setup Comparison",
+    "anchor": "ide-setup",
+    "text": "2. IDE Setup Comparison"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "2. IDE Setup Comparison",
+    "anchor": "ide-setup",
+    "text": "Both IntelliJ IDEA Ultimate and VS Code support Spring development. IntelliJ provides the deepest native integration; VS Code is free and sufficient for learning. Feature IntelliJ IDEA Ultimate VS Code + Spring Boot Extension Pack Spring bean graph Spring Explorer (built-in) — interactive bean depen"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "3. Maven vs Gradle",
+    "anchor": "maven-vs-gradle",
+    "text": "3. Maven vs Gradle"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "3. Maven vs Gradle",
+    "anchor": "maven-vs-gradle",
+    "text": "Both build tools are first-class citizens in the Spring ecosystem. Spring Initializr generates wrapper scripts for both, so neither requires a local installation. Below is the same task expressed in each tool."
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Adding a Dependency",
+    "anchor": "",
+    "text": "Adding a Dependency"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Adding a Dependency",
+    "anchor": "",
+    "text": "Maven — pom.xml <dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-starter-web</artifactId>\n</dependency> Gradle — build.gradle implementation 'org.springframework.boot:spring-boot-starter-web'"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Common Commands Side-by-Side",
+    "anchor": "",
+    "text": "Common Commands Side-by-Side"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Common Commands Side-by-Side",
+    "anchor": "",
+    "text": "Maven # Run tests\n./mvnw test\n\n# Build executable JAR\n./mvnw package\n\n# Run the application\n./mvnw spring-boot:run\n\n# Inspect dependency tree\n./mvnw dependency:tree Gradle # Run tests\n./gradlew test\n\n# Build executable JAR\n./gradlew build\n\n# Run the application\n./gradlew bootRun\n\n# Inspect dependenc"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "4. Running Locally — Step by Step",
+    "anchor": "running-locally",
+    "text": "4. Running Locally — Step by Step"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "4. Running Locally — Step by Step",
+    "anchor": "running-locally",
+    "text": "# 1. Generate project at start.spring.io (or IDE)\n#    Select: Maven, Java 21, Spring Web, Actuator, DevTools\n#    Click GENERATE and save the zip\n\n# 2. Unzip and enter directory\nunzip demo.zip\ncd demo\n\n# 3. Make wrapper executable (macOS / Linux)\nchmod +x mvnw\n\n# 4. Run the application\n./mvnw sprin"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Changing the Default Port",
+    "anchor": "",
+    "text": "Changing the Default Port"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Changing the Default Port",
+    "anchor": "",
+    "text": "By default Spring Boot listens on port 8080. To change it, add one line to src/main/resources/application.properties : server.port=8081 Then restart the application. Alternatively, pass it on the command line without touching the file: ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "5. Spring Boot DevTools — Hot Reload",
+    "anchor": "devtools",
+    "text": "5. Spring Boot DevTools — Hot Reload"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "5. Spring Boot DevTools — Hot Reload",
+    "anchor": "devtools",
+    "text": "DevTools monitors the JVM classpath for changes and triggers a fast restart — not a full JVM restart. It keeps the JVM alive, swaps only the application's own classes (the app classloader), and restarts the Spring context. This typically takes 1–3 seconds vs 5–20 seconds for a cold start."
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Add to pom.xml",
+    "anchor": "",
+    "text": "Add to pom.xml"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Add to pom.xml",
+    "anchor": "",
+    "text": "<!-- pom.xml -->\n<dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-devtools</artifactId>\n    <scope>runtime</scope>\n    <optional>true</optional>\n</dependency>"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "application.properties",
+    "anchor": "",
+    "text": "application.properties"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "application.properties",
+    "anchor": "",
+    "text": "# Enable classpath watcher and restart on change\nspring.devtools.restart.enabled=true\n\n# Enable LiveReload server (port 35729) — browser extension triggers refresh\nspring.devtools.livereload.enabled=true"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "How It Works",
+    "anchor": "",
+    "text": "How It Works"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "How It Works",
+    "anchor": "",
+    "text": "DevTools starts a file watcher on the classpath (your compiled classes). When your IDE saves and compiles a changed class, the watcher detects the update. DevTools discards the application classloader and creates a new one, reloading only your code (third-party library classes are kept). The Spring "
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "6. Testing Pyramid",
+    "anchor": "testing",
+    "text": "6. Testing Pyramid"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "6. Testing Pyramid",
+    "anchor": "testing",
+    "text": "Spring Boot provides test slice annotations that load only a subset of the application context — far faster than bootstrapping everything. The rule of thumb: use the narrowest slice that exercises your code path. Annotation Loads Speed Use when None (plain JUnit 5) Nothing — no Spring context Fastes"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Plain Unit Test — No Spring Context",
+    "anchor": "",
+    "text": "Plain Unit Test — No Spring Context"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Plain Unit Test — No Spring Context",
+    "anchor": "",
+    "text": "// No Spring annotation needed — instantiate directly\nclass PriceCalculatorTest {\n\n    private final PriceCalculator calculator = new PriceCalculator();\n\n    @Test\n    void shouldApplyDiscount() {\n        assertThat(calculator.withDiscount(100.0, 0.1)).isEqualTo(90.0);\n    }\n}"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@WebMvcTest— MVC Layer Only",
+    "anchor": "",
+    "text": "@WebMvcTest— MVC Layer Only"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@WebMvcTest— MVC Layer Only",
+    "anchor": "",
+    "text": "// @WebMvcTest loads controllers, filters, Jackson — but NOT service or repository beans\n@WebMvcTest(UserController.class)\nclass UserControllerTest {\n\n    @Autowired\n    private MockMvc mockMvc;\n\n    // Replace real service with Mockito mock — it is NOT in the MVC slice\n    @MockBean\n    private Use"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@DataJpaTest— JPA Slice with H2",
+    "anchor": "",
+    "text": "@DataJpaTest— JPA Slice with H2"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@DataJpaTest— JPA Slice with H2",
+    "anchor": "",
+    "text": "// @DataJpaTest starts JPA, configures in-memory H2, and rolls back each test\n@DataJpaTest\nclass UserRepositoryTest {\n\n    @Autowired\n    private UserRepository userRepository;\n\n    @Test\n    void shouldSaveAndFindUser() {\n        User saved = userRepository.save(new User(\"Bob\"));\n        assertThat"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@SpringBootTest— Full Context Integration Test",
+    "anchor": "",
+    "text": "@SpringBootTest— Full Context Integration Test"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "@SpringBootTest— Full Context Integration Test",
+    "anchor": "",
+    "text": "// Boots the complete application context — use sparingly\n@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)\nclass ApplicationIntegrationTest {\n\n    @Autowired\n    private TestRestTemplate restTemplate;\n\n    @Test\n    void healthEndpointShouldBeUp() {\n        ResponseEntity<"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "7. Actuator Endpoints",
+    "anchor": "actuator",
+    "text": "7. Actuator Endpoints"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "7. Actuator Endpoints",
+    "anchor": "actuator",
+    "text": "Spring Boot Actuator exposes operational information about a running application. By default only /actuator/health is exposed over HTTP. Expose additional endpoints via application.yml : management:\n  endpoints:\n    web:\n      exposure:\n        include: health,info,beans,conditions,env,mappings,metr"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Trying it Out",
+    "anchor": "",
+    "text": "Trying it Out"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Trying it Out",
+    "anchor": "",
+    "text": "# Health — shows component details\ncurl http://localhost:8080/actuator/health | python3 -m json.tool\n\n# List all registered beans (large output — pipe through grep)\ncurl -s http://localhost:8080/actuator/beans | python3 -m json.tool | grep '\"bean\"'\n\n# See all URL mappings\ncurl -s http://localhost:80"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "8. Common Errors and Fixes",
+    "anchor": "common-errors",
+    "text": "8. Common Errors and Fixes"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "8. Common Errors and Fixes",
+    "anchor": "common-errors",
+    "text": "The table below covers the most frequent errors encountered when starting with Spring Boot, their root cause, and the fastest fix. Error Cause Fix Web server failed to start. Port 8080 was already in use Another process (another Spring app, another server) is already listening on 8080 lsof -i:8080 t"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "9. Cheatsheet",
+    "anchor": "cheatsheet",
+    "text": "9. Cheatsheet"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "⚡ Spring Tooling Cheatsheet",
+    "anchor": "",
+    "text": "⚡ Spring Tooling Cheatsheet"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Maven Commands",
+    "anchor": "",
+    "text": "Maven Commands"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Maven Commands",
+    "anchor": "",
+    "text": "Command What it does ./mvnw spring-boot:run Run the application (no JAR needed) ./mvnw test Run all tests ./mvnw package Build executable JAR in target/ ./mvnw dependency:tree Print full dependency tree ./mvnw clean install Clean, build, and install to local .m2 cache"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Gradle Commands",
+    "anchor": "",
+    "text": "Gradle Commands"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Gradle Commands",
+    "anchor": "",
+    "text": "Command What it does ./gradlew bootRun Run the application ./gradlew test Run all tests ./gradlew build Build executable JAR in build/libs/ ./gradlew dependencies Print full dependency tree ./gradlew clean build Clean output dirs, then build"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Testing Annotations Quick Reference",
+    "anchor": "",
+    "text": "Testing Annotations Quick Reference"
+  },
+  {
+    "page": "Spring Tooling & Local Setup",
+    "href": "/spring-core/tooling.html",
+    "section": "Testing Annotations Quick Reference",
+    "anchor": "",
+    "text": "Annotation Loads Speed Use when None (plain JUnit 5) Nothing Fastest Pure logic, no Spring @WebMvcTest(Ctrl.class) MVC layer only Fast (< 3s) Controller endpoint tests @DataJpaTest JPA + in-memory DB Medium Repository tests @SpringBootTest Full context Slow (5–30s) Integration tests"
+  },
+  {
     "page": "Spring 5 vs 6 — Version Comparison",
     "href": "/spring-core/version-comparison.html",
     "section": "Spring 5 vs Spring 6 — Feature Comparison",

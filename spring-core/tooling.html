@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Tooling &amp; Local Setup</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">&#9776;</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">&#9728;&#65039; Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Tooling &amp; Local Setup</h1>
+    <p>This page covers everything you need to go from zero to a running Spring Boot application — project generation, IDE configuration, build tools, hot reload, testing strategies, Actuator endpoints, and common errors. Whether you are using Maven or Gradle, IntelliJ or VS Code, the examples below give you working commands and code you can use immediately.</p>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 1: SPRING INITIALIZR
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="initializr">1. Spring Initializr</h2>
+    <p><a href="https://start.spring.io" target="_blank" rel="noopener">start.spring.io</a> is the official project-generation tool. Fill in a short form and download a zip containing a ready-to-run project with the correct directory layout, wrapper scripts, and dependency declarations. Each field controls a distinct aspect of the generated project:</p>
+
+    <ul>
+      <li><strong>Project</strong> — Choose <em>Maven</em> or <em>Gradle</em>. Maven uses <code>pom.xml</code>; Gradle uses <code>build.gradle</code>. Both ship with a wrapper script (<code>mvnw</code> / <code>gradlew</code>) so a local install is not required.</li>
+      <li><strong>Language</strong> — Java, Kotlin, or Groovy. Java is the most common and has the widest documentation coverage.</li>
+      <li><strong>Spring Boot version</strong> — Always pick the latest stable (non-SNAPSHOT, non-M) release. Avoid milestone (<code>M</code>) and release-candidate (<code>RC</code>) builds for learning projects.</li>
+      <li><strong>Group / Artifact</strong> — Become your Maven coordinates (<code>groupId</code> + <code>artifactId</code>) and the root Java package. Convention: reverse-domain for Group (e.g. <code>com.example</code>), kebab-case for Artifact (e.g. <code>my-api</code>).</li>
+      <li><strong>Packaging</strong> — <em>Jar</em> embeds Tomcat and is self-contained (recommended). <em>War</em> is for deploying into an external servlet container.</li>
+      <li><strong>Java version</strong> — Match the JDK installed locally. Spring Boot 3.x requires Java 17+.</li>
+    </ul>
+
+    <!-- SVG: annotated Initializr UI mockup -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg"
+           aria-label="Spring Initializr UI layout with annotated fields" role="img"
+           style="max-width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+
+        <!-- Background panel -->
+        <rect x="10" y="10" width="700" height="420" rx="12" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+
+        <!-- Title bar -->
+        <rect x="10" y="10" width="700" height="36" rx="12" fill="var(--accent)" opacity="0.15"/>
+        <text x="360" y="33" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">start.spring.io — Project Generator</text>
+
+        <!-- Left column labels -->
+        <text x="30" y="75" font-size="11" font-weight="600" fill="var(--text-muted)">PROJECT</text>
+        <rect x="30" y="82" width="180" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="120" y="103" text-anchor="middle" font-size="12" fill="var(--text)">● Maven  ○ Gradle</text>
+
+        <text x="30" y="135" font-size="11" font-weight="600" fill="var(--text-muted)">LANGUAGE</text>
+        <rect x="30" y="142" width="180" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="120" y="163" text-anchor="middle" font-size="12" fill="var(--text)">● Java  ○ Kotlin</text>
+
+        <text x="30" y="196" font-size="11" font-weight="600" fill="var(--text-muted)">SPRING BOOT</text>
+        <rect x="30" y="203" width="180" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="120" y="224" text-anchor="middle" font-size="12" fill="var(--text)">3.3.2 (stable)</text>
+
+        <text x="30" y="257" font-size="11" font-weight="600" fill="var(--text-muted)">PACKAGING</text>
+        <rect x="30" y="264" width="180" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="120" y="285" text-anchor="middle" font-size="12" fill="var(--text)">● Jar  ○ War</text>
+
+        <text x="30" y="318" font-size="11" font-weight="600" fill="var(--text-muted)">JAVA VERSION</text>
+        <rect x="30" y="325" width="180" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="120" y="346" text-anchor="middle" font-size="12" fill="var(--text)">21</text>
+
+        <!-- Middle column: Group / Artifact / Name -->
+        <text x="240" y="75" font-size="11" font-weight="600" fill="var(--text-muted)">GROUP</text>
+        <rect x="240" y="82" width="200" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="103" text-anchor="middle" font-size="12" fill="var(--text)">com.example</text>
+
+        <text x="240" y="135" font-size="11" font-weight="600" fill="var(--text-muted)">ARTIFACT</text>
+        <rect x="240" y="142" width="200" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="163" text-anchor="middle" font-size="12" fill="var(--text)">demo</text>
+
+        <text x="240" y="196" font-size="11" font-weight="600" fill="var(--text-muted)">NAME</text>
+        <rect x="240" y="203" width="200" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="224" text-anchor="middle" font-size="12" fill="var(--text)">demo</text>
+
+        <text x="240" y="257" font-size="11" font-weight="600" fill="var(--text-muted)">DESCRIPTION</text>
+        <rect x="240" y="264" width="200" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="285" text-anchor="middle" font-size="11" fill="var(--text)">Demo Spring project</text>
+
+        <text x="240" y="318" font-size="11" font-weight="600" fill="var(--text-muted)">PACKAGE NAME</text>
+        <rect x="240" y="325" width="200" height="32" rx="6" fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="346" text-anchor="middle" font-size="11" fill="var(--text)">com.example.demo</text>
+
+        <!-- Right column: Dependencies -->
+        <text x="460" y="75" font-size="11" font-weight="600" fill="var(--text-muted)">DEPENDENCIES</text>
+        <rect x="460" y="82" width="235" height="200" rx="6" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="577" y="108" text-anchor="middle" font-size="12" fill="var(--text)">&#10003; Spring Web</text>
+        <text x="577" y="130" text-anchor="middle" font-size="12" fill="var(--text)">&#10003; Spring Data JPA</text>
+        <text x="577" y="152" text-anchor="middle" font-size="12" fill="var(--text)">&#10003; H2 Database</text>
+        <text x="577" y="174" text-anchor="middle" font-size="12" fill="var(--text)">&#10003; Spring Boot DevTools</text>
+        <text x="577" y="196" text-anchor="middle" font-size="12" fill="var(--text)">&#10003; Spring Boot Actuator</text>
+        <text x="577" y="248" text-anchor="middle" font-size="11" fill="var(--text-muted)">+ ADD DEPENDENCIES...</text>
+
+        <!-- Generate button -->
+        <rect x="240" y="380" width="200" height="36" rx="8" fill="var(--accent)"/>
+        <text x="340" y="403" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">GENERATE</text>
+
+        <!-- Annotation arrows -->
+        <!-- Project annotation -->
+        <line x1="215" y1="98" x2="248" y2="98" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Dependencies annotation -->
+        <text x="462" y="66" font-size="10" fill="var(--accent)" font-style="italic">Click to search &amp; add</text>
+      </svg>
+    </div>
+
+    <h3>Recommended Dependencies for Learning</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Dependency</th>
+          <th>Group ID</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Spring Web</td>
+          <td><code>org.springframework.boot</code></td>
+          <td>REST APIs, MVC controllers, embedded Tomcat</td>
+        </tr>
+        <tr>
+          <td>Spring Data JPA</td>
+          <td><code>org.springframework.boot</code></td>
+          <td>Database access via JPA/Hibernate with repository abstraction</td>
+        </tr>
+        <tr>
+          <td>H2 Database</td>
+          <td><code>com.h2database</code></td>
+          <td>In-memory database — zero config, great for testing</td>
+        </tr>
+        <tr>
+          <td>Spring Boot DevTools</td>
+          <td><code>org.springframework.boot</code></td>
+          <td>Hot reload on class changes, LiveReload browser refresh</td>
+        </tr>
+        <tr>
+          <td>Spring Boot Actuator</td>
+          <td><code>org.springframework.boot</code></td>
+          <td>Runtime monitoring endpoints: health, metrics, beans</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Generated <code>pom.xml</code> — Dependencies Block</h3>
+    <pre><code class="language-xml">&lt;dependencies&gt;
+
+    &lt;!-- Web: REST controllers + embedded Tomcat --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- JPA: ORM access via Hibernate --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- H2: in-memory DB, auto-configured with DataJpaTest --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.h2database&lt;/groupId&gt;
+        &lt;artifactId&gt;h2&lt;/artifactId&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- DevTools: classpath watcher + fast restart --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Actuator: /actuator/health, /actuator/beans, etc. --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Test slice: JUnit 5 + Mockito + MockMvc --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+&lt;/dependencies&gt;</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 2: IDE SETUP COMPARISON
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="ide-setup">2. IDE Setup Comparison</h2>
+    <p>Both IntelliJ IDEA Ultimate and VS Code support Spring development. IntelliJ provides the deepest native integration; VS Code is free and sufficient for learning.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>IntelliJ IDEA Ultimate</th>
+          <th>VS Code + Spring Boot Extension Pack</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Spring bean graph</td>
+          <td>Spring Explorer (built-in) — interactive bean dependency diagram</td>
+          <td>Partial (Spring Boot Dashboard — list view, no graph)</td>
+        </tr>
+        <tr>
+          <td>Run/Debug Spring Boot</td>
+          <td>Native support — green ▶ button, full debugger, env vars UI</td>
+          <td>Via Java Extension Pack — launch configs in <code>.vscode/launch.json</code></td>
+        </tr>
+        <tr>
+          <td>Live reload (DevTools)</td>
+          <td>Yes — auto-build on save triggers DevTools restart</td>
+          <td>Yes — enable "Build automatically" via Java: Autobuild</td>
+        </tr>
+        <tr>
+          <td>Cost</td>
+          <td>Paid (free Community edition has no Spring support)</td>
+          <td>Free</td>
+        </tr>
+        <tr>
+          <td>Spring Initializr</td>
+          <td>Built-in — File → New Project → Spring Initializr</td>
+          <td>Built-in — Spring Initializr extension in Extension Pack</td>
+        </tr>
+        <tr>
+          <td>Recommendation</td>
+          <td>Best for daily Spring development; deepest tooling</td>
+          <td>Best for learning / budget-conscious; sufficient for all exercises</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <strong>VS Code Setup:</strong> Install the <em>Spring Boot Extension Pack</em> by VMware — it bundles Spring Initializr, Spring Boot Dashboard, Spring Boot Tools, and the Java Extension Pack in a single install.
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 3: MAVEN VS GRADLE
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="maven-vs-gradle">3. Maven vs Gradle</h2>
+    <p>Both build tools are first-class citizens in the Spring ecosystem. Spring Initializr generates wrapper scripts for both, so neither requires a local installation. Below is the same task expressed in each tool.</p>
+
+    <h3>Adding a Dependency</h3>
+    <div class="diff-grid">
+      <div>
+        <div class="diff-label" style="color:var(--accent)">Maven — pom.xml</div>
+        <pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+      </div>
+      <div>
+        <div class="diff-label" style="color:var(--success)">Gradle — build.gradle</div>
+        <pre><code class="language-groovy">implementation 'org.springframework.boot:spring-boot-starter-web'</code></pre>
+      </div>
+    </div>
+
+    <h3>Common Commands Side-by-Side</h3>
+    <div class="diff-grid">
+      <div>
+        <div class="diff-label" style="color:var(--accent)">Maven</div>
+        <pre><code class="language-bash"># Run tests
+./mvnw test
+
+# Build executable JAR
+./mvnw package
+
+# Run the application
+./mvnw spring-boot:run
+
+# Inspect dependency tree
+./mvnw dependency:tree</code></pre>
+      </div>
+      <div>
+        <div class="diff-label" style="color:var(--success)">Gradle</div>
+        <pre><code class="language-bash"># Run tests
+./gradlew test
+
+# Build executable JAR
+./gradlew build
+
+# Run the application
+./gradlew bootRun
+
+# Inspect dependency tree
+./gradlew dependencies</code></pre>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <strong>Which to choose?</strong> Maven's XML is more verbose but its conventions are extremely stable and widely documented. Gradle's Groovy/Kotlin DSL is more concise. If you have no preference, pick Maven — most Spring tutorial examples show Maven syntax.
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 4: RUNNING LOCALLY — STEP BY STEP
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="running-locally">4. Running Locally — Step by Step</h2>
+
+    <pre><code class="language-bash"># 1. Generate project at start.spring.io (or IDE)
+#    Select: Maven, Java 21, Spring Web, Actuator, DevTools
+#    Click GENERATE and save the zip
+
+# 2. Unzip and enter directory
+unzip demo.zip
+cd demo
+
+# 3. Make wrapper executable (macOS / Linux)
+chmod +x mvnw
+
+# 4. Run the application
+./mvnw spring-boot:run
+# Spring Boot banner appears, then:
+# Started DemoApplication in 2.4 seconds (process running for 2.8)
+
+# 5. Verify it started (in a second terminal)
+curl http://localhost:8080/actuator/health
+# Expected output: {"status":"UP"}</code></pre>
+
+    <h3>Changing the Default Port</h3>
+    <p>By default Spring Boot listens on port 8080. To change it, add one line to <code>src/main/resources/application.properties</code>:</p>
+    <pre><code class="language-properties">server.port=8081</code></pre>
+
+    <p>Then restart the application. Alternatively, pass it on the command line without touching the file:</p>
+    <pre><code class="language-bash">./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 5: DEVTOOLS HOT RELOAD
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="devtools">5. Spring Boot DevTools — Hot Reload</h2>
+    <p>DevTools monitors the JVM classpath for changes and triggers a <strong>fast restart</strong> — not a full JVM restart. It keeps the JVM alive, swaps only the application's own classes (the app classloader), and restarts the Spring context. This typically takes 1–3 seconds vs 5–20 seconds for a cold start.</p>
+
+    <h3>Add to pom.xml</h3>
+    <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;</code></pre>
+
+    <h3>application.properties</h3>
+    <pre><code class="language-properties"># Enable classpath watcher and restart on change
+spring.devtools.restart.enabled=true
+
+# Enable LiveReload server (port 35729) — browser extension triggers refresh
+spring.devtools.livereload.enabled=true</code></pre>
+
+    <h3>How It Works</h3>
+    <ol>
+      <li>DevTools starts a <em>file watcher</em> on the classpath (your compiled classes).</li>
+      <li>When your IDE saves and compiles a changed class, the watcher detects the update.</li>
+      <li>DevTools discards the application classloader and creates a new one, reloading only your code (third-party library classes are kept).</li>
+      <li>The Spring context restarts using the new classloader — typically in under 3 seconds.</li>
+      <li>If LiveReload is enabled, connected browsers automatically refresh.</li>
+    </ol>
+
+    <div class="callout tip">
+      <strong>IDE Setting:</strong> In IntelliJ, enable <em>Build project automatically</em> (Settings → Build, Execution, Deployment → Compiler). In VS Code, the Java extension auto-builds on save by default. Without auto-build, DevTools never sees the updated class files.
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 6: TESTING PYRAMID
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="testing">6. Testing Pyramid</h2>
+    <p>Spring Boot provides <em>test slice</em> annotations that load only a subset of the application context — far faster than bootstrapping everything. The rule of thumb: use the narrowest slice that exercises your code path.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Annotation</th>
+          <th>Loads</th>
+          <th>Speed</th>
+          <th>Use when</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><em>None</em> (plain JUnit 5)</td>
+          <td>Nothing — no Spring context</td>
+          <td>Fastest (&lt; 1s)</td>
+          <td>Pure logic, no Spring dependencies</td>
+        </tr>
+        <tr>
+          <td><code>@WebMvcTest(Ctrl.class)</code></td>
+          <td>MVC layer only (controllers, filters, security)</td>
+          <td>Fast (&lt; 3s)</td>
+          <td>Controller endpoint tests</td>
+        </tr>
+        <tr>
+          <td><code>@DataJpaTest</code></td>
+          <td>JPA + in-memory DB (H2 auto-configured)</td>
+          <td>Medium (3–10s)</td>
+          <td>Repository query tests</td>
+        </tr>
+        <tr>
+          <td><code>@SpringBootTest</code></td>
+          <td>Full application context</td>
+          <td>Slow (5–30s)</td>
+          <td>Integration tests, end-to-end flows</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Plain Unit Test — No Spring Context</h3>
+    <pre><code class="language-java">// No Spring annotation needed — instantiate directly
+class PriceCalculatorTest {
+
+    private final PriceCalculator calculator = new PriceCalculator();
+
+    @Test
+    void shouldApplyDiscount() {
+        assertThat(calculator.withDiscount(100.0, 0.1)).isEqualTo(90.0);
+    }
+}</code></pre>
+
+    <h3><code>@WebMvcTest</code> — MVC Layer Only</h3>
+    <pre><code class="language-java">// @WebMvcTest loads controllers, filters, Jackson — but NOT service or repository beans
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    // Replace real service with Mockito mock — it is NOT in the MVC slice
+    @MockBean
+    private UserService userService;
+
+    @Test
+    void shouldReturnUser() throws Exception {
+        given(userService.findById(1L)).willReturn(new User(1L, "Alice"));
+
+        mockMvc.perform(get("/users/1"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value("Alice"));
+    }
+}</code></pre>
+
+    <h3><code>@DataJpaTest</code> — JPA Slice with H2</h3>
+    <pre><code class="language-java">// @DataJpaTest starts JPA, configures in-memory H2, and rolls back each test
+@DataJpaTest
+class UserRepositoryTest {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Test
+    void shouldSaveAndFindUser() {
+        User saved = userRepository.save(new User("Bob"));
+        assertThat(userRepository.findById(saved.getId())).isPresent();
+    }
+}</code></pre>
+
+    <h3><code>@SpringBootTest</code> — Full Context Integration Test</h3>
+    <pre><code class="language-java">// Boots the complete application context — use sparingly
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class ApplicationIntegrationTest {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void healthEndpointShouldBeUp() {
+        ResponseEntity&lt;String&gt; response =
+            restTemplate.getForEntity("/actuator/health", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+}</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 7: ACTUATOR ENDPOINTS
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="actuator">7. Actuator Endpoints</h2>
+    <p>Spring Boot Actuator exposes operational information about a running application. By default only <code>/actuator/health</code> is exposed over HTTP. Expose additional endpoints via <code>application.yml</code>:</p>
+
+    <pre><code class="language-yaml">management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,beans,conditions,env,mappings,metrics
+  endpoint:
+    health:
+      show-details: always</code></pre>
+
+    <div class="callout warn">
+      <strong>Security note:</strong> Never expose all actuator endpoints on a public server without authentication. Use Spring Security or a firewall rule to restrict access in production.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>What it shows</th>
+          <th>Useful for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/actuator/health</code></td>
+          <td>App + component status (DB, disk, custom indicators)</td>
+          <td>Kubernetes liveness/readiness probes</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/info</code></td>
+          <td>Custom app info (git commit, build version)</td>
+          <td>Version introspection in CI/CD</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/beans</code></td>
+          <td>All registered Spring beans, their types and dependencies</td>
+          <td>Debugging unexpected bean wiring</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/conditions</code></td>
+          <td>Why each auto-configuration class fired or was skipped</td>
+          <td>Debugging starter issues (<em>"why isn't DataSource configured?"</em>)</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/env</code></td>
+          <td>All property sources and their resolved values</td>
+          <td>Debugging config values across profiles</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/mappings</code></td>
+          <td>All URL routes and their handler methods</td>
+          <td>Documenting or auditing API surface</td>
+        </tr>
+        <tr>
+          <td><code>/actuator/metrics</code></td>
+          <td>Micrometer metrics — JVM, HTTP, custom timers</td>
+          <td>Performance monitoring, feeding Prometheus/Grafana</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Trying it Out</h3>
+    <pre><code class="language-bash"># Health — shows component details
+curl http://localhost:8080/actuator/health | python3 -m json.tool
+
+# List all registered beans (large output — pipe through grep)
+curl -s http://localhost:8080/actuator/beans | python3 -m json.tool | grep '"bean"'
+
+# See all URL mappings
+curl -s http://localhost:8080/actuator/mappings | python3 -m json.tool
+
+# Why did DataSourceAutoConfiguration fire?
+curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep -A5 "DataSource"</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 8: COMMON ERRORS AND FIXES
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="common-errors">8. Common Errors and Fixes</h2>
+    <p>The table below covers the most frequent errors encountered when starting with Spring Boot, their root cause, and the fastest fix.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Error</th>
+          <th>Cause</th>
+          <th>Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Web server failed to start. Port 8080 was already in use</code></td>
+          <td>Another process (another Spring app, another server) is already listening on 8080</td>
+          <td><code>lsof -i:8080</code> to find the PID, then <code>kill &lt;pid&gt;</code>; or set <code>server.port=8081</code> in application.properties</td>
+        </tr>
+        <tr>
+          <td><code>NoSuchBeanDefinitionException: No qualifying bean of type 'X'</code></td>
+          <td>Class is missing a stereotype annotation (<code>@Component</code>, <code>@Service</code>, <code>@Repository</code>) or is outside the component scan path</td>
+          <td>Add the appropriate stereotype annotation; verify the class package is under the <code>@SpringBootApplication</code> class's package (or add <code>@ComponentScan</code>)</td>
+        </tr>
+        <tr>
+          <td><code>UnsatisfiedDependencyException</code></td>
+          <td>Circular dependency between beans, or a required bean cannot be created</td>
+          <td>Add <code>@Lazy</code> on one injection point to break the cycle; or restructure beans to eliminate the circular reference</td>
+        </tr>
+        <tr>
+          <td><code>Failed to configure a DataSource</code></td>
+          <td>Spring Data JPA is on the classpath but no database configuration is present</td>
+          <td>Add H2 to dependencies + set <code>spring.datasource.url=jdbc:h2:mem:testdb</code> in application.properties; or add the H2 starter and Spring Boot will auto-configure it</td>
+        </tr>
+        <tr>
+          <td><code>Context load failed</code></td>
+          <td>Any bean initialization error — Spring wraps the real cause in generic context-load messages</td>
+          <td>Read the <em>full</em> stack trace to the bottom — the root <code>Caused by:</code> at the end is the actual error. The top-level message is just the symptom</td>
+        </tr>
+        <tr>
+          <td><code>ClassNotFoundException: javax.servlet.Servlet</code></td>
+          <td>Spring Framework 6 / Spring Boot 3 requires <code>jakarta.*</code> namespaces; code or a library still imports <code>javax.*</code></td>
+          <td>Replace <code>javax.servlet-api</code> with <code>jakarta.servlet-api</code>; update all <code>import javax.servlet</code> to <code>import jakarta.servlet</code> — this is the javax→jakarta namespace migration</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <strong>Debugging tip:</strong> Always start with <code>./mvnw spring-boot:run 2&gt;&amp;1 | tee app.log</code> to capture the full output. Then search for <code>Caused by:</code> — the last one before the stack ends is the true root cause.
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 9: CHEATSHEET
+         ═══════════════════════════════════════════════════ -->
+    <h2 id="cheatsheet">9. Cheatsheet</h2>
+    <div class="cheatsheet">
+      <h2>&#9889; Spring Tooling Cheatsheet</h2>
+
+      <h3>Maven Commands</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>./mvnw spring-boot:run</code></td><td>Run the application (no JAR needed)</td></tr>
+          <tr><td><code>./mvnw test</code></td><td>Run all tests</td></tr>
+          <tr><td><code>./mvnw package</code></td><td>Build executable JAR in <code>target/</code></td></tr>
+          <tr><td><code>./mvnw dependency:tree</code></td><td>Print full dependency tree</td></tr>
+          <tr><td><code>./mvnw clean install</code></td><td>Clean, build, and install to local .m2 cache</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Gradle Commands</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>./gradlew bootRun</code></td><td>Run the application</td></tr>
+          <tr><td><code>./gradlew test</code></td><td>Run all tests</td></tr>
+          <tr><td><code>./gradlew build</code></td><td>Build executable JAR in <code>build/libs/</code></td></tr>
+          <tr><td><code>./gradlew dependencies</code></td><td>Print full dependency tree</td></tr>
+          <tr><td><code>./gradlew clean build</code></td><td>Clean output dirs, then build</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Testing Annotations Quick Reference</h3>
+      <table>
+        <thead>
+          <tr><th>Annotation</th><th>Loads</th><th>Speed</th><th>Use when</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><em>None</em> (plain JUnit 5)</td>
+            <td>Nothing</td>
+            <td>Fastest</td>
+            <td>Pure logic, no Spring</td>
+          </tr>
+          <tr>
+            <td><code>@WebMvcTest(Ctrl.class)</code></td>
+            <td>MVC layer only</td>
+            <td>Fast (&lt; 3s)</td>
+            <td>Controller endpoint tests</td>
+          </tr>
+          <tr>
+            <td><code>@DataJpaTest</code></td>
+            <td>JPA + in-memory DB</td>
+            <td>Medium</td>
+            <td>Repository tests</td>
+          </tr>
+          <tr>
+            <td><code>@SpringBootTest</code></td>
+            <td>Full context</td>
+            <td>Slow (5–30s)</td>
+            <td>Integration tests</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /#content -->
+</div><!-- /#main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
