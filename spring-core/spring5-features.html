@@ -488,6 +488,45 @@ public class WebConfig implements WebMvcConfigurer {
 }</code></pre>
         </div>
 
+        <!-- Intermediate: ModelAndView -->
+        <div class="feature-card" id="model-and-view">
+          <h3 id="modelandview-combining-model-data-with-view-resolution">ModelAndView — Combining Model Data with View Resolution</h3>
+          <span class="badge badge-v5">Spring 5</span>
+          <p><code>ModelAndView</code> is a holder for both the model (data attributes) and view (name or <code>View</code> instance) returned from a controller handler method. Spring MVC's <code>DispatcherServlet</code> uses it to invoke <code>ViewResolver</code> and render the response.</p>
+          <h4>Basic Usage</h4>
+          <pre><code class="language-java">@Controller
+public class GreetingController {
+
+    @GetMapping("/greet")
+    public ModelAndView greet(@RequestParam String name) {
+        ModelAndView mav = new ModelAndView("greet"); // view name → greet.html / greet.jsp
+        mav.addObject("greeting", "Hello, " + name + "!");
+        mav.addObject("timestamp", LocalDateTime.now());
+        return mav;
+    }
+}</code></pre>
+          <h4>Intermediate — Pre-populating model with @ModelAttribute</h4>
+          <pre><code class="language-java">@Controller
+@RequestMapping("/users")
+public class UserController {
+
+    @ModelAttribute("roles")
+    public List&lt;String&gt; loadRoles() {
+        return List.of("ADMIN", "USER", "GUEST"); // added to every ModelAndView in this controller
+    }
+
+    @GetMapping("/{id}")
+    public ModelAndView show(@PathVariable Long id) {
+        ModelAndView mav = new ModelAndView("users/detail");
+        mav.addObject("user", userService.findById(id)); // "roles" already in model from above
+        return mav;
+    }
+}</code></pre>
+          <div class="callout callout-tip">
+            <strong>Modern alternative:</strong> Most Spring MVC controllers now return a <code>String</code> view name (or <code>ResponseEntity</code>) and populate the model via <code>Model</code> parameter injection. <code>ModelAndView</code> remains useful when you need to determine the view name programmatically or return different views from a single method.
+          </div>
+        </div>
+
         <!-- Advanced: Async processing -->
         <div class="feature-card">
           <h3 id="async-request-processing-callable-and-deferredresultt-advanced">Async Request Processing: Callable&lt;?&gt; and DeferredResult&lt;T&gt;
@@ -1491,6 +1530,7 @@ public class AppConfig {
             <tr><td><code>@RequestParam</code></td><td>org.springframework.web.bind.annotation</td><td>Binds an HTTP query parameter or form field to a method parameter</td></tr>
             <tr><td><code>@ExceptionHandler</code></td><td>org.springframework.web.bind.annotation</td><td>Designates a method to handle exceptions thrown by controller handler methods</td></tr>
             <tr><td><code>@ControllerAdvice</code></td><td>org.springframework.web.bind.annotation</td><td>Applies <code>@ExceptionHandler</code>, <code>@ModelAttribute</code>, and <code>@InitBinder</code> globally</td></tr>
+            <tr><td><code>ModelAndView</code></td><td>org.springframework.web.servlet</td><td>Holder for model attributes + view name; returned from @Controller handler methods; DispatcherServlet uses it to resolve and render the view</td></tr>
           </tbody>
         </table>
       </div>
