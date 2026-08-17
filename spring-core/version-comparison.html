@@ -708,6 +708,29 @@ class UserControllerTest {
     </table>
     </div>
 
+  <section class="cheatsheet" id="cheatsheet">
+    <h2>Version Comparison Cheatsheet</h2>
+    <table class="cheat-table">
+      <thead>
+        <tr><th>Topic</th><th>Spring 5 (javax.*)</th><th>Spring 6 (jakarta.*)</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Namespace</td><td>javax.servlet, javax.persistence</td><td>jakarta.servlet, jakarta.persistence</td><td>Changed</td></tr>
+        <tr><td>Java baseline</td><td>Java 8+</td><td>Java 17+ (LTS required)</td><td>Changed</td></tr>
+        <tr><td>Servlet API</td><td>Servlet 4 (javax)</td><td>Servlet 6 (jakarta)</td><td>Changed</td></tr>
+        <tr><td>HTTP clients</td><td>RestTemplate (imperative)</td><td>@HttpExchange (declarative, native HTTP)</td><td>New</td></tr>
+        <tr><td>Observability</td><td>Actuator metrics only</td><td>Micrometer Observation API (@Observed)</td><td>New</td></tr>
+        <tr><td>Native images</td><td>Experimental (Spring Native project)</td><td>First-class GraalVM + Spring AOT built-in</td><td>Changed</td></tr>
+        <tr><td>Error responses</td><td>Custom error body (no standard)</td><td>ProblemDetail (RFC 7807 / RFC 9457)</td><td>New</td></tr>
+        <tr><td>RestTemplate</td><td>Primary REST client</td><td>Deprecated — prefer WebClient / HTTP interfaces</td><td>Deprecated</td></tr>
+        <tr><td>WebFlux Kotlin</td><td>Coroutines support (limited)</td><td>Full coroutines + Flow integration</td><td>Changed</td></tr>
+        <tr><td>Testing AOT</td><td>n/a</td><td>@SpringBootTest with native/AOT mode support</td><td>New</td></tr>
+        <tr><td>Records support</td><td>Workarounds needed</td><td>First-class Java 17 records in beans</td><td>Changed</td></tr>
+        <tr><td>Security co-evolution</td><td>Spring Security 5 (WebSecurityConfigurerAdapter)</td><td>Spring Security 6 (component-based SecurityFilterChain)</td><td>Changed</td></tr>
+      </tbody>
+    </table>
+  </section>
+
   </div><!-- #content -->
 </div><!-- #main -->
 <script src="../assets/js/nav.js"></script>
