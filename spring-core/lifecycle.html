@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Bean Lifecycle</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Bean Lifecycle</h1>
+    <p>The <strong>Spring Bean Lifecycle</strong> is the complete sequence of steps that the Spring IoC container executes from the moment it creates a bean to the moment it destroys it. Understanding this lifecycle lets you hook into exactly the right phase — whether you need to validate configuration after injection, warm a cache before your first request, or release database connections on shutdown. Spring provides a rich set of interfaces and annotations at each phase, giving you fine-grained control without modifying the container itself.</p>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 2: LIFECYCLE FLOW DIAGRAM
+         ═══════════════════════════════════════════════════ -->
+    <h2>Lifecycle Flow Diagram</h2>
+    <p>The diagram below shows all 14 stages in order. Color coding: <span style="color:#8bb8ff">blue</span> = Aware interfaces, <span style="color:#86efac">green</span> = init callbacks, <span style="color:#fcd34d">amber</span> = BeanPostProcessor, <span style="color:#fca5a5">red</span> = destroy phase, gray = general stages.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 560 900" xmlns="http://www.w3.org/2000/svg" aria-label="Spring Bean Lifecycle flow diagram" role="img" style="max-width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#8b949e"/>
+          </marker>
+        </defs>
+
+        <!-- Legend: top-right corner -->
+        <rect x="360" y="10" width="14" height="14" rx="2" fill="#2d333b" stroke="#555" stroke-width="0.5"/>
+        <text x="379" y="22" font-size="11" fill="currentColor">General</text>
+
+        <rect x="360" y="32" width="14" height="14" rx="2" fill="#1f3a6e" stroke="#555" stroke-width="0.5"/>
+        <text x="379" y="44" font-size="11" fill="currentColor">Aware interfaces</text>
+
+        <rect x="360" y="54" width="14" height="14" rx="2" fill="#5a3e00" stroke="#555" stroke-width="0.5"/>
+        <text x="379" y="66" font-size="11" fill="currentColor">BeanPostProcessor</text>
+
+        <rect x="360" y="76" width="14" height="14" rx="2" fill="#1a4a2e" stroke="#555" stroke-width="0.5"/>
+        <text x="379" y="88" font-size="11" fill="currentColor">Init callbacks</text>
+
+        <rect x="360" y="98" width="14" height="14" rx="2" fill="#4a1a1a" stroke="#555" stroke-width="0.5"/>
+        <text x="379" y="110" font-size="11" fill="currentColor">Destroy phase</text>
+
+        <!-- Stage spacing: y starts at 130, each box 40px tall, 18px gap = 58px per stage -->
+
+        <!-- Stage 1: Instantiation — gray -->
+        <text x="123" y="157" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">1</text>
+        <a href="#stage-1">
+          <rect x="130" y="140" width="300" height="40" rx="6" fill="#2d333b" stroke="#555" stroke-width="1"/>
+          <text x="280" y="165" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Instantiation (Constructor)</text>
+        </a>
+        <line x1="280" y1="180" x2="280" y2="196" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 2: Populate Properties — gray -->
+        <text x="123" y="215" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">2</text>
+        <a href="#stage-2">
+          <rect x="130" y="198" width="300" height="40" rx="6" fill="#2d333b" stroke="#555" stroke-width="1"/>
+          <text x="280" y="223" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Populate Properties (DI)</text>
+        </a>
+        <line x1="280" y1="238" x2="280" y2="254" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 3: BeanNameAware — blue -->
+        <text x="123" y="273" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">3</text>
+        <a href="#stage-3">
+          <rect x="130" y="256" width="300" height="40" rx="6" fill="#1f3a6e" stroke="#3b6abf" stroke-width="1"/>
+          <text x="280" y="281" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">BeanNameAware.setBeanName()</text>
+        </a>
+        <line x1="280" y1="296" x2="280" y2="312" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 4: BeanClassLoaderAware — blue -->
+        <text x="123" y="331" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">4</text>
+        <a href="#stage-4">
+          <rect x="130" y="314" width="300" height="40" rx="6" fill="#1f3a6e" stroke="#3b6abf" stroke-width="1"/>
+          <text x="280" y="339" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">BeanClassLoaderAware.setBeanClassLoader()</text>
+        </a>
+        <line x1="280" y1="354" x2="280" y2="370" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 5: BeanFactoryAware — blue -->
+        <text x="123" y="389" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">5</text>
+        <a href="#stage-5">
+          <rect x="130" y="372" width="300" height="40" rx="6" fill="#1f3a6e" stroke="#3b6abf" stroke-width="1"/>
+          <text x="280" y="397" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">BeanFactoryAware.setBeanFactory()</text>
+        </a>
+        <line x1="280" y1="412" x2="280" y2="428" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 6: EnvironmentAware — blue -->
+        <text x="123" y="447" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">6</text>
+        <a href="#stage-6">
+          <rect x="130" y="430" width="300" height="40" rx="6" fill="#1f3a6e" stroke="#3b6abf" stroke-width="1"/>
+          <text x="280" y="455" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">EnvironmentAware.setEnvironment()</text>
+        </a>
+        <line x1="280" y1="470" x2="280" y2="486" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 7: ApplicationContextAware — blue -->
+        <text x="123" y="505" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">7</text>
+        <a href="#stage-7">
+          <rect x="130" y="488" width="300" height="40" rx="6" fill="#1f3a6e" stroke="#3b6abf" stroke-width="1"/>
+          <text x="280" y="513" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">ApplicationContextAware.setApplicationContext()</text>
+        </a>
+        <line x1="280" y1="528" x2="280" y2="544" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 8: BeanPostProcessor Before — amber -->
+        <text x="123" y="563" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">8</text>
+        <a href="#stage-8">
+          <rect x="130" y="546" width="300" height="40" rx="6" fill="#5a3e00" stroke="#a07000" stroke-width="1"/>
+          <text x="280" y="571" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">BeanPostProcessor.postProcessBeforeInit()</text>
+        </a>
+        <line x1="280" y1="586" x2="280" y2="602" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 9: @PostConstruct / afterPropertiesSet — green -->
+        <text x="123" y="621" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">9</text>
+        <a href="#stage-9">
+          <rect x="130" y="604" width="300" height="40" rx="6" fill="#1a4a2e" stroke="#2d7a4a" stroke-width="1"/>
+          <text x="280" y="629" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">@PostConstruct / afterPropertiesSet()</text>
+        </a>
+        <line x1="280" y1="644" x2="280" y2="660" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 10: Custom init-method — green -->
+        <text x="123" y="679" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">10</text>
+        <a href="#stage-10">
+          <rect x="130" y="662" width="300" height="40" rx="6" fill="#1a4a2e" stroke="#2d7a4a" stroke-width="1"/>
+          <text x="280" y="687" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Custom init-method</text>
+        </a>
+        <line x1="280" y1="702" x2="280" y2="718" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 11: BeanPostProcessor After — amber -->
+        <text x="123" y="737" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">11</text>
+        <a href="#stage-11">
+          <rect x="130" y="720" width="300" height="40" rx="6" fill="#5a3e00" stroke="#a07000" stroke-width="1"/>
+          <text x="280" y="745" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">BeanPostProcessor.postProcessAfterInit()</text>
+        </a>
+        <line x1="280" y1="760" x2="280" y2="776" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 12: Bean Ready — gray -->
+        <text x="123" y="795" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">12</text>
+        <a href="#stage-12">
+          <rect x="130" y="778" width="300" height="40" rx="6" fill="#2d333b" stroke="#3fb950" stroke-width="2"/>
+          <text x="280" y="803" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">✅ Bean Ready (In Use)</text>
+        </a>
+        <line x1="280" y1="818" x2="280" y2="834" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 13: @PreDestroy / destroy() — red -->
+        <text x="123" y="853" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">13</text>
+        <a href="#stage-13">
+          <rect x="130" y="836" width="300" height="40" rx="6" fill="#4a1a1a" stroke="#8b2222" stroke-width="1"/>
+          <text x="280" y="861" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">@PreDestroy / DisposableBean.destroy()</text>
+        </a>
+        <line x1="280" y1="876" x2="280" y2="884" stroke="#8b949e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Stage 14: Custom destroy-method — red -->
+        <text x="123" y="895" text-anchor="end" font-size="11" fill="currentColor" opacity="0.7">14</text>
+        <a href="#stage-14">
+          <rect x="130" y="878" width="300" height="40" rx="6" fill="#4a1a1a" stroke="#8b2222" stroke-width="1"/>
+          <text x="280" y="903" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Custom destroy-method</text>
+        </a>
+
+      </svg>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 3: STAGE-BY-STAGE DEEP DIVE
+         ═══════════════════════════════════════════════════ -->
+    <h2>Stage-by-Stage Deep Dive</h2>
+
+    <!-- Stage 1 -->
+    <h3 id="stage-1">Stage 1 — Instantiation (Constructor)</h3>
+    <p>Spring calls the bean's constructor (or a factory method) to create the object instance. If you have multiple constructors, Spring uses the one annotated with <code>@Autowired</code>, or the single no-arg constructor by default. At this point no dependencies have been injected — the object is just allocated.</p>
+
+    <pre><code class="language-java">import org.springframework.stereotype.Component;
+
+@Component
+public class OrderService {
+
+    private final PaymentService paymentService;
+
+    // Spring calls this constructor during instantiation
+    public OrderService(PaymentService paymentService) {
+        System.out.println("OrderService constructor called");
+        this.paymentService = paymentService;
+    }
+}</code></pre>
+
+    <div class="callout tip">
+      <strong>Practice tip</strong>
+      Use constructor injection rather than field injection — it makes the dependency explicit at instantiation time, and the field can be <code>final</code>, which prevents accidental reassignment.
+    </div>
+
+    <!-- Stage 2 -->
+    <h3 id="stage-2">Stage 2 — Populate Properties (Setter / Field Injection)</h3>
+    <p>After construction, Spring resolves all <code>@Autowired</code> fields and setter methods. It also applies values from <code>@Value</code> expressions. This is when the bean's dependency graph is fully satisfied.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class NotificationService {
+
+    // Field injection — populated after construction
+    @Autowired
+    private EmailClient emailClient;
+
+    @Value("${notifications.enabled:true}")
+    private boolean enabled;
+
+    // Setter injection — also populated at this stage
+    private SmsClient smsClient;
+
+    @Autowired
+    public void setSmsClient(SmsClient smsClient) {
+        this.smsClient = smsClient;
+    }
+}</code></pre>
+
+    <!-- Stage 3 -->
+    <h3 id="stage-3">Stage 3 — BeanNameAware.setBeanName()</h3>
+    <p>If the bean implements <code>BeanNameAware</code>, Spring calls <code>setBeanName(String name)</code> passing the bean's registered name in the container. This is the first of the Aware interface callbacks and fires immediately after property population.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyService implements BeanNameAware {
+    private String beanName;
+
+    @Override
+    public void setBeanName(String name) {
+        this.beanName = name;
+        System.out.println("Bean name set to: " + name);
+    }
+}</code></pre>
+
+    <div class="callout info">
+      <strong>When to use</strong>
+      Rarely needed in application code — mostly useful when writing generic infrastructure components (like a custom scope or a factory) that need to know their own registration name for logging or lookup purposes.
+    </div>
+
+    <!-- Stage 4 -->
+    <h3 id="stage-4">Stage 4 — BeanClassLoaderAware.setBeanClassLoader()</h3>
+    <p><code>BeanClassLoaderAware</code> gives the bean a reference to the <code>ClassLoader</code> used to load it. This is useful for frameworks that need to dynamically load classes by name using the same classloader as the bean.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PluginLoader implements BeanClassLoaderAware {
+    private ClassLoader classLoader;
+
+    @Override
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public Class&lt;?&gt; loadPluginClass(String className) throws ClassNotFoundException {
+        return classLoader.loadClass(className);
+    }
+}</code></pre>
+
+    <!-- Stage 5 -->
+    <h3 id="stage-5">Stage 5 — BeanFactoryAware.setBeanFactory()</h3>
+    <p><code>BeanFactoryAware</code> injects the owning <code>BeanFactory</code> into the bean. This lets a bean programmatically retrieve other beans from the container — though this is generally an anti-pattern since it couples your code to the Spring API. Prefer constructor injection.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class BeanLocator implements BeanFactoryAware {
+    private BeanFactory beanFactory;
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    public Object getBean(String name) {
+        return beanFactory.getBean(name);
+    }
+}</code></pre>
+
+    <!-- Stage 6 -->
+    <h3 id="stage-6">Stage 6 — EnvironmentAware.setEnvironment()</h3>
+    <p><code>EnvironmentAware</code> provides the bean with the <code>Environment</code> object, which gives access to property sources, profiles, and system properties. Useful for infrastructure beans that need to read configuration values programmatically.</p>
+
+    <pre><code class="language-java">import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ConfigInspector implements EnvironmentAware {
+    private Environment environment;
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
+    public String getActiveProfiles() {
+        return String.join(", ", environment.getActiveProfiles());
+    }
+
+    public String getProperty(String key) {
+        return environment.getProperty(key, "not set");
+    }
+}</code></pre>
+
+    <!-- Stage 7 -->
+    <h3 id="stage-7">Stage 7 — ApplicationContextAware.setApplicationContext()</h3>
+    <p><code>ApplicationContextAware</code> is the most commonly used Aware interface. It injects the full <code>ApplicationContext</code>, giving access to the entire bean registry, event publishing, message sources, and resource loading. A common pattern is a static holder so non-Spring code can access the context.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class AppContextHolder implements ApplicationContextAware {
+    private static ApplicationContext context;
+
+    @Override
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        AppContextHolder.context = ctx;
+    }
+
+    public static ApplicationContext getContext() {
+        return context;
+    }
+}</code></pre>
+
+    <div class="callout warn">
+      <strong>Thread safety</strong>
+      The static field pattern above is safe because <code>setApplicationContext</code> is called once during startup before any request threads run. Do not mutate the field after initialization.
+    </div>
+
+    <!-- Stage 8 -->
+    <h3 id="stage-8">Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()</h3>
+    <p><code>BeanPostProcessor</code> is a container extension point: implementations are called for <em>every</em> bean in the context, not just beans that implement a specific interface. The <code>postProcessBeforeInitialization</code> hook fires after the Aware callbacks but <em>before</em> the bean's own init methods. You can return the original bean or a wrapper/proxy.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
+
+@Component
+public class LoggingBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName)
+            throws BeansException {
+        System.out.println("Before init: " + beanName);
+        return bean; // must return the bean (or a wrapped proxy)
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+            throws BeansException {
+        System.out.println("After init: " + beanName);
+        return bean;
+    }
+}</code></pre>
+
+    <div class="callout info">
+      <strong>How Spring AOP works</strong>
+      Spring's AOP proxy creation happens inside a <code>BeanPostProcessor</code> (<code>AbstractAutoProxyCreator</code>). When you annotate a class with <code>@Transactional</code>, it's a BeanPostProcessor that wraps the bean in a proxy at this stage.
+    </div>
+
+    <!-- Stage 9 -->
+    <h3 id="stage-9">Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()</h3>
+    <p>Two hooks fire at this stage in order: the JSR-250 <code>@PostConstruct</code> method first, then <code>InitializingBean.afterPropertiesSet()</code>. Both run after all dependencies have been injected. Use them to perform any initialization that requires access to injected dependencies — warming caches, opening connections, validating configuration.</p>
+
+    <pre><code class="language-java">import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class CacheService {
+    private Map&lt;String, String&gt; cache;
+
+    @PostConstruct
+    public void init() {
+        // Runs after all dependencies injected
+        this.cache = new HashMap&lt;&gt;();
+        System.out.println("CacheService initialized");
+    }
+}</code></pre>
+
+    <p><code>InitializingBean.afterPropertiesSet()</code> is the programmatic alternative — it avoids the Jakarta annotation dependency but couples your class to the Spring API:</p>
+
+    <pre><code class="language-java">import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class CacheServiceAlt implements InitializingBean {
+    private Map&lt;String, String&gt; cache;
+
+    @Override
+    public void afterPropertiesSet() {
+        this.cache = new HashMap&lt;&gt;();
+        System.out.println("CacheServiceAlt initialized via afterPropertiesSet");
+    }
+}</code></pre>
+
+    <!-- Stage 10 -->
+    <h3 id="stage-10">Stage 10 — Custom init-method</h3>
+    <p>A custom init method fires after <code>afterPropertiesSet()</code>. Declare it on a <code>@Bean</code> definition with <code>initMethod</code>, or in XML with <code>init-method</code>. This lets you hook lifecycle behavior into third-party classes you can't annotate.</p>
+
+    <pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+// Third-party class — cannot add @PostConstruct
+public class ConnectionPool {
+    private int size;
+
+    public ConnectionPool(int size) {
+        this.size = size;
+    }
+
+    // Custom init: called by Spring after afterPropertiesSet
+    public void openConnections() {
+        System.out.println("Opening " + size + " connections in pool");
+    }
+
+    public void closeConnections() {
+        System.out.println("Closing all connections in pool");
+    }
+}
+
+@Configuration
+public class InfraConfig {
+
+    @Bean(initMethod = "openConnections", destroyMethod = "closeConnections")
+    public ConnectionPool connectionPool() {
+        return new ConnectionPool(10);
+    }
+}</code></pre>
+
+    <!-- Stage 11 -->
+    <h3 id="stage-11">Stage 11 — BeanPostProcessor.postProcessAfterInitialization()</h3>
+    <p>The second <code>BeanPostProcessor</code> hook fires after all init callbacks complete. This is when AOP proxies are typically installed — if the bean needs to be wrapped, the proxy replaces the original instance in the container from this point on. The object returned here is what callers will receive when they request this bean.</p>
+
+    <pre><code class="language-java">import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
+import java.lang.reflect.Proxy;
+
+@Component
+public class MetricsBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+            throws BeansException {
+        // Only wrap beans annotated with @Timed (illustrative)
+        if (bean.getClass().isAnnotationPresent(Timed.class)) {
+            return Proxy.newProxyInstance(
+                bean.getClass().getClassLoader(),
+                bean.getClass().getInterfaces(),
+                (proxy, method, args) -&gt; {
+                    long start = System.nanoTime();
+                    Object result = method.invoke(bean, args);
+                    System.out.println(method.getName() + " took "
+                        + (System.nanoTime() - start) + "ns");
+                    return result;
+                }
+            );
+        }
+        return bean;
+    }
+}
+
+// Marker annotation used above
+import java.lang.annotation.*;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Timed {}</code></pre>
+
+    <!-- Stage 12 -->
+    <h3 id="stage-12">Stage 12 — Bean Ready (In Use)</h3>
+    <p>At this point the bean is fully initialized and stored in the container. Calls to <code>applicationContext.getBean()</code> or any injection point will receive this bean (or its proxy). The bean remains in this state until the container begins shutdown.</p>
+
+    <pre><code class="language-java">import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Main {
+    public static void main(String[] args) {
+        try (var ctx = new AnnotationConfigApplicationContext(AppConfig.class)) {
+            // All beans are fully initialized here — ready for use
+            OrderService orders = ctx.getBean(OrderService.class);
+            orders.createOrder("item-42");
+        }
+        // ctx.close() triggers destroy phase automatically (try-with-resources)
+    }
+}</code></pre>
+
+    <!-- Stage 13 -->
+    <h3 id="stage-13">Stage 13 — @PreDestroy / DisposableBean.destroy()</h3>
+    <p>When the container is closed (e.g., <code>context.close()</code> or JVM shutdown hook), Spring calls destroy callbacks in reverse order. The <code>@PreDestroy</code> method fires first, then <code>DisposableBean.destroy()</code>. Use these to release resources: close database connections, flush caches, stop background threads.</p>
+
+    <pre><code class="language-java">import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Component;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class ConnectionPool {
+    private List&lt;Connection&gt; connections;
+
+    @PostConstruct
+    public void initialize() {
+        connections = new ArrayList&lt;&gt;();
+        // open connections...
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        // Called before bean is destroyed — clean up resources
+        connections.forEach(c -&gt; { try { c.close(); } catch (Exception ignored) {} });
+        System.out.println("ConnectionPool shut down");
+    }
+}</code></pre>
+
+    <p><code>DisposableBean.destroy()</code> is the programmatic equivalent:</p>
+
+    <pre><code class="language-java">import org.springframework.beans.factory.DisposableBean;
+import org.springframework.stereotype.Component;
+
+@Component
+public class BackgroundScheduler implements DisposableBean {
+    private Thread workerThread;
+
+    public void start() {
+        workerThread = new Thread(() -&gt; {
+            while (!Thread.currentThread().isInterrupted()) {
+                // ... background work
+            }
+        });
+        workerThread.start();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (workerThread != null) {
+            workerThread.interrupt();
+            workerThread.join(5000);
+        }
+        System.out.println("BackgroundScheduler stopped");
+    }
+}</code></pre>
+
+    <!-- Stage 14 -->
+    <h3 id="stage-14">Stage 14 — Custom destroy-method</h3>
+    <p>A custom destroy method fires after <code>DisposableBean.destroy()</code>. Declare it on a <code>@Bean</code> with <code>destroyMethod</code>. Spring also has a convention: if a bean has a <code>close()</code> or <code>shutdown()</code> method and no <code>destroyMethod</code> is specified, Spring <em>infers</em> it automatically for <code>@Bean</code> declarations.</p>
+
+    <pre><code class="language-java">// Already shown in Stage 10 — same @Bean definition handles both:
+@Bean(initMethod = "openConnections", destroyMethod = "closeConnections")
+public ConnectionPool connectionPool() {
+    return new ConnectionPool(10);
+}
+
+// Spring also auto-detects close()/shutdown() — no annotation needed:
+@Bean  // Spring will call pool.close() automatically
+public HikariDataSource dataSource() {
+    HikariDataSource ds = new HikariDataSource();
+    ds.setJdbcUrl("jdbc:h2:mem:test");
+    return ds; // HikariDataSource has close() — Spring infers it
+}</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 4: SCOPE COMPARISON
+         ═══════════════════════════════════════════════════ -->
+    <h2>Scope Comparison: Singleton vs Prototype</h2>
+    <p>Bean scope fundamentally changes how much of the lifecycle the container manages. Singleton beans enjoy full lifecycle management. Prototype beans are handed off to the caller after creation — the container does not track them after that point.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Singleton</th>
+            <th>Prototype</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Created</td>
+            <td>Once per container</td>
+            <td>New instance per request</td>
+          </tr>
+          <tr>
+            <td>Destroy callbacks</td>
+            <td>✅ Called on context close</td>
+            <td>❌ NOT called — developer responsible</td>
+          </tr>
+          <tr>
+            <td><code>@PreDestroy</code></td>
+            <td>✅ Yes</td>
+            <td>❌ No</td>
+          </tr>
+          <tr>
+            <td><code>DisposableBean.destroy()</code></td>
+            <td>✅ Yes</td>
+            <td>❌ No</td>
+          </tr>
+          <tr>
+            <td>Custom destroy-method</td>
+            <td>✅ Yes</td>
+            <td>❌ No</td>
+          </tr>
+          <tr>
+            <td>Default scope</td>
+            <td>✅ Yes (default)</td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <strong>Prototype beans are NOT destroyed by the container.</strong>
+      If your prototype bean holds resources (connections, file handles), you must implement cleanup yourself. Consider using a <code>BeanPostProcessor</code> to track prototype instances, or switch to a custom scope that manages the lifecycle boundary explicitly.
+    </div>
+
+    <pre><code class="language-java">import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope("prototype")
+public class ReportGenerator {
+    // Each getBean() call returns a new instance
+    // @PreDestroy will NOT be called — clean up manually!
+    public void generate(String reportId) {
+        System.out.println("Generating report: " + reportId);
+    }
+}</code></pre>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 5: APPLICATIONCONTEXT VS BEANFACTORY
+         ═══════════════════════════════════════════════════ -->
+    <h2>ApplicationContext vs BeanFactory</h2>
+    <p><code>ApplicationContext</code> is a superset of <code>BeanFactory</code>. In practice you always use <code>ApplicationContext</code> — the only reason to use <code>BeanFactory</code> directly is in highly resource-constrained environments (e.g., embedded devices) where eager initialization overhead matters.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>BeanFactory</th>
+            <th>ApplicationContext</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bean initialization</td>
+            <td>Lazy (on first <code>getBean()</code>)</td>
+            <td>Eager at startup (all singletons)</td>
+          </tr>
+          <tr>
+            <td>Event publishing</td>
+            <td>❌ No</td>
+            <td>✅ Yes (<code>ApplicationEventPublisher</code>)</td>
+          </tr>
+          <tr>
+            <td>ApplicationContextAware</td>
+            <td>❌ Not triggered</td>
+            <td>✅ Triggered</td>
+          </tr>
+          <tr>
+            <td>MessageSource (i18n)</td>
+            <td>❌ No</td>
+            <td>✅ Yes</td>
+          </tr>
+          <tr>
+            <td>BeanPostProcessors</td>
+            <td>Manual registration</td>
+            <td>✅ Auto-detected from context</td>
+          </tr>
+          <tr>
+            <td>AOP support</td>
+            <td>Limited</td>
+            <td>✅ Full proxy creation</td>
+          </tr>
+          <tr>
+            <td>Common implementation</td>
+            <td><code>DefaultListableBeanFactory</code></td>
+            <td><code>AnnotationConfigApplicationContext</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <strong>Rule of thumb</strong>
+      Always use <code>ApplicationContext</code> in application code. Only reach for <code>BeanFactory</code> when writing a framework-level component that must initialize before the full context is available (e.g., inside a <code>BeanFactoryPostProcessor</code>).
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION 6: CHEATSHEET
+         ═══════════════════════════════════════════════════ -->
+    <div class="cheatsheet">
+      <h2>⚡ Bean Lifecycle Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Stage</th>
+              <th>Hook / Interface / Annotation</th>
+              <th>Singleton</th>
+              <th>Prototype</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Instantiation</td>
+              <td>Constructor call</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Populate Properties</td>
+              <td><code>@Autowired</code>, <code>@Value</code>, setter injection</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>BeanNameAware</td>
+              <td><code>BeanNameAware.setBeanName()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>BeanClassLoaderAware</td>
+              <td><code>BeanClassLoaderAware.setBeanClassLoader()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>BeanFactoryAware</td>
+              <td><code>BeanFactoryAware.setBeanFactory()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>EnvironmentAware</td>
+              <td><code>EnvironmentAware.setEnvironment()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>ApplicationContextAware</td>
+              <td><code>ApplicationContextAware.setApplicationContext()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Pre-init post-processing</td>
+              <td><code>BeanPostProcessor.postProcessBeforeInitialization()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>@PostConstruct / afterPropertiesSet</td>
+              <td><code>@PostConstruct</code>, <code>InitializingBean.afterPropertiesSet()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Custom init-method</td>
+              <td><code>@Bean(initMethod="...")</code>, XML <code>init-method</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Post-init post-processing</td>
+              <td><code>BeanPostProcessor.postProcessAfterInitialization()</code></td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Bean Ready (In Use)</td>
+              <td>—</td>
+              <td>✅</td>
+              <td>✅ (then released)</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>@PreDestroy / destroy()</td>
+              <td><code>@PreDestroy</code>, <code>DisposableBean.destroy()</code></td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Custom destroy-method</td>
+              <td><code>@Bean(destroyMethod="...")</code>, XML <code>destroy-method</code></td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /cheatsheet -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

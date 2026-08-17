@@ -182,6 +182,279 @@
     "text": "Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices Java baseline reminder Spring 5.3.x requires Java 8 or higher and uses javax.* package names.\n      Spring 6.x requires Java 17 or higher and migrates all imports to jakarta.* .\n      Choose your branch based on y"
   },
   {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Spring Bean Lifecycle",
+    "anchor": "",
+    "text": "Spring Bean Lifecycle"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Spring Bean Lifecycle",
+    "anchor": "",
+    "text": "The Spring Bean Lifecycle is the complete sequence of steps that the Spring IoC container executes from the moment it creates a bean to the moment it destroys it. Understanding this lifecycle lets you hook into exactly the right phase — whether you need to validate configuration after injection, war"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Lifecycle Flow Diagram",
+    "anchor": "",
+    "text": "Lifecycle Flow Diagram"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Lifecycle Flow Diagram",
+    "anchor": "",
+    "text": "The diagram below shows all 14 stages in order. Color coding: blue = Aware interfaces, green = init callbacks, amber = BeanPostProcessor, red = destroy phase, gray = general stages. General Aware interfaces BeanPostProcessor Init callbacks Destroy phase 1 Instantiation (Constructor) 2 Populate Prope"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage-by-Stage Deep Dive",
+    "anchor": "",
+    "text": "Stage-by-Stage Deep Dive"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 1 — Instantiation (Constructor)",
+    "anchor": "stage-1",
+    "text": "Stage 1 — Instantiation (Constructor)"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 1 — Instantiation (Constructor)",
+    "anchor": "stage-1",
+    "text": "Spring calls the bean's constructor (or a factory method) to create the object instance. If you have multiple constructors, Spring uses the one annotated with @Autowired , or the single no-arg constructor by default. At this point no dependencies have been injected — the object is just allocated. im"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 2 — Populate Properties (Setter / Field Injection)",
+    "anchor": "stage-2",
+    "text": "Stage 2 — Populate Properties (Setter / Field Injection)"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 2 — Populate Properties (Setter / Field Injection)",
+    "anchor": "stage-2",
+    "text": "After construction, Spring resolves all @Autowired fields and setter methods. It also applies values from @Value expressions. This is when the bean's dependency graph is fully satisfied. import org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.beans.factory.annotatio"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 3 — BeanNameAware.setBeanName()",
+    "anchor": "stage-3",
+    "text": "Stage 3 — BeanNameAware.setBeanName()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 3 — BeanNameAware.setBeanName()",
+    "anchor": "stage-3",
+    "text": "If the bean implements BeanNameAware , Spring calls setBeanName(String name) passing the bean's registered name in the container. This is the first of the Aware interface callbacks and fires immediately after property population. import org.springframework.beans.factory.BeanNameAware;\nimport org.spr"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()",
+    "anchor": "stage-4",
+    "text": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 4 — BeanClassLoaderAware.setBeanClassLoader()",
+    "anchor": "stage-4",
+    "text": "BeanClassLoaderAware gives the bean a reference to the ClassLoader used to load it. This is useful for frameworks that need to dynamically load classes by name using the same classloader as the bean. import org.springframework.beans.factory.BeanClassLoaderAware;\nimport org.springframework.stereotype"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 5 — BeanFactoryAware.setBeanFactory()",
+    "anchor": "stage-5",
+    "text": "Stage 5 — BeanFactoryAware.setBeanFactory()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 5 — BeanFactoryAware.setBeanFactory()",
+    "anchor": "stage-5",
+    "text": "BeanFactoryAware injects the owning BeanFactory into the bean. This lets a bean programmatically retrieve other beans from the container — though this is generally an anti-pattern since it couples your code to the Spring API. Prefer constructor injection. import org.springframework.beans.BeansExcept"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 6 — EnvironmentAware.setEnvironment()",
+    "anchor": "stage-6",
+    "text": "Stage 6 — EnvironmentAware.setEnvironment()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 6 — EnvironmentAware.setEnvironment()",
+    "anchor": "stage-6",
+    "text": "EnvironmentAware provides the bean with the Environment object, which gives access to property sources, profiles, and system properties. Useful for infrastructure beans that need to read configuration values programmatically. import org.springframework.context.EnvironmentAware;\nimport org.springfram"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 7 — ApplicationContextAware.setApplicationContext()",
+    "anchor": "stage-7",
+    "text": "Stage 7 — ApplicationContextAware.setApplicationContext()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 7 — ApplicationContextAware.setApplicationContext()",
+    "anchor": "stage-7",
+    "text": "ApplicationContextAware is the most commonly used Aware interface. It injects the full ApplicationContext , giving access to the entire bean registry, event publishing, message sources, and resource loading. A common pattern is a static holder so non-Spring code can access the context. import org.sp"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()",
+    "anchor": "stage-8",
+    "text": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 8 — BeanPostProcessor.postProcessBeforeInitialization()",
+    "anchor": "stage-8",
+    "text": "BeanPostProcessor is a container extension point: implementations are called for every bean in the context, not just beans that implement a specific interface. The postProcessBeforeInitialization hook fires after the Aware callbacks but before the bean's own init methods. You can return the original"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()",
+    "anchor": "stage-9",
+    "text": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 9 — @PostConstruct / InitializingBean.afterPropertiesSet()",
+    "anchor": "stage-9",
+    "text": "Two hooks fire at this stage in order: the JSR-250 @PostConstruct method first, then InitializingBean.afterPropertiesSet() . Both run after all dependencies have been injected. Use them to perform any initialization that requires access to injected dependencies — warming caches, opening connections,"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 10 — Custom init-method",
+    "anchor": "stage-10",
+    "text": "Stage 10 — Custom init-method"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 10 — Custom init-method",
+    "anchor": "stage-10",
+    "text": "A custom init method fires after afterPropertiesSet() . Declare it on a @Bean definition with initMethod , or in XML with init-method . This lets you hook lifecycle behavior into third-party classes you can't annotate. import org.springframework.context.annotation.Bean;\nimport org.springframework.co"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()",
+    "anchor": "stage-11",
+    "text": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 11 — BeanPostProcessor.postProcessAfterInitialization()",
+    "anchor": "stage-11",
+    "text": "The second BeanPostProcessor hook fires after all init callbacks complete. This is when AOP proxies are typically installed — if the bean needs to be wrapped, the proxy replaces the original instance in the container from this point on. The object returned here is what callers will receive when they"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 12 — Bean Ready (In Use)",
+    "anchor": "stage-12",
+    "text": "Stage 12 — Bean Ready (In Use)"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 12 — Bean Ready (In Use)",
+    "anchor": "stage-12",
+    "text": "At this point the bean is fully initialized and stored in the container. Calls to applicationContext.getBean() or any injection point will receive this bean (or its proxy). The bean remains in this state until the container begins shutdown. import org.springframework.context.annotation.AnnotationCon"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 13 — @PreDestroy / DisposableBean.destroy()",
+    "anchor": "stage-13",
+    "text": "Stage 13 — @PreDestroy / DisposableBean.destroy()"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 13 — @PreDestroy / DisposableBean.destroy()",
+    "anchor": "stage-13",
+    "text": "When the container is closed (e.g., context.close() or JVM shutdown hook), Spring calls destroy callbacks in reverse order. The @PreDestroy method fires first, then DisposableBean.destroy() . Use these to release resources: close database connections, flush caches, stop background threads. import ja"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 14 — Custom destroy-method",
+    "anchor": "stage-14",
+    "text": "Stage 14 — Custom destroy-method"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Stage 14 — Custom destroy-method",
+    "anchor": "stage-14",
+    "text": "A custom destroy method fires after DisposableBean.destroy() . Declare it on a @Bean with destroyMethod . Spring also has a convention: if a bean has a close() or shutdown() method and no destroyMethod is specified, Spring infers it automatically for @Bean declarations. // Already shown in Stage 10 "
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Scope Comparison: Singleton vs Prototype",
+    "anchor": "",
+    "text": "Scope Comparison: Singleton vs Prototype"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "Scope Comparison: Singleton vs Prototype",
+    "anchor": "",
+    "text": "Bean scope fundamentally changes how much of the lifecycle the container manages. Singleton beans enjoy full lifecycle management. Prototype beans are handed off to the caller after creation — the container does not track them after that point. Aspect Singleton Prototype Created Once per container N"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "ApplicationContext vs BeanFactory",
+    "anchor": "",
+    "text": "ApplicationContext vs BeanFactory"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "ApplicationContext vs BeanFactory",
+    "anchor": "",
+    "text": "ApplicationContext is a superset of BeanFactory . In practice you always use ApplicationContext — the only reason to use BeanFactory directly is in highly resource-constrained environments (e.g., embedded devices) where eager initialization overhead matters. Feature BeanFactory ApplicationContext Be"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "⚡ Bean Lifecycle Cheatsheet",
+    "anchor": "",
+    "text": "⚡ Bean Lifecycle Cheatsheet"
+  },
+  {
+    "page": "Spring Bean Lifecycle",
+    "href": "/spring-core/lifecycle.html",
+    "section": "⚡ Bean Lifecycle Cheatsheet",
+    "anchor": "",
+    "text": "# Stage Hook / Interface / Annotation Singleton Prototype 1 Instantiation Constructor call ✅ ✅ 2 Populate Properties @Autowired , @Value , setter injection ✅ ✅ 3 BeanNameAware BeanNameAware.setBeanName() ✅ ✅ 4 BeanClassLoaderAware BeanClassLoaderAware.setBeanClassLoader() ✅ ✅ 5 BeanFactoryAware Bean"
+  },
+  {
     "page": "Spring 5 Features",
     "href": "/spring-core/spring5-features.html",
     "section": "Spring Framework 5 Features",
