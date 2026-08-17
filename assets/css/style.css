@@ -288,3 +288,19 @@ tr:nth-child(even) { background: var(--surface); }
   #hamburger { display: block; }
   #content { padding: 1.5rem 1rem; }
 }
+
+/* Prism tomorrow theme overrides */
+code[class*="language-"], pre[class*="language-"] {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  background: none;
+  color: #cdd9e5;
+}
+pre[class*="language-"] { background: var(--code-bg); }
+.token.comment, .token.prolog, .token.doctype { color: #768390; }
+.token.keyword { color: #f47067; }
+.token.string  { color: #96d0ff; }
+.token.class-name, .token.function { color: #dcbdfb; }
+.token.annotation { color: #e3b341; }
+.token.number  { color: #6cb6ff; }
+.token.operator, .token.punctuation { color: #adbac7; }
