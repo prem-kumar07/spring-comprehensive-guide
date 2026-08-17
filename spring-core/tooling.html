@@ -112,7 +112,7 @@
       </svg>
     </div>
 
-    <h3>Recommended Dependencies for Learning</h3>
+    <h3 id="recommended-dependencies-for-learning">Recommended Dependencies for Learning</h3>
     <table>
       <thead>
         <tr>
@@ -150,7 +150,7 @@
       </tbody>
     </table>
 
-    <h3>Generated <code>pom.xml</code> — Dependencies Block</h3>
+    <h3 id="generated-pom-xml-dependencies-block">Generated <code>pom.xml</code> — Dependencies Block</h3>
     <pre><code class="language-xml">&lt;dependencies&gt;
 
     &lt;!-- Web: REST controllers + embedded Tomcat --&gt;
@@ -253,7 +253,7 @@
     <h2 id="maven-vs-gradle">3. Maven vs Gradle</h2>
     <p>Both build tools are first-class citizens in the Spring ecosystem. Spring Initializr generates wrapper scripts for both, so neither requires a local installation. Below is the same task expressed in each tool.</p>
 
-    <h3>Adding a Dependency</h3>
+    <h3 id="adding-a-dependency">Adding a Dependency</h3>
     <div class="diff-grid">
       <div>
         <div class="diff-label" style="color:var(--accent)">Maven — pom.xml</div>
@@ -268,7 +268,7 @@
       </div>
     </div>
 
-    <h3>Common Commands Side-by-Side</h3>
+    <h3 id="common-commands-side-by-side">Common Commands Side-by-Side</h3>
     <div class="diff-grid">
       <div>
         <div class="diff-label" style="color:var(--accent)">Maven</div>
@@ -329,7 +329,7 @@ chmod +x mvnw
 curl http://localhost:8080/actuator/health
 # Expected output: {"status":"UP"}</code></pre>
 
-    <h3>Changing the Default Port</h3>
+    <h3 id="changing-the-default-port">Changing the Default Port</h3>
     <p>By default Spring Boot listens on port 8080. To change it, add one line to <code>src/main/resources/application.properties</code>:</p>
     <pre><code class="language-properties">server.port=8081</code></pre>
 
@@ -342,7 +342,7 @@ curl http://localhost:8080/actuator/health
     <h2 id="devtools">5. Spring Boot DevTools — Hot Reload</h2>
     <p>DevTools monitors the JVM classpath for changes and triggers a <strong>fast restart</strong> — not a full JVM restart. It keeps the JVM alive, swaps only the application's own classes (the app classloader), and restarts the Spring context. This typically takes 1–3 seconds vs 5–20 seconds for a cold start.</p>
 
-    <h3>Add to pom.xml</h3>
+    <h3 id="add-to-pom-xml">Add to pom.xml</h3>
     <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -351,14 +351,14 @@ curl http://localhost:8080/actuator/health
     &lt;optional&gt;true&lt;/optional&gt;
 &lt;/dependency&gt;</code></pre>
 
-    <h3>application.properties</h3>
+    <h3 id="application-properties">application.properties</h3>
     <pre><code class="language-properties"># Enable classpath watcher and restart on change
 spring.devtools.restart.enabled=true
 
 # Enable LiveReload server (port 35729) — browser extension triggers refresh
 spring.devtools.livereload.enabled=true</code></pre>
 
-    <h3>How It Works</h3>
+    <h3 id="how-it-works">How It Works</h3>
     <ol>
       <li>DevTools starts a <em>file watcher</em> on the classpath (your compiled classes).</li>
       <li>When your IDE saves and compiles a changed class, the watcher detects the update.</li>
@@ -414,7 +414,7 @@ spring.devtools.livereload.enabled=true</code></pre>
       </tbody>
     </table>
 
-    <h3>Plain Unit Test — No Spring Context</h3>
+    <h3 id="plain-unit-test-no-spring-context">Plain Unit Test — No Spring Context</h3>
     <pre><code class="language-java">// No Spring annotation needed — instantiate directly
 class PriceCalculatorTest {
 
@@ -426,7 +426,7 @@ class PriceCalculatorTest {
     }
 }</code></pre>
 
-    <h3><code>@WebMvcTest</code> — MVC Layer Only</h3>
+    <h3 id="webmvctest-mvc-layer-only"><code>@WebMvcTest</code> — MVC Layer Only</h3>
     <pre><code class="language-java">// @WebMvcTest loads controllers, filters, Jackson — but NOT service or repository beans
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -448,7 +448,7 @@ class UserControllerTest {
     }
 }</code></pre>
 
-    <h3><code>@DataJpaTest</code> — JPA Slice with H2</h3>
+    <h3 id="datajpatest-jpa-slice-with-h2"><code>@DataJpaTest</code> — JPA Slice with H2</h3>
     <pre><code class="language-java">// @DataJpaTest starts JPA, configures in-memory H2, and rolls back each test
 @DataJpaTest
 class UserRepositoryTest {
@@ -463,7 +463,7 @@ class UserRepositoryTest {
     }
 }</code></pre>
 
-    <h3><code>@SpringBootTest</code> — Full Context Integration Test</h3>
+    <h3 id="springboottest-full-context-integration-test"><code>@SpringBootTest</code> — Full Context Integration Test</h3>
     <pre><code class="language-java">// Boots the complete application context — use sparingly
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationIntegrationTest {
@@ -545,7 +545,7 @@ class ApplicationIntegrationTest {
       </tbody>
     </table>
 
-    <h3>Trying it Out</h3>
+    <h3 id="trying-it-out">Trying it Out</h3>
     <pre><code class="language-bash"># Health — shows component details
 curl http://localhost:8080/actuator/health | python3 -m json.tool
 
@@ -617,7 +617,7 @@ curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep 
     <div class="cheatsheet">
       <h2>&#9889; Spring Tooling Cheatsheet</h2>
 
-      <h3>Maven Commands</h3>
+      <h3 id="maven-commands">Maven Commands</h3>
       <table>
         <thead>
           <tr><th>Command</th><th>What it does</th></tr>
@@ -631,7 +631,7 @@ curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep 
         </tbody>
       </table>
 
-      <h3>Gradle Commands</h3>
+      <h3 id="gradle-commands">Gradle Commands</h3>
       <table>
         <thead>
           <tr><th>Command</th><th>What it does</th></tr>
@@ -645,7 +645,7 @@ curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep 
         </tbody>
       </table>
 
-      <h3>Testing Annotations Quick Reference</h3>
+      <h3 id="testing-annotations-quick-reference">Testing Annotations Quick Reference</h3>
       <table>
         <thead>
           <tr><th>Annotation</th><th>Loads</th><th>Speed</th><th>Use when</th></tr>
