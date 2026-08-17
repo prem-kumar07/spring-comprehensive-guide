@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring Comprehensive Guide",
+    "anchor": "",
+    "text": "Spring Comprehensive Guide"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring Comprehensive Guide",
+    "anchor": "",
+    "text": "A complete reference for Spring Core, Spring Boot, and Spring AI — from basics to advanced, with working code examples, version comparisons, and quick cheatsheets."
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring Core",
+    "anchor": "",
+    "text": "Spring Core"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring Core",
+    "anchor": "",
+    "text": "Covers Spring Framework 5.x and 6.x — IoC container, AOP, lifecycle, web, data, testing, and more. Spring Core Overview Spring 5 Features Spring 6 Features Version Comparison (5 → 6) Bean Lifecycle Deep-Dive Tooling & Local Setup"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring BootComing soon",
+    "anchor": "",
+    "text": "Spring BootComing soon"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring BootComing soon",
+    "anchor": "",
+    "text": "Spring Boot 3.x and 3.3.x features, auto-configuration, starters, Actuator, and more."
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring AIComing soon",
+    "anchor": "",
+    "text": "Spring AIComing soon"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "/index.html",
+    "section": "Spring AIComing soon",
+    "anchor": "",
+    "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
+  }
+]
