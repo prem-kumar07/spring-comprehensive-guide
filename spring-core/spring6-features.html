@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring 6 Features</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Framework 6 Features</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v6">Spring 6.2.x Current</span>
+      Java 17+ baseline &bull; GA: Nov 2022 &bull; Jakarta EE 9+
+    </div>
+
+    <p>Spring Framework 6 is the most significant release since Spring 5 — it raises the baseline to <strong>Java 17</strong> and <strong>Jakarta EE 9+</strong>, completing the <code>javax.*</code> → <code>jakarta.*</code> namespace migration. It adds first-class support for <strong>GraalVM native images</strong> via Spring AOT, a declarative HTTP client via <code>@HttpExchange</code>, built-in <strong>Micrometer observability</strong>, RFC 7807 <code>ProblemDetail</code> error responses, and Project Loom virtual-thread support. Spring 6.1 added <code>RestClient</code> (the synchronous counterpart to <code>WebClient</code>), and Spring 6.2 shipped <code>MockMvcTester</code> for fluent assertion-style MVC tests.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-jakarta">Jakarta EE</button>
+        <button class="tab-btn" data-tab="tab-http">HTTP Interfaces</button>
+        <button class="tab-btn" data-tab="tab-observability">Observability</button>
+        <button class="tab-btn" data-tab="tab-aot">Native/AOT</button>
+        <button class="tab-btn" data-tab="tab-web">Web</button>
+        <button class="tab-btn" data-tab="tab-testing">Testing</button>
+        <button class="tab-btn" data-tab="tab-core">Core Changes</button>
+      </div>
+
+      <!-- ══════════════ JAKARTA EE ══════════════ -->
+      <div id="tab-jakarta" class="tab-panel active">
+
+        <!-- Basic: javax → jakarta namespace migration -->
+        <div class="feature-card">
+          <h3>javax.* → jakarta.* Namespace Migration — All Major Packages
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>The most impactful change in Spring 6 is the complete migration from <code>javax.*</code> to <code>jakarta.*</code> namespaces, mandated by the transfer of Java EE to the Eclipse Foundation as Jakarta EE. Every import in your codebase that references a Java EE API must be updated. The most frequently touched packages are shown below.</p>
+
+          <pre><code class="language-java">// ── Servlet API ───────────────────────────────────────
+// Spring 5 (javax)
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+
+// Spring 6 (jakarta)
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+
+// ── JPA / Persistence ─────────────────────────────────
+// Spring 5 (javax)
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import javax.persistence.GeneratedValue;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+// Spring 6 (jakarta)
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+// ── Bean Validation ───────────────────────────────────
+// Spring 5 (javax)
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.validation.constraints.Email;
+
+// Spring 6 (jakarta)
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+
+// ── Common Annotations (JSR-250) ──────────────────────
+// Spring 5 (javax)
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+
+// Spring 6 (jakarta)
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;</code></pre>
+
+          <div class="callout tip">
+            <strong>Rule of thumb</strong>
+            Any import that starts with <code>javax.</code> from a Java EE / Jakarta EE API package needs to change to <code>jakarta.</code>. Pure Java SE packages (e.g. <code>javax.net</code>, <code>javax.crypto</code>) do <em>not</em> change — only EE-origin APIs were transferred.
+          </div>
+        </div>
+
+        <!-- Intermediate: pom.xml dependency versions -->
+        <div class="feature-card">
+          <h3>pom.xml Dependency Updates for Jakarta EE 9+
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Switching to Jakarta EE 9+ requires updating your dependency coordinates in addition to renaming imports. The group IDs and artifact IDs for many APIs changed when the Eclipse Foundation took ownership.</p>
+
+          <pre><code class="language-xml">&lt;!-- Spring 5 / Javax EE dependencies --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;4.0.1&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;javax.annotation&lt;/groupId&gt;
+  &lt;artifactId&gt;javax.annotation-api&lt;/artifactId&gt;
+  &lt;version&gt;1.3.2&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- ↕ Change to Spring 6 / Jakarta EE 9+ dependencies ↕ --&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;6.0.0&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.annotation&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.annotation-api&lt;/artifactId&gt;
+  &lt;version&gt;2.1.1&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Spring 6 core — automatically brings in Jakarta dependencies --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;6.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Spring Boot 3 includes all Jakarta EE 10 deps transitively --&gt;
+&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;3.2.0&lt;/version&gt;
+&lt;/parent&gt;</code></pre>
+
+          <div class="callout info">
+            <strong>Spring Boot 3 = Spring 6</strong>
+            Spring Boot 3.x is built on Spring Framework 6. Upgrading from Spring Boot 2.x to 3.x is the most common migration path — it handles the Jakarta EE transitive dependencies automatically.
+          </div>
+        </div>
+
+        <!-- Intermediate: OpenRewrite migration tool -->
+        <div class="feature-card">
+          <h3>Automated Migration — OpenRewrite &amp; Spring Boot Migrator
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>The <strong>OpenRewrite</strong> project provides a recipe (<code>UpgradeSpringBoot_3_0</code>) that automates the bulk of the migration: renaming all <code>javax.*</code> imports, updating POM dependencies, migrating deprecated API usages, and applying configuration property renames. The <strong>Spring Boot Migrator</strong> (SBM) is a CLI tool that applies the same set of recipes interactively.</p>
+
+          <pre><code class="language-xml">&lt;!-- Add to pom.xml build section to run OpenRewrite --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.openrewrite.maven&lt;/groupId&gt;
+  &lt;artifactId&gt;rewrite-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;5.34.0&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;activeRecipes&gt;
+      &lt;recipe&gt;org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2&lt;/recipe&gt;
+    &lt;/activeRecipes&gt;
+  &lt;/configuration&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.openrewrite.recipe&lt;/groupId&gt;
+      &lt;artifactId&gt;rewrite-spring&lt;/artifactId&gt;
+      &lt;version&gt;5.18.0&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/plugin&gt;</code></pre>
+
+          <pre><code class="language-bash"># Run OpenRewrite — rewrites source files in place
+mvn rewrite:run
+
+# Or use the Spring Boot Migrator CLI
+java -jar spring-boot-migrator.jar migrate --project-path /my-app
+
+# Dry run to see proposed changes without applying them
+mvn rewrite:dryRun</code></pre>
+
+          <div class="callout tip">
+            <strong>What the recipe handles automatically</strong>
+            javax → jakarta imports, spring.factories → @AutoConfiguration, deprecated API replacements, property key renames (e.g. <code>spring.redis.*</code> → <code>spring.data.redis.*</code>), security configuration deprecations, and more.
+          </div>
+        </div>
+
+        <!-- Advanced: Jakarta EE 10 features in Spring 6 -->
+        <div class="feature-card">
+          <h3>Jakarta EE 10 Features in Spring 6 — Virtual Threads &amp; Records
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 6 targets Jakarta EE 9+ (moving to EE 10 with Spring 6.1). Jakarta EE 10 brought CDI 4.0, Servlet 6.0, and various API cleanups. Combined with Java 17's sealed classes and records, Spring 6 fully embraces these idioms. Entity classes can now be Java records (with some limitations), and <code>@Async</code> methods can be backed by virtual threads from Project Loom.</p>
+
+          <pre><code class="language-java">import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
+
+// Java record as a DTO — works natively with Spring 6 data binding
+public record UserRequest(
+    @NotBlank String name,
+    @Email String email,
+    @NotNull String role
+) {}
+
+// Jakarta annotations on a standard entity class
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    // Getters/setters or use Lombok
+}
+
+// Sealed class hierarchy for domain modeling (Java 17+)
+public sealed interface PaymentResult
+        permits PaymentResult.Success, PaymentResult.Failure {
+
+    record Success(String transactionId, java.math.BigDecimal amount)
+            implements PaymentResult {}
+
+    record Failure(String code, String message)
+            implements PaymentResult {}
+}
+
+// Virtual thread configuration (Spring 6.1+ / Java 21)
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskExecutor;
+
+@Configuration
+public class AsyncConfig {
+
+    @Bean
+    public SimpleAsyncTaskExecutor taskExecutor() {
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
+        executor.setVirtualThreads(true);  // Java 21 virtual threads
+        return executor;
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Records as DTOs vs Entities</strong>
+            Java records work well as request/response DTOs. Using them directly as JPA <code>@Entity</code> classes is problematic because JPA requires a no-arg constructor and mutable state. Use records for data transfer and standard classes for entities.
+          </div>
+        </div>
+
+      </div><!-- /tab-jakarta -->
+
+      <!-- ══════════════ HTTP INTERFACES ══════════════ -->
+      <div id="tab-http" class="tab-panel">
+
+        <!-- Basic: @HttpExchange -->
+        <div class="feature-card">
+          <h3>@HttpExchange — Declarative HTTP Client (NEW in Spring 6)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p><code>@HttpExchange</code> lets you declare an HTTP client as a Java interface — similar to how Spring Data repositories work. You annotate a method with the HTTP method and URI; Spring generates a proxy implementation backed by either <code>WebClient</code> (reactive) or <code>RestClient</code> (synchronous, Spring 6.1+). This replaces the verbose boilerplate of manually calling <code>RestTemplate</code> or building <code>WebClient</code> chains.</p>
+
+          <pre><code class="language-xml">&lt;!-- Spring 5 equivalent: manual RestTemplate boilerplate --&gt;
+&lt;!-- OLD: dozens of lines per endpoint --&gt;
+
+&lt;!-- Spring 6: spring-web already includes @HttpExchange support --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+  &lt;version&gt;6.2.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+// Declare the client as an interface — no implementation needed
+@HttpExchange(url = "/api/products", accept = "application/json")
+public interface ProductClient {
+
+    @GetExchange
+    List&lt;Product&gt; listAll();
+
+    @GetExchange("/{id}")
+    Product getById(@PathVariable Long id);
+
+    @PostExchange
+    Product create(@RequestBody Product product);
+
+    @PutExchange("/{id}")
+    Product update(@PathVariable Long id, @RequestBody Product product);
+
+    @DeleteExchange("/{id}")
+    void delete(@PathVariable Long id);
+}
+
+// Spring 5 equivalent (manual WebClient calls):
+// webClient.get().uri("/api/products/{id}", id)
+//          .retrieve().bodyToMono(Product.class).block()
+// — repeated per method, no type safety on URL params</code></pre>
+
+          <div class="callout tip">
+            <strong>Spring 5 equivalent</strong>
+            In Spring 5, you would call <code>RestTemplate</code> or <code>WebClient</code> imperatively in a service class. <code>@HttpExchange</code> removes all that boilerplate — the interface declaration IS the implementation.
+          </div>
+        </div>
+
+        <!-- Basic: HTTP method annotations -->
+        <div class="feature-card">
+          <h3>@GetExchange, @PostExchange, @PutExchange, @DeleteExchange
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 6 ships four convenience annotations — each is a specialization of <code>@HttpExchange</code> with the HTTP method pre-set. They mirror the server-side <code>@GetMapping</code> / <code>@PostMapping</code> annotations, making the client interface immediately readable.</p>
+
+          <pre><code class="language-java">import org.springframework.web.service.annotation.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+
+@HttpExchange(url = "https://api.example.com")
+public interface OrderServiceClient {
+
+    // GET /orders
+    @GetExchange("/orders")
+    List&lt;Order&gt; getOrders();
+
+    // GET /orders/{id}  — path variable
+    @GetExchange("/orders/{id}")
+    Order getOrder(@PathVariable Long id);
+
+    // GET /orders?status=PENDING  — query param
+    @GetExchange("/orders")
+    List&lt;Order&gt; getOrdersByStatus(@RequestParam String status);
+
+    // POST /orders  — request body
+    @PostExchange("/orders")
+    ResponseEntity&lt;Order&gt; createOrder(@RequestBody Order order);
+
+    // PUT /orders/{id}  — path + body
+    @PutExchange("/orders/{id}")
+    Order updateOrder(@PathVariable Long id, @RequestBody Order order);
+
+    // PATCH /orders/{id}
+    @PatchExchange("/orders/{id}")
+    Order patchOrder(@PathVariable Long id, @RequestBody Map&lt;String, Object&gt; patch);
+
+    // DELETE /orders/{id}
+    @DeleteExchange("/orders/{id}")
+    void deleteOrder(@PathVariable Long id);
+
+    // HEAD — check existence
+    @HttpExchange(method = "HEAD", url = "/orders/{id}")
+    ResponseEntity&lt;Void&gt; existsById(@PathVariable Long id);
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: HttpServiceProxyFactory -->
+        <div class="feature-card">
+          <h3>HttpServiceProxyFactory — Wiring the Client Proxy
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>HttpServiceProxyFactory</code> creates the runtime proxy that implements your <code>@HttpExchange</code> interface. You configure it with an HTTP adapter — either <code>WebClientAdapter</code> (reactive) or <code>RestClientAdapter</code> (synchronous, Spring 6.1+) — and then ask it to create an instance of your interface. The resulting bean can be injected anywhere in the application context.</p>
+
+          <pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+
+@Configuration
+public class HttpClientConfig {
+
+    // ── Option A: backed by WebClient (reactive / non-blocking) ──
+    @Bean
+    public ProductClient productClientReactive() {
+        WebClient webClient = WebClient.builder()
+                .baseUrl("https://products.example.com")
+                .defaultHeader("X-API-Key", "secret")
+                .build();
+
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+                .builderFor(WebClientAdapter.create(webClient))
+                .build();
+
+        return factory.createClient(ProductClient.class);
+    }
+
+    // ── Option B: backed by RestClient (synchronous, Spring 6.1+) ──
+    @Bean
+    public OrderServiceClient orderServiceClient() {
+        RestClient restClient = RestClient.builder()
+                .baseUrl("https://orders.example.com")
+                .defaultHeader("Authorization", "Bearer token")
+                .build();
+
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+                .builderFor(RestClientAdapter.create(restClient))
+                .build();
+
+        return factory.createClient(OrderServiceClient.class);
+    }
+}
+
+// ── Using the generated proxy in a service ──
+@Service
+public class CheckoutService {
+
+    private final ProductClient productClient;
+    private final OrderServiceClient orderServiceClient;
+
+    public CheckoutService(ProductClient productClient,
+                           OrderServiceClient orderServiceClient) {
+        this.productClient       = productClient;
+        this.orderServiceClient  = orderServiceClient;
+    }
+
+    public Order checkout(Long productId, int qty) {
+        Product product = productClient.getById(productId);  // HTTP GET
+        Order order = new Order(product, qty);
+        return orderServiceClient.createOrder(order).getBody();  // HTTP POST
+    }
+}</code></pre>
+        </div>
+
+        <!-- Advanced: headers, error handling, timeout, retry -->
+        <div class="feature-card">
+          <h3>Custom Headers, Error Handling, Timeout &amp; Retry
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Advanced <code>@HttpExchange</code> usage involves per-request headers, structured error decoding, connect/read timeouts, and retry policies. These are configured on the underlying <code>WebClient</code> or <code>RestClient</code> rather than the interface itself, giving you full control over the HTTP transport behaviour.</p>
+
+          <pre><code class="language-java">import org.springframework.web.service.annotation.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+
+// Per-method header via @RequestHeader
+@HttpExchange(url = "/api/secure")
+public interface SecureApiClient {
+
+    @GetExchange("/resource")
+    Resource fetchResource(@RequestHeader("X-Correlation-Id") String correlationId,
+                           @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
+
+    @PostExchange("/resource")
+    Resource createResource(@RequestBody Resource resource,
+                            @RequestHeader Map&lt;String, String&gt; headers);
+}
+
+// ── Advanced factory setup: timeout + retry ──
+import io.netty.channel.ChannelOption;
+import reactor.netty.http.client.HttpClient;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import java.time.Duration;
+import reactor.util.retry.Retry;
+
+@Configuration
+public class AdvancedClientConfig {
+
+    @Bean
+    public SecureApiClient secureApiClient() {
+        // Netty HTTP client with connect + read timeout
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                .responseTimeout(Duration.ofSeconds(10));
+
+        WebClient webClient = WebClient.builder()
+                .baseUrl("https://secure.example.com")
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                // Global error decoder — maps 4xx/5xx to exceptions
+                .defaultStatusHandler(
+                    status -> status.isError(),
+                    response -> response.bodyToMono(ErrorPayload.class)
+                                       .map(body -> new ApiException(body.message())))
+                .build();
+
+        return HttpServiceProxyFactory
+                .builderFor(WebClientAdapter.create(webClient))
+                .build()
+                .createClient(SecureApiClient.class);
+    }
+}
+
+// ── Retry policy with resilience4j or Reactor's built-in retry ──
+@Service
+public class ResilientOrderClient {
+
+    private final WebClient webClient;
+
+    public ResilientOrderClient(WebClient.Builder builder) {
+        this.webClient = builder.baseUrl("https://orders.example.com").build();
+    }
+
+    public Mono&lt;Order&gt; fetchWithRetry(Long orderId) {
+        return webClient.get()
+                .uri("/orders/{id}", orderId)
+                .retrieve()
+                .bodyToMono(Order.class)
+                .retryWhen(Retry.backoff(3, Duration.ofMillis(200))
+                               .filter(ex -> ex instanceof ApiException));
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-http -->
+
+      <!-- ══════════════ OBSERVABILITY ══════════════ -->
+      <div id="tab-observability" class="tab-panel">
+
+        <!-- Basic: Micrometer core integration -->
+        <div class="feature-card">
+          <h3>Micrometer — Now Core in Spring 6 (Not Optional)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring Framework 6 integrates <strong>Micrometer</strong> as a first-class dependency (not an optional add-on). Micrometer is the vendor-neutral instrumentation facade for JVM applications — it provides a single API to record metrics (counters, gauges, timers) and traces, then ships the data to any backend: Prometheus, Datadog, Zipkin, Grafana, etc. In Spring 6 the <code>ObservationRegistry</code> replaces ad-hoc metric and tracing configuration.</p>
+
+          <pre><code class="language-xml">&lt;!-- spring-webmvc 6+ already includes micrometer-observation transitively --&gt;
+&lt;!-- For full metrics + tracing add: --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
+  &lt;version&gt;1.12.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Distributed tracing (Micrometer Tracing) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-tracing-bridge-brave&lt;/artifactId&gt;
+  &lt;version&gt;1.2.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">// In Spring 5 you had to wire Micrometer metrics manually.
+// In Spring 6 the ObservationRegistry is auto-configured and ready to use.
+
+import io.micrometer.observation.ObservationRegistry;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ProductService {
+
+    private final ObservationRegistry registry;
+
+    public ProductService(ObservationRegistry registry) {
+        this.registry = registry;
+    }
+
+    public Product findById(Long id) {
+        // Wrap business logic in an observation — records both metric + span
+        return io.micrometer.observation.Observation
+                .createNotStarted("product.find-by-id", registry)
+                .lowCardinalityKeyValue("db", "postgres")
+                .observe(() -> repository.findById(id)
+                        .orElseThrow(() -> new ProductNotFoundException(id)));
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Spring 5 equivalent</strong>
+            In Spring 5 you'd manually call <code>meterRegistry.timer("...", ...).record(...)</code>. Spring 6's <code>Observation</code> API unifies metrics and distributed tracing in one call — one observation becomes both a Micrometer timer and a trace span automatically.
+          </div>
+        </div>
+
+        <!-- Intermediate: @Observed -->
+        <div class="feature-card">
+          <h3>@Observed — Automatic Method-Level Instrumentation
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>The <code>@Observed</code> annotation (from Micrometer, usable in Spring 6 via AOP) wraps an entire method in an observation without any boilerplate code. When placed on a class, it applies to all public methods. Spring generates a timer metric and a trace span named after the class and method automatically.</p>
+
+          <pre><code class="language-java">import io.micrometer.observation.annotation.Observed;
+import org.springframework.stereotype.Service;
+
+// @Observed on the class applies to ALL public methods
+@Observed(name = "order.service",
+          contextualName = "OrderService",
+          lowCardinalityKeyValues = {"team", "checkout"})
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+
+    public OrderService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
+    // This method is automatically observed as "order.service"
+    // — timer metric + trace span created and closed around the call
+    public Order placeOrder(Order order) {
+        return orderRepository.save(order);
+    }
+
+    // Override the name for a specific method
+    @Observed(name = "order.cancel", contextualName = "CancelOrder")
+    public void cancelOrder(Long orderId) {
+        orderRepository.deleteById(orderId);
+    }
+}
+
+// ── Enable AOP-based @Observed processing ──
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.aop.ObservedAspect;
+
+@Configuration
+public class ObservabilityConfig {
+
+    // Required to activate @Observed AOP interception
+    @Bean
+    ObservedAspect observedAspect(ObservationRegistry registry) {
+        return new ObservedAspect(registry);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: ObservationRegistry -->
+        <div class="feature-card">
+          <h3>ObservationRegistry — Configuring Metrics &amp; Tracing Backends
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>ObservationRegistry</code> is the central hub. You configure it once with metric and tracing handlers; then all observations flow to those backends. Spring Boot auto-configures this for common backends — in plain Spring 6 (without Boot) you configure it manually.</p>
+
+          <pre><code class="language-java">import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.ObservationHandler;
+import io.micrometer.observation.ObservationTextPublisher;
+import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ObservationRegistryConfig {
+
+    // ── Metrics backend: Prometheus / SimpleMeterRegistry ──
+    @Bean
+    public MeterRegistry meterRegistry() {
+        // In production: use PrometheusMeterRegistry or DatadogMeterRegistry
+        return new SimpleMeterRegistry();
+    }
+
+    // ── Observation registry wired to metrics ──
+    @Bean
+    public ObservationRegistry observationRegistry(MeterRegistry meterRegistry) {
+        ObservationRegistry registry = ObservationRegistry.create();
+
+        // Each observation creates a Micrometer timer
+        registry.observationConfig()
+                .observationHandler(new DefaultMeterObservationHandler(meterRegistry));
+
+        // Optional: print observations to stdout (dev only)
+        registry.observationConfig()
+                .observationHandler(new ObservationTextPublisher());
+
+        return registry;
+    }
+}
+
+// ── Application properties for Spring Boot + Actuator ──
+// management.observations.enable.all=true
+// management.tracing.sampling.probability=1.0
+// management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans</code></pre>
+        </div>
+
+        <!-- Advanced: custom ObservationConvention and ObservationHandler -->
+        <div class="feature-card">
+          <h3>Custom ObservationConvention &amp; ObservationHandler
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>To customise what tags (key-values) appear on observations, implement <code>ObservationConvention</code>. To intercept observation lifecycle events (start, stop, error), implement <code>ObservationHandler</code>. These are the extension points for custom instrumentation that goes beyond what <code>@Observed</code> provides.</p>
+
+          <pre><code class="language-java">import io.micrometer.observation.*;
+import io.micrometer.common.KeyValues;
+
+// ── 1. Custom context — carries extra data through the observation ──
+public class OrderObservationContext extends Observation.Context {
+
+    private final String orderId;
+    private final String customerId;
+
+    public OrderObservationContext(String orderId, String customerId) {
+        this.orderId    = orderId;
+        this.customerId = customerId;
+    }
+
+    public String getOrderId()    { return orderId; }
+    public String getCustomerId() { return customerId; }
+}
+
+// ── 2. Custom convention — controls metric name and tags ──
+public class OrderObservationConvention
+        implements ObservationConvention&lt;OrderObservationContext&gt; {
+
+    @Override
+    public String getName() {
+        return "order.processing";
+    }
+
+    @Override
+    public String getContextualName(OrderObservationContext ctx) {
+        return "Process Order " + ctx.getOrderId();
+    }
+
+    @Override
+    public KeyValues getLowCardinalityKeyValues(OrderObservationContext ctx) {
+        return KeyValues.of("customer.tier", resolveCustomerTier(ctx.getCustomerId()));
+    }
+
+    @Override
+    public KeyValues getHighCardinalityKeyValues(OrderObservationContext ctx) {
+        return KeyValues.of("order.id", ctx.getOrderId());  // high cardinality — traces only
+    }
+
+    @Override
+    public boolean supportsContext(Observation.Context context) {
+        return context instanceof OrderObservationContext;
+    }
+
+    private String resolveCustomerTier(String customerId) {
+        return customerId.startsWith("VIP") ? "premium" : "standard";
+    }
+}
+
+// ── 3. Custom handler — lifecycle hooks ──
+public class OrderObservationHandler
+        implements ObservationHandler&lt;OrderObservationContext&gt; {
+
+    @Override
+    public void onStart(OrderObservationContext ctx) {
+        System.out.println("Order processing started: " + ctx.getOrderId());
+    }
+
+    @Override
+    public void onStop(OrderObservationContext ctx) {
+        System.out.println("Order processing stopped, duration tracked");
+    }
+
+    @Override
+    public void onError(OrderObservationContext ctx) {
+        System.err.println("Order processing error for: " + ctx.getOrderId());
+    }
+
+    @Override
+    public boolean supportsContext(Observation.Context context) {
+        return context instanceof OrderObservationContext;
+    }
+}
+
+// ── 4. Usage ──
+@Service
+public class OrderProcessor {
+
+    private final ObservationRegistry registry;
+
+    public OrderProcessor(ObservationRegistry registry) {
+        this.registry = registry;
+    }
+
+    public void process(Order order) {
+        OrderObservationContext ctx = new OrderObservationContext(
+                order.id().toString(), order.customerId());
+
+        Observation.createNotStarted(new OrderObservationConvention(), ctx, registry)
+                   .observe(() -> doProcess(order));
+    }
+
+    private void doProcess(Order order) { /* business logic */ }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-observability -->
+
+      <!-- ══════════════ NATIVE/AOT ══════════════ -->
+      <div id="tab-aot" class="tab-panel">
+
+        <!-- Basic: GraalVM native image -->
+        <div class="feature-card">
+          <h3>GraalVM Native Image — Why &amp; What
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>A <strong>GraalVM native image</strong> is a standalone executable compiled ahead-of-time from Java bytecode. Unlike a JVM-based application that JIT-compiles at runtime, a native image is already fully compiled before deployment. The benefits are dramatic: startup in tens of milliseconds instead of seconds, and memory footprint reduced by 60–80%. The trade-off is a longer build time and restrictions on dynamic features (reflection, proxies, serialization) that must be declared ahead of time.</p>
+
+          <pre><code class="language-bash"># Traditional JVM app startup
+java -jar my-app.jar
+# Startup: 2–8 seconds, heap: ~256 MB
+
+# GraalVM native image startup
+./my-app-native
+# Startup: 20–100 ms, RSS: ~40–80 MB
+
+# Build native image with Maven (Spring Boot 3 / Spring 6)
+./mvnw -Pnative native:compile
+
+# Or with Gradle
+./gradlew nativeCompile</code></pre>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml — native build plugin --&gt;
+&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+      &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+      &lt;version&gt;0.10.0&lt;/version&gt;
+      &lt;extensions&gt;true&lt;/extensions&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;configuration&gt;
+        &lt;image&gt;
+          &lt;builder&gt;paketobuildpacks/builder-jammy-tiny:latest&lt;/builder&gt;
+        &lt;/image&gt;
+      &lt;/configuration&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <div class="callout info">
+            <strong>When to use native images</strong>
+            Ideal for serverless functions (AWS Lambda, Google Cloud Run), CLI tools, and microservices where cold-start latency matters. Long-running applications that have already warmed up JIT compilation may see lower peak throughput with native vs. JVM.
+          </div>
+        </div>
+
+        <!-- Intermediate: Spring AOT processing -->
+        <div class="feature-card">
+          <h3>Spring AOT Processing — Build-Time vs. Runtime
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6 introduced <strong>Ahead-of-Time (AOT) processing</strong> as a build phase that runs before GraalVM compilation. During the AOT phase Spring analyzes the application context, generates optimized source code (bean factory code without reflection), and produces the hint files (<code>reflect-config.json</code>, <code>proxy-config.json</code>) that GraalVM needs. The generated sources live in <code>target/spring-aot/</code>.</p>
+
+          <pre><code class="language-bash"># What happens during mvn -Pnative native:compile:
+
+# Phase 1: Spring AOT (runs at build time)
+#   1. Loads your ApplicationContext
+#   2. Analyzes all bean definitions
+#   3. Generates: BeanFactoryRegistrations.java  (no-reflection bootstrap)
+#   4. Generates: reflect-config.json, resource-config.json, proxy-config.json
+#   5. Output: target/spring-aot/main/sources/  and  .../resources/
+
+# Phase 2: GraalVM native-image compilation
+#   1. Compiles BeanFactoryRegistrations.java along with your source
+#   2. Uses hint files to include only referenced types/resources
+#   3. Output: target/my-app (native executable)</code></pre>
+
+          <pre><code class="language-java">// Generated AOT bootstrap code (target/spring-aot/main/sources/...)
+// You don't write this — Spring generates it automatically.
+// Example shape:
+
+// com/example/MyApplication__BeanFactoryRegistrations.java (generated)
+public class MyApplication__BeanFactoryRegistrations
+        implements BeanFactoryInitializer&lt;DefaultListableBeanFactory&gt; {
+
+    @Override
+    public void initialize(DefaultListableBeanFactory beanFactory) {
+        // Registers all beans WITHOUT reflection
+        RootBeanDefinition def = new RootBeanDefinition(ProductService.class);
+        def.setInstanceSupplier(ProductService::new);
+        beanFactory.registerBeanDefinition("productService", def);
+        // ... one entry per bean
+    }
+}
+// At runtime, the native app uses this generated code instead of scanning</code></pre>
+
+          <div class="callout tip">
+            <strong>AOT vs. JVM mode</strong>
+            The same application runs in both JVM and native mode. AOT output is only used in native mode — JVM mode still uses the standard Spring reflection-based bootstrap. No code changes are needed to support both.
+          </div>
+        </div>
+
+        <!-- Intermediate: @RuntimeHints -->
+        <div class="feature-card">
+          <h3>@RuntimeHints — Declaring Reflection &amp; Resource Needs
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>GraalVM's static analysis cannot discover reflection, proxies, serialization, or classpath resources used at runtime. You must declare these needs explicitly using <code>RuntimeHints</code>. Spring 6 provides <code>@RegisterReflectionForBinding</code>, <code>@ImportRuntimeHints</code>, and the <code>RuntimeHintsRegistrar</code> interface for this purpose. Spring auto-detects many common cases but library authors and advanced use cases need manual hints.</p>
+
+          <pre><code class="language-java">import org.springframework.aot.hint.*;
+import org.springframework.aot.hint.annotation.*;
+
+// ── Simple annotation style — register one class for reflection ──
+@RegisterReflectionForBinding(ProductDto.class)
+@Service
+public class ProductService { /* ... */ }
+
+// ── Register a resource file needed at runtime ──
+@ImportRuntimeHints(MyRuntimeHints.class)
+@Configuration
+public class AppConfig { /* ... */ }
+
+// ── RuntimeHintsRegistrar — full control ──
+import org.springframework.context.annotation.ImportRuntimeHints;
+
+public class MyRuntimeHints implements RuntimeHintsRegistrar {
+
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+
+        // Reflection — allow all methods and fields to be accessed at runtime
+        hints.reflection()
+             .registerType(ProductDto.class,
+                           MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                           MemberCategory.INVOKE_PUBLIC_METHODS)
+             .registerType(OrderEvent.class,
+                           MemberCategory.DECLARED_FIELDS,
+                           MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+
+        // Resources — include config files in the native image
+        hints.resources()
+             .registerPattern("sql/*.sql")
+             .registerPattern("templates/**/*.html");
+
+        // JDK proxies — register interfaces that will be proxied
+        hints.proxies()
+             .registerJdkProxy(UserRepository.class);
+
+        // Serialization — types used with Java serialization
+        hints.serialization()
+             .registerType(OrderEvent.class);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Advanced: testing AOT -->
+        <div class="feature-card">
+          <h3>RuntimeHintsRegistrar Testing &amp; @ImportRuntimeHints
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 6 provides dedicated test support for verifying that your <code>RuntimeHintsRegistrar</code> declares the correct hints. <code>RuntimeHintsPredicates</code> lets you assert that a type is registered for reflection, a resource pattern is included, or a proxy type is declared — without building a full native image.</p>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class MyRuntimeHintsTest {
+
+    @Test
+    void hintsDeclareProductDtoForReflection() {
+        RuntimeHints hints = new RuntimeHints();
+        new MyRuntimeHints().registerHints(hints, getClass().getClassLoader());
+
+        // Assert ProductDto is registered for constructor invocation
+        assertThat(RuntimeHintsPredicates.reflection()
+                .onType(ProductDto.class)
+                .withMemberCategories(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+                .accepts(hints);
+    }
+
+    @Test
+    void hintsDeclareResourcePattern() {
+        RuntimeHints hints = new RuntimeHints();
+        new MyRuntimeHints().registerHints(hints, getClass().getClassLoader());
+
+        assertThat(RuntimeHintsPredicates.resource()
+                .forResource("sql/schema.sql"))
+                .accepts(hints);
+    }
+}
+
+// ── Testing a full AOT ApplicationContext ──
+import org.springframework.test.context.aot.AotContext;
+import org.springframework.test.context.TestPropertySource;
+
+// (Spring Boot 3.x) — runs tests against the AOT-generated context
+@SpringBootTest
+@TestPropertySource(properties = "spring.aot.enabled=true")
+class AotContextTest {
+
+    @Autowired
+    ProductService productService;
+
+    @Test
+    void contextLoads() {
+        assertThat(productService).isNotNull();
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Hint testing is fast; native builds are slow</strong>
+            Use <code>RuntimeHintsPredicates</code>-based tests in CI to catch missing hints early. Reserve full native image builds for release pipelines — they take 1–5 minutes even on fast machines.
+          </div>
+        </div>
+
+      </div><!-- /tab-aot -->
+
+      <!-- ══════════════ WEB ══════════════ -->
+      <div id="tab-web" class="tab-panel">
+
+        <!-- Basic: ProblemDetail -->
+        <div class="feature-card">
+          <h3>ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 6 ships <code>ProblemDetail</code> — an implementation of <a href="https://www.rfc-editor.org/rfc/rfc7807">RFC 7807 (Problem Details for HTTP APIs)</a>. Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields (<code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>) that API consumers can programmatically interpret.</p>
+
+          <pre><code class="language-java">import org.springframework.http.ProblemDetail;
+import org.springframework.http.HttpStatus;
+import java.net.URI;
+
+// Creating a ProblemDetail manually
+ProblemDetail problem = ProblemDetail
+        .forStatusAndDetail(HttpStatus.NOT_FOUND, "Product with id 42 not found");
+
+problem.setType(URI.create("https://api.example.com/errors/product-not-found"));
+problem.setTitle("Product Not Found");
+problem.setInstance(URI.create("/api/products/42"));
+
+// Add custom properties beyond the RFC standard
+problem.setProperty("productId", 42);
+problem.setProperty("catalog", "electronics");
+
+// JSON response shape:
+// {
+//   "type":     "https://api.example.com/errors/product-not-found",
+//   "title":    "Product Not Found",
+//   "status":   404,
+//   "detail":   "Product with id 42 not found",
+//   "instance": "/api/products/42",
+//   "productId": 42,
+//   "catalog":  "electronics"
+// }
+
+// Spring 5 equivalent: custom ErrorResponse record/class per project
+// (no standard shape, inconsistent between teams)</code></pre>
+
+          <div class="callout info">
+            <strong>Content type</strong>
+            The RFC 7807 content type is <code>application/problem+json</code> (or <code>application/problem+xml</code>). Spring 6 sets this automatically when a <code>ProblemDetail</code> is returned.
+          </div>
+        </div>
+
+        <!-- Intermediate: ErrorResponse interface -->
+        <div class="feature-card">
+          <h3>ErrorResponse Interface &amp; @ExceptionHandler with ProblemDetail
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>The <code>ErrorResponse</code> interface (implemented by <code>ResponseEntityExceptionHandler</code> and custom exceptions) unifies exception classes with the ProblemDetail they produce. Exceptions that implement <code>ErrorResponse</code> can carry their own <code>ProblemDetail</code>, making the error definition self-contained in the exception class itself.</p>
+
+          <pre><code class="language-java">import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.ErrorResponse;
+import java.net.URI;
+
+// ── Custom exception that implements ErrorResponse ──
+public class ProductNotFoundException extends RuntimeException
+        implements ErrorResponse {
+
+    private final Long productId;
+    private final ProblemDetail problemDetail;
+
+    public ProductNotFoundException(Long productId) {
+        super("Product not found: " + productId);
+        this.productId = productId;
+        this.problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.NOT_FOUND,
+                        "No product exists with id " + productId);
+        this.problemDetail.setTitle("Product Not Found");
+        this.problemDetail.setType(
+                URI.create("https://api.example.com/probs/product-not-found"));
+        this.problemDetail.setProperty("productId", productId);
+    }
+
+    @Override
+    public ProblemDetail getBody() {
+        return problemDetail;
+    }
+}
+
+// ── Global handler using Spring's ResponseEntityExceptionHandler ──
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+@ControllerAdvice
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    // Spring 6 auto-converts ErrorResponse exceptions to ProblemDetail
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleProductNotFound(
+            ProductNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getBody());
+    }
+
+    // Override Spring's built-in handler to enrich with custom fields
+    @Override
+    protected ResponseEntity&lt;Object&gt; handleMethodArgumentNotValid(
+            org.springframework.web.bind.MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+        ProblemDetail problem = ex.getBody();
+        problem.setProperty("violations",
+                ex.getBindingResult().getFieldErrors().stream()
+                  .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                  .toList());
+
+        return ResponseEntity.status(status).headers(headers).body(problem);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: RestClient -->
+        <div class="feature-card">
+          <h3>RestClient — Synchronous HTTP Client (NEW in Spring 6.1)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6.1 introduced <code>RestClient</code> — a modern, fluent, synchronous HTTP client that replaces the deprecated <code>RestTemplate</code>. Unlike <code>WebClient</code> (which is reactive), <code>RestClient</code> blocks until the response arrives, making it a drop-in conceptual replacement for <code>RestTemplate</code> in non-reactive applications. It shares the same <code>HttpMessageConverter</code> stack and supports the same request building patterns as <code>WebClient</code>.</p>
+
+          <pre><code class="language-java">import org.springframework.web.client.RestClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+
+// ── Create a RestClient ──
+RestClient restClient = RestClient.builder()
+        .baseUrl("https://api.example.com")
+        .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+        .build();
+
+// ── GET — retrieve body ──
+Product product = restClient.get()
+        .uri("/products/{id}", 42)
+        .retrieve()
+        .body(Product.class);
+
+// ── GET — retrieve with full response ──
+ResponseEntity&lt;Product&gt; response = restClient.get()
+        .uri("/products/{id}", 42)
+        .retrieve()
+        .toEntity(Product.class);
+
+// ── GET list ──
+List&lt;Product&gt; products = restClient.get()
+        .uri("/products")
+        .retrieve()
+        .body(new ParameterizedTypeReference&lt;List&lt;Product&gt;&gt;() {});
+
+// ── POST — send body ──
+Product created = restClient.post()
+        .uri("/products")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(new Product("Widget", 9.99))
+        .retrieve()
+        .body(Product.class);
+
+// ── Error handling ──
+Product result = restClient.get()
+        .uri("/products/{id}", 99)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError(), (req, res) -> {
+            throw new ProductNotFoundException(99L);
+        })
+        .body(Product.class);
+
+// Spring 5 equivalent (RestTemplate — deprecated):
+// restTemplate.getForObject("/products/{id}", Product.class, 42)</code></pre>
+
+          <div class="callout tip">
+            <strong>RestTemplate migration</strong>
+            <code>RestClient</code> is the intended migration path from <code>RestTemplate</code>. The API is intentionally similar so migration is mechanical. <code>RestTemplate</code> is not removed in Spring 6 but is in maintenance mode — no new features.
+          </div>
+        </div>
+
+        <!-- Advanced: Virtual threads -->
+        <div class="feature-card">
+          <h3>Virtual Threads (Project Loom) — Spring 6.1+ on Java 21
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Java 21 (LTS) made Project Loom's <strong>virtual threads</strong> generally available. Virtual threads are JVM-managed lightweight threads — millions can exist simultaneously without exhausting OS thread pools. Spring 6.1 added first-class support: you can configure Tomcat, Jetty, or Undertow to dispatch requests on virtual threads, and <code>@Async</code> methods can run on a virtual-thread executor.</p>
+
+          <pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+// ── 1. Configure @Async to use virtual threads ──
+@Configuration
+@EnableAsync
+public class AsyncConfig {
+
+    @Bean(name = "applicationTaskExecutor")
+    public Executor virtualThreadExecutor() {
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("vt-");
+        executor.setVirtualThreads(true);  // Java 21: uses Thread.ofVirtual()
+        return executor;
+    }
+}
+
+// ── 2. Use @Async — now backed by virtual threads ──
+@Service
+public class ReportService {
+
+    @Async  // executes on a virtual thread from the pool above
+    public CompletableFuture&lt;Report&gt; generateReport(Long reportId) {
+        // Blocking I/O is fine here — virtual thread unmounts while waiting
+        Report report = slowDatabaseQuery(reportId);
+        return CompletableFuture.completedFuture(report);
+    }
+}
+
+// ── 3. Configure Tomcat to use virtual threads for request dispatch ──
+import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
+
+@Configuration
+public class TomcatVirtualThreadConfig {
+
+    @Bean
+    public TomcatProtocolHandlerCustomizer&lt;?&gt; virtualThreadProtocolHandlerCustomizer() {
+        return protocolHandler ->
+            protocolHandler.setExecutor(
+                Executors.newVirtualThreadPerTaskExecutor());
+    }
+}
+
+// application.properties alternative (Spring Boot 3.2+):
+// spring.threads.virtual.enabled=true</code></pre>
+
+          <div class="callout info">
+            <strong>Virtual threads vs. reactive (WebFlux)</strong>
+            Virtual threads provide the scalability benefits of reactive programming without the reactive programming model. You write blocking, imperative code and the JVM handles the non-blocking suspension automatically. Choose virtual threads when you want simplicity; choose WebFlux when you need streaming or backpressure.
+          </div>
+        </div>
+
+      </div><!-- /tab-web -->
+
+      <!-- ══════════════ TESTING ══════════════ -->
+      <div id="tab-testing" class="tab-panel">
+
+        <!-- Basic: MockMvcTester -->
+        <div class="feature-card">
+          <h3>MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 6.2 introduced <code>MockMvcTester</code> — a new fluent, AssertJ-native entry point for MockMvc tests. The classic <code>MockMvc</code> API uses a DSL of static methods and result matchers; <code>MockMvcTester</code> returns an <code>MvcTestResult</code> that AssertJ's <code>assertThat()</code> can reason about directly — making errors much more readable and enabling IDE autocompletion throughout the assertion chain.</p>
+
+          <pre><code class="language-java">import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResult;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@WebMvcTest(ProductController.class)
+class ProductControllerMvcTesterTest {
+
+    @Autowired
+    MockMvcTester mvc;  // autowired directly in Spring 6.2
+
+    @MockBean
+    ProductService productService;
+
+    @Test
+    void getProduct_returns200() {
+        given(productService.findById(1L))
+                .willReturn(new Product(1L, "Widget", new BigDecimal("9.99")));
+
+        // MockMvcTester: fluent chain, no checked exceptions
+        assertThat(mvc.get().uri("/api/products/1"))
+                .hasStatusOk()
+                .hasContentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .bodyJson()
+                .extractingPath("$.name").isEqualTo("Widget");
+    }
+
+    @Test
+    void getProduct_notFound_returns404() {
+        given(productService.findById(99L))
+                .willThrow(new ProductNotFoundException(99L));
+
+        assertThat(mvc.get().uri("/api/products/99"))
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .bodyJson()
+                .extractingPath("$.status").isEqualTo(404);
+    }
+
+    // Spring 5 equivalent (classic MockMvc):
+    // mockMvc.perform(get("/api/products/1").accept(APPLICATION_JSON))
+    //        .andExpect(status().isOk())
+    //        .andExpect(jsonPath("$.name").value("Widget"));
+    // (checked exception, static imports, less readable on failure)
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Spring 5 comparison</strong>
+            Classic <code>MockMvc</code> requires <code>throws Exception</code> on every test method and uses static-import chains (<code>MockMvcResultMatchers.*</code>). <code>MockMvcTester</code> removes the checked exception, is fully fluent with AssertJ, and produces cleaner failure messages.
+          </div>
+        </div>
+
+        <!-- Intermediate: AOT test improvements -->
+        <div class="feature-card">
+          <h3>AOT Test Improvements — @TestRuntimeHints &amp; Native Test Support
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6 adds testing infrastructure for verifying that AOT-generated configuration is correct. Tests can be run against the AOT-generated application context (simulating native mode) and <code>RuntimeHintsRegistrar</code> implementations can be validated with dedicated test support without a full native build.</p>
+
+          <pre><code class="language-java">import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
+import org.springframework.aot.hint.MemberCategory;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+// ── Test that your RuntimeHintsRegistrar declares the right hints ──
+class MyRuntimeHintsRegistrarTest {
+
+    @Test
+    void productDtoIsRegisteredForReflection() {
+        RuntimeHints hints = new RuntimeHints();
+        // Apply your registrar
+        new MyRuntimeHints().registerHints(hints, getClass().getClassLoader());
+
+        assertThat(RuntimeHintsPredicates.reflection()
+                .onType(ProductDto.class)
+                .withMemberCategories(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                                      MemberCategory.INVOKE_PUBLIC_METHODS))
+                .accepts(hints);
+    }
+
+    @Test
+    void sqlScriptsAreRegisteredAsResources() {
+        RuntimeHints hints = new RuntimeHints();
+        new MyRuntimeHints().registerHints(hints, getClass().getClassLoader());
+
+        assertThat(RuntimeHintsPredicates.resource()
+                .forResource("sql/schema.sql"))
+                .accepts(hints);
+    }
+}
+
+// ── Run a test against the AOT context (Spring Boot 3) ──
+import org.springframework.test.context.aot.DisabledInAotMode;
+
+@SpringBootTest
+class NativeCompatibilityTest {
+
+    @Autowired
+    private ProductService productService;
+
+    @Test
+    @DisabledInAotMode  // skip this specific test in native/AOT mode
+    void jvmOnlyBehavior() { /* test that relies on dynamic features */ }
+
+    @Test
+    void contextLoadsInAotMode() {
+        assertThat(productService).isNotNull();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Advanced: ApplicationContextRunner -->
+        <div class="feature-card">
+          <h3>ApplicationContextRunner — Testing Auto-Configurations
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p><code>ApplicationContextRunner</code> is the recommended way to test custom Spring Boot auto-configurations and <code>@Conditional</code> beans. It creates a lightweight application context programmatically, applies your configuration, and lets you assert which beans are present (or absent) — all without a full <code>@SpringBootTest</code> startup.</p>
+
+          <pre><code class="language-java">import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class CacheAutoConfigurationTest {
+
+    // Reusable runner — apply your auto-configuration
+    private final ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(CacheAutoConfiguration.class));
+
+    @Test
+    void cacheManagerBeanIsPresent_whenPropertyEnabled() {
+        contextRunner
+            .withPropertyValues("app.cache.enabled=true")
+            .run(ctx -> {
+                assertThat(ctx).hasSingleBean(CacheManager.class);
+                assertThat(ctx.getBean(CacheManager.class))
+                        .isInstanceOf(RedisCacheManager.class);
+            });
+    }
+
+    @Test
+    void cacheManagerBeanIsAbsent_whenPropertyDisabled() {
+        contextRunner
+            .withPropertyValues("app.cache.enabled=false")
+            .run(ctx -> {
+                assertThat(ctx).doesNotHaveBean(CacheManager.class);
+            });
+    }
+
+    @Test
+    void userDefinedBeanTakesPrecedence() {
+        contextRunner
+            .withPropertyValues("app.cache.enabled=true")
+            .withUserConfiguration(UserCacheConfig.class)  // user-provided
+            .run(ctx -> {
+                // Auto-configuration backs off when user defines their own
+                assertThat(ctx).hasSingleBean(CacheManager.class);
+                CacheManager cm = ctx.getBean(CacheManager.class);
+                assertThat(cm).isInstanceOf(ConcurrentMapCacheManager.class);
+            });
+    }
+
+    @org.springframework.context.annotation.Configuration
+    static class UserCacheConfig {
+        @org.springframework.context.annotation.Bean
+        CacheManager customCacheManager() {
+            return new ConcurrentMapCacheManager("user-cache");
+        }
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>WebApplicationContextRunner</strong>
+            For testing web-layer auto-configurations (filters, MVC config, security), use <code>WebApplicationContextRunner</code> — it adds a mock web environment to the runner.
+          </div>
+        </div>
+
+      </div><!-- /tab-testing -->
+
+      <!-- ══════════════ CORE CHANGES ══════════════ -->
+      <div id="tab-core" class="tab-panel">
+
+        <!-- Basic: Constructor injection as canonical style -->
+        <div class="feature-card">
+          <h3>Constructor Injection — The Official Canonical Style in Spring 6
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 6 and the accompanying Spring team guidance make constructor injection the <strong>canonical and recommended</strong> injection style. Field injection (which requires reflection to set private fields) conflicts with GraalVM native image constraints. When there is a single constructor, <code>@Autowired</code> is optional — Spring uses it implicitly. Lombok's <code>@RequiredArgsConstructor</code> generates the boilerplate constructor automatically.</p>
+
+          <pre><code class="language-java">import org.springframework.stereotype.Service;
+
+// ── RECOMMENDED in Spring 6: Constructor injection ──
+// @Autowired is not required — single constructor is implicitly used
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;  // final — immutable
+    private final PricingService pricingService;
+
+    // Single constructor — Spring 6 injects without @Autowired
+    public ProductService(ProductRepository productRepository,
+                          PricingService pricingService) {
+        this.productRepository = productRepository;
+        this.pricingService    = pricingService;
+    }
+
+    public Product findById(Long id) {
+        return productRepository.findById(id)
+                .map(pricingService::applyPricing)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+}
+
+// ── AVOID: Field injection — breaks native image, not testable without Spring ──
+@Service
+public class BadProductService {
+    @Autowired private ProductRepository productRepository;  // no final, requires reflection
+    @Autowired private PricingService pricingService;
+}
+
+// ── Lombok shortcut — generates the constructor ──
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+    // Lombok generates: public OrderService(OrderRepository repo) { this.repo = repo; }
+    private final OrderRepository repo;
+    private final ProductService productService;
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Native image benefit</strong>
+            Field injection requires Spring to call <code>setAccessible(true)</code> on private fields via reflection — an operation that must be pre-declared in native images. Constructor injection requires no reflection, reducing the set of hints needed.
+          </div>
+        </div>
+
+        <!-- Intermediate: @ComponentScan with index -->
+        <div class="feature-card">
+          <h3>Annotation Processing — @ComponentScan with Component Index
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6 builds on the component index introduced in Spring 5.0 (<code>spring-context-indexer</code>). With Spring AOT, the index generation is now part of the AOT processing phase — the generated <code>BeanFactoryRegistrations</code> effectively replaces runtime classpath scanning entirely in native mode. In JVM mode the index still provides a startup performance benefit for large applications.</p>
+
+          <pre><code class="language-xml">&lt;!-- Compile-time component indexer (JVM mode startup speedup) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context-indexer&lt;/artifactId&gt;
+  &lt;version&gt;6.2.0&lt;/version&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.index.CandidateComponentsIndex;
+
+// The index is transparent — @ComponentScan works the same
+@Configuration
+@ComponentScan(
+    basePackages = "com.example",
+    // Spring automatically uses META-INF/spring.components when present
+    // No extra configuration needed
+    lazyInit = false   // Spring 6 supports lazy component registration
+)
+public class AppConfig { }
+
+// Generated: META-INF/spring.components
+// com.example.service.ProductService=org.springframework.stereotype.Component
+// com.example.service.OrderService=org.springframework.stereotype.Component
+// com.example.repository.ProductRepository=org.springframework.stereotype.Component
+
+// Spring 6 AOT: the index is superseded by generated BeanFactoryRegistrations
+// which registers beans without ANY reflection or file scanning at runtime</code></pre>
+        </div>
+
+        <!-- Advanced: BeanDefinitionRegistry + programmatic container -->
+        <div class="feature-card">
+          <h3>BeanDefinitionRegistry &amp; Programmatic Container Configuration
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 6 improves the programmatic container API. <code>BeanDefinitionRegistry</code> allows registering, removing, and querying bean definitions at any point before the context is refreshed. Combined with <code>BeanDefinitionParserDelegate</code> improvements, this is the foundation that framework authors use to support custom XML namespaces and programmatic context bootstrapping.</p>
+
+          <pre><code class="language-java">import org.springframework.beans.factory.support.*;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
+
+public class ProgrammaticContainerDemo {
+
+    public static void main(String[] args) {
+        GenericApplicationContext ctx = new GenericApplicationContext();
+
+        // Access the registry
+        BeanDefinitionRegistry registry = ctx.getBeanFactory();
+
+        // Register a bean definition programmatically
+        RootBeanDefinition def = new RootBeanDefinition(ProductService.class);
+        def.setScope(BeanDefinition.SCOPE_SINGLETON);
+        def.setLazyInit(false);
+        def.getConstructorArgumentValues()
+           .addGenericArgumentValue(new RuntimeBeanReference("productRepository"));
+
+        registry.registerBeanDefinition("productService", def);
+
+        // Register a bean with a generic type (Spring 6 improvement)
+        // Useful for registering generic repository beans by type
+        RootBeanDefinition repoDefinition = new RootBeanDefinition();
+        repoDefinition.setTargetType(
+                ResolvableType.forClassWithGenerics(JpaRepository.class, Product.class, Long.class));
+        repoDefinition.setBeanClass(SimpleJpaRepository.class);
+        registry.registerBeanDefinition("productJpaRepository", repoDefinition);
+
+        // Introspect registered beans before refresh
+        String[] beanNames = registry.getBeanDefinitionNames();
+        for (String name : beanNames) {
+            BeanDefinition bd = registry.getBeanDefinition(name);
+            System.out.printf("Bean: %-30s scope: %s%n", name, bd.getScope());
+        }
+
+        ctx.refresh();
+
+        // Remove a bean definition post-refresh (advanced, careful)
+        // registry.removeBeanDefinition("productService");
+
+        ctx.close();
+    }
+}
+
+// ── BeanDefinitionParserDelegate — for custom XML namespace support ──
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
+
+public class CustomBeanDefinitionParser
+        implements org.springframework.beans.factory.xml.BeanDefinitionParser {
+
+    @Override
+    public BeanDefinition parse(
+            org.w3c.dom.Element element,
+            org.springframework.beans.factory.xml.ParserContext parserContext) {
+
+        BeanDefinitionParserDelegate delegate = parserContext.getDelegate();
+
+        // Spring 6: improved type resolution in delegate
+        RootBeanDefinition definition = new RootBeanDefinition();
+        definition.setBeanClass(CustomProcessor.class);
+        delegate.parsePropertyElements(element, definition);
+
+        parserContext.getRegistry()
+                     .registerBeanDefinition("customProcessor", definition);
+        return definition;
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Framework authors</strong>
+            <code>BeanDefinitionRegistry</code> and <code>BeanDefinitionParserDelegate</code> are primarily for framework and library authors. Application code should prefer <code>@Configuration</code> + <code>@Bean</code> for readability and AOT compatibility.
+          </div>
+        </div>
+
+      </div><!-- /tab-core -->
+
+    </div><!-- /tab-container -->
+
+    <!-- ══════════════ CHEATSHEET ══════════════ -->
+    <div class="cheatsheet">
+      <h2>⚡ Spring 6 Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / Class</th>
+              <th>Package</th>
+              <th>Version</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Core (carried over from Spring 5) -->
+            <tr><td><code>@Component</code></td><td>org.springframework.stereotype</td><td>5+</td><td>Marks a class as a Spring-managed bean; detected by classpath scan</td></tr>
+            <tr><td><code>@Service</code></td><td>org.springframework.stereotype</td><td>5+</td><td>Specialisation of @Component for service-layer beans</td></tr>
+            <tr><td><code>@Repository</code></td><td>org.springframework.stereotype</td><td>5+</td><td>Specialisation of @Component for DAO beans; enables exception translation</td></tr>
+            <tr><td><code>@Controller</code></td><td>org.springframework.stereotype</td><td>5+</td><td>Marks MVC controller; methods can return view names or response bodies</td></tr>
+            <tr><td><code>@RestController</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Composed @Controller + @ResponseBody; all methods serialize to HTTP body</td></tr>
+            <tr><td><code>@Autowired</code></td><td>org.springframework.beans.factory.annotation</td><td>5+</td><td>Triggers DI on constructor, field, or setter; optional on single constructor (4.3+)</td></tr>
+            <tr><td><code>@Qualifier</code></td><td>org.springframework.beans.factory.annotation</td><td>5+</td><td>Narrows injection to a specific named bean when multiple candidates exist</td></tr>
+            <tr><td><code>@Value</code></td><td>org.springframework.beans.factory.annotation</td><td>5+</td><td>Injects a value from property sources or a SpEL expression</td></tr>
+            <tr><td><code>@Configuration</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Designates a class as a source of @Bean definitions</td></tr>
+            <tr><td><code>@Bean</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Declares a method return value as a Spring-managed bean</td></tr>
+            <tr><td><code>@Conditional</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Registers a bean only when a Condition implementation returns true</td></tr>
+            <tr><td><code>@Profile</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Restricts a bean or config class to one or more named Spring profiles</td></tr>
+            <tr><td><code>@ComponentScan</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Configures packages scanned for @Component-annotated classes</td></tr>
+            <tr><td><code>@Lazy</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Defers bean creation until first use rather than at context startup</td></tr>
+            <tr><td><code>@Primary</code></td><td>org.springframework.context.annotation</td><td>5+</td><td>Marks a bean as preferred candidate when multiple beans of the same type exist</td></tr>
+            <tr><td><code>@Transactional</code></td><td>org.springframework.transaction.annotation</td><td>5+</td><td>Demarcates transaction boundaries; supports propagation and isolation settings</td></tr>
+            <tr><td><code>@Async</code></td><td>org.springframework.scheduling.annotation</td><td>5+</td><td>Executes a method asynchronously; in Spring 6.1+ can use virtual threads</td></tr>
+            <tr><td><code>@Scheduled</code></td><td>org.springframework.scheduling.annotation</td><td>5+</td><td>Triggers a method on a fixed-rate, fixed-delay, or cron schedule</td></tr>
+            <tr><td><code>@EventListener</code></td><td>org.springframework.context.event</td><td>5+</td><td>Subscribes a method to application events</td></tr>
+            <tr><td><code>@ExceptionHandler</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Handles exceptions thrown by controller methods</td></tr>
+            <tr><td><code>@ControllerAdvice</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Applies @ExceptionHandler globally across all controllers</td></tr>
+            <tr><td><code>@GetMapping</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Shortcut for @RequestMapping(method = GET)</td></tr>
+            <tr><td><code>@PostMapping</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Shortcut for @RequestMapping(method = POST)</td></tr>
+            <tr><td><code>@PutMapping</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Shortcut for @RequestMapping(method = PUT)</td></tr>
+            <tr><td><code>@DeleteMapping</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Shortcut for @RequestMapping(method = DELETE)</td></tr>
+            <tr><td><code>@PathVariable</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Extracts a URI template variable and binds it to a method parameter</td></tr>
+            <tr><td><code>@RequestBody</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Deserializes the HTTP request body into a Java object</td></tr>
+            <tr><td><code>@RequestParam</code></td><td>org.springframework.web.bind.annotation</td><td>5+</td><td>Binds an HTTP query parameter to a method parameter</td></tr>
+            <tr><td><code>@PostConstruct</code></td><td>jakarta.annotation</td><td>5+</td><td>Init hook — invoked once after DI completes (jakarta.* namespace in Spring 6)</td></tr>
+            <tr><td><code>@PreDestroy</code></td><td>jakarta.annotation</td><td>5+</td><td>Cleanup hook — invoked before the bean is removed from the context</td></tr>
+            <tr><td><code>@SpringBootTest</code></td><td>org.springframework.boot.test.context</td><td>5+</td><td>Loads the full Spring application context for integration tests</td></tr>
+            <tr><td><code>@WebMvcTest</code></td><td>org.springframework.boot.test.autoconfigure.web.servlet</td><td>5+</td><td>Loads only the MVC layer — slice test for controllers</td></tr>
+            <tr><td><code>@MockBean</code></td><td>org.springframework.boot.test.mock.mockito</td><td>5+</td><td>Replaces a Spring bean with a Mockito mock in the test context</td></tr>
+            <!-- New in Spring 6 -->
+            <tr><td><code>@HttpExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Marks an interface as a declarative HTTP client (base annotation)</td></tr>
+            <tr><td><code>@GetExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Shortcut for @HttpExchange with method=GET; declares a GET HTTP client method</td></tr>
+            <tr><td><code>@PostExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Shortcut for @HttpExchange with method=POST; declares a POST HTTP client method</td></tr>
+            <tr><td><code>@PutExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Shortcut for @HttpExchange with method=PUT; declares a PUT HTTP client method</td></tr>
+            <tr><td><code>@DeleteExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Shortcut for @HttpExchange with method=DELETE; declares a DELETE HTTP client method</td></tr>
+            <tr><td><code>@PatchExchange</code></td><td>org.springframework.web.service.annotation</td><td>6+</td><td>Shortcut for @HttpExchange with method=PATCH; declares a PATCH HTTP client method</td></tr>
+            <tr><td><code>HttpServiceProxyFactory</code></td><td>org.springframework.web.service.invoker</td><td>6+</td><td>Creates runtime proxy instances from @HttpExchange interfaces</td></tr>
+            <tr><td><code>RestClient</code></td><td>org.springframework.web.client</td><td>6.1+</td><td>Synchronous fluent HTTP client replacing RestTemplate (non-reactive)</td></tr>
+            <tr><td><code>RestClientAdapter</code></td><td>org.springframework.web.client.support</td><td>6.1+</td><td>Adapts RestClient to back an HttpServiceProxyFactory (synchronous)</td></tr>
+            <tr><td><code>WebClientAdapter</code></td><td>org.springframework.web.reactive.function.client.support</td><td>6+</td><td>Adapts WebClient to back an HttpServiceProxyFactory (reactive)</td></tr>
+            <tr><td><code>ProblemDetail</code></td><td>org.springframework.http</td><td>6+</td><td>RFC 7807 standardised error response (type, title, status, detail, instance)</td></tr>
+            <tr><td><code>ErrorResponse</code></td><td>org.springframework.web</td><td>6+</td><td>Interface for exceptions that carry their own ProblemDetail body</td></tr>
+            <tr><td><code>@Observed</code></td><td>io.micrometer.observation.annotation</td><td>6+</td><td>AOP-based annotation that auto-creates an Observation (metric + trace) around a method</td></tr>
+            <tr><td><code>ObservationRegistry</code></td><td>io.micrometer.observation</td><td>6+</td><td>Central hub for configuring observation handlers (metrics, tracing backends)</td></tr>
+            <tr><td><code>ObservationConvention</code></td><td>io.micrometer.observation</td><td>6+</td><td>Controls the name and key-values (tags) on observations</td></tr>
+            <tr><td><code>ObservationHandler</code></td><td>io.micrometer.observation</td><td>6+</td><td>Intercepts observation lifecycle events (start, stop, error) for custom instrumentation</td></tr>
+            <tr><td><code>ObservedAspect</code></td><td>io.micrometer.observation.aop</td><td>6+</td><td>Spring AOP aspect that activates @Observed processing; register as a @Bean</td></tr>
+            <tr><td><code>@RuntimeHints</code></td><td>org.springframework.aot.hint.annotation</td><td>6+</td><td>Meta-annotation for registering AOT/native image hints on a class</td></tr>
+            <tr><td><code>RuntimeHintsRegistrar</code></td><td>org.springframework.aot.hint</td><td>6+</td><td>Interface for programmatically registering reflection, resource, proxy, serialization hints</td></tr>
+            <tr><td><code>@ImportRuntimeHints</code></td><td>org.springframework.context.annotation</td><td>6+</td><td>Imports a RuntimeHintsRegistrar into the application context at build time</td></tr>
+            <tr><td><code>@RegisterReflectionForBinding</code></td><td>org.springframework.aot.hint.annotation</td><td>6+</td><td>Shortcut to register a class for full reflection (constructor + methods + fields)</td></tr>
+            <tr><td><code>RuntimeHintsPredicates</code></td><td>org.springframework.aot.hint.predicate</td><td>6+</td><td>AssertJ-compatible predicates for verifying RuntimeHints in tests</td></tr>
+            <tr><td><code>MockMvcTester</code></td><td>org.springframework.test.web.servlet.assertj</td><td>6.2+</td><td>Fluent AssertJ-native entry point for MockMvc tests; replaces static MockMvc DSL</td></tr>
+            <tr><td><code>MvcTestResult</code></td><td>org.springframework.test.web.servlet.assertj</td><td>6.2+</td><td>Assertable result returned by MockMvcTester; use with assertThat()</td></tr>
+            <tr><td><code>@DisabledInAotMode</code></td><td>org.springframework.test.context.aot</td><td>6+</td><td>Skips a test when running against the AOT-generated application context</td></tr>
+            <tr><td><code>AotContext</code></td><td>org.springframework.test.context.aot</td><td>6+</td><td>Test context that uses AOT-generated bean factory registrations (native simulation)</td></tr>
+            <tr><td><code>SimpleAsyncTaskExecutor</code></td><td>org.springframework.scheduling.concurrent</td><td>6.1+</td><td>Task executor with setVirtualThreads(true) for Project Loom virtual thread support</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /cheatsheet -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

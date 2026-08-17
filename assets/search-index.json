@@ -572,5 +572,397 @@
     "section": "⚡ Spring 5 Cheatsheet",
     "anchor": "",
     "text": "Annotation / Class Package Purpose @Component org.springframework.stereotype Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype Specialisation of @C"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Spring Framework 6 Features",
+    "anchor": "",
+    "text": "Spring Framework 6 Features"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Spring Framework 6 Features",
+    "anchor": "",
+    "text": "Spring 6.2.x Current Java 17+ baseline • GA: Nov 2022 • Jakarta EE 9+ Spring Framework 6 is the most significant release since Spring 5 — it raises the baseline to Java 17 and Jakarta EE 9+ , completing the javax.* → jakarta.* namespace migration. It adds first-class support for GraalVM native image"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]",
+    "anchor": "",
+    "text": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "javax.* → jakarta.* Namespace Migration — All Major Packages[Basic]",
+    "anchor": "",
+    "text": "The most impactful change in Spring 6 is the complete migration from javax.* to jakarta.* namespaces, mandated by the transfer of Java EE to the Eclipse Foundation as Jakarta EE. Every import in your codebase that references a Java EE API must be updated. The most frequently touched packages are sho"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]",
+    "anchor": "",
+    "text": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "pom.xml Dependency Updates for Jakarta EE 9+[Intermediate]",
+    "anchor": "",
+    "text": "Switching to Jakarta EE 9+ requires updating your dependency coordinates in addition to renaming imports. The group IDs and artifact IDs for many APIs changed when the Eclipse Foundation took ownership. <!-- Spring 5 / Javax EE dependencies -->\n<dependency>\n  <groupId>javax.servlet</groupId>\n  <arti"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]",
+    "anchor": "",
+    "text": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Automated Migration — OpenRewrite & Spring Boot Migrator[Intermediate]",
+    "anchor": "",
+    "text": "The OpenRewrite project provides a recipe ( UpgradeSpringBoot_3_0 ) that automates the bulk of the migration: renaming all javax.* imports, updating POM dependencies, migrating deprecated API usages, and applying configuration property renames. The Spring Boot Migrator (SBM) is a CLI tool that appli"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]",
+    "anchor": "",
+    "text": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Jakarta EE 10 Features in Spring 6 — Virtual Threads & Records[Advanced]",
+    "anchor": "",
+    "text": "Spring 6 targets Jakarta EE 9+ (moving to EE 10 with Spring 6.1). Jakarta EE 10 brought CDI 4.0, Servlet 6.0, and various API cleanups. Combined with Java 17's sealed classes and records, Spring 6 fully embraces these idioms. Entity classes can now be Java records (with some limitations), and @Async"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]",
+    "anchor": "",
+    "text": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@HttpExchange — Declarative HTTP Client (NEW in Spring 6)[Basic]",
+    "anchor": "",
+    "text": "@HttpExchange lets you declare an HTTP client as a Java interface — similar to how Spring Data repositories work. You annotate a method with the HTTP method and URI; Spring generates a proxy implementation backed by either WebClient (reactive) or RestClient (synchronous, Spring 6.1+). This replaces "
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]",
+    "anchor": "",
+    "text": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@GetExchange, @PostExchange, @PutExchange, @DeleteExchange[Basic]",
+    "anchor": "",
+    "text": "Spring 6 ships four convenience annotations — each is a specialization of @HttpExchange with the HTTP method pre-set. They mirror the server-side @GetMapping / @PostMapping annotations, making the client interface immediately readable. import org.springframework.web.service.annotation.*;\nimport org."
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]",
+    "anchor": "",
+    "text": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "HttpServiceProxyFactory — Wiring the Client Proxy[Intermediate]",
+    "anchor": "",
+    "text": "HttpServiceProxyFactory creates the runtime proxy that implements your @HttpExchange interface. You configure it with an HTTP adapter — either WebClientAdapter (reactive) or RestClientAdapter (synchronous, Spring 6.1+) — and then ask it to create an instance of your interface. The resulting bean can"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Custom Headers, Error Handling, Timeout & Retry[Advanced]",
+    "anchor": "",
+    "text": "Custom Headers, Error Handling, Timeout & Retry[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Custom Headers, Error Handling, Timeout & Retry[Advanced]",
+    "anchor": "",
+    "text": "Advanced @HttpExchange usage involves per-request headers, structured error decoding, connect/read timeouts, and retry policies. These are configured on the underlying WebClient or RestClient rather than the interface itself, giving you full control over the HTTP transport behaviour. import org.spri"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]",
+    "anchor": "",
+    "text": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Micrometer — Now Core in Spring 6 (Not Optional)[Basic]",
+    "anchor": "",
+    "text": "Spring Framework 6 integrates Micrometer as a first-class dependency (not an optional add-on). Micrometer is the vendor-neutral instrumentation facade for JVM applications — it provides a single API to record metrics (counters, gauges, timers) and traces, then ships the data to any backend: Promethe"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@Observed — Automatic Method-Level Instrumentation[Intermediate]",
+    "anchor": "",
+    "text": "@Observed — Automatic Method-Level Instrumentation[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@Observed — Automatic Method-Level Instrumentation[Intermediate]",
+    "anchor": "",
+    "text": "The @Observed annotation (from Micrometer, usable in Spring 6 via AOP) wraps an entire method in an observation without any boilerplate code. When placed on a class, it applies to all public methods. Spring generates a timer metric and a trace span named after the class and method automatically. imp"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]",
+    "anchor": "",
+    "text": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ObservationRegistry — Configuring Metrics & Tracing Backends[Intermediate]",
+    "anchor": "",
+    "text": "ObservationRegistry is the central hub. You configure it once with metric and tracing handlers; then all observations flow to those backends. Spring Boot auto-configures this for common backends — in plain Spring 6 (without Boot) you configure it manually. import io.micrometer.core.instrument.MeterR"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Custom ObservationConvention & ObservationHandler[Advanced]",
+    "anchor": "",
+    "text": "Custom ObservationConvention & ObservationHandler[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Custom ObservationConvention & ObservationHandler[Advanced]",
+    "anchor": "",
+    "text": "To customise what tags (key-values) appear on observations, implement ObservationConvention . To intercept observation lifecycle events (start, stop, error), implement ObservationHandler . These are the extension points for custom instrumentation that goes beyond what @Observed provides. import io.m"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "GraalVM Native Image — Why & What[Basic]",
+    "anchor": "",
+    "text": "GraalVM Native Image — Why & What[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "GraalVM Native Image — Why & What[Basic]",
+    "anchor": "",
+    "text": "A GraalVM native image is a standalone executable compiled ahead-of-time from Java bytecode. Unlike a JVM-based application that JIT-compiles at runtime, a native image is already fully compiled before deployment. The benefits are dramatic: startup in tens of milliseconds instead of seconds, and mem"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]",
+    "anchor": "",
+    "text": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Spring AOT Processing — Build-Time vs. Runtime[Intermediate]",
+    "anchor": "",
+    "text": "Spring 6 introduced Ahead-of-Time (AOT) processing as a build phase that runs before GraalVM compilation. During the AOT phase Spring analyzes the application context, generates optimized source code (bean factory code without reflection), and produces the hint files ( reflect-config.json , proxy-co"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]",
+    "anchor": "",
+    "text": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "@RuntimeHints — Declaring Reflection & Resource Needs[Intermediate]",
+    "anchor": "",
+    "text": "GraalVM's static analysis cannot discover reflection, proxies, serialization, or classpath resources used at runtime. You must declare these needs explicitly using RuntimeHints . Spring 6 provides @RegisterReflectionForBinding , @ImportRuntimeHints , and the RuntimeHintsRegistrar interface for this "
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]",
+    "anchor": "",
+    "text": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "RuntimeHintsRegistrar Testing & @ImportRuntimeHints[Advanced]",
+    "anchor": "",
+    "text": "Spring 6 provides dedicated test support for verifying that your RuntimeHintsRegistrar declares the correct hints. RuntimeHintsPredicates lets you assert that a type is registered for reflection, a resource pattern is included, or a proxy type is declared — without building a full native image. impo"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]",
+    "anchor": "",
+    "text": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)[Basic]",
+    "anchor": "",
+    "text": "Spring 6 ships ProblemDetail — an implementation of RFC 7807 (Problem Details for HTTP APIs) . Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields ( type , title , status , detail , instance ) that API consumers can programmatically interpret. import or"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]",
+    "anchor": "",
+    "text": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ErrorResponse Interface & @ExceptionHandler with ProblemDetail[Intermediate]",
+    "anchor": "",
+    "text": "The ErrorResponse interface (implemented by ResponseEntityExceptionHandler and custom exceptions) unifies exception classes with the ProblemDetail they produce. Exceptions that implement ErrorResponse can carry their own ProblemDetail , making the error definition self-contained in the exception cla"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]",
+    "anchor": "",
+    "text": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "RestClient — Synchronous HTTP Client (NEW in Spring 6.1)[Intermediate]",
+    "anchor": "",
+    "text": "Spring 6.1 introduced RestClient — a modern, fluent, synchronous HTTP client that replaces the deprecated RestTemplate . Unlike WebClient (which is reactive), RestClient blocks until the response arrives, making it a drop-in conceptual replacement for RestTemplate in non-reactive applications. It sh"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]",
+    "anchor": "",
+    "text": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Virtual Threads (Project Loom) — Spring 6.1+ on Java 21[Advanced]",
+    "anchor": "",
+    "text": "Java 21 (LTS) made Project Loom's virtual threads generally available. Virtual threads are JVM-managed lightweight threads — millions can exist simultaneously without exhausting OS thread pools. Spring 6.1 added first-class support: you can configure Tomcat, Jetty, or Undertow to dispatch requests o"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]",
+    "anchor": "",
+    "text": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2)[Basic]",
+    "anchor": "",
+    "text": "Spring 6.2 introduced MockMvcTester — a new fluent, AssertJ-native entry point for MockMvc tests. The classic MockMvc API uses a DSL of static methods and result matchers; MockMvcTester returns an MvcTestResult that AssertJ's assertThat() can reason about directly — making errors much more readable "
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]",
+    "anchor": "",
+    "text": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "AOT Test Improvements — @TestRuntimeHints & Native Test Support[Intermediate]",
+    "anchor": "",
+    "text": "Spring 6 adds testing infrastructure for verifying that AOT-generated configuration is correct. Tests can be run against the AOT-generated application context (simulating native mode) and RuntimeHintsRegistrar implementations can be validated with dedicated test support without a full native build. "
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]",
+    "anchor": "",
+    "text": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "ApplicationContextRunner — Testing Auto-Configurations[Advanced]",
+    "anchor": "",
+    "text": "ApplicationContextRunner is the recommended way to test custom Spring Boot auto-configurations and @Conditional beans. It creates a lightweight application context programmatically, applies your configuration, and lets you assert which beans are present (or absent) — all without a full @SpringBootTe"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]",
+    "anchor": "",
+    "text": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Constructor Injection — The Official Canonical Style in Spring 6[Basic]",
+    "anchor": "",
+    "text": "Spring 6 and the accompanying Spring team guidance make constructor injection the canonical and recommended injection style. Field injection (which requires reflection to set private fields) conflicts with GraalVM native image constraints. When there is a single constructor, @Autowired is optional —"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Annotation Processing — @ComponentScan with Component Index[Intermediate]",
+    "anchor": "",
+    "text": "Annotation Processing — @ComponentScan with Component Index[Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "Annotation Processing — @ComponentScan with Component Index[Intermediate]",
+    "anchor": "",
+    "text": "Spring 6 builds on the component index introduced in Spring 5.0 ( spring-context-indexer ). With Spring AOT, the index generation is now part of the AOT processing phase — the generated BeanFactoryRegistrations effectively replaces runtime classpath scanning entirely in native mode. In JVM mode the "
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]",
+    "anchor": "",
+    "text": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "BeanDefinitionRegistry & Programmatic Container Configuration[Advanced]",
+    "anchor": "",
+    "text": "Spring 6 improves the programmatic container API. BeanDefinitionRegistry allows registering, removing, and querying bean definitions at any point before the context is refreshed. Combined with BeanDefinitionParserDelegate improvements, this is the foundation that framework authors use to support cus"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "⚡ Spring 6 Cheatsheet",
+    "anchor": "",
+    "text": "⚡ Spring 6 Cheatsheet"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "/spring-core/spring6-features.html",
+    "section": "⚡ Spring 6 Cheatsheet",
+    "anchor": "",
+    "text": "Annotation / Class Package Version Purpose @Component org.springframework.stereotype 5+ Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype 5+ Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype 5+ Spe"
   }
 ]
