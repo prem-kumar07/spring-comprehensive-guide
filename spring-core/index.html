@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Core Framework</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Core Framework</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v5">Spring 5.3.x LTS</span>
+      <span class="version-badge badge-v6">Spring 6.2.x Current</span>
+    </div>
+
+    <p>Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an <strong>Inversion of Control (IoC) container</strong> that manages object creation and wiring through <strong>Dependency Injection (DI)</strong>, letting you describe your application's architecture as a graph of loosely-coupled components rather than a tangle of hard-coded <code>new</code> calls and static references.</p>
+
+    <p>Beyond the container, Spring provides a consistent abstraction layer over <strong>Aspect-Oriented Programming (AOP)</strong> — enabling cross-cutting concerns like transactions, security, and logging to be applied declaratively without polluting your business logic. The framework also ships production-ready modules for web MVC and reactive WebFlux, JDBC/ORM data access, messaging, and testing, all sharing the same foundational container and sharing annotations you already know.</p>
+
+    <p>Spring's philosophy is <em>non-invasive programming</em>: your application classes do not need to extend Spring base classes or implement Spring interfaces. The framework works alongside your code through configuration and proxying, so your domain objects remain plain Java (POJO) and are easily unit-tested in isolation. This design principle has guided the framework from its origins in Rod Johnson's 2002 book <em>Expert One-on-One J2EE Design and Development</em> all the way to today's Jakarta EE 10 baseline in Spring 6.</p>
+
+    <h2>Module Architecture</h2>
+    <p>Spring is structured as a set of modules layered on top of the Core Container. Pick only what you need — each module is independently deployable as a Maven/Gradle dependency.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" aria-label="Spring module architecture diagram" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <!-- Central box: Core Container -->
+        <rect x="230" y="145" width="240" height="110" rx="10" ry="10"
+              fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="350" y="183" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent)">Core Container</text>
+        <text x="350" y="202" text-anchor="middle" font-size="12" fill="var(--text-muted)">IoC · DI · Beans</text>
+        <text x="350" y="220" text-anchor="middle" font-size="12" fill="var(--text-muted)">Context · SpEL</text>
+        <text x="350" y="238" text-anchor="middle" font-size="12" fill="var(--text-muted)">BeanFactory</text>
+
+        <!-- AOP & Aspects — top left -->
+        <line x1="230" y1="185" x2="148" y2="105" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="20" y="55" width="160" height="65" rx="8" ry="8"
+              fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="100" y="83" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">AOP &amp; Aspects</text>
+        <text x="100" y="103" text-anchor="middle" font-size="11" fill="var(--text-muted)">Proxies · AspectJ</text>
+
+        <!-- Web (MVC / WebFlux) — top right -->
+        <line x1="470" y1="185" x2="553" y2="105" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="523" y="55" width="160" height="65" rx="8" ry="8"
+              fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="603" y="78" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Web</text>
+        <text x="603" y="96" text-anchor="middle" font-size="11" fill="var(--text-muted)">MVC · WebFlux</text>
+        <text x="603" y="112" text-anchor="middle" font-size="11" fill="var(--text-muted)">REST · WebSocket</text>
+
+        <!-- Data Access — bottom left -->
+        <line x1="230" y1="215" x2="148" y2="295" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="20" y="275" width="160" height="65" rx="8" ry="8"
+              fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="100" y="298" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Data Access</text>
+        <text x="100" y="316" text-anchor="middle" font-size="11" fill="var(--text-muted)">JDBC · ORM · TX</text>
+        <text x="100" y="333" text-anchor="middle" font-size="11" fill="var(--text-muted)">R2DBC</text>
+
+        <!-- Testing — bottom center -->
+        <line x1="350" y1="255" x2="350" y2="310" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="265" y="310" width="170" height="65" rx="8" ry="8"
+              fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="350" y="333" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Testing</text>
+        <text x="350" y="351" text-anchor="middle" font-size="11" fill="var(--text-muted)">MockMvc · TestContext</text>
+        <text x="350" y="368" text-anchor="middle" font-size="11" fill="var(--text-muted)">JUnit 5 · Mockito</text>
+
+        <!-- Integration & Messaging — bottom right -->
+        <line x1="470" y1="215" x2="553" y2="295" stroke="var(--border)" stroke-width="1.5"/>
+        <rect x="523" y="275" width="160" height="65" rx="8" ry="8"
+              fill="var(--bg)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="603" y="298" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Integration</text>
+        <text x="603" y="316" text-anchor="middle" font-size="11" fill="var(--text-muted)">Messaging · JMS</text>
+        <text x="603" y="333" text-anchor="middle" font-size="11" fill="var(--text-muted)">Tasks · Cache</text>
+      </svg>
+    </div>
+
+    <h2>Version Timeline</h2>
+    <p>Spring 5.x targets Java 8+ with <code>javax.*</code> namespaces (Jakarta EE 8). Spring 6.x requires Java 17+ and migrates to <code>jakarta.*</code> namespaces (Jakarta EE 9+). Spring 5.3.x is the LTS release receiving maintenance until 2024; Spring 6.x is the active development line.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" aria-label="Spring version timeline" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <!-- Baseline -->
+        <line x1="60" y1="48" x2="740" y2="48" stroke="var(--border)" stroke-width="2"/>
+
+        <!-- Spring 5.x milestones (blue) -->
+        <!-- 5.0 Sep 2017 -->
+        <circle cx="100" cy="48" r="7" fill="#58a6ff"/>
+        <text x="100" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#58a6ff">5.0</text>
+        <text x="100" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2017</text>
+
+        <!-- 5.1 Sep 2018 -->
+        <circle cx="230" cy="48" r="7" fill="#58a6ff"/>
+        <text x="230" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#58a6ff">5.1</text>
+        <text x="230" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2018</text>
+
+        <!-- 5.2 Sep 2019 -->
+        <circle cx="360" cy="48" r="7" fill="#58a6ff"/>
+        <text x="360" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#58a6ff">5.2</text>
+        <text x="360" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2019</text>
+
+        <!-- 5.3 LTS Oct 2020 -->
+        <circle cx="460" cy="48" r="9" fill="#58a6ff"/>
+        <text x="460" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">5.3 LTS</text>
+        <text x="460" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Oct 2020</text>
+
+        <!-- Spring 6.x milestones (green) -->
+        <!-- 6.0 Nov 2022 -->
+        <circle cx="570" cy="48" r="7" fill="#3fb950"/>
+        <text x="570" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#3fb950">6.0</text>
+        <text x="570" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2022</text>
+
+        <!-- 6.1 Nov 2023 -->
+        <circle cx="655" cy="48" r="7" fill="#3fb950"/>
+        <text x="655" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#3fb950">6.1</text>
+        <text x="655" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2023</text>
+
+        <!-- 6.2 Nov 2024 -->
+        <circle cx="720" cy="48" r="9" fill="#3fb950"/>
+        <text x="720" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#3fb950">6.2</text>
+        <text x="720" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2024</text>
+
+        <!-- Legend -->
+        <circle cx="160" cy="100" r="5" fill="#58a6ff"/>
+        <text x="172" y="104" font-size="11" fill="var(--text-muted)">Spring 5.x (Java 8+, javax.*)</text>
+        <circle cx="430" cy="100" r="5" fill="#3fb950"/>
+        <text x="442" y="104" font-size="11" fill="var(--text-muted)">Spring 6.x (Java 17+, jakarta.*)</text>
+      </svg>
+    </div>
+
+    <h2>Explore the Guide</h2>
+    <p>Each section below covers a specific facet of Spring Core in depth — with code examples, version-diff panels, and cheatsheets.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0">
+      <a href="spring5-features.html" class="feature-card" style="text-decoration:none">
+        <h3>Spring 5 Features</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">IoC, WebFlux, Kotlin support, testing improvements — Java 8+ baseline</p>
+      </a>
+      <a href="spring6-features.html" class="feature-card" style="text-decoration:none">
+        <h3>Spring 6 Features</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Jakarta EE 10, AOT compilation, virtual threads, HTTP client — Java 17+ required</p>
+      </a>
+      <a href="version-comparison.html" class="feature-card" style="text-decoration:none">
+        <h3>Version Comparison</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Side-by-side diff of Spring 5 vs 6 — namespace changes, removed APIs, migration guide</p>
+      </a>
+      <a href="lifecycle.html" class="feature-card" style="text-decoration:none">
+        <h3>Bean Lifecycle</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Full bean lifecycle deep-dive — instantiation, post-processing, init, use, destruction</p>
+      </a>
+      <a href="tooling.html" class="feature-card" style="text-decoration:none">
+        <h3>Tooling &amp; Setup</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices</p>
+      </a>
+    </div>
+
+    <div class="callout info">
+      <strong>Java baseline reminder</strong>
+      Spring 5.3.x requires Java 8 or higher and uses <code>javax.*</code> package names.
+      Spring 6.x requires Java 17 or higher and migrates all imports to <code>jakarta.*</code>.
+      Choose your branch based on your runtime target before starting a project.
+    </div>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

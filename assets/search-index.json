@@ -54,5 +54,131 @@
     "section": "Spring AIComing soon",
     "anchor": "",
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring Core Framework",
+    "anchor": "",
+    "text": "Spring Core Framework"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring Core Framework",
+    "anchor": "",
+    "text": "Spring 5.3.x LTS Spring 6.2.x Current Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an Inversion of Control (IoC) container that manages object creation and wiring through Dependency Injection (DI) , letting you"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Module Architecture",
+    "anchor": "",
+    "text": "Module Architecture"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Module Architecture",
+    "anchor": "",
+    "text": "Spring is structured as a set of modules layered on top of the Core Container. Pick only what you need — each module is independently deployable as a Maven/Gradle dependency. Core Container IoC · DI · Beans Context · SpEL BeanFactory AOP & Aspects Proxies · AspectJ Web MVC · WebFlux REST · WebSocket"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Version Timeline",
+    "anchor": "",
+    "text": "Version Timeline"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Version Timeline",
+    "anchor": "",
+    "text": "Spring 5.x targets Java 8+ with javax.* namespaces (Jakarta EE 8). Spring 6.x requires Java 17+ and migrates to jakarta.* namespaces (Jakarta EE 9+). Spring 5.3.x is the LTS release receiving maintenance until 2024; Spring 6.x is the active development line. 5.0 Sep 2017 5.1 Sep 2018 5.2 Sep 2019 5."
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Explore the Guide",
+    "anchor": "",
+    "text": "Explore the Guide"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Explore the Guide",
+    "anchor": "",
+    "text": "Each section below covers a specific facet of Spring Core in depth — with code examples, version-diff panels, and cheatsheets."
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring 5 Features",
+    "anchor": "",
+    "text": "Spring 5 Features"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring 5 Features",
+    "anchor": "",
+    "text": "IoC, WebFlux, Kotlin support, testing improvements — Java 8+ baseline"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring 6 Features",
+    "anchor": "",
+    "text": "Spring 6 Features"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Spring 6 Features",
+    "anchor": "",
+    "text": "Jakarta EE 10, AOT compilation, virtual threads, HTTP client — Java 17+ required"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Side-by-side diff of Spring 5 vs 6 — namespace changes, removed APIs, migration guide"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Bean Lifecycle",
+    "anchor": "",
+    "text": "Bean Lifecycle"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Bean Lifecycle",
+    "anchor": "",
+    "text": "Full bean lifecycle deep-dive — instantiation, post-processing, init, use, destruction"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Tooling & Setup",
+    "anchor": "",
+    "text": "Tooling & Setup"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "/spring-core/index.html",
+    "section": "Tooling & Setup",
+    "anchor": "",
+    "text": "Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices Java baseline reminder Spring 5.3.x requires Java 8 or higher and uses javax.* package names.\n      Spring 6.x requires Java 17 or higher and migrates all imports to jakarta.* .\n      Choose your branch based on y"
   }
 ]
