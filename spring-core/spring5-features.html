@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring 5 Features</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Framework 5 Features</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v5">Spring 5.3.x LTS</span>
+      Java 8+ baseline &bull; GA: Sep 2017 &bull; LTS: Oct 2020
+    </div>
+
+    <p>Spring Framework 5 represents a major generational leap — it moved to a Java 8+ baseline, introduced the fully reactive <strong>WebFlux</strong> stack built on Project Reactor, adopted JUnit 5 as a first-class testing citizen, added null-safety annotations, and provided dedicated support for Kotlin. Spring 5.3 (October 2020) became the Long-Term Support branch, receiving backported fixes until the end of 2024 to give teams a stable migration bridge to Spring 6.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-core">Core Container</button>
+        <button class="tab-btn" data-tab="tab-webmvc">Web MVC</button>
+        <button class="tab-btn" data-tab="tab-webflux">WebFlux</button>
+        <button class="tab-btn" data-tab="tab-data">Data</button>
+        <button class="tab-btn" data-tab="tab-testing">Testing</button>
+        <button class="tab-btn" data-tab="tab-new">New Features</button>
+      </div>
+
+      <!-- ══════════════ CORE CONTAINER ══════════════ -->
+      <div id="tab-core" class="tab-panel active">
+
+        <!-- Basic: @Component, @Autowired, @Value -->
+        <div class="feature-card">
+          <h3>Stereotype Annotations &amp; Dependency Injection
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p><code>@Component</code> marks a class so the classpath scanner registers it as a Spring-managed bean. <code>@Autowired</code> instructs the container to resolve and inject a matching bean by type at the annotated field, constructor, or setter. <code>@Value</code> injects scalar values from property sources or Spring Expression Language (SpEL) expressions directly into fields.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class GreetingService {
+
+    @Value("${app.greeting:Hello}")
+    private String greeting;
+
+    public String greet(String name) {
+        return greeting + ", " + name + "!";
+    }
+}
+
+@Component
+public class WelcomeController {
+
+    private final GreetingService greetingService;
+
+    @Autowired
+    public WelcomeController(GreetingService greetingService) {
+        this.greetingService = greetingService;
+    }
+
+    public String welcome(String name) {
+        return greetingService.greet(name);
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Tip</strong>
+            Prefer constructor injection (shown above) over field injection. It makes dependencies explicit, allows the class to be unit-tested without a Spring context, and the field can be <code>final</code>.
+          </div>
+        </div>
+
+        <!-- Basic: XML vs Annotation config -->
+        <div class="feature-card">
+          <h3>XML vs Annotation Configuration
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring supports three configuration styles that can be freely mixed: legacy XML (<code>&lt;bean&gt;</code> elements), annotation-driven classpath scanning (<code>@Component</code> + <code>@ComponentScan</code>), and Java-based configuration (<code>@Configuration</code> + <code>@Bean</code>). Modern projects almost exclusively use annotation or Java config, but XML is still used to import legacy or third-party bean definitions.</p>
+
+          <pre><code class="language-xml">&lt;!-- legacy-beans.xml (XML style) --&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+
+  &lt;bean id="dataSource" class="com.example.SimpleDataSource"&gt;
+    &lt;property name="url" value="jdbc:h2:mem:testdb"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</code></pre>
+
+          <pre><code class="language-java">// Annotation config style — Java equivalent
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+
+@Configuration
+@ComponentScan("com.example")          // scan for @Component beans
+@ImportResource("classpath:legacy-beans.xml")  // pull in XML if needed
+public class AppConfig {
+    // @Bean methods go here (see next card)
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: @Configuration, @Bean, @Conditional, @Profile -->
+        <div class="feature-card">
+          <h3>@Configuration, @Bean, @Conditional &amp; @Profile
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>A class annotated with <code>@Configuration</code> acts as a bean factory: its <code>@Bean</code>-annotated methods produce beans managed by the container. <code>@Profile</code> restricts a bean or configuration class to a named Spring profile (e.g. <code>dev</code>, <code>prod</code>), and <code>@Conditional</code> evaluates arbitrary logic to decide whether to register a bean — the foundation for Spring Boot's auto-configuration.</p>
+
+          <pre><code class="language-java">import org.springframework.context.annotation.*;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+
+@Configuration
+public class InfraConfig {
+
+    // Always registered — active datasource
+    @Bean
+    @Profile("prod")
+    public DataSource prodDataSource() {
+        HikariDataSource ds = new HikariDataSource();
+        ds.setJdbcUrl("jdbc:postgresql://db:5432/mydb");
+        return ds;
+    }
+
+    @Bean
+    @Profile("!prod")  // all non-prod profiles
+    public DataSource devDataSource() {
+        return new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.H2)
+                .build();
+    }
+
+    // Only register when the class is on the classpath
+    @Bean
+    @Conditional(CacheOnClasspathCondition.class)
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager("users", "products");
+    }
+}
+
+class CacheOnClasspathCondition implements Condition {
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        try {
+            Class.forName("org.springframework.cache.CacheManager");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: Injection styles comparison -->
+        <div class="feature-card">
+          <h3>Constructor vs Field vs Setter Injection
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring supports three injection styles. Constructor injection (recommended by the Spring team since 5.0) makes dependencies mandatory and immutable, enables <code>final</code> fields, and simplifies unit testing. Field injection (<code>@Autowired</code> on a field) is concise but hides dependencies, prevents <code>final</code>, and requires a Spring context in tests. Setter injection is appropriate for optional or reconfigurable dependencies.</p>
+
+          <pre><code class="language-java">import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+// RECOMMENDED: Constructor injection
+@Service
+public class OrderService {
+
+    private final PaymentGateway paymentGateway;
+    private final InventoryService inventoryService;
+
+    // @Autowired is implicit when there is a single constructor (Spring 4.3+)
+    public OrderService(PaymentGateway paymentGateway,
+                        InventoryService inventoryService) {
+        this.paymentGateway = paymentGateway;
+        this.inventoryService = inventoryService;
+    }
+}
+
+// AVOID: Field injection — hides dependencies, prevents final
+@Service
+public class BadOrderService {
+    @Autowired private PaymentGateway paymentGateway;   // hard to test
+    @Autowired private InventoryService inventoryService;
+}
+
+// ACCEPTABLE for optional dependencies: Setter injection
+@Service
+public class NotificationService {
+
+    private EmailSender emailSender;
+
+    @Autowired(required = false)
+    public void setEmailSender(EmailSender emailSender) {
+        this.emailSender = emailSender;
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Circular dependency gotcha</strong>
+            Constructor injection correctly surfaces circular dependencies as a startup error. Field injection hides them until a <code>NullPointerException</code> occurs at runtime. Prefer constructor injection so the container fails fast.
+          </div>
+        </div>
+
+        <!-- Advanced: Functional bean registration -->
+        <div class="feature-card">
+          <h3>Functional Bean Registration (GenericApplicationContext)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. <code>GenericApplicationContext.registerBean()</code> accepts a supplier lambda and optional customizers, making it possible to build a Spring context with zero classpath scanning — ideal for GraalVM native images and lambda-cold-start optimization.</p>
+
+          <pre><code class="language-java">import org.springframework.context.support.GenericApplicationContext;
+
+public class FunctionalContextDemo {
+
+    public static void main(String[] args) {
+        GenericApplicationContext ctx = new GenericApplicationContext();
+
+        // Register beans with lambda suppliers — no annotation scanning needed
+        ctx.registerBean(DataSourceConfig.class, DataSourceConfig::new);
+
+        ctx.registerBean("primaryRepo", UserRepository.class,
+                () -> new UserRepository(ctx.getBean(DataSourceConfig.class)),
+                bd -> {
+                    bd.setPrimary(true);
+                    bd.setLazyInit(true);
+                });
+
+        ctx.registerBean(UserService.class,
+                () -> new UserService(ctx.getBean(UserRepository.class)));
+
+        ctx.refresh();
+
+        UserService userService = ctx.getBean(UserService.class);
+        System.out.println("Context started, UserService: " + userService);
+
+        ctx.close();
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Native image benefit</strong>
+            Functional registration avoids runtime classpath scanning and reflection, which significantly reduces the work required for Spring Native / GraalVM ahead-of-time compilation hints.
+          </div>
+        </div>
+
+        <!-- Advanced: @Lazy, @Primary, @Qualifier, @DependsOn -->
+        <div class="feature-card">
+          <h3>@Lazy, @Primary, @Qualifier, @DependsOn
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p><code>@Primary</code> designates the preferred candidate when multiple beans of the same type exist; <code>@Qualifier</code> targets a specific bean by name when <code>@Primary</code> is not specific enough. <code>@Lazy</code> defers bean initialization until first use (useful for heavy resources or circular-dependency breaking). <code>@DependsOn</code> forces the container to initialize named beans before the annotated one, even when there is no direct injection relationship.</p>
+
+          <pre><code class="language-java">import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.annotation.*;
+
+@Configuration
+public class CacheConfig {
+
+    @Bean
+    @Primary  // injected by default when CacheManager is autowired
+    public CacheManager redisCacheManager() {
+        return new RedisCacheManager();
+    }
+
+    @Bean("local")
+    public CacheManager localCacheManager() {
+        return new ConcurrentMapCacheManager();
+    }
+}
+
+@Service
+@DependsOn("schemaInitializer")  // ensure DB schema exists before this bean
+public class ProductService {
+
+    private final CacheManager primary;    // gets RedisCacheManager
+    private final CacheManager local;      // targeted by qualifier
+
+    public ProductService(CacheManager primary,
+                          @Qualifier("local") CacheManager local) {
+        this.primary = primary;
+        this.local   = local;
+    }
+}
+
+@Component
+@Lazy  // not created until first getBean() or injection
+public class HeavyAnalyticsEngine {
+    public HeavyAnalyticsEngine() {
+        System.out.println("Initializing expensive analytics engine...");
+    }
+}</code></pre>
+        </div>
+      </div><!-- /tab-core -->
+
+      <!-- ══════════════ WEB MVC ══════════════ -->
+      <div id="tab-webmvc" class="tab-panel">
+
+        <!-- Basic: @RestController, mappings -->
+        <div class="feature-card">
+          <h3>@RestController, @GetMapping, @PostMapping, @RequestBody, @PathVariable
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p><code>@RestController</code> is a composed annotation combining <code>@Controller</code> and <code>@ResponseBody</code>, so every method return value is serialized directly to the HTTP response body (JSON by default via Jackson). The <code>@GetMapping</code> / <code>@PostMapping</code> shortcuts bind HTTP methods to handler methods; <code>@PathVariable</code> extracts URI template variables and <code>@RequestBody</code> deserializes the request body into a Java object.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @GetMapping
+    public List&lt;Product&gt; listAll() {
+        return productService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Product getById(@PathVariable Long id) {
+        return productService.findById(id);
+    }
+
+    @PostMapping
+    public Product create(@RequestBody Product product) {
+        return productService.save(product);
+    }
+
+    @PutMapping("/{id}")
+    public Product update(@PathVariable Long id,
+                          @RequestBody Product product) {
+        return productService.update(id, product);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        productService.delete(id);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: @ExceptionHandler, @ControllerAdvice, ResponseEntity -->
+        <div class="feature-card">
+          <h3>@ExceptionHandler, @ControllerAdvice &amp; ResponseEntity&lt;T&gt;
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>@ExceptionHandler</code> methods catch exceptions thrown by handler methods and produce a structured error response. When placed in a <code>@ControllerAdvice</code> class they apply globally across all controllers in the application. <code>ResponseEntity&lt;T&gt;</code> gives full control over the HTTP status code, headers, and body of the response.</p>
+
+          <pre><code class="language-java">import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+// Global error response shape
+record ErrorResponse(int status, String error, String path) {}
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleNotFound(
+            ResourceNotFoundException ex,
+            jakarta.servlet.http.HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                404, ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleBadRequest(
+            IllegalArgumentException ex,
+            jakarta.servlet.http.HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                400, ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleAll(
+            Exception ex,
+            jakarta.servlet.http.HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                500, "Internal Server Error", req.getRequestURI());
+        return ResponseEntity.internalServerError().body(body);
+    }
+}
+
+// Example: ResponseEntity usage inside a controller method
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;Order&gt; place(@RequestBody Order order) {
+        Order created = orderService.place(order);
+        URI location = URI.create("/api/orders/" + created.id());
+        return ResponseEntity
+                .created(location)
+                .header("X-Order-Id", String.valueOf(created.id()))
+                .body(created);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: HandlerInterceptor -->
+        <div class="feature-card">
+          <h3>HandlerInterceptor for Cross-Cutting Concerns
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>HandlerInterceptor</code> hooks into the Spring MVC request lifecycle at three points: <code>preHandle</code> (before the handler method; return <code>false</code> to abort), <code>postHandle</code> (after the handler but before view rendering), and <code>afterCompletion</code> (after the full request, including any exceptions). Interceptors are registered via <code>WebMvcConfigurer.addInterceptors()</code>.</p>
+
+          <pre><code class="language-java">import org.springframework.web.servlet.*;
+import org.springframework.web.servlet.config.annotation.*;
+import jakarta.servlet.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class RequestLoggingInterceptor implements HandlerInterceptor {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(RequestLoggingInterceptor.class);
+    private static final String START_ATTR = "requestStartMs";
+
+    @Override
+    public boolean preHandle(HttpServletRequest req,
+                             HttpServletResponse res,
+                             Object handler) {
+        req.setAttribute(START_ATTR, System.currentTimeMillis());
+        log.info("--&gt; {} {}", req.getMethod(), req.getRequestURI());
+        return true;  // continue processing
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest req,
+                                HttpServletResponse res,
+                                Object handler,
+                                Exception ex) {
+        long start = (long) req.getAttribute(START_ATTR);
+        long elapsed = System.currentTimeMillis() - start;
+        log.info("&lt;-- {} {} {}ms", res.getStatus(),
+                req.getRequestURI(), elapsed);
+    }
+}
+
+@org.springframework.context.annotation.Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new RequestLoggingInterceptor())
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/health");
+    }
+}</code></pre>
+        </div>
+
+        <!-- Advanced: Async processing -->
+        <div class="feature-card">
+          <h3>Async Request Processing: Callable&lt;?&gt; and DeferredResult&lt;T&gt;
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring MVC can release the Servlet container thread while the response is still pending, allowing the container to handle more concurrent requests with fewer threads. Returning a <code>Callable&lt;T&gt;</code> offloads the work to Spring's task executor thread pool. <code>DeferredResult&lt;T&gt;</code> is more flexible — the result can be set from any thread (e.g. a message broker callback) and supports configurable timeouts.</p>
+
+          <pre><code class="language-java">import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.*;
+import java.util.concurrent.*;
+
+@RestController
+@RequestMapping("/api/reports")
+public class ReportController {
+
+    private final ReportService reportService;
+    private final TaskExecutor taskExecutor;
+
+    public ReportController(ReportService reportService,
+                            TaskExecutor taskExecutor) {
+        this.reportService = reportService;
+        this.taskExecutor  = taskExecutor;
+    }
+
+    // Servlet thread released immediately; Spring runs work in taskExecutor
+    @GetMapping("/callable/{id}")
+    public Callable&lt;Report&gt; generateCallable(@PathVariable Long id) {
+        return () -&gt; reportService.generateHeavyReport(id);
+    }
+
+    // DeferredResult — result set externally (e.g. from a message listener)
+    @GetMapping("/deferred/{id}")
+    public DeferredResult&lt;Report&gt; generateDeferred(@PathVariable Long id) {
+        DeferredResult&lt;Report&gt; result = new DeferredResult&lt;&gt;(30_000L);  // 30 s timeout
+
+        result.onTimeout(() -&gt;
+            result.setErrorResult(new TimeoutException("Report timed out"))
+        );
+
+        taskExecutor.execute(() -&gt; {
+            try {
+                result.setResult(reportService.generateHeavyReport(id));
+            } catch (Exception e) {
+                result.setErrorResult(e);
+            }
+        });
+
+        return result;  // servlet thread returns here immediately
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Servlet 3.1 requirement</strong>
+            Async processing requires a Servlet 3.0+ container and must be enabled on the <code>DispatcherServlet</code>. Spring Boot auto-configures this. For WebFlux consider switching to reactive controllers returning <code>Mono</code>/<code>Flux</code> instead.
+          </div>
+        </div>
+      </div><!-- /tab-webmvc -->
+
+      <!-- ══════════════ WEBFLUX ══════════════ -->
+      <div id="tab-webflux" class="tab-panel">
+
+        <!-- Basic: Reactive vs Imperative -->
+        <div class="feature-card">
+          <h3>Reactive vs Imperative — Mono and Flux
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring WebFlux (introduced in Spring 5.0) is built on <strong>Project Reactor</strong> and implements the Reactive Streams specification. Instead of blocking threads while waiting for I/O, reactive code describes a pipeline of transformations over asynchronous data. <code>Mono&lt;T&gt;</code> represents a stream of zero or one item; <code>Flux&lt;T&gt;</code> represents a stream of zero to N items — both are lazy and only execute when subscribed.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-webflux&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.projectreactor&lt;/groupId&gt;
+  &lt;artifactId&gt;reactor-core&lt;/artifactId&gt;
+  &lt;version&gt;3.4.38&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+public class ReactiveIntro {
+
+    public static void main(String[] args) {
+        // Mono — exactly one result (or empty/error)
+        Mono&lt;String&gt; greeting = Mono.just("Hello, Spring 5!");
+
+        // Flux — zero to N results
+        Flux&lt;Integer&gt; numbers = Flux.range(1, 5);
+
+        // Pipeline: transform and filter — nothing executes until subscribe()
+        numbers
+            .map(n -&gt; n * n)
+            .filter(n -&gt; n &gt; 5)
+            .subscribe(
+                value  -&gt; System.out.println("Value: " + value),
+                error  -&gt; System.err.println("Error: " + error),
+                ()     -&gt; System.out.println("Complete")
+            );
+
+        // Blocking subscriber (only for demo / tests — never in reactive handlers)
+        String result = greeting.block();
+        System.out.println(result);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Never block inside a reactive pipeline</strong>
+            Calling <code>.block()</code>, <code>Thread.sleep()</code>, or any blocking I/O inside a reactive chain starves the non-blocking event loop threads. Use reactive operators (<code>flatMap</code>, <code>then</code>, <code>zip</code>) to compose async operations.
+          </div>
+        </div>
+
+        <!-- Basic: @RestController with Mono -->
+        <div class="feature-card">
+          <h3>@RestController with Mono&lt;T&gt; Return Types
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>WebFlux reuses Spring MVC annotations like <code>@RestController</code> and <code>@GetMapping</code>. The key difference is that handler methods return <code>Mono&lt;T&gt;</code> (single result) or <code>Flux&lt;T&gt;</code> (collection), signaling to the framework that the response is asynchronous. The container subscribes to the publisher and writes the serialized response when items arrive.</p>
+
+          <pre><code class="language-java">import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    private final ReactiveUserRepository userRepository;
+
+    public UserController(ReactiveUserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping
+    public Flux&lt;User&gt; listAll() {
+        return userRepository.findAll();  // streams each user as it arrives
+    }
+
+    @GetMapping("/{id}")
+    public Mono&lt;User&gt; getById(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .switchIfEmpty(Mono.error(
+                    new ResourceNotFoundException("User not found: " + id)));
+    }
+
+    @PostMapping
+    public Mono&lt;User&gt; create(@RequestBody Mono&lt;User&gt; userMono) {
+        return userMono.flatMap(userRepository::save);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: WebClient -->
+        <div class="feature-card">
+          <h3>WebClient — Reactive HTTP Client
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>WebClient</code> is the reactive, non-blocking replacement for the deprecated <code>RestTemplate</code>. It is part of <code>spring-webflux</code> and can be used even in traditional Spring MVC applications. It supports request/response streaming, exchange functions, and integrates with Reactor operators for composing complex HTTP call sequences.</p>
+
+          <pre><code class="language-java">import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+public class ExternalApiService {
+
+    private final WebClient webClient;
+
+    public ExternalApiService(WebClient.Builder builder) {
+        this.webClient = builder
+                .baseUrl("https://api.example.com")
+                .defaultHeader("Accept", "application/json")
+                .build();
+    }
+
+    public Mono&lt;Product&gt; fetchProduct(Long id) {
+        return webClient.get()
+                .uri("/products/{id}", id)
+                .retrieve()
+                .onStatus(status -&gt; status.is4xxClientError(),
+                          resp  -&gt; resp.bodyToMono(String.class)
+                                       .map(ResourceNotFoundException::new))
+                .bodyToMono(Product.class);
+    }
+
+    public Mono&lt;Order&gt; placeOrder(Order order) {
+        return webClient.post()
+                .uri("/orders")
+                .bodyValue(order)
+                .retrieve()
+                .bodyToMono(Order.class);
+    }
+
+    // Parallel calls with zip
+    public Mono&lt;CombinedResult&gt; fetchBoth(Long productId, Long userId) {
+        Mono&lt;Product&gt; productMono = fetchProduct(productId);
+        Mono&lt;User&gt;    userMono    = fetchUser(userId);
+        return Mono.zip(productMono, userMono,
+                (product, user) -&gt; new CombinedResult(product, user));
+    }
+
+    private Mono&lt;User&gt; fetchUser(Long userId) {
+        return webClient.get()
+                .uri("/users/{id}", userId)
+                .retrieve()
+                .bodyToMono(User.class);
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>RestTemplate deprecation</strong>
+            <code>RestTemplate</code> was deprecated in Spring 5.0 for new code. Migrate to <code>WebClient</code> even in servlet-based apps — it requires adding <code>spring-webflux</code> to the classpath but does not require switching the web stack.
+          </div>
+        </div>
+
+        <!-- Advanced: Router Functions -->
+        <div class="feature-card">
+          <h3>Router Functions — Functional Web Endpoints
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 5 introduced a functional, lambda-based alternative to annotated controllers for WebFlux. A <code>RouterFunction&lt;ServerResponse&gt;</code> maps request predicates to <code>HandlerFunction&lt;ServerResponse&gt;</code> implementations. This style is entirely type-safe, easily unit-testable without a server, and composes naturally with reactive operators.</p>
+
+          <pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.server.*;
+import reactor.core.publisher.Mono;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.*;
+
+@Configuration
+public class RouterConfig {
+
+    @Bean
+    public RouterFunction&lt;ServerResponse&gt; productRouter(ProductHandler handler) {
+        return route()
+                .GET("/functional/products",      handler::listAll)
+                .GET("/functional/products/{id}", handler::getById)
+                .POST("/functional/products",     handler::create)
+                .DELETE("/functional/products/{id}", handler::delete)
+                .build();
+    }
+}
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.*;
+
+@Component
+public class ProductHandler {
+
+    private final ReactiveProductRepository repository;
+
+    public ProductHandler(ReactiveProductRepository repository) {
+        this.repository = repository;
+    }
+
+    public Mono&lt;ServerResponse&gt; listAll(ServerRequest request) {
+        return ok().body(repository.findAll(), Product.class);
+    }
+
+    public Mono&lt;ServerResponse&gt; getById(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return repository.findById(id)
+                .flatMap(p  -&gt; ok().bodyValue(p))
+                .switchIfEmpty(notFound().build());
+    }
+
+    public Mono&lt;ServerResponse&gt; create(ServerRequest request) {
+        return request.bodyToMono(Product.class)
+                .flatMap(repository::save)
+                .flatMap(p -&gt; created(
+                    request.uriBuilder().path("/{id}").build(p.id()))
+                    .bodyValue(p));
+    }
+
+    public Mono&lt;ServerResponse&gt; delete(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+        return repository.deleteById(id).then(noContent().build());
+    }
+}</code></pre>
+        </div>
+      </div><!-- /tab-webflux -->
+
+      <!-- ══════════════ DATA ══════════════ -->
+      <div id="tab-data" class="tab-panel">
+
+        <!-- Basic: JdbcTemplate -->
+        <div class="feature-card">
+          <h3>JdbcTemplate Basics
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p><code>JdbcTemplate</code> is Spring's classic JDBC abstraction that eliminates boilerplate resource management (opening/closing connections, catching SQLExceptions) while keeping full control of SQL. The three most common methods are <code>query()</code> for SELECT returning a list, <code>queryForObject()</code> for single-row SELECT, and <code>update()</code> for INSERT/UPDATE/DELETE.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-jdbc&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class ProductJdbcRepository {
+
+    private final JdbcTemplate jdbc;
+
+    private static final RowMapper&lt;Product&gt; PRODUCT_ROW_MAPPER = (rs, rowNum) -&gt;
+            new Product(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getBigDecimal("price")
+            );
+
+    public ProductJdbcRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
+
+    public List&lt;Product&gt; findAll() {
+        return jdbc.query("SELECT id, name, price FROM products", PRODUCT_ROW_MAPPER);
+    }
+
+    public Optional&lt;Product&gt; findById(Long id) {
+        List&lt;Product&gt; results = jdbc.query(
+                "SELECT id, name, price FROM products WHERE id = ?",
+                PRODUCT_ROW_MAPPER, id);
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+    }
+
+    public int save(Product product) {
+        return jdbc.update(
+                "INSERT INTO products (name, price) VALUES (?, ?)",
+                product.name(), product.price());
+    }
+
+    public int delete(Long id) {
+        return jdbc.update("DELETE FROM products WHERE id = ?", id);
+    }
+
+    public int count() {
+        Integer result = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM products", Integer.class);
+        return result != null ? result : 0;
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: @Transactional -->
+        <div class="feature-card">
+          <h3>@Transactional — Propagation and Isolation
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring's <code>@Transactional</code> demarcates transaction boundaries declaratively via AOP proxy. The most important attributes are <strong>propagation</strong> (what happens when a transactional method calls another transactional method) and <strong>isolation</strong> (what concurrent transactions can see of each other's in-flight data). The default propagation is <code>REQUIRED</code> (join existing or create new); the default isolation is <code>DEFAULT</code> (delegate to the database, typically <code>READ_COMMITTED</code>).</p>
+
+          <pre><code class="language-java">import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+
+@Service
+@Transactional  // class-level default: REQUIRED propagation
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final AuditService auditService;
+    private final PaymentService paymentService;
+
+    public OrderService(OrderRepository orderRepo,
+                        AuditService auditService,
+                        PaymentService paymentService) {
+        this.orderRepo      = orderRepo;
+        this.auditService   = auditService;
+        this.paymentService = paymentService;
+    }
+
+    // REQUIRED (default): joins caller's transaction, or opens a new one
+    public Order place(Order order) {
+        Order saved = orderRepo.save(order);
+        auditService.log("ORDER_PLACED", saved.id()); // same transaction
+        paymentService.charge(saved);                  // REQUIRES_NEW (below)
+        return saved;
+    }
+
+    // REQUIRES_NEW: always suspends caller tx and starts its own
+    // Audit is persisted even if the outer tx rolls back
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logAuditEntry(String event, Long entityId) {
+        // persisted in its own separate transaction
+        auditService.log(event, entityId);
+    }
+
+    // NESTED: savepoint within the outer tx — inner rollback doesn't affect outer
+    @Transactional(propagation = Propagation.NESTED)
+    public void processOptionalStep(Order order) {
+        try {
+            orderRepo.processOptional(order);
+        } catch (OptionalStepException e) {
+            // rolls back to savepoint, outer tx continues
+        }
+    }
+
+    // Serializable isolation: strongest, prevents phantom reads
+    @Transactional(isolation = Isolation.SERIALIZABLE,
+                   timeout = 10,
+                   readOnly = false)
+    public void transferStock(Long fromId, Long toId, int qty) {
+        orderRepo.decrementStock(fromId, qty);
+        orderRepo.incrementStock(toId, qty);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Self-invocation bypass</strong>
+            Calling a <code>@Transactional</code> method from within the same class bypasses the AOP proxy and the transaction is NOT started. Extract the method to a separate Spring bean to ensure the proxy intercepts the call.
+          </div>
+        </div>
+
+        <!-- Advanced: NamedParameterJdbcTemplate and TransactionSynchronizationManager -->
+        <div class="feature-card">
+          <h3>NamedParameterJdbcTemplate &amp; TransactionSynchronizationManager
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p><code>NamedParameterJdbcTemplate</code> replaces positional <code>?</code> placeholders with named parameters like <code>:name</code>, making complex queries more readable and maintainable. <code>TransactionSynchronizationManager</code> provides programmatic access to the current transaction context and allows registering callbacks (<code>TransactionSynchronization</code>) to run logic after commit, after rollback, or after completion.</p>
+
+          <pre><code class="language-java">import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public class AdvancedProductRepository {
+
+    private final NamedParameterJdbcTemplate namedJdbc;
+
+    public AdvancedProductRepository(NamedParameterJdbcTemplate namedJdbc) {
+        this.namedJdbc = namedJdbc;
+    }
+
+    public List&lt;Product&gt; findByCategoryAndPriceRange(
+            String category, double minPrice, double maxPrice) {
+
+        String sql = "SELECT id, name, price FROM products " +
+                     "WHERE category = :category " +
+                     "  AND price BETWEEN :minPrice AND :maxPrice " +
+                     "ORDER BY price";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("category", category)
+                .addValue("minPrice",  minPrice)
+                .addValue("maxPrice",  maxPrice);
+
+        return namedJdbc.query(sql, params,
+                (rs, rowNum) -&gt; new Product(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getBigDecimal("price")));
+    }
+
+    // Register a post-commit hook using TransactionSynchronizationManager
+    public void saveWithCacheEviction(Product product) {
+        String sql = "INSERT INTO products (name, price) VALUES (:name, :price)";
+        namedJdbc.update(sql,
+                Map.of("name", product.name(), "price", product.price()));
+
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronizationAdapter() {
+                    @Override
+                    public void afterCommit() {
+                        // Only evict cache after the transaction successfully commits
+                        System.out.println("TX committed — evicting product cache");
+                    }
+                });
+        }
+    }
+}</code></pre>
+        </div>
+      </div><!-- /tab-data -->
+
+      <!-- ══════════════ TESTING ══════════════ -->
+      <div id="tab-testing" class="tab-panel">
+
+        <!-- Basic: @SpringBootTest -->
+        <div class="feature-card">
+          <h3>@SpringBootTest — Integration Testing
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p><code>@SpringBootTest</code> bootstraps the full Spring <code>ApplicationContext</code> (all beans, auto-configuration, and the embedded server if <code>webEnvironment</code> is set). Use it for end-to-end integration tests; avoid it for unit tests of individual classes because it is expensive. The test context is cached across test methods and classes that share the same configuration, keeping the full test suite fast.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml (test scope) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderIntegrationTest {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Test
+    void placeOrder_returnsCreated() {
+        Order order = new Order("product-1", 2);
+        ResponseEntity&lt;Order&gt; response = restTemplate.postForEntity(
+                "/api/orders", order, Order.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().id()).isNotNull();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: @WebMvcTest + MockMvc -->
+        <div class="feature-card">
+          <h3>@WebMvcTest &amp; MockMvc — Controller Slice Tests
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>@WebMvcTest</code> is a slice test that loads only the MVC layer — controllers, <code>@ControllerAdvice</code>, filters, and converters — without starting an actual HTTP server or loading service/repository beans. Dependencies that are not in the MVC layer must be provided as mocks. <code>MockMvc</code> executes requests against the <code>DispatcherServlet</code> in-process, making assertions on status, headers, and JSON body.</p>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(ProductController.class)  // loads ONLY ProductController + MVC layer
+class ProductControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean  // Spring-managed mock injected into ProductController
+    private ProductService productService;
+
+    @Test
+    void getProduct_returns200WithJson() throws Exception {
+        Product product = new Product(1L, "Widget", new java.math.BigDecimal("9.99"));
+        given(productService.findById(1L)).willReturn(product);
+
+        mockMvc.perform(get("/api/products/1")
+                        .accept(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.name").value("Widget"))
+               .andExpect(jsonPath("$.price").value(9.99));
+    }
+
+    @Test
+    void getProduct_notFound_returns404() throws Exception {
+        given(productService.findById(99L))
+                .willThrow(new ResourceNotFoundException("Product not found: 99"));
+
+        mockMvc.perform(get("/api/products/99"))
+               .andExpect(status().isNotFound())
+               .andExpect(jsonPath("$.error").value("Product not found: 99"));
+    }
+}</code></pre>
+        </div>
+
+        <!-- Intermediate: @MockBean vs @SpyBean -->
+        <div class="feature-card">
+          <h3>@MockBean vs @SpyBean
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>@MockBean</code> replaces a Spring bean in the application context with a Mockito mock (all methods return default values unless stubbed). <code>@SpyBean</code> wraps an existing Spring bean in a Mockito spy — real methods execute unless explicitly stubbed — making it useful when you want to test the real implementation but verify interactions or override one method.</p>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+
+import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+class NotificationIntegrationTest {
+
+    @Autowired
+    private OrderService orderService;
+
+    // Full mock — all methods are no-ops unless stubbed
+    @MockBean
+    private EmailClient emailClient;
+
+    // Real bean, wrapped in spy — only doReturn/when overrides specific calls
+    @SpyBean
+    private AuditService auditService;
+
+    @Test
+    void placeOrder_sendsEmailAndAudits() {
+        Order order = new Order("product-42", 1);
+
+        // Stub emailClient to track calls without sending real email
+        willDoNothing().given(emailClient).send(any(EmailMessage.class));
+
+        orderService.place(order);
+
+        // Verify email was attempted
+        then(emailClient).should(times(1)).send(any(EmailMessage.class));
+
+        // Real auditService.log() ran — verify it was called
+        then(auditService).should(atLeastOnce()).log(eq("ORDER_PLACED"), anyLong());
+    }
+}</code></pre>
+        </div>
+
+        <!-- Advanced: WebTestClient, @TestConfiguration, context caching -->
+        <div class="feature-card">
+          <h3>WebTestClient, @TestConfiguration &amp; Context Caching
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p><code>WebTestClient</code> is the reactive equivalent of <code>MockMvc</code>, used to test WebFlux controllers either against a running server or bound to the <code>ApplicationContext</code> directly. <code>@TestConfiguration</code> adds beans to the test context without replacing the production configuration. Spring caches the <code>ApplicationContext</code> between test classes — any modification (new mocks, properties, beans) creates a new context, slowing the suite.</p>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import static org.mockito.BDDMockito.given;
+
+@WebFluxTest(UserController.class)
+@TestPropertySource(properties = "feature.flag.new-ui=true")
+class UserControllerWebFluxTest {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @MockBean
+    private ReactiveUserRepository userRepository;
+
+    @Test
+    void listUsers_returnsFluxOfUsers() {
+        given(userRepository.findAll())
+                .willReturn(Flux.just(
+                    new User(1L, "Alice"),
+                    new User(2L, "Bob")));
+
+        webTestClient.get()
+                .uri("/api/users")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(User.class)
+                .hasSize(2)
+                .contains(new User(1L, "Alice"));
+    }
+
+    @Test
+    void getUser_notFound_returns404() {
+        given(userRepository.findById(99L)).willReturn(Mono.empty());
+
+        webTestClient.get()
+                .uri("/api/users/99")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    // @TestConfiguration — adds extra beans without replacing production config
+    @org.springframework.boot.test.context.TestConfiguration
+    static class TestConfig {
+        @Bean
+        public TestAuditRecorder testAuditRecorder() {
+            return new TestAuditRecorder();  // captured audit entries for assertions
+        }
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Context caching rules</strong>
+            Spring caches the context keyed on the set of configuration classes, active profiles, property sources, and context loader. Keep slice tests using the same <code>@MockBean</code> / <code>@SpyBean</code> set to share a cached context. Every unique combination creates a separate context — minimize them for faster CI runs.
+          </div>
+        </div>
+      </div><!-- /tab-testing -->
+
+      <!-- ══════════════ NEW FEATURES ══════════════ -->
+      <div id="tab-new" class="tab-panel">
+
+        <!-- @Nullable / @NonNull -->
+        <div class="feature-card">
+          <h3>@Nullable / @NonNull — Null-Safety Annotations
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 5 introduced package-level null-safety annotations (<code>@NonNullApi</code>, <code>@NonNullFields</code> in <code>org.springframework.lang</code>), making the entire Spring Framework API null-safe and IDE-verifiable. Individual parameters or return types that can legitimately be null are annotated with <code>@Nullable</code>. IDEs (IntelliJ IDEA, Eclipse) and tools like SpotBugs can now warn at development time rather than throwing <code>NullPointerException</code> at runtime.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml — included transitively in spring-core --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
+public class UserService {
+
+    /**
+     * Returns the user, guaranteed non-null — throws if not found.
+     */
+    @NonNull
+    public User findById(@NonNull Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -&gt; new ResourceNotFoundException("User: " + id));
+    }
+
+    /**
+     * Returns null when no user matches the email — caller must check.
+     */
+    @Nullable
+    public User findByEmail(@NonNull String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public void updateProfile(@NonNull Long id,
+                               @Nullable String displayName,
+                               @Nullable String avatarUrl) {
+        User user = findById(id);
+        if (displayName != null) user.setDisplayName(displayName);
+        if (avatarUrl   != null) user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Kotlin Coroutines Support -->
+        <div class="feature-card">
+          <h3>Kotlin Coroutines Support
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 5 added first-class Kotlin support, and Spring 5.2 extended WebFlux to understand Kotlin coroutines — <code>suspend</code> functions and <code>Flow</code> — as a more ergonomic alternative to <code>Mono</code> / <code>Flux</code>. Under the covers Spring converts suspend functions to Reactor publishers automatically, so the runtime model remains identical.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml — Kotlin coroutines for WebFlux --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jetbrains.kotlinx&lt;/groupId&gt;
+  &lt;artifactId&gt;kotlinx-coroutines-reactor&lt;/artifactId&gt;
+  &lt;version&gt;1.7.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">// Kotlin — Spring WebFlux controller using coroutines
+// (Note: this is valid Kotlin, not Java)
+/*
+import org.springframework.web.bind.annotation.*
+import kotlinx.coroutines.flow.Flow
+
+@RestController
+@RequestMapping("/api/items")
+class ItemController(private val repository: CoroutineItemRepository) {
+
+    // suspend fun replaces Mono<T>
+    @GetMapping("/{id}")
+    suspend fun getById(@PathVariable id: Long): Item =
+        repository.findById(id) ?: throw ResourceNotFoundException("$id")
+
+    // Flow<T> replaces Flux<T>
+    @GetMapping
+    fun listAll(): Flow<Item> = repository.findAll()
+
+    @PostMapping
+    suspend fun create(@RequestBody item: Item): Item =
+        repository.save(item)
+}
+*/
+
+// Java-side: coexistence — Kotlin coroutine beans work alongside Java beans
+// No Java code change needed; Spring detects Kotlin suspend functions automatically</code></pre>
+
+          <div class="callout info">
+            <strong>Kotlin DSL for bean registration</strong>
+            Spring 5 also ships a Kotlin Bean Definition DSL: <code>beans { bean&lt;MyService&gt;() }</code> — a type-safe alternative to XML or Java <code>@Configuration</code> that integrates with the functional registration API introduced in Spring 5.
+          </div>
+        </div>
+
+        <!-- JUnit 5 first-class citizen -->
+        <div class="feature-card">
+          <h3>JUnit 5 (Jupiter) as First-Class Citizen
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 5 dropped support for JUnit 4 in the core <code>spring-test</code> module and made JUnit 5 (Jupiter) the primary testing framework. The <code>@ExtendWith(SpringExtension.class)</code> annotation replaces JUnit 4's <code>@RunWith(SpringJUnit4ClassRunner.class)</code>. Spring Boot 2.1+ auto-applies <code>SpringExtension</code> via <code>@SpringBootTest</code> and other slice annotations, so you rarely need to write it explicitly.</p>
+
+          <pre><code class="language-java">import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.ContextConfiguration;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+// @ExtendWith replaces JUnit 4's @RunWith
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = AppConfig.class)
+class UserServiceTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    @DisplayName("findById returns user when present")
+    void findById_returnsUser() {
+        User user = userService.findById(1L);
+        assertThat(user).isNotNull();
+        assertThat(user.id()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("findById throws when not found")
+    void findById_throwsWhenMissing() {
+        assertThrows(ResourceNotFoundException.class,
+                () -&gt; userService.findById(999L));
+    }
+
+    // JUnit 5 parameterized tests integrate cleanly with Spring context
+    @ParameterizedTest
+    @CsvSource({ "alice@example.com, Alice", "bob@example.com, Bob" })
+    void findByEmail_returnsCorrectUser(String email, String expectedName) {
+        User user = userService.findByEmail(email);
+        assertThat(user).isNotNull();
+        assertThat(user.name()).isEqualTo(expectedName);
+    }
+
+    @BeforeEach
+    void setUp() {
+        // JUnit 5 lifecycle hooks — Spring beans already injected here
+    }
+}</code></pre>
+        </div>
+
+        <!-- Functional registerBean -->
+        <div class="feature-card">
+          <h3>ApplicationContext.registerBean() — Functional Style
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 5 added the <code>registerBean()</code> method to <code>GenericApplicationContext</code> as a functional bean registration API. Unlike <code>@Bean</code> methods (which rely on CGLIB proxying and reflection), this API is lambda-based, avoids annotation processing, and allows programmatic customization of every bean definition attribute — a key enabler for Spring Native / GraalVM ahead-of-time compilation.</p>
+
+          <pre><code class="language-java">import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.beans.factory.config.BeanDefinition;
+
+public class FunctionalAppBootstrap {
+
+    public static void main(String[] args) {
+        GenericApplicationContext ctx = new GenericApplicationContext();
+
+        // Simple registration with supplier
+        ctx.registerBean(AppConfig.class, AppConfig::new);
+
+        // Registration with customizer lambda — set scope, lazy, primary flags
+        ctx.registerBean("userRepository", UserRepository.class,
+            () -&gt; new UserRepository(ctx.getBean(DataSource.class)),
+            bd -&gt; {
+                bd.setScope(BeanDefinition.SCOPE_SINGLETON);
+                bd.setLazyInit(false);
+                bd.setPrimary(true);
+            });
+
+        ctx.registerBean(UserService.class,
+            () -&gt; new UserService(ctx.getBean(UserRepository.class)));
+
+        ctx.registerBean(ProductService.class, ProductService::new);
+
+        ctx.refresh();
+
+        // Use the context
+        UserService userService = ctx.getBean(UserService.class);
+        System.out.println("UserService ready: " + userService.getClass().getSimpleName());
+
+        ctx.close();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Classpath scanning improvements -->
+        <div class="feature-card">
+          <h3>Classpath Scanning Improvements — Component Index
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 5.0 introduced a compile-time component index (<code>spring-context-indexer</code>) to replace expensive runtime classpath scanning. During the build, an annotation processor generates <code>META-INF/spring.components</code> listing all candidate components. At startup the container reads the index instead of scanning JARs, reducing startup time significantly in large applications.</p>
+
+          <pre><code class="language-xml">&lt;!-- pom.xml — annotation processor; compile scope only --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context-indexer&lt;/artifactId&gt;
+  &lt;version&gt;5.3.39&lt;/version&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-java">// No code changes needed — the annotation processor runs at compile time.
+// It generates: META-INF/spring.components
+// Contents look like:
+//   com.example.service.UserService=org.springframework.stereotype.Component
+//   com.example.repo.UserRepository=org.springframework.stereotype.Component
+
+// Spring automatically uses the index when present.
+// Verify it's active by setting the log level:
+// logging.level.org.springframework.context.index=DEBUG
+
+// To disable the index for debugging (forces full classpath scan):
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(
+    basePackages = "com.example",
+    useDefaultFilters = true
+    // Spring uses the index when META-INF/spring.components exists
+    // and all packages are indexed
+)
+public class AppConfig {
+    // No changes required here — index is transparent
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Startup improvement</strong>
+            The component index is most beneficial in large monoliths with hundreds of beans spread across many JARs. Spring Boot applications with a few dozen beans may see minimal benefit, but it becomes significant in modular microservice platforms with shared library JARs.
+          </div>
+        </div>
+      </div><!-- /tab-new -->
+
+    </div><!-- /tab-container -->
+
+    <!-- ══════════════ CHEATSHEET ══════════════ -->
+    <div class="cheatsheet">
+      <h2>⚡ Spring 5 Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / Class</th>
+              <th>Package</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>@Component</code></td><td>org.springframework.stereotype</td><td>Marks a class as a Spring-managed bean; detected by classpath scan</td></tr>
+            <tr><td><code>@Service</code></td><td>org.springframework.stereotype</td><td>Specialisation of <code>@Component</code> for service-layer beans</td></tr>
+            <tr><td><code>@Repository</code></td><td>org.springframework.stereotype</td><td>Specialisation of <code>@Component</code> for DAO beans; enables exception translation</td></tr>
+            <tr><td><code>@Controller</code></td><td>org.springframework.stereotype</td><td>Marks MVC controller; methods can return view names</td></tr>
+            <tr><td><code>@RestController</code></td><td>org.springframework.web.bind.annotation</td><td>Composed <code>@Controller</code> + <code>@ResponseBody</code>; all methods return response body</td></tr>
+            <tr><td><code>@Autowired</code></td><td>org.springframework.beans.factory.annotation</td><td>Triggers dependency injection on constructor, field, or setter</td></tr>
+            <tr><td><code>@Qualifier</code></td><td>org.springframework.beans.factory.annotation</td><td>Narrows injection to a specifically named bean when multiple candidates exist</td></tr>
+            <tr><td><code>@Value</code></td><td>org.springframework.beans.factory.annotation</td><td>Injects a value from property source or SpEL expression</td></tr>
+            <tr><td><code>@Configuration</code></td><td>org.springframework.context.annotation</td><td>Designates a class as a source of <code>@Bean</code> definitions</td></tr>
+            <tr><td><code>@Bean</code></td><td>org.springframework.context.annotation</td><td>Declares a method return value as a Spring-managed bean</td></tr>
+            <tr><td><code>@Conditional</code></td><td>org.springframework.context.annotation</td><td>Registers a bean only when a <code>Condition</code> implementation returns true</td></tr>
+            <tr><td><code>@Profile</code></td><td>org.springframework.context.annotation</td><td>Restricts a bean to one or more named Spring profiles</td></tr>
+            <tr><td><code>@Scope</code></td><td>org.springframework.context.annotation</td><td>Declares bean scope: singleton (default), prototype, request, session</td></tr>
+            <tr><td><code>@Lazy</code></td><td>org.springframework.context.annotation</td><td>Defers bean creation until first use rather than at context startup</td></tr>
+            <tr><td><code>@Primary</code></td><td>org.springframework.context.annotation</td><td>Marks a bean as the preferred candidate when multiple beans of the same type exist</td></tr>
+            <tr><td><code>@ComponentScan</code></td><td>org.springframework.context.annotation</td><td>Configures the package(s) scanned for <code>@Component</code>-annotated classes</td></tr>
+            <tr><td><code>@ImportResource</code></td><td>org.springframework.context.annotation</td><td>Imports bean definitions from XML files into a <code>@Configuration</code> class</td></tr>
+            <tr><td><code>@PropertySource</code></td><td>org.springframework.context.annotation</td><td>Registers a <code>.properties</code> or <code>.yaml</code> file as a property source</td></tr>
+            <tr><td><code>@PostConstruct</code></td><td>jakarta.annotation (JSR-250)</td><td>Invoked once after dependency injection — init hook</td></tr>
+            <tr><td><code>@PreDestroy</code></td><td>jakarta.annotation (JSR-250)</td><td>Invoked before the bean is removed from the context — cleanup hook</td></tr>
+            <tr><td><code>@Transactional</code></td><td>org.springframework.transaction.annotation</td><td>Demarcates transaction boundaries; supports propagation and isolation settings</td></tr>
+            <tr><td><code>@Async</code></td><td>org.springframework.scheduling.annotation</td><td>Executes a method asynchronously in Spring's task executor thread pool</td></tr>
+            <tr><td><code>@Scheduled</code></td><td>org.springframework.scheduling.annotation</td><td>Triggers a method on a fixed-rate, fixed-delay, or cron schedule</td></tr>
+            <tr><td><code>@EventListener</code></td><td>org.springframework.context.event</td><td>Subscribes a method to application events published via <code>ApplicationEventPublisher</code></td></tr>
+            <tr><td><code>@SpringBootTest</code></td><td>org.springframework.boot.test.context</td><td>Loads the full Spring application context for integration tests</td></tr>
+            <tr><td><code>@MockBean</code></td><td>org.springframework.boot.test.mock.mockito</td><td>Replaces a Spring bean with a Mockito mock in the test context</td></tr>
+            <tr><td><code>@SpyBean</code></td><td>org.springframework.boot.test.mock.mockito</td><td>Wraps an existing Spring bean with a Mockito spy</td></tr>
+            <tr><td><code>@WebMvcTest</code></td><td>org.springframework.boot.test.autoconfigure.web.servlet</td><td>Loads only the MVC layer (controllers, filters) — slice test for controllers</td></tr>
+            <tr><td><code>@GetMapping</code></td><td>org.springframework.web.bind.annotation</td><td>Shortcut for <code>@RequestMapping(method = GET)</code></td></tr>
+            <tr><td><code>@PostMapping</code></td><td>org.springframework.web.bind.annotation</td><td>Shortcut for <code>@RequestMapping(method = POST)</code></td></tr>
+            <tr><td><code>@PutMapping</code></td><td>org.springframework.web.bind.annotation</td><td>Shortcut for <code>@RequestMapping(method = PUT)</code></td></tr>
+            <tr><td><code>@DeleteMapping</code></td><td>org.springframework.web.bind.annotation</td><td>Shortcut for <code>@RequestMapping(method = DELETE)</code></td></tr>
+            <tr><td><code>@RequestBody</code></td><td>org.springframework.web.bind.annotation</td><td>Deserializes the HTTP request body into a Java object via <code>HttpMessageConverter</code></td></tr>
+            <tr><td><code>@PathVariable</code></td><td>org.springframework.web.bind.annotation</td><td>Extracts a URI template variable and binds it to a method parameter</td></tr>
+            <tr><td><code>@RequestParam</code></td><td>org.springframework.web.bind.annotation</td><td>Binds an HTTP query parameter or form field to a method parameter</td></tr>
+            <tr><td><code>@ExceptionHandler</code></td><td>org.springframework.web.bind.annotation</td><td>Designates a method to handle exceptions thrown by controller handler methods</td></tr>
+            <tr><td><code>@ControllerAdvice</code></td><td>org.springframework.web.bind.annotation</td><td>Applies <code>@ExceptionHandler</code>, <code>@ModelAttribute</code>, and <code>@InitBinder</code> globally</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /cheatsheet -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
