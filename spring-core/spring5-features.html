@@ -1268,14 +1268,14 @@ import kotlinx.coroutines.flow.Flow
 @RequestMapping("/api/items")
 class ItemController(private val repository: CoroutineItemRepository) {
 
-    // suspend fun replaces Mono<T>
+    // suspend fun replaces Mono&lt;T&gt;
     @GetMapping("/{id}")
     suspend fun getById(@PathVariable id: Long): Item =
         repository.findById(id) ?: throw ResourceNotFoundException("$id")
 
-    // Flow<T> replaces Flux<T>
+    // Flow&lt;T&gt; replaces Flux&lt;T&gt;
     @GetMapping
-    fun listAll(): Flow<Item> = repository.findAll()
+    fun listAll(): Flow&lt;Item&gt; = repository.findAll()
 
     @PostMapping
     suspend fun create(@RequestBody item: Item): Item =
