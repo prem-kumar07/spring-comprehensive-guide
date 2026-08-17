@@ -987,21 +987,22 @@ class MyRuntimeHintsTest {
     }
 }
 
-// ── Testing a full AOT ApplicationContext ──
-import org.springframework.test.context.aot.AotContext;
-import org.springframework.test.context.TestPropertySource;
+// AOT native simulation test — uses @SpringBootTest with native AOT processing
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.aot.AotTestContextInitializer;
 
-// (Spring Boot 3.x) — runs tests against the AOT-generated context
 @SpringBootTest
 @TestPropertySource(properties = "spring.aot.enabled=true")
-class AotContextTest {
+class NativeAotIntegrationTest {
 
     @Autowired
-    ProductService productService;
+    private ApplicationContext context;
 
     @Test
-    void contextLoads() {
-        assertThat(productService).isNotNull();
+    void contextLoadsInAotMode() {
+        assertThat(context).isNotNull();
+        // Verify beans registered via AOT-generated registrar
+        assertThat(context.containsBean("myService")).isTrue();
     }
 }</code></pre>
 
@@ -1321,7 +1322,7 @@ class ProductControllerMvcTesterTest {
 
         <!-- Intermediate: AOT test improvements -->
         <div class="feature-card">
-          <h3>AOT Test Improvements — @TestRuntimeHints &amp; Native Test Support
+          <h3 id="aot-native-test-support">AOT Test Improvements — @ImportRuntimeHints &amp; Native Test Support
             <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
           </h3>
           <p>Spring 6 adds testing infrastructure for verifying that AOT-generated configuration is correct. Tests can be run against the AOT-generated application context (simulating native mode) and <code>RuntimeHintsRegistrar</code> implementations can be validated with dedicated test support without a full native build.</p>
@@ -1707,7 +1708,7 @@ public class CustomBeanDefinitionParser
             <tr><td><code>MockMvcTester</code></td><td>org.springframework.test.web.servlet.assertj</td><td>6.2+</td><td>Fluent AssertJ-native entry point for MockMvc tests; replaces static MockMvc DSL</td></tr>
             <tr><td><code>MvcTestResult</code></td><td>org.springframework.test.web.servlet.assertj</td><td>6.2+</td><td>Assertable result returned by MockMvcTester; use with assertThat()</td></tr>
             <tr><td><code>@DisabledInAotMode</code></td><td>org.springframework.test.context.aot</td><td>6+</td><td>Skips a test when running against the AOT-generated application context</td></tr>
-            <tr><td><code>AotContext</code></td><td>org.springframework.test.context.aot</td><td>6+</td><td>Test context that uses AOT-generated bean factory registrations (native simulation)</td></tr>
+            <tr><td><code>TestContextAotGenerator</code></td><td>org.springframework.test.context.aot</td><td>6+</td><td>Generates AOT artifacts (hints, registrars) for a test suite — run as build step before native compile</td></tr>
             <tr><td><code>SimpleAsyncTaskExecutor</code></td><td>org.springframework.scheduling.concurrent</td><td>6.1+</td><td>Task executor with setVirtualThreads(true) for Project Loom virtual thread support</td></tr>
           </tbody>
         </table>
