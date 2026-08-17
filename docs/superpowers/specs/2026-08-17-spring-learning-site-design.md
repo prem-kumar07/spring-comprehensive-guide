@@ -89,8 +89,10 @@ Structure per page:
    - Feature name + one-line summary
    - Explanation (2–4 sentences, sourced from spring.io)
    - `pom.xml` / `build.gradle` dependency snippet (minimum required)
-   - Runnable code example (self-contained, copy-paste ready)
+   - Coverage progresses basic → intermediate → advanced within each category
+   - Runnable code example per level (self-contained, copy-paste ready)
    - Callout notes: gotchas, migration tips
+4. **Cheatsheet section** (bottom of page) — quick-reference table of all annotations, interfaces, and key APIs covered on that page with a one-liner description each
 
 ### 5b. Version Comparison Page
 
@@ -115,6 +117,7 @@ Structure per page:
 3. **Scope comparison** — singleton vs prototype lifecycle differences (diagram)
 4. **ApplicationContext vs BeanFactory** — lifecycle handling differences
 5. **Practical patterns** — resource cleanup, lazy init, `@DependsOn`
+6. **Cheatsheet section** (bottom of page) — lifecycle stage order, key interfaces/annotations, scope behavior summary
 
 ### 5d. Tooling Page
 
@@ -129,6 +132,7 @@ Structure per page:
 6. **Testing setup** — JUnit 5 + Mockito, `@SpringBootTest` vs `@WebMvcTest` vs `@DataJpaTest` — when to use each with examples
 7. **Actuator** — enabling `spring-boot-actuator` locally, useful endpoints (`/beans`, `/conditions`, `/health`, `/env`)
 8. **Common errors** — port conflicts, `NoSuchBeanDefinitionException`, context load failures, classpath issues
+9. **Cheatsheet section** (bottom of page) — Maven/Gradle commands, Actuator endpoints, key annotations for testing, IDE shortcuts
 
 ---
 
@@ -158,6 +162,7 @@ Before writing any content:
 3. Cross-reference the Spring Blog (`spring.io/blog`) for feature announcements
 4. All code examples must be verified runnable with listed dependency versions
 5. Diagrams reflect actual Spring source behavior, not approximations
+6. Coverage must be complete — basic → intermediate → advanced — no concept left at a surface level; every topic is taken to its practical limit with real examples
 
 ---
 
