@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring 5 vs 6 — Version Comparison</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring 5 vs Spring 6 — Feature Comparison</h1>
+    <p>This page compares Spring Framework 5 and Spring Framework 6 across the major areas of change. Use the filters to narrow by category or change type. Click any row to expand a side-by-side code diff.</p>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+      <label style="color:var(--text-muted);font-size:0.875rem">Filter:</label>
+      <select id="filter-category" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:0.35rem 0.6rem;border-radius:6px;font-size:0.875rem">
+        <option value="all">All Categories</option>
+        <option value="core">Core</option>
+        <option value="web">Web</option>
+        <option value="data">Data</option>
+        <option value="testing">Testing</option>
+        <option value="tooling">Tooling</option>
+      </select>
+      <select id="filter-type" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:0.35rem 0.6rem;border-radius:6px;font-size:0.875rem">
+        <option value="all">All Changes</option>
+        <option value="new">New</option>
+        <option value="changed">Changed</option>
+        <option value="removed">Removed</option>
+        <option value="deprecated">Deprecated</option>
+      </select>
+      <span id="filter-count" style="color:var(--text-muted);font-size:0.875rem"></span>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="table-wrap">
+    <table id="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th><span class="version-badge badge-v5">Spring 5</span></th>
+          <th><span class="version-badge badge-v6">Spring 6</span></th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1: Java Namespace -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="1" style="cursor:pointer" title="Click to expand">
+          <td><strong>Java Namespace</strong></td>
+          <td><code>javax.*</code></td>
+          <td><code>jakarta.*</code></td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-1" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5</div>
+                <pre><code class="language-java">// Spring 5 — javax namespace
+import javax.servlet.http.HttpServletRequest;
+import javax.persistence.Entity;
+import javax.validation.Valid;
+
+@RestController
+public class UserController {
+    public String handle(HttpServletRequest request) {
+        return "handled";
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6</div>
+                <pre><code class="language-java">// Spring 6 — jakarta namespace
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.Entity;
+import jakarta.validation.Valid;
+
+@RestController
+public class UserController {
+    public String handle(HttpServletRequest request) {
+        return "handled";
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2: Java Baseline -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="2" style="cursor:pointer" title="Click to expand">
+          <td><strong>Java Baseline</strong></td>
+          <td>Java 8+</td>
+          <td>Java 17+</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-2" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 (Java 8+)</div>
+                <pre><code class="language-xml">&lt;!-- Spring 5 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;java.version&gt;8&lt;/java.version&gt;
+  &lt;spring-framework.version&gt;5.3.39&lt;/spring-framework.version&gt;
+&lt;/properties&gt;</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 (Java 17+)</div>
+                <pre><code class="language-xml">&lt;!-- Spring 6 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;java.version&gt;17&lt;/java.version&gt;
+  &lt;spring-framework.version&gt;6.2.9&lt;/spring-framework.version&gt;
+&lt;/properties&gt;
+
+&lt;!-- Record types, sealed classes, text blocks available --&gt;</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 3: HTTP Client -->
+        <tr class="comparison-row" data-category="web" data-type="changed" data-id="3" style="cursor:pointer" title="Click to expand">
+          <td><strong>HTTP Client</strong></td>
+          <td><code>RestTemplate</code></td>
+          <td><code>RestClient</code> / <code>@HttpExchange</code></td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-3" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — RestTemplate</div>
+                <pre><code class="language-java">// Spring 5 — RestTemplate
+@Service
+public class UserService {
+
+    private final RestTemplate restTemplate;
+
+    public UserService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public User getUser(Long id) {
+        return restTemplate.getForObject(
+            "https://api.example.com/users/{id}",
+            User.class, id);
+    }
+
+    public void createUser(User user) {
+        restTemplate.postForEntity(
+            "https://api.example.com/users",
+            user, User.class);
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — RestClient</div>
+                <pre><code class="language-java">// Spring 6 — RestClient (fluent builder API)
+@Service
+public class UserService {
+
+    private final RestClient restClient;
+
+    public UserService(RestClient.Builder builder) {
+        this.restClient = builder
+            .baseUrl("https://api.example.com")
+            .build();
+    }
+
+    public User getUser(Long id) {
+        return restClient.get()
+            .uri("/users/{id}", id)
+            .retrieve()
+            .body(User.class);
+    }
+
+    public void createUser(User user) {
+        restClient.post()
+            .uri("/users")
+            .body(user)
+            .retrieve()
+            .toBodilessEntity();
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 4: Error Response Format -->
+        <tr class="comparison-row" data-category="web" data-type="new" data-id="4" style="cursor:pointer" title="Click to expand">
+          <td><strong>Error Response Format</strong></td>
+          <td>Custom <code>@ExceptionHandler</code></td>
+          <td><code>ProblemDetail</code> (RFC 7807)</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr id="detail-4" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — Custom error body</div>
+                <pre><code class="language-java">// Spring 5 — manual error response
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map&lt;String, Object&gt; handleNotFound(
+            NotFoundException ex) {
+        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        body.put("status", 404);
+        return body;
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — ProblemDetail (RFC 7807)</div>
+                <pre><code class="language-java">// Spring 6 — ProblemDetail built-in
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(NotFoundException.class)
+    public ProblemDetail handleNotFound(
+            NotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage());
+        pd.setTitle("Resource Not Found");
+        pd.setType(URI.create("/errors/not-found"));
+        return pd;
+        // Produces: {"type":..., "title":...,
+        //   "status":404, "detail":...}
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 5: Observability -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="5" style="cursor:pointer" title="Click to expand">
+          <td><strong>Observability</strong></td>
+          <td>Micrometer (optional add-on)</td>
+          <td>Micrometer core + <code>@Observed</code></td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-5" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — manual Micrometer</div>
+                <pre><code class="language-java">// Spring 5 — optional Micrometer dependency
+// Must add micrometer-core explicitly
+@Service
+public class OrderService {
+
+    private final MeterRegistry meterRegistry;
+
+    public Order placeOrder(OrderRequest req) {
+        Timer.Sample sample =
+            Timer.start(meterRegistry);
+        try {
+            Order order = processOrder(req);
+            sample.stop(meterRegistry.timer(
+                "order.placed"));
+            return order;
+        } catch (Exception e) {
+            meterRegistry.counter(
+                "order.errors").increment();
+            throw e;
+        }
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — @Observed</div>
+                <pre><code class="language-java">// Spring 6 — Micrometer core built-in
+// @Observed AOP aspect creates spans + metrics
+@Service
+@Observed(name = "order.service")
+public class OrderService {
+
+    // All methods automatically observed —
+    // creates both metrics and traces
+    @Observed(name = "order.placed",
+              contextualName = "placing-order")
+    public Order placeOrder(OrderRequest req) {
+        return processOrder(req);
+    }
+    // No boilerplate — framework handles
+    // Timer, Counter, and Span lifecycle
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 6: Native Image -->
+        <tr class="comparison-row" data-category="tooling" data-type="new" data-id="6" style="cursor:pointer" title="Click to expand">
+          <td><strong>Native Image</strong></td>
+          <td>No first-class support</td>
+          <td>Spring AOT + GraalVM</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr id="detail-6" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — no native support</div>
+                <pre><code class="language-bash"># Spring 5 — only JVM deployment
+# GraalVM with Spring Boot was experimental
+# Required heavy manual configuration:
+# native-image.properties, reflection-config.json,
+# proxy-config.json, resource-config.json
+
+mvn spring-boot:run   # JVM only</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — AOT + GraalVM</div>
+                <pre><code class="language-bash"># Spring 6 — first-class native support
+# Spring AOT processes beans at build time,
+# generating optimised source for GraalVM
+
+# Build native executable via Spring Boot plugin:
+mvn -Pnative native:compile
+
+# Result: fast startup (&lt;100ms), low memory
+# AOT hints auto-generated for most use cases
+# Custom hints via @ImportRuntimeHints</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 7: Config Class Proxy -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="7" style="cursor:pointer" title="Click to expand">
+          <td><strong>Config Class Proxy</strong></td>
+          <td><code>proxyBeanMethods=true</code> default</td>
+          <td><code>proxyBeanMethods=false</code> (lite) available</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-7" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — CGLIB proxy (default)</div>
+                <pre><code class="language-java">// Spring 5 — @Configuration uses CGLIB proxy
+// so inter-bean @Bean method calls return
+// the same singleton from the container
+@Configuration
+// proxyBeanMethods=true is the default
+public class AppConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        return new HikariDataSource();
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        // Safe: calls through CGLIB proxy —
+        // returns the singleton DataSource bean
+        return new JdbcTemplate(dataSource());
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — lite mode (no proxy)</div>
+                <pre><code class="language-java">// Spring 6 — proxyBeanMethods=false (lite)
+// No CGLIB subclass; direct method calls
+// create new instances — avoid inter-bean calls
+@Configuration(proxyBeanMethods = false)
+public class AppConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        return new HikariDataSource();
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(
+            DataSource dataSource) {
+        // Use parameter injection instead —
+        // Spring injects the singleton safely
+        return new JdbcTemplate(dataSource);
+    }
+    // Benefit: AOT-friendly, no CGLIB overhead
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 8: Declarative HTTP Client -->
+        <tr class="comparison-row" data-category="web" data-type="new" data-id="8" style="cursor:pointer" title="Click to expand">
+          <td><strong>Declarative HTTP Client</strong></td>
+          <td><code>RestTemplate</code> + manual <code>@Bean</code></td>
+          <td><code>@HttpExchange</code> interface</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr id="detail-8" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — manual RestTemplate bean</div>
+                <pre><code class="language-java">// Spring 5 — verbose manual wiring
+@Configuration
+public class ClientConfig {
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+@Service
+public class GitHubService {
+    private final RestTemplate rest;
+
+    public GitHubService(RestTemplate rest) {
+        this.rest = rest;
+    }
+
+    public Repo getRepo(String owner, String name) {
+        return rest.getForObject(
+            "https://api.github.com/repos/{o}/{n}",
+            Repo.class, owner, name);
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — @HttpExchange interface</div>
+                <pre><code class="language-java">// Spring 6 — declare as annotated interface
+@HttpExchange("https://api.github.com")
+public interface GitHubClient {
+
+    @GetExchange("/repos/{owner}/{repo}")
+    Repo getRepo(
+        @PathVariable String owner,
+        @PathVariable String repo);
+
+    @PostExchange("/repos/{owner}/{repo}/issues")
+    Issue createIssue(
+        @PathVariable String owner,
+        @PathVariable String repo,
+        @RequestBody NewIssue issue);
+}
+
+// Register with RestClient or WebClient:
+@Bean
+GitHubClient gitHubClient(RestClient.Builder b) {
+    return HttpServiceProxyFactory
+        .builderFor(RestClientAdapter.create(
+            b.build()))
+        .build()
+        .createClient(GitHubClient.class);
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 9: Virtual Threads -->
+        <tr class="comparison-row" data-category="core" data-type="new" data-id="9" style="cursor:pointer" title="Click to expand">
+          <td><strong>Virtual Threads</strong></td>
+          <td>Not supported</td>
+          <td>Project Loom integration</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr id="detail-9" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — platform threads only</div>
+                <pre><code class="language-java">// Spring 5 — traditional thread pool
+// Each request consumes a platform thread
+// High memory overhead for I/O-bound work
+
+@Bean
+public TaskExecutor taskExecutor() {
+    ThreadPoolTaskExecutor exec =
+        new ThreadPoolTaskExecutor();
+    exec.setCorePoolSize(10);
+    exec.setMaxPoolSize(100);
+    // Limited by OS thread count (~thousands)
+    return exec;
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — Virtual Threads (Loom)</div>
+                <pre><code class="language-java">// Spring 6 (Java 21+) — virtual threads
+// Requires spring.threads.virtual.enabled=true
+// in application.properties
+
+// application.properties:
+// spring.threads.virtual.enabled=true
+
+// Or configure directly:
+@Bean
+public TomcatProtocolHandlerCustomizer&lt;?&gt;
+        virtualThreadCustomizer() {
+    return handler -&gt; handler.setExecutor(
+        Executors.newVirtualThreadPerTaskExecutor()
+    );
+    // Millions of virtual threads possible —
+    // ideal for blocking I/O (DB, HTTP calls)
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 10: Constructor Injection -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="10" style="cursor:pointer" title="Click to expand">
+          <td><strong>Constructor Injection</strong></td>
+          <td>All styles equal</td>
+          <td>Recommended as primary style</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-10" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — field injection common</div>
+                <pre><code class="language-java">// Spring 5 — all injection styles used equally
+@Service
+public class UserService {
+
+    // Field injection — common in Spring 5 code
+    @Autowired
+    private UserRepository userRepo;
+
+    @Autowired
+    private EmailService emailService;
+
+    // Works, but harder to test, hides deps,
+    // and fails with final fields
+    public void register(User user) {
+        userRepo.save(user);
+        emailService.sendWelcome(user);
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — constructor injection recommended</div>
+                <pre><code class="language-java">// Spring 6 — constructor injection is idiomatic
+// Lombok @RequiredArgsConstructor or explicit
+@Service
+public class UserService {
+
+    private final UserRepository userRepo;
+    private final EmailService emailService;
+
+    // Spring 6 docs + AOT tooling favour this:
+    // - Immutable fields (final)
+    // - Explicit dependencies
+    // - Testable without Spring context
+    public UserService(UserRepository userRepo,
+                       EmailService emailService) {
+        this.userRepo = userRepo;
+        this.emailService = emailService;
+    }
+
+    public void register(User user) {
+        userRepo.save(user);
+        emailService.sendWelcome(user);
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 11: RestTemplate deprecated -->
+        <tr class="comparison-row" data-category="web" data-type="deprecated" data-id="11" style="cursor:pointer" title="Click to expand">
+          <td><strong><code>RestTemplate</code></strong></td>
+          <td>Primary HTTP client</td>
+          <td>Deprecated — use <code>RestClient</code></td>
+          <td><span class="version-badge" style="background:rgba(139,148,158,0.15);color:#8b949e;border:1px solid #8b949e44">Deprecated</span></td>
+        </tr>
+        <tr id="detail-11" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — RestTemplate (primary)</div>
+                <pre><code class="language-java">// Spring 5 — RestTemplate is the standard
+@Bean
+public RestTemplate restTemplate(
+        RestTemplateBuilder builder) {
+    return builder
+        .rootUri("https://api.example.com")
+        .connectTimeout(Duration.ofSeconds(5))
+        .readTimeout(Duration.ofSeconds(10))
+        .build();
+}
+
+// Usage
+User user = restTemplate.getForObject(
+    "/users/{id}", User.class, 42L);
+ResponseEntity&lt;User&gt; resp =
+    restTemplate.postForEntity(
+        "/users", newUser, User.class);</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6 — RestClient (replacement)</div>
+                <pre><code class="language-java">// Spring 6 — RestTemplate is deprecated
+// Migrate to RestClient for new code
+
+@Bean
+public RestClient restClient(
+        RestClient.Builder builder) {
+    return builder
+        .baseUrl("https://api.example.com")
+        .defaultHeader("Accept",
+            MediaType.APPLICATION_JSON_VALUE)
+        .build();
+}
+
+// Usage — fluent, type-safe, exception-friendly
+User user = restClient.get()
+    .uri("/users/{id}", 42L)
+    .retrieve()
+    .body(User.class);
+
+ResponseEntity&lt;User&gt; resp = restClient.post()
+    .uri("/users")
+    .body(newUser)
+    .retrieve()
+    .toEntity(User.class);</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 12: MockMvc Testing API -->
+        <tr class="comparison-row" data-category="testing" data-type="changed" data-id="12" style="cursor:pointer" title="Click to expand">
+          <td><strong>MockMvc Testing API</strong></td>
+          <td><code>MockMvc</code> + <code>ResultActions</code></td>
+          <td><code>MockMvcTester</code> (Spring 6.2) fluent API</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr id="detail-12" style="display:none">
+          <td colspan="4">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — MockMvc + ResultActions</div>
+                <pre><code class="language-java">// Spring 5 — perform/andExpect pattern
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserControllerTest {
+
+    @Autowired MockMvc mockMvc;
+
+    @Test
+    void getUser() throws Exception {
+        mockMvc.perform(
+            get("/users/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(
+                jsonPath("$.name").value("Alice"))
+            .andExpect(
+                jsonPath("$.email")
+                    .value("alice@example.com"))
+            .andDo(print());
+        // Throws checked Exception everywhere
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6.2 — MockMvcTester (fluent)</div>
+                <pre><code class="language-java">// Spring 6.2 — MockMvcTester + AssertJ
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserControllerTest {
+
+    @Autowired MockMvcTester mockMvc;
+
+    @Test
+    void getUser() {
+        // No checked exceptions — cleaner tests
+        assertThat(
+            mockMvc.get().uri("/users/1"))
+            .hasStatusOk()
+            .bodyJson()
+            .extractingPath("$.name")
+            .asString()
+            .isEqualTo("Alice");
+        // Full AssertJ fluency —
+        // IDE auto-complete works throughout
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+    </div>
+
+  </div><!-- #content -->
+</div><!-- #main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+<script>
+(function(){
+  const rows = document.querySelectorAll('tr.comparison-row');
+
+  function updateCount() {
+    const visible = document.querySelectorAll('tr.comparison-row:not([style*="display: none"]):not([style*="display:none"])').length;
+    const counter = document.getElementById('filter-count');
+    if (counter) counter.textContent = visible + ' of ' + rows.length + ' features';
+  }
+
+  function applyFilters(){
+    const cat = document.getElementById('filter-category').value;
+    const type = document.getElementById('filter-type').value;
+    rows.forEach(row => {
+      const show = (cat === 'all' || row.dataset.category === cat) &&
+                   (type === 'all' || row.dataset.type === type);
+      row.style.display = show ? '' : 'none';
+      const detail = document.getElementById('detail-' + row.dataset.id);
+      if(detail && !show) detail.style.display = 'none';
+    });
+    updateCount();
+  }
+
+  document.getElementById('filter-category').addEventListener('change', applyFilters);
+  document.getElementById('filter-type').addEventListener('change', applyFilters);
+
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      const detail = document.getElementById('detail-' + row.dataset.id);
+      if(detail) {
+        detail.style.display = detail.style.display === 'none' ? '' : 'none';
+      }
+    });
+  });
+
+  updateCount();
+})();
+</script>
+</body>
+</html>

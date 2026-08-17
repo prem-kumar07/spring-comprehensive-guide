@@ -964,5 +964,19 @@
     "section": "⚡ Spring 6 Cheatsheet",
     "anchor": "",
     "text": "Annotation / Class Package Version Purpose @Component org.springframework.stereotype 5+ Marks a class as a Spring-managed bean; detected by classpath scan @Service org.springframework.stereotype 5+ Specialisation of @Component for service-layer beans @Repository org.springframework.stereotype 5+ Spe"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "/spring-core/version-comparison.html",
+    "section": "Spring 5 vs Spring 6 — Feature Comparison",
+    "anchor": "",
+    "text": "Spring 5 vs Spring 6 — Feature Comparison"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "/spring-core/version-comparison.html",
+    "section": "Spring 5 vs Spring 6 — Feature Comparison",
+    "anchor": "",
+    "text": "This page compares Spring Framework 5 and Spring Framework 6 across the major areas of change. Use the filters to narrow by category or change type. Click any row to expand a side-by-side code diff. Filter: All Categories Core Web Data Testing Tooling All Changes New Changed Removed Deprecated Featu"
   }
 ]
