@@ -113,7 +113,7 @@
     </div>
 
     <h3 id="recommended-dependencies-for-learning">Recommended Dependencies for Learning</h3>
-    <table>
+    <div class="table-wrap"><table>
       <thead>
         <tr>
           <th>Dependency</th>
@@ -148,7 +148,7 @@
           <td>Runtime monitoring endpoints: health, metrics, beans</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h3 id="generated-pom-xml-dependencies-block">Generated <code>pom.xml</code> — Dependencies Block</h3>
     <pre><code class="language-xml">&lt;dependencies&gt;
@@ -201,7 +201,7 @@
     <h2 id="ide-setup">2. IDE Setup Comparison</h2>
     <p>Both IntelliJ IDEA Ultimate and VS Code support Spring development. IntelliJ provides the deepest native integration; VS Code is free and sufficient for learning.</p>
 
-    <table>
+    <div class="table-wrap"><table>
       <thead>
         <tr>
           <th>Feature</th>
@@ -241,7 +241,7 @@
           <td>Best for learning / budget-conscious; sufficient for all exercises</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="callout tip">
       <strong>VS Code Setup:</strong> Install the <em>Spring Boot Extension Pack</em> by VMware — it bundles Spring Initializr, Spring Boot Dashboard, Spring Boot Tools, and the Java Extension Pack in a single install.
@@ -377,7 +377,7 @@ spring.devtools.livereload.enabled=true</code></pre>
     <h2 id="testing">6. Testing Pyramid</h2>
     <p>Spring Boot provides <em>test slice</em> annotations that load only a subset of the application context — far faster than bootstrapping everything. The rule of thumb: use the narrowest slice that exercises your code path.</p>
 
-    <table>
+    <div class="table-wrap"><table>
       <thead>
         <tr>
           <th>Annotation</th>
@@ -412,7 +412,7 @@ spring.devtools.livereload.enabled=true</code></pre>
           <td>Integration tests, end-to-end flows</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h3 id="plain-unit-test-no-spring-context">Plain Unit Test — No Spring Context</h3>
     <pre><code class="language-java">// No Spring annotation needed — instantiate directly
@@ -498,7 +498,7 @@ class ApplicationIntegrationTest {
       <strong>Security note:</strong> Never expose all actuator endpoints on a public server without authentication. Use Spring Security or a firewall rule to restrict access in production.
     </div>
 
-    <table>
+    <div class="table-wrap"><table>
       <thead>
         <tr>
           <th>Endpoint</th>
@@ -543,7 +543,7 @@ class ApplicationIntegrationTest {
           <td>Performance monitoring, feeding Prometheus/Grafana</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <h3 id="trying-it-out">Trying it Out</h3>
     <pre><code class="language-bash"># Health — shows component details
@@ -564,7 +564,7 @@ curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep 
     <h2 id="common-errors">8. Common Errors and Fixes</h2>
     <p>The table below covers the most frequent errors encountered when starting with Spring Boot, their root cause, and the fastest fix.</p>
 
-    <table>
+    <div class="table-wrap"><table>
       <thead>
         <tr>
           <th>Error</th>
@@ -604,7 +604,7 @@ curl -s http://localhost:8080/actuator/conditions | python3 -m json.tool | grep 
           <td>Replace <code>javax.servlet-api</code> with <code>jakarta.servlet-api</code>; update all <code>import javax.servlet</code> to <code>import jakarta.servlet</code> — this is the javax→jakarta namespace migration</td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="callout tip">
       <strong>Debugging tip:</strong> Always start with <code>./mvnw spring-boot:run 2&gt;&amp;1 | tee app.log</code> to capture the full output. Then search for <code>Caused by:</code> — the last one before the stack ends is the true root cause.
