@@ -362,7 +362,6 @@ UserV2 result = userClient.getUserV2(42);</code></pre>
 
           <h4>Example</h4>
           <pre><code class="language-java">// Jackson 3 uses tools.jackson instead of com.fasterxml.jackson
-import tools.jackson.databind.JsonMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 // JsonMapper replaces ObjectMapper as the preferred entry point in Jackson 3
@@ -487,7 +486,8 @@ public class OrderService {
           <h4>Example</h4>
           <pre><code class="language-java">import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableResilientMethods;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Backoff;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 
@@ -545,7 +545,9 @@ public class ExternalApiClient {
           <h4>Example</h4>
           <pre><code class="language-java">import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableResilientMethods;
+import org.springframework.resilience.annotation.Backoff;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Configuration
@@ -591,9 +593,9 @@ public class ReportGenerationService {
 &lt;/dependency&gt;</code></pre>
 
           <h4>Example</h4>
-          <pre><code class="language-java">import org.springframework.retry.RetryTemplate;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+          <pre><code class="language-java">import org.springframework.resilience.retry.RetryTemplate;
+import org.springframework.resilience.retry.policy.SimpleRetryPolicy;
+import org.springframework.resilience.retry.backoff.ExponentialBackOffPolicy;
 
 // Build a RetryTemplate with exponential back-off
 RetryTemplate retryTemplate = RetryTemplate.builder()
