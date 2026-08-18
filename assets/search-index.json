@@ -550,7 +550,7 @@
     "href": "spring-core/spring5-features.html",
     "section": "Functional Bean Registration (GenericApplicationContext) [Advanced]",
     "anchor": "functional-bean-registration-genericapplicationcontext-advanced",
-    "text": "Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. GenericApplicationContext.registerBean() accepts a supplier lambda and optional customizers, making it possible to build a Spring context with zero classpath scanning — ideal for GraalVM n"
+    "text": "Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. GenericApplicationContext.registerBean() accepts a Supplier<T> lambda (a @FunctionalInterface ) and optional BeanDefinitionCustomizer callbacks, making it possible to build a Spring contex"
   },
   {
     "page": "Spring 5 Features",
@@ -1643,6 +1643,174 @@
     "section": "Spring 5 vs Spring 6 — Feature Comparison",
     "anchor": "",
     "text": "This page compares Spring Framework 5 and Spring Framework 6 across the major areas of change. Use the filters to narrow by category or change type. Click any row to expand a side-by-side code diff. Filter: All Categories Core Web Data Testing Tooling All Changes New Changed Removed Deprecated Featu"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Java Namespace (javax → jakarta)",
+    "anchor": "java-namespace",
+    "text": "Java Namespace (javax → jakarta)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Java Namespace (javax → jakarta)",
+    "anchor": "java-namespace",
+    "text": "javax.* jakarta.* Changed Spring 5 // Spring 5 — javax namespace\nimport javax.servlet.http.HttpServletRequest;\nimport javax.persistence.Entity;\nimport javax.validation.Valid;\n\n@RestController\npublic class UserController {\n    public String handle(HttpServletRequest request) {\n        return \"handled"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Java Baseline (8 → 17)",
+    "anchor": "java-baseline",
+    "text": "Java Baseline (8 → 17)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Java Baseline (8 → 17)",
+    "anchor": "java-baseline",
+    "text": "Java 8+ Java 17+ Changed Spring 5 (Java 8+) <!-- Spring 5 pom.xml -->\n<properties>\n  <java.version>8</java.version>\n  <spring-framework.version>5.3.39</spring-framework.version>\n</properties> Spring 6 (Java 17+) <!-- Spring 6 pom.xml -->\n<properties>\n  <java.version>17</java.version>\n  <spring-frame"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "HTTP Client (RestTemplate → WebClient / @HttpExchange)",
+    "anchor": "http-client",
+    "text": "HTTP Client (RestTemplate → WebClient / @HttpExchange)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "HTTP Client (RestTemplate → WebClient / @HttpExchange)",
+    "anchor": "http-client",
+    "text": "RestTemplate RestClient / @HttpExchange Changed Spring 5 — RestTemplate // Spring 5 — RestTemplate\n@Service\npublic class UserService {\n\n    private final RestTemplate restTemplate;\n\n    public UserService(RestTemplate restTemplate) {\n        this.restTemplate = restTemplate;\n    }\n\n    public User g"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Error Response Format (custom → ProblemDetail RFC 7807)",
+    "anchor": "error-response-format",
+    "text": "Error Response Format (custom → ProblemDetail RFC 7807)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Error Response Format (custom → ProblemDetail RFC 7807)",
+    "anchor": "error-response-format",
+    "text": "Custom @ExceptionHandler ProblemDetail (RFC 7807) New Spring 5 — Custom error body // Spring 5 — manual error response\n@RestControllerAdvice\npublic class GlobalExceptionHandler {\n\n    @ExceptionHandler(NotFoundException.class)\n    @ResponseStatus(HttpStatus.NOT_FOUND)\n    public Map<String, Object> "
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Observability (manual Micrometer → @Observed)",
+    "anchor": "observability",
+    "text": "Observability (manual Micrometer → @Observed)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Observability (manual Micrometer → @Observed)",
+    "anchor": "observability",
+    "text": "Micrometer (optional add-on) Micrometer core + @Observed Changed Spring 5 — manual Micrometer // Spring 5 — optional Micrometer dependency\n// Must add micrometer-core explicitly\n@Service\npublic class OrderService {\n\n    private final MeterRegistry meterRegistry;\n\n    public Order placeOrder(OrderReq"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Native Image (experimental → Spring AOT + GraalVM)",
+    "anchor": "native-image",
+    "text": "Native Image (experimental → Spring AOT + GraalVM)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Native Image (experimental → Spring AOT + GraalVM)",
+    "anchor": "native-image",
+    "text": "No first-class support Spring AOT + GraalVM New Spring 5 — no native support # Spring 5 — only JVM deployment\n# GraalVM with Spring Boot was experimental\n# Required heavy manual configuration:\n# native-image.properties, reflection-config.json,\n# proxy-config.json, resource-config.json\n\nmvn spring-bo"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Config Class Proxy (CGLIB → proxyBeanMethods=false)",
+    "anchor": "config-class-proxy",
+    "text": "Config Class Proxy (CGLIB → proxyBeanMethods=false)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Config Class Proxy (CGLIB → proxyBeanMethods=false)",
+    "anchor": "config-class-proxy",
+    "text": "proxyBeanMethods=true default proxyBeanMethods=false (lite) available Changed Spring 5 — CGLIB proxy (default) // Spring 5 — @Configuration uses CGLIB proxy\n// so inter-bean @Bean method calls return\n// the same singleton from the container\n@Configuration\n// proxyBeanMethods=true is the default\npubl"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Declarative HTTP Client (@HttpExchange interface proxies)",
+    "anchor": "declarative-http-client",
+    "text": "Declarative HTTP Client (@HttpExchange interface proxies)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Declarative HTTP Client (@HttpExchange interface proxies)",
+    "anchor": "declarative-http-client",
+    "text": "RestTemplate + manual @Bean @HttpExchange interface New Spring 5 — manual RestTemplate bean // Spring 5 — verbose manual wiring\n@Configuration\npublic class ClientConfig {\n    @Bean\n    public RestTemplate restTemplate() {\n        return new RestTemplate();\n    }\n}\n\n@Service\npublic class GitHubServic"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Virtual Threads (Spring 6 + Java 21 Project Loom)",
+    "anchor": "virtual-threads",
+    "text": "Virtual Threads (Spring 6 + Java 21 Project Loom)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Virtual Threads (Spring 6 + Java 21 Project Loom)",
+    "anchor": "virtual-threads",
+    "text": "Not supported Project Loom integration New Spring 5 — platform threads only // Spring 5 — traditional thread pool\n// Each request consumes a platform thread\n// High memory overhead for I/O-bound work\n\n@Bean\npublic TaskExecutor taskExecutor() {\n    ThreadPoolTaskExecutor exec =\n        new ThreadPool"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Constructor Injection (implicit in Spring 6 single-constructor)",
+    "anchor": "constructor-injection",
+    "text": "Constructor Injection (implicit in Spring 6 single-constructor)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "Constructor Injection (implicit in Spring 6 single-constructor)",
+    "anchor": "constructor-injection",
+    "text": "All styles equal Recommended as primary style Changed Spring 5 — field injection common // Spring 5 — all injection styles used equally\n@Service\npublic class UserService {\n\n    // Field injection — common in Spring 5 code\n    @Autowired\n    private UserRepository userRepo;\n\n    @Autowired\n    privat"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "RestTemplate (deprecated → prefer RestClient / WebClient)",
+    "anchor": "resttemplate-deprecation",
+    "text": "RestTemplate (deprecated → prefer RestClient / WebClient)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "RestTemplate (deprecated → prefer RestClient / WebClient)",
+    "anchor": "resttemplate-deprecation",
+    "text": "Primary HTTP client Deprecated — use RestClient Deprecated Spring 5 — RestTemplate (primary) // Spring 5 — RestTemplate is the standard\n@Bean\npublic RestTemplate restTemplate(\n        RestTemplateBuilder builder) {\n    return builder\n        .rootUri(\"https://api.example.com\")\n        .connectTimeou"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "MockMvc Testing API (legacy → MockMvcTester fluent API)",
+    "anchor": "mockmvc-testing",
+    "text": "MockMvc Testing API (legacy → MockMvcTester fluent API)"
+  },
+  {
+    "page": "Spring 5 vs 6 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "MockMvc Testing API (legacy → MockMvcTester fluent API)",
+    "anchor": "mockmvc-testing",
+    "text": "MockMvc + ResultActions MockMvcTester (Spring 6.2) fluent API Changed Spring 5 — MockMvc + ResultActions // Spring 5 — perform/andExpect pattern\n@SpringBootTest\n@AutoConfigureMockMvc\nclass UserControllerTest {\n\n    @Autowired MockMvc mockMvc;\n\n    @Test\n    void getUser() throws Exception {\n        "
   },
   {
     "page": "Spring 5 vs 6 — Version Comparison",

@@ -55,7 +55,7 @@
 
         <!-- Row 1: Java Namespace -->
         <tr class="comparison-row" data-category="core" data-type="changed" data-id="1" style="cursor:pointer" title="Click to expand">
-          <td><strong>Java Namespace</strong></td>
+          <td><h3 class="comparison-feature" id="java-namespace">Java Namespace (javax → jakarta)</h3></td>
           <td><code>javax.*</code></td>
           <td><code>jakarta.*</code></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -97,7 +97,7 @@ public class UserController {
 
         <!-- Row 2: Java Baseline -->
         <tr class="comparison-row" data-category="core" data-type="changed" data-id="2" style="cursor:pointer" title="Click to expand">
-          <td><strong>Java Baseline</strong></td>
+          <td><h3 class="comparison-feature" id="java-baseline">Java Baseline (8 → 17)</h3></td>
           <td>Java 8+</td>
           <td>Java 17+</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -129,7 +129,7 @@ public class UserController {
 
         <!-- Row 3: HTTP Client -->
         <tr class="comparison-row" data-category="web" data-type="changed" data-id="3" style="cursor:pointer" title="Click to expand">
-          <td><strong>HTTP Client</strong></td>
+          <td><h3 class="comparison-feature" id="http-client">HTTP Client (RestTemplate → WebClient / @HttpExchange)</h3></td>
           <td><code>RestTemplate</code></td>
           <td><code>RestClient</code> / <code>@HttpExchange</code></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -198,7 +198,7 @@ public class UserService {
 
         <!-- Row 4: Error Response Format -->
         <tr class="comparison-row" data-category="web" data-type="new" data-id="4" style="cursor:pointer" title="Click to expand">
-          <td><strong>Error Response Format</strong></td>
+          <td><h3 class="comparison-feature" id="error-response-format">Error Response Format (custom → ProblemDetail RFC 7807)</h3></td>
           <td>Custom <code>@ExceptionHandler</code></td>
           <td><code>ProblemDetail</code> (RFC 7807)</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
@@ -249,7 +249,7 @@ public class GlobalExceptionHandler {
 
         <!-- Row 5: Observability -->
         <tr class="comparison-row" data-category="core" data-type="changed" data-id="5" style="cursor:pointer" title="Click to expand">
-          <td><strong>Observability</strong></td>
+          <td><h3 class="comparison-feature" id="observability">Observability (manual Micrometer → @Observed)</h3></td>
           <td>Micrometer (optional add-on)</td>
           <td>Micrometer core + <code>@Observed</code></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -307,7 +307,7 @@ public class OrderService {
 
         <!-- Row 6: Native Image -->
         <tr class="comparison-row" data-category="tooling" data-type="new" data-id="6" style="cursor:pointer" title="Click to expand">
-          <td><strong>Native Image</strong></td>
+          <td><h3 class="comparison-feature" id="native-image">Native Image (experimental → Spring AOT + GraalVM)</h3></td>
           <td>No first-class support</td>
           <td>Spring AOT + GraalVM</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
@@ -344,7 +344,7 @@ mvn -Pnative native:compile
 
         <!-- Row 7: Config Class Proxy -->
         <tr class="comparison-row" data-category="core" data-type="changed" data-id="7" style="cursor:pointer" title="Click to expand">
-          <td><strong>Config Class Proxy</strong></td>
+          <td><h3 class="comparison-feature" id="config-class-proxy">Config Class Proxy (CGLIB → proxyBeanMethods=false)</h3></td>
           <td><code>proxyBeanMethods=true</code> default</td>
           <td><code>proxyBeanMethods=false</code> (lite) available</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -403,7 +403,7 @@ public class AppConfig {
 
         <!-- Row 8: Declarative HTTP Client -->
         <tr class="comparison-row" data-category="web" data-type="new" data-id="8" style="cursor:pointer" title="Click to expand">
-          <td><strong>Declarative HTTP Client</strong></td>
+          <td><h3 class="comparison-feature" id="declarative-http-client">Declarative HTTP Client (@HttpExchange interface proxies)</h3></td>
           <td><code>RestTemplate</code> + manual <code>@Bean</code></td>
           <td><code>@HttpExchange</code> interface</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
@@ -471,7 +471,7 @@ GitHubClient gitHubClient(RestClient.Builder b) {
 
         <!-- Row 9: Virtual Threads -->
         <tr class="comparison-row" data-category="core" data-type="new" data-id="9" style="cursor:pointer" title="Click to expand">
-          <td><strong>Virtual Threads</strong></td>
+          <td><h3 class="comparison-feature" id="virtual-threads">Virtual Threads (Spring 6 + Java 21 Project Loom)</h3></td>
           <td>Not supported</td>
           <td>Project Loom integration</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
@@ -521,7 +521,7 @@ public TomcatProtocolHandlerCustomizer&lt;?&gt;
 
         <!-- Row 10: Constructor Injection -->
         <tr class="comparison-row" data-category="core" data-type="changed" data-id="10" style="cursor:pointer" title="Click to expand">
-          <td><strong>Constructor Injection</strong></td>
+          <td><h3 class="comparison-feature" id="constructor-injection">Constructor Injection (implicit in Spring 6 single-constructor)</h3></td>
           <td>All styles equal</td>
           <td>Recommended as primary style</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
@@ -582,7 +582,7 @@ public class UserService {
 
         <!-- Row 11: RestTemplate deprecated -->
         <tr class="comparison-row" data-category="web" data-type="deprecated" data-id="11" style="cursor:pointer" title="Click to expand">
-          <td><strong><code>RestTemplate</code></strong></td>
+          <td><h3 class="comparison-feature" id="resttemplate-deprecation">RestTemplate (deprecated → prefer RestClient / WebClient)</h3></td>
           <td>Primary HTTP client</td>
           <td>Deprecated — use <code>RestClient</code></td>
           <td><span class="version-badge" style="background:rgba(139,148,158,0.15);color:#8b949e;border:1px solid #8b949e44">Deprecated</span></td>
@@ -643,7 +643,7 @@ ResponseEntity&lt;User&gt; resp = restClient.post()
 
         <!-- Row 12: MockMvc Testing API -->
         <tr class="comparison-row" data-category="testing" data-type="changed" data-id="12" style="cursor:pointer" title="Click to expand">
-          <td><strong>MockMvc Testing API</strong></td>
+          <td><h3 class="comparison-feature" id="mockmvc-testing">MockMvc Testing API (legacy → MockMvcTester fluent API)</h3></td>
           <td><code>MockMvc</code> + <code>ResultActions</code></td>
           <td><code>MockMvcTester</code> (Spring 6.2) fluent API</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>

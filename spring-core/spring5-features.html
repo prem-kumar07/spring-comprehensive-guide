@@ -225,7 +225,7 @@ public class NotificationService {
           <h3 id="functional-bean-registration-genericapplicationcontext-advanced">Functional Bean Registration (GenericApplicationContext)
             <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
           </h3>
-          <p>Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. <code>GenericApplicationContext.registerBean()</code> accepts a supplier lambda and optional customizers, making it possible to build a Spring context with zero classpath scanning — ideal for GraalVM native images and lambda-cold-start optimization.</p>
+          <p>Spring 5 introduced a functional, lambda-friendly API for registering beans without annotation scanning or XML. <code>GenericApplicationContext.registerBean()</code> accepts a <code>Supplier&lt;T&gt;</code> lambda (a <code>@FunctionalInterface</code>) and optional <code>BeanDefinitionCustomizer</code> callbacks, making it possible to build a Spring context with zero classpath scanning — ideal for GraalVM native images and lambda-cold-start optimization.</p>
 
           <pre><code class="language-java">import org.springframework.context.support.GenericApplicationContext;
 
