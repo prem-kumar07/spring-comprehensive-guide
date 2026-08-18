@@ -71,10 +71,22 @@
 
     document.body.prepend(sidebar);
 
+    // Overlay for mobile sidebar backdrop
+    const overlay = document.createElement('div');
+    overlay.id = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('visible'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+
     const ham = document.getElementById('hamburger');
     if (ham) {
-      ham.addEventListener('click', () => sidebar.classList.toggle('open'));
+      ham.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
     }
+
+    // Close sidebar when tapping the overlay or following a nav link
+    overlay.addEventListener('click', closeSidebar);
+    sidebar.addEventListener('click', (e) => { if (e.target.tagName === 'A' && e.target.href !== '#') closeSidebar(); });
   }
 
   function isActive(href) {
