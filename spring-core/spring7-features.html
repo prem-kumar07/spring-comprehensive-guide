@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring 7 Features</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring 7 Features</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v7">Spring 7.x — GA: Nov 13, 2025</span>
+      Java 17+ baseline &bull; Latest: 7.0.3 (Jan 2026) &bull; Jakarta EE 11
+    </div>
+
+    <p>Spring Framework 7.0, released on <strong>November 13, 2025</strong>, is the beginning of a new framework generation serving as the foundation for <strong>Spring Boot 4.0</strong>. It retains a <strong>Java 17</strong> baseline while embracing <strong>Java 21/25</strong> idioms, and raises the Jakarta EE level to <strong>Jakarta EE 11</strong> (Servlet 6.1, JPA 3.2, Bean Validation 3.1, WebSocket 2.2). The headline themes of the release are standardised null safety via <strong>JSpecify</strong>, built-in resilience primitives (<code>@Retryable</code>, <code>@ConcurrencyLimit</code>), first-class <strong>REST API versioning</strong> on both server and client, native <strong>OpenTelemetry</strong> integration, and deeper <strong>GraalVM AOT</strong> support.</p>
+
+    <div class="callout info">
+      <strong>Java 17 required</strong>
+      Spring 7.x requires Java 17 or higher. Spring 6.x also required Java 17, but Spring 7 adds first-class support for Java 21 virtual threads, Java 24 <code>ClassFileMetadataReader</code>, and is tested against Java 25 LTS.
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-core">Core Container</button>
+        <button class="tab-btn" data-tab="tab-web">Web &amp; REST</button>
+        <button class="tab-btn" data-tab="tab-resilience">Resilience</button>
+        <button class="tab-btn" data-tab="tab-observability">Observability</button>
+        <button class="tab-btn" data-tab="tab-aot">Native / AOT</button>
+        <button class="tab-btn" data-tab="tab-jakarta">Jakarta EE 11</button>
+      </div>
+
+      <!-- ══════════════ CORE CONTAINER ══════════════ -->
+      <div class="tab-panel active" id="tab-core">
+
+        <!-- Basic: JSpecify null safety -->
+        <div class="feature-card">
+          <h3 id="jspecify-null-safety">JSpecify Null Safety Annotations
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring Framework 7 replaces its own <code>@Nullable</code> / <code>@NonNull</code> (JSR-305-based) annotations with <strong>JSpecify</strong> — a vendor-neutral, tooling-supported standard for expressing nullability contracts. The entire Spring Framework codebase has been annotated with JSpecify, which also covers array and vararg elements and generic type arguments. The legacy Spring nullness annotations are deprecated and will be removed in a future release. With JSpecify, IDEs and static analysis tools (SpotBugs, NullAway, Error Prone) can surface null-safety violations at compile time.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- Spring 7 pulls in JSpecify transitively; explicit declaration for clarity --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- JSpecify annotations (transitive, shown for documentation) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.jspecify&lt;/groupId&gt;
+  &lt;artifactId&gt;jspecify&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+
+// Mark the whole package/class as null-safe by default (non-null unless stated)
+@NullMarked
+public class UserService {
+
+    // Return type is @NonNull by virtue of @NullMarked on the class
+    public User findById(long id) {
+        return userRepository.findById(id)
+               .orElseThrow(() -> new EntityNotFoundException("User not found: " + id));
+    }
+
+    // Explicitly declare that null is a valid return value
+    public @Nullable User findByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email).orElse(null);
+    }
+
+    // Null-safe generic method — generic type argument is non-null by default
+    public &lt;T extends User&gt; void save(@NonNull T entity) {
+        userRepository.save(entity);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            Replace <code>org.springframework.lang.@Nullable</code> / <code>@NonNull</code> with <code>org.jspecify.annotations.@Nullable</code> / <code>@NonNull</code> and add <code>@NullMarked</code> at the package or class level to opt into strict null checking.
+          </div>
+        </div>
+
+        <!-- Intermediate: ClassFileMetadataReader -->
+        <div class="feature-card">
+          <h3 id="classfile-metadata-reader">ClassFileMetadataReader for Java 24+
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 introduces a new <code>ClassFileMetadataReader</code> implementation in <code>spring-core</code> that uses the Java 24+ <strong>Class-File API</strong> (<code>java.lang.classfile</code>) to parse bytecode metadata. On Java 24 and above, Spring automatically uses this implementation instead of the legacy ASM-based reader, delivering lower memory overhead during classpath scanning and faster startup when processing large numbers of class files. On Java 17–23, ASM continues to be used transparently.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// No code change required — Spring selects the reader automatically.
+// To verify which reader is active, enable DEBUG logging:
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class App {
+    public static void main(String[] args) {
+        // On Java 24+, ClassFileMetadataReader is used during component scan.
+        // Component scanning is faster with the new reader — no code change needed.
+        try (var ctx = new AnnotationConfigApplicationContext("com.example")) {
+            ctx.getBean(MyService.class).run();
+        }
+    }
+}
+
+// application.properties — enable debug to confirm active reader strategy
+// logging.level.org.springframework.core.type=DEBUG</code></pre>
+
+          <div class="callout info">
+            <strong>No action required for most projects</strong>
+            The switch to <code>ClassFileMetadataReader</code> on Java 24+ is fully automatic. If you are running on Java 17–23, there is no impact — ASM is still present and used.
+          </div>
+        </div>
+
+        <!-- Intermediate: spring-jcl removal -->
+        <div class="feature-card">
+          <h3 id="spring-jcl-removal">spring-jcl Module Removal
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 removes the internal <code>spring-jcl</code> bridge module that was introduced in Spring 5 to avoid a hard dependency on Apache Commons Logging. Starting from Spring 7, the framework depends directly on <strong>Apache Commons Logging 1.3.0</strong>, which ships its own zero-dependency bridge implementation. The change is transparent for most applications — the logging API calls remain the same — but any explicit dependency on <code>spring-jcl</code> in a <code>pom.xml</code> must be removed.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- REMOVE this from your pom.xml if present --&gt;
+&lt;!-- &lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-jcl&lt;/artifactId&gt;
+&lt;/dependency&gt; --&gt;
+
+&lt;!-- Spring 7 core now brings commons-logging 1.3+ transitively --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Logging code is unchanged — use the same Commons Logging API as before
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class OrderService {
+
+    private static final Log log = LogFactory.getLog(OrderService.class);
+
+    public void processOrder(Order order) {
+        log.debug("Processing order id=" + order.getId());
+        // ... business logic ...
+        log.info("Order " + order.getId() + " processed successfully");
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            Remove any explicit <code>spring-jcl</code> dependency from your POM. Also, annotations from <code>javax.annotation</code> and <code>javax.inject</code> (e.g. <code>@javax.annotation.Resource</code>, <code>@javax.inject.Inject</code>) are no longer supported — switch to their <code>jakarta.*</code> equivalents.
+          </div>
+        </div>
+
+        <!-- Advanced: AntPathMatcher deprecation -->
+        <div class="feature-card">
+          <h3 id="antpathmatcher-deprecation">AntPathMatcher Deprecation for HTTP Routing
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 7 deprecates the legacy <code>AntPathMatcher</code> variant used for matching HTTP request mappings in Spring MVC and WebFlux. Applications should migrate to <code>PathPatternParser</code>, which was introduced in Spring 5 and has been the default since Spring 5.3. <code>PathPatternParser</code> is faster (pre-parsed patterns), safer (avoids certain ambiguities), and aligns with the reactive routing model. The <code>AntPathMatcher</code> class itself is not removed — it remains available for non-HTTP pattern matching (e.g. classpath scanning).</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.web.util.pattern.PathPatternParser;
+import org.springframework.web.util.pattern.PathPattern;
+
+// Using PathPatternParser directly (preferred in Spring 7)
+PathPatternParser parser = PathPatternParser.defaultInstance;
+PathPattern pattern = parser.parse("/api/v{version}/users/{id}");
+
+// Check if a path matches
+boolean matches = pattern.matches(
+    PathContainer.parsePath("/api/v2/users/42")
+);
+
+// In Spring MVC config — PathPatternParser is already the default,
+// but this shows explicit configuration
+@Configuration
+@EnableWebMvc
+public class MvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        // Ensure PathPatternParser is active (it is the default in Spring 5.3+)
+        configurer.setPatternParser(PathPatternParser.defaultInstance);
+        // Do NOT set AntPathMatcher — it is deprecated for HTTP routing in Spring 7
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            If your <code>WebMvcConfigurer</code> explicitly calls <code>configurer.setPathMatcher(new AntPathMatcher())</code>, remove that call. The default <code>PathPatternParser</code> handles all standard Ant-style patterns and is a drop-in replacement for most use cases.
+          </div>
+        </div>
+
+      </div><!-- /tab-core -->
+
+      <!-- ══════════════ WEB & REST ══════════════ -->
+      <div class="tab-panel" id="tab-web">
+
+        <!-- Basic: REST API versioning server-side -->
+        <div class="feature-card">
+          <h3 id="rest-api-versioning-server">REST API Versioning — Server Side
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring MVC and WebFlux 7 introduce first-class server-side <strong>REST API versioning</strong>. You can now map controller methods to specific API versions using <code>@RequestMapping</code> attributes, and configure how the version is resolved (path segment, query parameter, or request header). Spring parses and validates the version value automatically, and returns a <code>406 Not Acceptable</code> when a requested version is unsupported.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.*;
+
+// Configure the version resolver — here: read version from request header
+@Configuration
+@EnableWebMvc
+public class ApiVersionConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureApiVersioning(ApiVersionConfigurer configurer) {
+        configurer
+            .useRequestHeader("X-API-Version")   // or .usePathPrefix("/v{version}")
+            .defaultVersion("1");                 // fallback when header absent
+    }
+}
+
+// Controller — map each method to its supported version(s)
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    // Serves requests where X-API-Version: 1 (or no header — uses default)
+    @GetMapping(version = "1")
+    public UserV1 getUserV1(@PathVariable long id) {
+        return userV1Service.get(id);
+    }
+
+    // Serves requests where X-API-Version: 2
+    @GetMapping(version = "2")
+    public UserV2 getUserV2(@PathVariable long id) {
+        return userV2Service.get(id);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Version formats supported</strong>
+            Spring 7 parses semantic versions (<code>2.1</code>, <code>2.1.3</code>) and simple integers (<code>2</code>). You can supply a custom <code>ApiVersionParser</code> for proprietary schemes.
+          </div>
+        </div>
+
+        <!-- Intermediate: REST API versioning client-side -->
+        <div class="feature-card">
+          <h3 id="rest-api-versioning-client">REST API Versioning — Client Side (RestClient / WebClient)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>The client-side counterpart allows you to set the API version on outgoing requests via <code>RestClient</code>, <code>WebClient</code>, and declarative HTTP Interface clients. The version is applied according to the same strategy configured on the server (header, path prefix, or query parameter), making client–server versioning symmetric. HTTP Interface proxy clients can declare the API version on the interface or individual method.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.web.client.RestClient;
+import org.springframework.web.service.annotation.*;
+
+// ── RestClient with version ───────────────────────────
+RestClient client = RestClient.builder()
+    .baseUrl("https://api.example.com")
+    .apiVersion("2")                       // sets X-API-Version: 2 on every request
+    .build();
+
+UserV2 user = client.get()
+    .uri("/api/users/{id}", 42)
+    .retrieve()
+    .body(UserV2.class);
+
+// ── HTTP Interface client with per-method version ─────
+@HttpExchange("/api/users")
+public interface UserClient {
+
+    @GetExchange(version = "1")
+    UserV1 getUserV1(@PathVariable long id);
+
+    @GetExchange(version = "2")
+    UserV2 getUserV2(@PathVariable long id);
+}
+
+// Register and use the proxy
+UserClient userClient = HttpServiceProxyFactory
+    .builderFor(RestClientAdapter.create(client))
+    .build()
+    .createClient(UserClient.class);
+
+UserV2 result = userClient.getUserV2(42);</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            If you currently encode version info manually in request URLs or headers, replace that boilerplate with the new <code>RestClient.builder().apiVersion(...)</code> API for cleaner, centralised version management.
+          </div>
+        </div>
+
+        <!-- Intermediate: Jackson 3 -->
+        <div class="feature-card">
+          <h3 id="jackson-3-support">Jackson 3 Support
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring Framework 7 adds first-class support for <strong>Jackson 3.x</strong>, whose biggest breaking change is the package relocation from <code>com.fasterxml.jackson</code> to <code>tools.jackson</code>. Spring 7 auto-detects which Jackson version is on the classpath and configures the correct <code>MappingJackson2HttpMessageConverter</code> or the new <code>MappingJackson3HttpMessageConverter</code> accordingly. Jackson 2.x support is retained but deprecated — Spring Boot 4 ships with Jackson 3 as default, while standalone Spring 7 continues to support both.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- Jackson 3.x (new package: tools.jackson) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+  &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Jackson 3 uses tools.jackson instead of com.fasterxml.jackson
+import tools.jackson.databind.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
+
+// JsonMapper replaces ObjectMapper as the preferred entry point in Jackson 3
+JsonMapper mapper = JsonMapper.builder()
+    .findAndAddModules()                 // auto-register modules (JavaTimeModule, etc.)
+    .build();
+
+// Serialize
+String json = mapper.writeValueAsString(new User("Alice", "alice@example.com"));
+
+// Deserialize
+User user = mapper.readValue(json, User.class);
+
+// In Spring MVC config — explicit registration for Jackson 3 (auto-configured in Boot 4)
+@Configuration
+public class JacksonConfig {
+
+    @Bean
+    public JsonMapper jsonMapper() {
+        return JsonMapper.builder()
+            .findAndAddModules()
+            .build();
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            Jackson 3 relocates all packages from <code>com.fasterxml.jackson.*</code> to <code>tools.jackson.*</code> and uses <code>JsonMapper</code> (immutable, builder-based) in place of <code>ObjectMapper</code>. Jackson 3 is designed to coexist with Jackson 2 on the classpath to allow a gradual migration.
+          </div>
+        </div>
+
+        <!-- Advanced: HTTP Interfaces with OTel -->
+        <div class="feature-card">
+          <h3 id="http-interfaces-opentelemetry-propagation">HTTP Interface Clients with Automatic OTel Trace Propagation
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Declarative <code>@HttpExchange</code> interface clients in Spring 7 automatically propagate <strong>OpenTelemetry trace context</strong> (W3C TraceContext headers: <code>traceparent</code> / <code>tracestate</code>) to downstream services without any manual instrumentation. The integration is driven by Spring's native OTel support — when an <code>OpenTelemetry</code> bean is present in the context, the <code>HttpServiceProxyFactory</code> installs an interceptor that injects the current span context into every outgoing request header.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-api&lt;/artifactId&gt;
+  &lt;version&gt;1.36.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.web.service.annotation.*;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+
+// Declare the HTTP interface — OTel propagation is automatic
+@HttpExchange("https://inventory.internal")
+public interface InventoryClient {
+
+    @GetExchange("/items/{sku}")
+    InventoryItem getItem(@PathVariable String sku);
+
+    @PostExchange("/items/{sku}/reserve")
+    ReservationResult reserve(@PathVariable String sku, @RequestBody ReserveRequest req);
+}
+
+// Configuration — OTel SDK bean triggers automatic trace propagation
+@Configuration
+public class ClientConfig {
+
+    @Bean
+    public InventoryClient inventoryClient(RestClient.Builder builder) {
+        RestClient restClient = builder
+            .baseUrl("https://inventory.internal")
+            .build();
+        return HttpServiceProxyFactory
+            .builderFor(RestClientAdapter.create(restClient))
+            .build()
+            .createClient(InventoryClient.class);
+    }
+}
+
+// Usage — trace context is injected automatically into outgoing headers
+@Service
+public class OrderService {
+    private final InventoryClient inventory;
+
+    public Order placeOrder(String sku, int qty) {
+        InventoryItem item = inventory.getItem(sku); // traceparent header injected
+        ReservationResult res = inventory.reserve(sku, new ReserveRequest(qty));
+        return buildOrder(item, res);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Zero manual instrumentation</strong>
+            As long as an <code>OpenTelemetry</code> or <code>ObservationRegistry</code> bean is present (auto-configured by Spring Boot 4), <code>@HttpExchange</code> clients propagate traces automatically — no custom interceptors or filters needed.
+          </div>
+        </div>
+
+      </div><!-- /tab-web -->
+
+      <!-- ══════════════ RESILIENCE ══════════════ -->
+      <div class="tab-panel" id="tab-resilience">
+
+        <!-- Basic: @EnableResilientMethods and @Retryable -->
+        <div class="feature-card">
+          <h3 id="enable-resilient-methods-retryable">@EnableResilientMethods and @Retryable
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring Framework 7 ships built-in resilience primitives in <code>spring-context</code> — no external library like <code>spring-retry</code> or Resilience4j needed. The <code>@Retryable</code> annotation declares retry behaviour on a method or class, and <code>@EnableResilientMethods</code> on a <code>@Configuration</code> class activates the AOP proxy that intercepts annotated methods. <code>@Retryable</code> automatically adapts to reactive return types, decorating the Reactor pipeline with Reactor's retry capabilities.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- No additional dependency — built into spring-context --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableResilientMethods;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import java.io.IOException;
+
+// 1. Activate resilience AOP
+@Configuration
+@EnableResilientMethods
+public class AppConfig {}
+
+// 2. Annotate the method to retry
+@Service
+public class ExternalApiClient {
+
+    // Retry up to 3 times on IOException, with 500 ms delay between attempts
+    @Retryable(
+        retryFor = IOException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 500, multiplier = 2.0)
+    )
+    public WeatherData fetchWeather(String city) throws IOException {
+        return httpClient.get("https://weather.api/v1/current?city=" + city,
+                              WeatherData.class);
+    }
+
+    // Works with reactive types too — decorates the Mono pipeline
+    @Retryable(maxAttempts = 4, backoff = @Backoff(delay = 200))
+    public Mono&lt;WeatherData&gt; fetchWeatherReactive(String city) {
+        return webClient.get()
+            .uri("/v1/current?city=" + city)
+            .retrieve()
+            .bodyToMono(WeatherData.class);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration note</strong>
+            If you use <code>spring-retry</code>, Moderne provides an OpenRewrite recipe (<code>MigrateSpringRetryToSpringFramework7</code>) to automate the migration to the new built-in annotations. Remove the <code>spring-retry</code> and <code>@EnableRetry</code> dependency after migrating.
+          </div>
+        </div>
+
+        <!-- Intermediate: @ConcurrencyLimit -->
+        <div class="feature-card">
+          <h3 id="concurrency-limit-annotation">@ConcurrencyLimit — Declarative Concurrency Control
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>@ConcurrencyLimit</code> is a new declarative annotation for constraining the number of concurrent invocations of a Spring-managed method. It is particularly valuable when using <strong>virtual threads</strong> (Project Loom): since virtual threads are cheap to create, a downstream resource (database, external API) can be overwhelmed without a concurrency guard. <code>@ConcurrencyLimit</code> enforces a semaphore at the proxy level with no need for external libraries.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- Built into spring-context; also enable with @EnableResilientMethods --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableResilientMethods;
+import org.springframework.resilience.annotation.ConcurrencyLimit;
+import org.springframework.stereotype.Service;
+
+@Configuration
+@EnableResilientMethods   // activates both @Retryable and @ConcurrencyLimit
+public class ResilienceConfig {}
+
+@Service
+public class ReportGenerationService {
+
+    // At most 5 concurrent calls — excess callers block (or throw if configured)
+    @ConcurrencyLimit(5)
+    public Report generateReport(ReportRequest request) {
+        // heavy computation or I/O — guarded to 5 concurrent executions
+        return reportBuilder.build(request);
+    }
+
+    // Combine with @Retryable for resilient + rate-limited calls
+    @ConcurrencyLimit(10)
+    @Retryable(maxAttempts = 2, backoff = @Backoff(delay = 300))
+    public ExternalData callExternalApi(String params) {
+        return externalClient.fetch(params);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Virtual thread use case</strong>
+            When the Spring Boot 4 virtual-thread executor is active, all request-handling runs on virtual threads. Without a concurrency guard, a burst of requests could issue thousands of simultaneous DB queries. <code>@ConcurrencyLimit</code> is the recommended first line of defence.
+          </div>
+        </div>
+
+        <!-- Advanced: RetryTemplate programmatic -->
+        <div class="feature-card">
+          <h3 id="retry-template-programmatic">RetryTemplate — Programmatic Retry
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Beyond declarative annotations, Spring 7's built-in resilience module provides a <code>RetryTemplate</code> for programmatic retry control. It supports pluggable <code>RetryPolicy</code> and <code>BackOffPolicy</code> implementations and integrates with Spring's <code>ApplicationEventPublisher</code> to emit retry events that Micrometer can capture as metrics. This is the preferred approach when you need fine-grained control — for example, different policies per exception type, or access to the retry context inside the retry callback.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.retry.RetryTemplate;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+
+// Build a RetryTemplate with exponential back-off
+RetryTemplate retryTemplate = RetryTemplate.builder()
+    .maxAttempts(5)
+    .exponentialBackoff(100, 2.0, 5000)     // initial=100ms, multiplier=2, max=5s
+    .retryOn(IOException.class)
+    .retryOn(ServiceUnavailableException.class)
+    .build();
+
+// Execute with retry context access
+String result = retryTemplate.execute(context -&gt; {
+    int attempt = context.getRetryCount() + 1;
+    log.debug("Attempt {} of {}", attempt, 5);
+    return externalService.call();
+}, context -&gt; {
+    // Recovery callback — called when all retries exhausted
+    log.error("All retries exhausted after {} attempts", context.getRetryCount());
+    return "fallback-value";
+});
+
+// Register as a bean for injection
+@Bean
+public RetryTemplate paymentRetryTemplate() {
+    return RetryTemplate.builder()
+        .maxAttempts(3)
+        .fixedBackoff(250)
+        .retryOn(PaymentGatewayException.class)
+        .build();
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Observability</strong>
+            Combine <code>RetryTemplate</code> with a Micrometer <code>MeterRegistry</code> listener to record retry attempt counts and failure rates as metrics, which surface automatically in Spring Boot 4 Actuator dashboards.
+          </div>
+        </div>
+
+      </div><!-- /tab-resilience -->
+
+      <!-- ══════════════ OBSERVABILITY ══════════════ -->
+      <div class="tab-panel" id="tab-observability">
+
+        <!-- Basic: Native OpenTelemetry -->
+        <div class="feature-card">
+          <h3 id="native-opentelemetry-integration">Native OpenTelemetry Integration
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring Framework 7 introduces direct <strong>OpenTelemetry</strong> support without requiring a Micrometer bridge. When an <code>io.opentelemetry.api.OpenTelemetry</code> bean is registered in the application context, Spring automatically instruments request handling (servlet/reactive), scheduled tasks, and HTTP interface client calls. Traces are exported via OTLP in the W3C TraceContext format. This replaces the need for third-party Java agents for many common instrumentation needs.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-sdk&lt;/artifactId&gt;
+  &lt;version&gt;1.36.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-exporter-otlp&lt;/artifactId&gt;
+  &lt;version&gt;1.36.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OtelConfig {
+
+    // Register OpenTelemetry bean — Spring 7 detects and uses it automatically
+    @Bean
+    public OpenTelemetry openTelemetry() {
+        OtlpGrpcSpanExporter exporter = OtlpGrpcSpanExporter.builder()
+            .setEndpoint("http://otel-collector:4317")
+            .build();
+
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+            .addSpanProcessor(BatchSpanProcessor.builder(exporter).build())
+            .build();
+
+        return OpenTelemetrySdk.builder()
+            .setTracerProvider(tracerProvider)
+            .build();
+    }
+}
+// All incoming HTTP requests and @HttpExchange calls are now auto-instrumented.</code></pre>
+
+          <div class="callout info">
+            <strong>Spring Boot 4 auto-configuration</strong>
+            In Spring Boot 4, the <code>OpenTelemetry</code> bean is auto-configured when the OTel SDK is on the classpath. You just add the exporter dependency and set <code>management.otlp.tracing.endpoint</code> in <code>application.properties</code>.
+          </div>
+        </div>
+
+        <!-- Intermediate: Micrometer improvements -->
+        <div class="feature-card">
+          <h3 id="micrometer-observability-improvements">Micrometer Observability Improvements
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 builds on the Micrometer Observation API introduced in Spring 6.0 with additional integration points. <code>@Observed</code> can now be applied at the class level to instrument all public methods, and Spring 7 adds observation support for the new built-in resilience annotations: <code>@Retryable</code> retry attempts and <code>@ConcurrencyLimit</code> rejections are automatically recorded as Micrometer metrics. The <code>ObservationRegistry</code> is injected wherever Spring 7 creates observability-capable components.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-aop&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-observation&lt;/artifactId&gt;
+  &lt;version&gt;1.13.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import io.micrometer.observation.annotation.Observed;
+import org.springframework.stereotype.Service;
+
+// Class-level @Observed — instruments every public method automatically
+@Observed(name = "payment.service", contextualName = "PaymentService")
+@Service
+public class PaymentService {
+
+    // Each method call creates a span named "payment.service#processPayment"
+    public PaymentResult processPayment(PaymentRequest request) {
+        // ... payment logic ...
+        return PaymentResult.success(request.amount());
+    }
+
+    public RefundResult issueRefund(String transactionId) {
+        // ... refund logic ... (also auto-instrumented)
+        return RefundResult.ok();
+    }
+}
+
+// Programmatic observation with custom tags
+@Service
+public class InventoryService {
+
+    private final ObservationRegistry registry;
+
+    public int checkStock(String sku) {
+        return Observation.createNotStarted("inventory.stock-check", registry)
+            .lowCardinalityKeyValue("sku.category", resolveCategory(sku))
+            .observe(() -&gt; stockRepository.findBySku(sku).getQuantity());
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Tip: Dual signals from one annotation</strong>
+            With a Micrometer-OTel bridge on the classpath, a single <code>@Observed</code> annotation emits both <strong>metrics</strong> (Prometheus counters/timers) and <strong>distributed traces</strong> (OTel spans) simultaneously.
+          </div>
+        </div>
+
+        <!-- Advanced: Structured Concurrency observability -->
+        <div class="feature-card">
+          <h3 id="structured-concurrency-observability">Structured Concurrency and Observation Scope
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 7 integrates Observation scope propagation with Java 21+ <strong>Structured Concurrency</strong> (preview feature in Java 21, standard in later releases). When a parent observation is active, child tasks forked within a <code>StructuredTaskScope</code> automatically inherit the trace context, ensuring that spans from concurrent sub-tasks are correctly parented under the initiating span. This makes distributed traces accurate even when request handling fans out to multiple virtual-thread sub-tasks.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import java.util.concurrent.StructuredTaskScope;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+
+@Service
+public class DashboardService {
+
+    private final UserClient userClient;
+    private final OrderClient orderClient;
+    private final ObservationRegistry registry;
+
+    // Fan-out with structured concurrency — child spans parented correctly
+    public DashboardData loadDashboard(long userId) throws Exception {
+        return Observation.createNotStarted("dashboard.load", registry)
+            .observe(() -&gt; {
+                try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+                    // Both sub-tasks inherit the active observation/trace context
+                    var userFuture  = scope.fork(() -&gt; userClient.getUser(userId));
+                    var orderFuture = scope.fork(() -&gt; orderClient.getRecent(userId, 10));
+                    scope.join().throwIfFailed();
+                    return new DashboardData(userFuture.get(), orderFuture.get());
+                }
+            });
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Java version requirement</strong>
+            Structured Concurrency requires Java 21+ (preview) or Java 25+ (standard). Ensure your project compiles with <code>--enable-preview</code> on Java 21. Spring Boot 4's virtual thread executor is fully compatible with this pattern.
+          </div>
+        </div>
+
+      </div><!-- /tab-observability -->
+
+      <!-- ══════════════ NATIVE / AOT ══════════════ -->
+      <div class="tab-panel" id="tab-aot">
+
+        <!-- Basic: Enhanced GraalVM native image -->
+        <div class="feature-card">
+          <h3 id="graalvm-native-image-enhanced">Enhanced GraalVM Native Image Support
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 7 deepens its <strong>GraalVM native image</strong> support, building on the AOT engine introduced in Spring 6. The Spring AOT processor now generates more complete <code>reflect-config.json</code> and <code>resource-config.json</code> files for common Spring patterns (including the new resilience annotations and JSpecify metadata), reducing the number of custom hints that application code must provide. Compilation to native executables is faster and the resulting binary is smaller due to more aggressive dead-code elimination.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- In pom.xml — use spring-boot-maven-plugin for native compilation --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+  &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;0.10.3&lt;/version&gt;
+  &lt;extensions&gt;true&lt;/extensions&gt;
+&lt;/plugin&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Compile to native with Maven
+// mvn -Pnative native:compile
+
+// Resulting binary runs without JVM:
+// ./target/my-app --spring.profiles.active=prod
+
+// Spring 7 AOT processes this automatically — no manual hints needed
+// for common patterns:
+@SpringBootApplication
+public class MyApp {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApp.class, args);
+    }
+}
+
+// For custom reflection needs, use @ImportRuntimeHints
+@Configuration
+@ImportRuntimeHints(MyRuntimeHints.class)
+public class AppConfig { }
+
+class MyRuntimeHints implements RuntimeHintsRegistrar {
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        hints.reflection()
+            .registerType(DynamicPayload.class,
+                MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                MemberCategory.INVOKE_PUBLIC_METHODS);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Build time vs. runtime</strong>
+            GraalVM native images perform all class loading, reflection resolution, and proxy generation at build time. The AOT processor in Spring 7 handles this for Spring-managed beans automatically; only truly dynamic reflection needs manual <code>RuntimeHintsRegistrar</code> entries.
+          </div>
+        </div>
+
+        <!-- Intermediate: AOT processing improvements -->
+        <div class="feature-card">
+          <h3 id="aot-processing-improvements">AOT Processing Improvements
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7's AOT processor introduces a richer <strong>hint inference</strong> model, reducing the gap between JVM and native execution modes. The processor can now infer reflection requirements from JSpecify annotations, from the new <code>@Retryable</code> / <code>@ConcurrencyLimit</code> AOP proxies, and from Jackson 3 module registrations. AOT-processed beans are serialised to <code>BeanDefinitionCode</code> classes that the native image loads statically, removing the need for runtime <code>BeanFactory</code> introspection in most scenarios.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Enable AOT-compatible conditional configuration
+// @ConditionalOnClass and @ConditionalOnMissingBean are evaluated at build time
+// when compiling to native
+
+@Configuration
+@ConditionalOnClass(JsonMapper.class)  // resolved at AOT compile time for native
+public class Jackson3Config {
+
+    @Bean
+    public JsonMapper jsonMapper() {
+        return JsonMapper.builder()
+            .findAndAddModules()
+            .build();
+    }
+}
+
+// Test native compatibility in the JVM with Spring AOT test mode
+// application-test.properties:
+// spring.aot.enabled=true
+
+@SpringBootTest
+@ActiveProfiles("test")
+class MyServiceAotTest {
+    @Autowired MyService service;
+
+    @Test
+    void verifyAotCompatible() {
+        // Runs with AOT-generated artifacts — catches native-incompatible patterns early
+        assertThat(service.compute("input")).isEqualTo("expected");
+    }
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Early native testing</strong>
+            Set <code>spring.aot.enabled=true</code> in tests to run with the AOT-generated bean definitions on the JVM. This catches most native incompatibilities without the multi-minute native compilation cycle.
+          </div>
+        </div>
+
+        <!-- Advanced: @NativeHint and RuntimeHints API -->
+        <div class="feature-card">
+          <h3 id="runtime-hints-api-advances">RuntimeHints API — Advanced Registration Patterns
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 7 extends the <code>RuntimeHints</code> API with new registration categories for <strong>serialization proxies</strong>, <strong>resource patterns</strong> (supporting glob patterns), and <strong>JDK dynamic proxies</strong> generated for HTTP Interface clients. The <code>@ImportRuntimeHints</code> annotation is now inheritable, so library authors can annotate a <code>@Configuration</code> class once and have all their AOT requirements covered transitively for all consumers.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.aot.hint.*;
+import org.springframework.context.annotation.ImportRuntimeHints;
+
+// Library configuration — hints are inherited by all consumers
+@Configuration
+@ImportRuntimeHints(CsvLibraryHints.class)
+public class CsvLibraryConfig { }
+
+// RuntimeHintsRegistrar — covers reflection, proxies, resources, and serialization
+class CsvLibraryHints implements RuntimeHintsRegistrar {
+
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader loader) {
+
+        // 1. Reflection — dynamic DTO classes
+        hints.reflection()
+            .registerType(CsvRow.class, MemberCategory.values())
+            .registerType(CsvParser.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+
+        // 2. Resource patterns — glob support (new in Spring 7)
+        hints.resources()
+            .registerPattern("csv-schemas/*.json")
+            .registerPattern("META-INF/csv-*.properties");
+
+        // 3. JDK proxy — HTTP Interface client interface
+        hints.proxies()
+            .registerJdkProxy(CsvDownloadClient.class);
+
+        // 4. Serialization
+        hints.serialization()
+            .registerType(CsvRow.class);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Library authors</strong>
+            Place <code>@ImportRuntimeHints</code> on your library's auto-configuration class. Spring Boot 4's AOT processor picks it up transitively, meaning application developers who use your library get native image support for free.
+          </div>
+        </div>
+
+      </div><!-- /tab-aot -->
+
+      <!-- ══════════════ JAKARTA EE 11 ══════════════ -->
+      <div class="tab-panel" id="tab-jakarta">
+
+        <!-- Basic: Servlet 6.1 -->
+        <div class="feature-card">
+          <h3 id="jakarta-servlet-6-1">Jakarta Servlet 6.1
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring 7 adopts <strong>Jakarta Servlet 6.1</strong> as the new web container baseline, replacing Servlet 6.0 from Spring 6.x. Servlet 6.1 refines cookie handling (stricter attribute control), adds the <code>HttpServletMapping</code> enhancements for precise path resolution, and removes deprecated APIs that were carried over from the <code>javax.*</code> era. Applications deployed on <strong>Tomcat 11+</strong> or <strong>Jetty 12.1+</strong> are required; earlier container versions are not compatible with Spring 7.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- Servlet 6.1 container dependency (provided scope — container ships it) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;6.1.0&lt;/version&gt;
+  &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class SessionController {
+
+    @GetMapping("/session")
+    public String getSessionInfo(HttpServletRequest request) {
+        // HttpServletMapping — precise path resolution (enhanced in Servlet 6.1)
+        var mapping = request.getHttpServletMapping();
+        return "Pattern: " + mapping.getPattern()
+             + ", MatchValue: " + mapping.getMatchValue();
+    }
+
+    @PostMapping("/set-cookie")
+    public void setCookie(HttpServletResponse response) {
+        // Jakarta Cookie API (jakarta.servlet.http.Cookie — no change from 6.0)
+        Cookie cookie = new Cookie("session_hint", "dark-mode");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(86400);
+        response.addCookie(cookie);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Container requirement</strong>
+            Spring 7 requires Tomcat 11.0+ or Jetty 12.1+ (or any other Servlet 6.1-compatible container). Tomcat 10.x (Servlet 6.0) is no longer supported. Update your embedded or external container before migrating.
+          </div>
+        </div>
+
+        <!-- Intermediate: JPA 3.2 -->
+        <div class="feature-card">
+          <h3 id="jakarta-persistence-3-2">Jakarta Persistence 3.2
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7's data access support targets <strong>Jakarta Persistence 3.2</strong> (JPA 3.2), which adds <code>Query.getSingleResultOrNull()</code>, expanded <code>@Column</code> options (e.g. <code>check</code> constraint expressions), improved numeric type support (<code>UUID</code> as a first-class mapped type), and a richer Criteria API. Spring Data JPA 3.x is the companion library that wraps JPA 3.2 with repositories and query derivation, and requires Hibernate 6.4+ or EclipseLink 4.0+ as the JPA provider.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.persistence&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.persistence-api&lt;/artifactId&gt;
+  &lt;version&gt;3.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-orm&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- JPA 3.2 provider --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.hibernate.orm&lt;/groupId&gt;
+  &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+  &lt;version&gt;6.6.0.Final&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import jakarta.persistence.*;
+import java.util.UUID;
+
+@Entity
+@Table(name = "products")
+public class Product {
+
+    // UUID as first-class JPA 3.2 mapped type — no custom converter needed
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    // JPA 3.2 @Column(check) — generates a CHECK constraint in the DDL
+    @Column(nullable = false,
+            check = @CheckConstraint(constraint = "price > 0"))
+    private java.math.BigDecimal price;
+
+    // Getters/setters omitted for brevity
+}
+
+// JPA 3.2: Query.getSingleResultOrNull() — cleaner than try/catch NoResultException
+@Repository
+public class ProductRepository {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public Optional&lt;Product&gt; findByName(String name) {
+        Product result = em.createQuery(
+                "SELECT p FROM Product p WHERE p.name = :name", Product.class)
+            .setParameter("name", name)
+            .getSingleResultOrNull();   // returns null instead of throwing
+        return Optional.ofNullable(result);
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Spring Data JPA</strong>
+            Use Spring Data JPA 3.x (part of the Spring Data 2025.x release train) for repository-based data access on top of JPA 3.2. It requires no code changes for basic CRUD repositories, but enables new query methods targeting JPA 3.2 features.
+          </div>
+        </div>
+
+        <!-- Intermediate: Bean Validation 3.1 -->
+        <div class="feature-card">
+          <h3 id="jakarta-bean-validation-3-1">Jakarta Bean Validation 3.1
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 raises the Bean Validation baseline to <strong>Jakarta Bean Validation 3.1</strong>, which brings built-in support for validating <strong>Java records</strong>, <code>Optional</code> unwrapping, and expanded built-in constraints. <code>@NotBlank</code>, <code>@Email</code>, and <code>@Size</code> now apply to record components directly. The reference implementation is <strong>Hibernate Validator 8.0</strong>, and Spring 7's <code>LocalValidatorFactoryBean</code> auto-configures for it.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.validation&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.validation-api&lt;/artifactId&gt;
+  &lt;version&gt;3.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.hibernate.validator&lt;/groupId&gt;
+  &lt;artifactId&gt;hibernate-validator&lt;/artifactId&gt;
+  &lt;version&gt;8.0.1.Final&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+// Java record with Bean Validation 3.1 — validates record components natively
+public record CreateUserRequest(
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100) String name,
+
+    @NotNull @Email(message = "Must be a valid email address")
+    String email,
+
+    @NotNull @Min(13) @Max(120)
+    Integer age
+) {}
+
+// Controller — Spring validates the record with @Valid
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @PostMapping
+    public UserResponse create(@RequestBody @Valid CreateUserRequest request) {
+        // If validation fails, Spring returns 400 with ProblemDetail (RFC 7807)
+        return userService.create(request);
+    }
+}
+
+// Programmatic validation
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
+Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+var violations = validator.validate(new CreateUserRequest("", "bad-email", 5));
+violations.forEach(v -&gt; System.out.println(v.getPropertyPath() + ": " + v.getMessage()));</code></pre>
+
+          <div class="callout tip">
+            <strong>Records + validation</strong>
+            Bean Validation 3.1 validates record components declared in the compact constructor. This means you can use records as validated request/response DTOs without any conversion step.
+          </div>
+        </div>
+
+        <!-- Advanced: Virtual threads enhanced -->
+        <div class="feature-card">
+          <h3 id="virtual-threads-enhanced">Enhanced Virtual Thread Support
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring 7 deepens its <strong>Project Loom virtual thread</strong> support beyond the initial integration in Spring 6.1. The scheduler integration for <code>@Scheduled</code> tasks now uses virtual threads by default when running on Java 21+. The new <code>@ConcurrencyLimit</code> annotation is specifically designed to guard virtual-thread-backed methods against resource saturation. Spring 7 also integrates virtual thread metrics into Micrometer, exposing active virtual thread counts and scheduler queue depths through Actuator.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;!-- Requires Java 21+; no additional Maven dep — built into the JDK and spring-context --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.3&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.context.annotation.*;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskExecutor;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+// Configure virtual-thread executor for @Async and general task execution
+@Configuration
+@EnableScheduling
+public class VirtualThreadConfig {
+
+    @Bean(name = "applicationTaskExecutor")
+    public SimpleAsyncTaskExecutor virtualThreadExecutor() {
+        var executor = new SimpleAsyncTaskExecutor("vt-");
+        executor.setVirtualThreads(true);   // Java 21+ virtual threads
+        return executor;
+    }
+}
+
+// @Scheduled tasks also run on virtual threads in Spring 7
+@Component
+public class ReportScheduler {
+
+    @Scheduled(fixedRate = 60_000)  // runs every 60 s on a virtual thread
+    public void generateDailyReport() {
+        // Blocking I/O here is fine — virtual thread parks, not blocks platform thread
+        reportService.generate();
+    }
+}
+
+// Manual virtual thread creation (Java 21 API) with Spring beans
+@Service
+public class BatchProcessor {
+
+    public void processBatch(List&lt;Item&gt; items) throws Exception {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            for (Item item : items) {
+                scope.fork(() -&gt; processItem(item));  // each task on a virtual thread
+            }
+            scope.join().throwIfFailed();
+        }
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Pinning pitfall</strong>
+            Virtual threads pin to platform threads when blocking inside a <code>synchronized</code> block or native method. Prefer <code>ReentrantLock</code> in code that may block, and use <code>@ConcurrencyLimit</code> instead of <code>synchronized</code> for Spring-managed concurrency control.
+          </div>
+        </div>
+
+      </div><!-- /tab-jakarta -->
+
+    </div><!-- /tab-container -->
+
+    <!-- ══════════════ CHEATSHEET ══════════════ -->
+    <section class="cheatsheet">
+      <h2>Spring 7 Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / API</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>@NullMarked</code></td>
+              <td>Declares all types in scope as non-null by default (JSpecify)</td>
+              <td>New in Spring 7; replaces Spring's own <code>@NonNullApi</code></td>
+            </tr>
+            <tr>
+              <td><code>@Nullable</code> (JSpecify)</td>
+              <td>Marks a type or element as potentially null</td>
+              <td><code>org.jspecify.annotations.Nullable</code> — Spring 6's version deprecated</td>
+            </tr>
+            <tr>
+              <td><code>@NonNull</code> (JSpecify)</td>
+              <td>Asserts a value must never be null</td>
+              <td><code>org.jspecify.annotations.NonNull</code></td>
+            </tr>
+            <tr>
+              <td><code>@EnableResilientMethods</code></td>
+              <td>Activates AOP proxies for <code>@Retryable</code> and <code>@ConcurrencyLimit</code></td>
+              <td>New in Spring 7; place on a <code>@Configuration</code> class</td>
+            </tr>
+            <tr>
+              <td><code>@Retryable</code></td>
+              <td>Retries a method on specified exceptions with configurable back-off</td>
+              <td>Built into <code>spring-context</code>; adapts to reactive return types</td>
+            </tr>
+            <tr>
+              <td><code>@Backoff</code></td>
+              <td>Configures delay, multiplier, and max-delay for <code>@Retryable</code></td>
+              <td>Supports fixed, linear, and exponential back-off strategies</td>
+            </tr>
+            <tr>
+              <td><code>@ConcurrencyLimit</code></td>
+              <td>Caps concurrent invocations of a method with a semaphore</td>
+              <td>New in Spring 7; designed for virtual-thread saturation prevention</td>
+            </tr>
+            <tr>
+              <td><code>RetryTemplate</code></td>
+              <td>Programmatic retry with pluggable policy and back-off</td>
+              <td>Built into <code>spring-context</code>; integrates with Micrometer metrics</td>
+            </tr>
+            <tr>
+              <td><code>RestClient.apiVersion(...)</code></td>
+              <td>Sets the API version for all requests from a <code>RestClient</code> instance</td>
+              <td>New in Spring 7; symmetric to server-side versioning</td>
+            </tr>
+            <tr>
+              <td><code>@RequestMapping(version = "...")</code></td>
+              <td>Routes controller methods by API version</td>
+              <td>New in Spring 7; configures via <code>ApiVersionConfigurer</code></td>
+            </tr>
+            <tr>
+              <td><code>ApiVersionConfigurer</code></td>
+              <td>Configures version resolution strategy (header / path / query param)</td>
+              <td>Part of <code>WebMvcConfigurer</code> in Spring 7</td>
+            </tr>
+            <tr>
+              <td><code>JsonMapper</code> (Jackson 3)</td>
+              <td>Immutable, builder-based replacement for Jackson 2's <code>ObjectMapper</code></td>
+              <td>Package: <code>tools.jackson.databind.json.JsonMapper</code></td>
+            </tr>
+            <tr>
+              <td><code>ClassFileMetadataReader</code></td>
+              <td>Java 24+ bytecode reader using the Class-File API (faster classpath scan)</td>
+              <td>Auto-selected on Java 24+; no code change required</td>
+            </tr>
+            <tr>
+              <td><code>@ImportRuntimeHints</code></td>
+              <td>Registers AOT reflection/resource/proxy hints for GraalVM native images</td>
+              <td>Inheritable in Spring 7 — library authors annotate once</td>
+            </tr>
+            <tr>
+              <td><code>RuntimeHints.resources().registerPattern(...)</code></td>
+              <td>Registers glob resource patterns for native image inclusion</td>
+              <td>Glob pattern support new in Spring 7</td>
+            </tr>
+            <tr>
+              <td><code>@Observed</code> (class-level)</td>
+              <td>Instruments all public methods of a class with Micrometer observations</td>
+              <td>Class-level placement new in Spring 7</td>
+            </tr>
+            <tr>
+              <td><code>jakarta.servlet-api 6.1</code></td>
+              <td>Jakarta Servlet 6.1 — baseline for Spring 7 web apps</td>
+              <td>Requires Tomcat 11+ or Jetty 12.1+</td>
+            </tr>
+            <tr>
+              <td><code>jakarta.persistence-api 3.2</code></td>
+              <td>JPA 3.2 with UUID mapping, <code>getSingleResultOrNull()</code></td>
+              <td>Requires Hibernate 6.4+ or EclipseLink 4.0+</td>
+            </tr>
+            <tr>
+              <td><code>jakarta.validation-api 3.1</code></td>
+              <td>Bean Validation 3.1 with native record component validation</td>
+              <td>Reference impl: Hibernate Validator 8.0</td>
+            </tr>
+            <tr>
+              <td><code>SimpleAsyncTaskExecutor.setVirtualThreads(true)</code></td>
+              <td>Configures the task executor to use Java 21+ virtual threads</td>
+              <td>Java 21+ required; <code>@Scheduled</code> uses virtual threads by default in Spring 7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
