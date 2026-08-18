@@ -20,6 +20,7 @@
         { label: 'Overview',           href: ROOT + 'spring-core/index.html' },
         { label: 'Spring 5 Features',  href: ROOT + 'spring-core/spring5-features.html' },
         { label: 'Spring 6 Features',  href: ROOT + 'spring-core/spring6-features.html' },
+        { label: 'Spring 7 Features',  href: ROOT + 'spring-core/spring7-features.html' },
         { label: 'Version Comparison', href: ROOT + 'spring-core/version-comparison.html' },
         { label: 'Bean Lifecycle',     href: ROOT + 'spring-core/lifecycle.html' },
         { label: 'Tooling & Setup',    href: ROOT + 'spring-core/tooling.html' },
