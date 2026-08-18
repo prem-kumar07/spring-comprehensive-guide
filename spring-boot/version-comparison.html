@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot 3.x vs 4.x — Version Comparison</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot 3.x vs 4.x — Feature Comparison</h1>
+    <p>Spring Boot 4.0 (November 2025) is a major revision built on Spring Framework 7, targeting Jakarta EE 11, Java 17+, Hibernate 7, Jackson 3, and Spring Security 7. This page compares each significant area of change from Boot 3.x (latest: 3.5.7) to Boot 4.x. Click any row to expand a side-by-side code diff.</p>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:1.5rem 0 1rem;align-items:center">
+      <label style="color:var(--text-muted);font-size:0.875rem">Filter:</label>
+      <button class="filter-btn active" data-filter="all" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-size:0.8rem">All</button>
+      <button class="filter-btn" data-filter="new" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">New</button>
+      <button class="filter-btn" data-filter="changed" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Changed</button>
+      <button class="filter-btn" data-filter="removed" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Removed</button>
+      <button class="filter-btn" data-filter="deprecated" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Deprecated</button>
+      <span id="filter-count" style="color:var(--text-muted);font-size:0.875rem;margin-left:0.5rem"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table id="comparison-table">
+        <thead>
+          <tr>
+            <th style="width:25%">Feature</th>
+            <th style="width:30%"><span class="version-badge badge-boot3">Spring Boot 3.x</span></th>
+            <th style="width:30%"><span class="version-badge badge-boot4">Spring Boot 4.x</span></th>
+            <th style="width:15%">Type</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1: Spring Framework Version -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="spring-framework-version">Spring Framework Version (6.x → 7.x)</h3></td>
+            <td>Spring Framework 6.x — requires Java 17+, Jakarta EE 9+, AOT processing, GraalVM native support.</td>
+            <td>Spring Framework 7.x — built on Jakarta EE 11, adds JSpecify null safety, built-in retry/concurrency, CRaC checkpoint support.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Spring Framework 6</div>
+                  <pre><code class="language-xml">&lt;!-- Spring Boot 3.x (3.5.7) --&gt;
+&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;3.5.7&lt;/version&gt;
+&lt;/parent&gt;
+&lt;!-- Pulls in Spring Framework 6.2.x --&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Spring Framework 7</div>
+                  <pre><code class="language-xml">&lt;!-- Spring Boot 4.0.0 --&gt;
+&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;4.0.0&lt;/version&gt;
+&lt;/parent&gt;
+&lt;!-- Pulls in Spring Framework 7.0.x --&gt;
+&lt;!-- New: CRaC, JSpecify, built-in retry --&gt;</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: Java Baseline -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="java-baseline">Java Baseline (17 minimum, 21+ recommended in Boot 4)</h3></td>
+            <td>Java 17 minimum; Java 21 recommended for virtual threads (opt-in with <code>spring.threads.virtual.enabled=true</code>).</td>
+            <td>Java 17 minimum retained; Java 21+ strongly recommended for default-on virtual threads; Java 25 (next LTS) supported.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Java 17+ baseline</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 3 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;java.version&gt;17&lt;/java.version&gt;
+&lt;/properties&gt;
+&lt;!-- Virtual threads: opt-in --&gt;
+&lt;!-- application.properties --&gt;
+&lt;!-- spring.threads.virtual.enabled=true --&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Java 21+ recommended</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 4 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;!-- 17 still compiles, but 21+ is recommended --&gt;
+  &lt;java.version&gt;21&lt;/java.version&gt;
+&lt;/properties&gt;
+&lt;!-- Virtual threads: on by default in Boot 4 --&gt;
+&lt;!-- Records, sealed classes, pattern matching --&gt;
+&lt;!-- all available as first-class Spring targets --&gt;</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: Jakarta EE Version -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="jakarta-ee-version">Jakarta EE Version (EE 9 → EE 11)</h3></td>
+            <td>Jakarta EE 9 baseline — Servlet 5.0, JPA 3.0, Bean Validation 3.0, CDI 3.0. All <code>javax.*</code> replaced with <code>jakarta.*</code>.</td>
+            <td>Jakarta EE 11 — Servlet 6.1, JPA 3.2 (<code>@Find</code>, <code>@Query</code>), Bean Validation 3.1, CDI 4.1.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Jakarta EE 9</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 3: Jakarta EE 9 --&gt;
+&lt;!-- Servlet 5.0, JPA 3.0 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;5.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Jakarta EE 11</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 4: Jakarta EE 11 --&gt;
+&lt;!-- Servlet 6.1, JPA 3.2, BV 3.1 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;6.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+// JPA 3.2 — declarative query methods
+@Repository
+public interface UserRepo
+    extends JpaRepository&lt;User, Long&gt; {
+
+  @Find
+  Optional&lt;User&gt; byEmail(String email);
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4: Hibernate Version -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="hibernate-version">Hibernate ORM Version (6.x → 7.x)</h3></td>
+            <td>Hibernate ORM 6.x — Jakarta EE 9 namespace, improved HQL, SQM query engine, lazy loading improvements.</td>
+            <td>Hibernate ORM 7.x — Jakarta EE 11 alignment, stateless session improvements, enhanced batch processing, removed legacy APIs.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Hibernate 6</div>
+                  <pre><code class="language-java">// Hibernate 6 in Boot 3 — jakarta namespace
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class Product {
+    @Id
+    private Long id;
+    private String name;
+
+    // Hibernate 6: improved @Formula,
+    // better query caching, SQM engine
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Hibernate 7</div>
+                  <pre><code class="language-java">// Hibernate 7 in Boot 4
+// JPA 3.2 @Find, @Query natively supported
+// StatelessSession improvements for batch ops
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+public class Product {
+    @Id
+    private Long id;
+    private String name;
+
+    // Hibernate 7: removed deprecated legacy
+    // Criteria API (old hbm.xml style)
+    // Enhanced batch insert/update performance
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 5: Jackson Version -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="jackson-version">Jackson Version (2.x → 3.x default)</h3></td>
+            <td>Jackson 2.x (2.17+) — <code>com.fasterxml.jackson</code> groupId. Standard <code>ObjectMapper</code>, <code>JsonNode</code> API.</td>
+            <td>Jackson 3.x default — groupId changed to <code>tools.jackson</code>. Updated <code>ObjectMapper</code>, <code>ValueType</code> API, improved records support.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Jackson 2.x</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 3 — jackson 2.x --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+  &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+  &lt;version&gt;2.17.x&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+                  <pre><code class="language-java">// Jackson 2 usage
+ObjectMapper mapper = new ObjectMapper();
+JsonNode node = mapper.readTree(json);
+String name = node.get("name").asText();</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Jackson 3.x</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 4 — jackson 3.x (breaking change!) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+  &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+  &lt;version&gt;3.0.x&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+                  <pre><code class="language-java">// Jackson 3 — groupId and API changes
+// ValueType replaces TypeReference in some APIs
+// Records serialized without annotations needed
+ObjectMapper mapper = new ObjectMapper();
+JsonNode node = mapper.readTree(json);
+// Core traversal API updated — check migration guide</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 6: Spring Security Version -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="spring-security-version">Spring Security Version (6.x → 7.x)</h3></td>
+            <td>Spring Security 6.x — <code>SecurityFilterChain</code> component model, <code>HttpSecurity</code> lambda DSL. <code>AntPathRequestMatcher</code> still available.</td>
+            <td>Spring Security 7.x — <code>AntPathRequestMatcher</code> removed; use <code>MvcRequestMatcher</code> or <code>PathPatternRequestMatcher</code>. Enhanced OAuth2/OIDC.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Security 6 + AntPathRequestMatcher</div>
+                  <pre><code class="language-java">// Boot 3 — AntPathRequestMatcher still usable
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -&gt; auth
+            .requestMatchers(
+                new AntPathRequestMatcher("/api/**"))
+            .authenticated()
+            .anyRequest().permitAll()
+        );
+        return http.build();
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Security 7: AntPathRequestMatcher removed</div>
+                  <pre><code class="language-java">// Boot 4 — AntPathRequestMatcher REMOVED
+// Migrate to PathPatternRequestMatcher or
+// the simplified string-based matchers
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -&gt; auth
+            // Use string patterns directly:
+            .requestMatchers("/api/**")
+                .authenticated()
+            .anyRequest().permitAll()
+        );
+        return http.build();
+    }
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 7: Virtual Threads Default -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="virtual-threads-default">Virtual Threads (opt-in in Boot 3 → default in Boot 4)</h3></td>
+            <td>Virtual threads available since Boot 3.2 on Java 21+; must opt in via <code>spring.threads.virtual.enabled=true</code>.</td>
+            <td>Virtual threads are enabled by default in Boot 4 on Java 21+. Set <code>spring.threads.virtual.enabled=false</code> to disable.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — virtual threads opt-in</div>
+                  <pre><code class="language-properties"># Boot 3 application.properties
+# Virtual threads must be explicitly enabled:
+spring.threads.virtual.enabled=true
+
+# Default: platform threads (OS-backed pool)
+# If omitted, Tomcat uses traditional thread pool</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — virtual threads on by default</div>
+                  <pre><code class="language-properties"># Boot 4 application.properties
+# Virtual threads are ON by default (Java 21+)
+# No configuration needed for most apps.
+
+# To revert to platform threads if needed:
+spring.threads.virtual.enabled=false
+
+# Also: @Async methods auto-use virtual threads
+# when VirtualThreadTaskExecutor is configured</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 8: Structured Logging -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="structured-logging">Structured Logging (introduced in 3.4, enhanced in Boot 4)</h3></td>
+            <td>Boot 3.4 introduced opt-in structured logging (JSON format via Logback/Log4j2) with <code>logging.structured.format.console=ecs</code>.</td>
+            <td>Boot 4 matures structured logging — improved field ordering, additional built-in formats, structured MDC propagation with virtual threads.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.4 — structured logging opt-in</div>
+                  <pre><code class="language-properties"># Boot 3.4 application.properties
+# Enable Elastic Common Schema JSON output:
+logging.structured.format.console=ecs
+
+# Or logstash format:
+logging.structured.format.console=logstash
+
+# Output (ECS):
+# {"@timestamp":"...","log.level":"INFO",
+#  "message":"Request received","service.name":"..."}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — enhanced structured logging</div>
+                  <pre><code class="language-properties"># Boot 4 application.properties
+# Structured logging more refined:
+logging.structured.format.console=ecs
+
+# New: structured MDC carries through virtual threads
+# New: additional built-in formats (gelf, etc.)
+# New: consistent field ordering in all formats
+
+# MDC with virtual threads — context propagated:
+logging.structured.format.console=logstash</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 9: AutoConfiguration Mechanism -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="autoconfiguration-mechanism">AutoConfiguration Mechanism (.imports file improvements)</h3></td>
+            <td>Boot 3 replaced <code>spring.factories</code> with <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>.</td>
+            <td>Boot 4 refines the imports format — supports conditional ordering annotations, improved failure analysis, and AOT-safe configuration ordering.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — AutoConfiguration.imports</div>
+                  <pre><code class="language-text"># META-INF/spring/
+# org.springframework.boot.autoconfigure.AutoConfiguration.imports
+
+com.example.MyDatabaseAutoConfiguration
+com.example.MySecurityAutoConfiguration</code></pre>
+                  <pre><code class="language-java">// Boot 3 auto-configuration class
+@AutoConfiguration
+@ConditionalOnClass(DataSource.class)
+@ConditionalOnMissingBean(DataSource.class)
+public class MyDataSourceAutoConfiguration {
+    @Bean
+    public DataSource dataSource(
+            DataSourceProperties props) {
+        return props.initializeDataSourceBuilder()
+            .build();
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — improved ordering + failure analysis</div>
+                  <pre><code class="language-text"># Same file format, refined ordering support
+# META-INF/spring/
+# org.springframework.boot.autoconfigure.AutoConfiguration.imports
+
+com.example.MyDatabaseAutoConfiguration
+com.example.MySecurityAutoConfiguration</code></pre>
+                  <pre><code class="language-java">// Boot 4: @AutoConfiguration gets enhanced
+// @AutoConfigureAfter / @AutoConfigureBefore
+// more reliable for AOT processing
+@AutoConfiguration
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@ConditionalOnClass(DataSource.class)
+public class MyDataSourceAutoConfiguration {
+    // Better failure-analysis messages in Boot 4
+    // when conditions are not met
+    @Bean
+    public DataSource dataSource(
+            DataSourceProperties props) {
+        return props.initializeDataSourceBuilder()
+            .build();
+    }
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 10: @HttpExchange Changes -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="http-exchange-changes">@HttpExchange Interface Clients (enhanced in Boot 4)</h3></td>
+            <td>Boot 3 introduced <code>@HttpExchange</code> declarative HTTP clients (backed by <code>RestClient</code> or <code>WebClient</code>).</td>
+            <td>Boot 4 enhances <code>@HttpExchange</code> — auto-registration via <code>@ImportHttpServices</code>, improved error handling, reactive + sync unified API.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — @HttpExchange manual registration</div>
+                  <pre><code class="language-java">// Boot 3 — must register manually via factory
+@HttpExchange("https://api.example.com")
+public interface ProductClient {
+
+    @GetExchange("/products/{id}")
+    Product getProduct(@PathVariable Long id);
+
+    @PostExchange("/products")
+    Product createProduct(@RequestBody Product p);
+}
+
+// Manual wiring:
+@Bean
+ProductClient productClient(
+        RestClient.Builder builder) {
+    RestClient restClient = builder
+        .baseUrl("https://api.example.com")
+        .build();
+    return HttpServiceProxyFactory
+        .builderFor(RestClientAdapter
+            .create(restClient))
+        .build()
+        .createClient(ProductClient.class);
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — @ImportHttpServices auto-registration</div>
+                  <pre><code class="language-java">// Boot 4 — auto-register with @ImportHttpServices
+@SpringBootApplication
+@ImportHttpServices(types = ProductClient.class)
+public class App {
+    public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
+    }
+}
+
+@HttpExchange("https://api.example.com")
+public interface ProductClient {
+
+    @GetExchange("/products/{id}")
+    Product getProduct(@PathVariable Long id);
+
+    @PostExchange("/products")
+    Product createProduct(@RequestBody Product p);
+}
+// Bean is auto-created — no @Bean boilerplate
+// application.properties sets base-url, timeouts</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 11: Null Safety / JSpecify -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="null-safety-jspecify">Null Safety via JSpecify Integration</h3></td>
+            <td>Spring Framework 6 used its own <code>@NonNull</code> / <code>@Nullable</code> annotations in <code>org.springframework.lang</code>.</td>
+            <td>Boot 4 / Framework 7 adopts JSpecify (<code>org.jspecify.annotations</code>) for standardised null safety across the entire Spring API surface.</td>
+            <td><span class="version-badge badge-boot4">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Spring's own null annotations</div>
+                  <pre><code class="language-java">// Spring Framework 6 null annotations
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
+public interface UserService {
+
+    @NonNull
+    User findById(@NonNull Long id);
+
+    @Nullable
+    User findByEmail(@NonNull String email);
+}
+// These are Spring-specific; IDEs vary
+// in how well they understand them</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — JSpecify standardised null safety</div>
+                  <pre><code class="language-java">// Spring Framework 7 adopts JSpecify
+// org.jspecify.annotations.*
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+// Package-level null-marked (common pattern):
+// @NullMarked on package-info.java makes all
+// types non-null by default in the package
+@NullMarked
+package com.example.service;
+
+public interface UserService {
+
+    User findById(Long id);  // non-null by default
+
+    @Nullable
+    User findByEmail(String email);
+}
+// Kotlin interop improved; tool support wider</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 12: gRPC Support -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="grpc-first-class-support">gRPC First-Class Support</h3></td>
+            <td>Boot 3 offered no built-in gRPC support; required third-party starters (e.g. <code>grpc-spring-boot-starter</code> from the community).</td>
+            <td>Boot 4 provides <code>spring-boot-starter-grpc</code> with auto-configuration for gRPC server/client, health checks, and Micrometer metrics.</td>
+            <td><span class="version-badge badge-boot4">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — third-party gRPC starter required</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 3 — community starter needed --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;net.devh&lt;/groupId&gt;
+  &lt;artifactId&gt;grpc-spring-boot-starter&lt;/artifactId&gt;
+  &lt;version&gt;2.x.x.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+                  <pre><code class="language-java">// Community gRPC — vendor-specific annotations
+@GrpcService
+public class UserGrpcService
+        extends UserServiceGrpc.UserServiceImplBase {
+
+    @Override
+    public void getUser(GetUserRequest req,
+            StreamObserver&lt;User&gt; resp) {
+        // manual error handling, no Boot integration
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — first-class spring-boot-starter-grpc</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 4 — official starter --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-grpc&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                  <pre><code class="language-java">// Boot 4 — Spring-idiomatic gRPC service
+@Service
+@GrpcService  // from org.springframework.grpc
+public class UserGrpcService
+        extends UserServiceGrpc.UserServiceImplBase {
+
+    @Override
+    public void getUser(GetUserRequest req,
+            StreamObserver&lt;UserReply&gt; resp) {
+        // Auto health check, Micrometer metrics,
+        // Spring Security integration built-in
+    }
+}
+// application.properties:
+// spring.grpc.server.port=9090</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 13: Built-in API Versioning -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="api-versioning">Built-in API Versioning</h3></td>
+            <td>Boot 3 had no built-in API versioning; developers implemented versioning manually (URL prefix, headers, content negotiation).</td>
+            <td>Boot 4 introduces <code>@ApiVersionMapping</code> and configurable versioning strategies (URI, header, media type) supported natively by Spring MVC and WebFlux.</td>
+            <td><span class="version-badge badge-boot4">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — manual URL-based versioning</div>
+                  <pre><code class="language-java">// Boot 3 — manual version prefix in URL
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserV1Controller {
+
+    @GetMapping("/{id}")
+    public UserV1Response getUser(@PathVariable Long id) {
+        return userService.getUserV1(id);
+    }
+}
+
+@RestController
+@RequestMapping("/api/v2/users")
+public class UserV2Controller {
+
+    @GetMapping("/{id}")
+    public UserV2Response getUser(@PathVariable Long id) {
+        return userService.getUserV2(id);
+    }
+}
+// Duplicated controllers — hard to maintain</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — @ApiVersionMapping built-in</div>
+                  <pre><code class="language-java">// Boot 4 — built-in versioning via annotation
+// application.properties:
+// spring.mvc.versioning.type=uri-path
+// spring.mvc.versioning.uri-path.prefix=/api/{version}
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    @GetMapping("/{id}")
+    @ApiVersionMapping({"v1", "v2"})
+    public UserResponse getUser(
+            @PathVariable Long id,
+            ApiVersion version) {
+        // Same controller handles multiple versions
+        if (version.isAtLeast("v2")) {
+            return userService.getUserV2(id);
+        }
+        return userService.getUserV1(id);
+    }
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 14: ListenableFuture Removed -->
+          <tr class="comparison-row" data-type="removed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="listenable-future-removed">ListenableFuture Removed</h3></td>
+            <td>Boot 3 deprecated <code>ListenableFuture</code> and <code>AsyncResult</code>; <code>CompletableFuture</code> recommended as replacement.</td>
+            <td>Boot 4 / Framework 7 removes <code>ListenableFuture</code>, <code>AsyncResult</code>, and <code>SettableListenableFuture</code> entirely.</td>
+            <td><span style="background:rgba(248,81,73,0.15);color:#f85149;border:1px solid #f8514944;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.78rem;font-weight:600">Removed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — ListenableFuture (deprecated)</div>
+                  <pre><code class="language-java">// Boot 3 — ListenableFuture deprecated
+// @Async returning ListenableFuture still works
+// but generates deprecation warnings
+@Service
+public class EmailService {
+
+    @Async
+    public ListenableFuture&lt;Boolean&gt; sendEmail(
+            String to, String subject) {
+        boolean result = doSend(to, subject);
+        return AsyncResult.forValue(result);
+        // Deprecated — migrate to CompletableFuture
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — CompletableFuture required</div>
+                  <pre><code class="language-java">// Boot 4 — ListenableFuture REMOVED
+// Migrate to CompletableFuture (Java 8+)
+@Service
+public class EmailService {
+
+    @Async
+    public CompletableFuture&lt;Boolean&gt; sendEmail(
+            String to, String subject) {
+        boolean result = doSend(to, subject);
+        return CompletableFuture.completedFuture(
+            result);
+    }
+
+    // Or use reactive Mono from Project Reactor:
+    public Mono&lt;Boolean&gt; sendEmailReactive(
+            String to, String subject) {
+        return Mono.fromCallable(
+            () -&gt; doSend(to, subject));
+    }
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 15: Undertow Support Removed -->
+          <tr class="comparison-row" data-type="removed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="undertow-removed">Undertow Embedded Server Removed</h3></td>
+            <td>Boot 3 supported Undertow as an embedded servlet container alongside Tomcat and Jetty via <code>spring-boot-starter-undertow</code>.</td>
+            <td>Boot 4 removes Undertow support. Use Tomcat (default) or Jetty. Reactor Netty remains the reactive server.</td>
+            <td><span style="background:rgba(248,81,73,0.15);color:#f85149;border:1px solid #f8514944;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.78rem;font-weight:600">Removed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — Undertow as an option</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 3 — switch to Undertow --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;exclusions&gt;
+    &lt;exclusion&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+    &lt;/exclusion&gt;
+  &lt;/exclusions&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-undertow&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — Tomcat or Jetty only</div>
+                  <pre><code class="language-xml">&lt;!-- Boot 4 — Undertow removed, use Tomcat (default) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;!-- Uses Tomcat by default --&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Or switch to Jetty: --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!-- Reactive: Reactor Netty via WebFlux starter --&gt;</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 16: Deprecated API removal (WebMvcConfigurationSupport) -->
+          <tr class="comparison-row" data-type="removed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="deprecated-mvc-apis-removed">Deprecated MVC APIs Removed (WebMvcConfigurationSupport legacy methods)</h3></td>
+            <td>Boot 3 retained deprecated <code>WebMvcConfigurationSupport</code> override methods and legacy <code>HandlerInterceptorAdapter</code>.</td>
+            <td>Boot 4 removes <code>HandlerInterceptorAdapter</code> and various deprecated <code>WebMvcConfigurer</code> / <code>WebMvcConfigurationSupport</code> methods.</td>
+            <td><span style="background:rgba(248,81,73,0.15);color:#f85149;border:1px solid #f8514944;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.78rem;font-weight:600">Removed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — HandlerInterceptorAdapter deprecated</div>
+                  <pre><code class="language-java">// Boot 3 — HandlerInterceptorAdapter deprecated
+// but still compiles with warning
+public class LoggingInterceptor
+        extends HandlerInterceptorAdapter {
+
+    @Override
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler) {
+        log.info("Request: {}", request.getRequestURI());
+        return true;
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — implement HandlerInterceptor directly</div>
+                  <pre><code class="language-java">// Boot 4 — HandlerInterceptorAdapter REMOVED
+// Implement HandlerInterceptor interface directly
+public class LoggingInterceptor
+        implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler) {
+        log.info("Request: {}", request.getRequestURI());
+        return true;
+    }
+    // postHandle and afterCompletion are
+    // default methods — override only what you need
+}</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 17: Spring Data (deprecated repositories) -->
+          <tr class="comparison-row" data-type="deprecated" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="crudrepository-count-exists">CrudRepository count/exists Return Types (deprecated in Boot 4)</h3></td>
+            <td>Boot 3: <code>CrudRepository.count()</code> returns <code>long</code>; <code>existsById()</code> returns <code>boolean</code>.</td>
+            <td>Boot 4: boxed <code>Long</code> / <code>Boolean</code> overloads added; primitive versions deprecated to align with null-safe API contracts.</td>
+            <td><span class="version-badge badge-v7">Deprecated</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Boot 3.x — primitive return types</div>
+                  <pre><code class="language-java">// Boot 3 — CrudRepository returns primitives
+@Repository
+public interface ProductRepository
+        extends CrudRepository&lt;Product, Long&gt; {
+}
+
+// Usage:
+long count = productRepository.count();
+boolean exists = productRepository
+    .existsById(42L);</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Boot 4.x — boxed types preferred</div>
+                  <pre><code class="language-java">// Boot 4 — primitive methods deprecated
+// Migrate to boxed type methods
+@Repository
+public interface ProductRepository
+        extends CrudRepository&lt;Product, Long&gt; {
+}
+
+// Preferred in Boot 4 (null-safe, JSpecify aligned):
+Long count = productRepository.count();
+// or use Optional-returning query methods
+
+Boolean exists = productRepository
+    .existsById(42L);
+// Primitive versions still work but emit warnings</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Migration Cheatsheet -->
+    <section class="cheatsheet" id="migration-cheatsheet">
+      <h2>Migration Cheatsheet: Boot 3.x → 4.x</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>What to Change</th>
+              <th>Spring Boot 3.x</th>
+              <th>Spring Boot 4.x</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Parent POM version</td>
+              <td><code>spring-boot-starter-parent:3.5.7</code></td>
+              <td><code>spring-boot-starter-parent:4.0.0</code></td>
+            </tr>
+            <tr>
+              <td>Jackson groupId</td>
+              <td><code>com.fasterxml.jackson.core</code></td>
+              <td><code>tools.jackson.core</code></td>
+            </tr>
+            <tr>
+              <td>Security path matcher</td>
+              <td><code>new AntPathRequestMatcher("/api/**")</code></td>
+              <td><code>.requestMatchers("/api/**")</code> (string literal)</td>
+            </tr>
+            <tr>
+              <td>Async return type</td>
+              <td><code>ListenableFuture&lt;T&gt;</code> / <code>AsyncResult.forValue()</code></td>
+              <td><code>CompletableFuture&lt;T&gt;</code> / <code>CompletableFuture.completedFuture()</code></td>
+            </tr>
+            <tr>
+              <td>Interceptor base class</td>
+              <td><code>extends HandlerInterceptorAdapter</code></td>
+              <td><code>implements HandlerInterceptor</code></td>
+            </tr>
+            <tr>
+              <td>Embedded server (Undertow)</td>
+              <td><code>spring-boot-starter-undertow</code></td>
+              <td>Remove; use Tomcat (default) or <code>spring-boot-starter-jetty</code></td>
+            </tr>
+            <tr>
+              <td>Null annotations</td>
+              <td><code>org.springframework.lang.@NonNull</code></td>
+              <td><code>org.jspecify.annotations.@NonNull</code></td>
+            </tr>
+            <tr>
+              <td>gRPC dependency</td>
+              <td><code>net.devh:grpc-spring-boot-starter</code> (community)</td>
+              <td><code>org.springframework.boot:spring-boot-starter-grpc</code></td>
+            </tr>
+            <tr>
+              <td>Virtual threads</td>
+              <td><code>spring.threads.virtual.enabled=true</code> (opt-in)</td>
+              <td>On by default; disable with <code>spring.threads.virtual.enabled=false</code></td>
+            </tr>
+            <tr>
+              <td>HTTP client registration</td>
+              <td>Manual <code>HttpServiceProxyFactory</code> <code>@Bean</code></td>
+              <td><code>@ImportHttpServices(types = MyClient.class)</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- #content -->
+</div><!-- #main -->
+
+<script>
+(function () {
+  const rows = document.querySelectorAll('.comparison-row');
+  let activeFilter = 'all';
+
+  function updateCount() {
+    const visible = document.querySelectorAll(
+      '.comparison-row:not([style*="display: none"]):not([style*="display:none"])'
+    ).length;
+    const counter = document.getElementById('filter-count');
+    if (counter) counter.textContent = visible + ' of ' + rows.length + ' features';
+  }
+
+  function applyFilter() {
+    rows.forEach(row => {
+      const show = activeFilter === 'all' || row.dataset.type === activeFilter;
+      row.style.display = show ? '' : 'none';
+      const diffRow = row.nextElementSibling;
+      if (diffRow && diffRow.classList.contains('diff-row')) {
+        if (!show) diffRow.style.display = 'none';
+      }
+    });
+    updateCount();
+  }
+
+  // Filter button clicks
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.style.background = 'var(--surface)';
+        b.style.color = 'var(--text-muted)';
+        b.classList.remove('active');
+      });
+      btn.style.background = 'var(--surface-2)';
+      btn.style.color = 'var(--text)';
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  // Expandable rows
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      const diffRow = row.nextElementSibling;
+      if (diffRow && diffRow.classList.contains('diff-row')) {
+        diffRow.style.display =
+          diffRow.style.display === 'none' ? '' : 'none';
+      }
+    });
+  });
+
+  updateCount();
+})();
+</script>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

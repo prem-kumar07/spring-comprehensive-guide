@@ -959,6 +959,272 @@
     "text": "Actuator health groups, Micrometer metrics, containerization, Testcontainers, graceful shutdown"
   },
   {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Boot 3.x vs 4.x — Feature Comparison",
+    "anchor": "",
+    "text": "Spring Boot 3.x vs 4.x — Feature Comparison"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Boot 3.x vs 4.x — Feature Comparison",
+    "anchor": "",
+    "text": "Spring Boot 4.0 (November 2025) is a major revision built on Spring Framework 7, targeting Jakarta EE 11, Java 17+, Hibernate 7, Jackson 3, and Spring Security 7. This page compares each significant area of change from Boot 3.x (latest: 3.5.7) to Boot 4.x. Click any row to expand a side-by-side code"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Framework Version (6.x → 7.x)",
+    "anchor": "spring-framework-version",
+    "text": "Spring Framework Version (6.x → 7.x)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Framework Version (6.x → 7.x)",
+    "anchor": "spring-framework-version",
+    "text": "Spring Framework 6.x — requires Java 17+, Jakarta EE 9+, AOT processing, GraalVM native support. Spring Framework 7.x — built on Jakarta EE 11, adds JSpecify null safety, built-in retry/concurrency, CRaC checkpoint support. Changed Boot 3.x — Spring Framework 6 <!-- Spring Boot 3.x (3.5.7) -->\n<pare"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Java Baseline (17 minimum, 21+ recommended in Boot 4)",
+    "anchor": "java-baseline",
+    "text": "Java Baseline (17 minimum, 21+ recommended in Boot 4)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Java Baseline (17 minimum, 21+ recommended in Boot 4)",
+    "anchor": "java-baseline",
+    "text": "Java 17 minimum; Java 21 recommended for virtual threads (opt-in with spring.threads.virtual.enabled=true ). Java 17 minimum retained; Java 21+ strongly recommended for default-on virtual threads; Java 25 (next LTS) supported. Changed Boot 3.x — Java 17+ baseline <!-- Boot 3 pom.xml -->\n<properties>"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Jakarta EE Version (EE 9 → EE 11)",
+    "anchor": "jakarta-ee-version",
+    "text": "Jakarta EE Version (EE 9 → EE 11)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Jakarta EE Version (EE 9 → EE 11)",
+    "anchor": "jakarta-ee-version",
+    "text": "Jakarta EE 9 baseline — Servlet 5.0, JPA 3.0, Bean Validation 3.0, CDI 3.0. All javax.* replaced with jakarta.* . Jakarta EE 11 — Servlet 6.1, JPA 3.2 ( @Find , @Query ), Bean Validation 3.1, CDI 4.1. Changed Boot 3.x — Jakarta EE 9 <!-- Boot 3: Jakarta EE 9 -->\n<!-- Servlet 5.0, JPA 3.0 -->\n<depend"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Hibernate ORM Version (6.x → 7.x)",
+    "anchor": "hibernate-version",
+    "text": "Hibernate ORM Version (6.x → 7.x)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Hibernate ORM Version (6.x → 7.x)",
+    "anchor": "hibernate-version",
+    "text": "Hibernate ORM 6.x — Jakarta EE 9 namespace, improved HQL, SQM query engine, lazy loading improvements. Hibernate ORM 7.x — Jakarta EE 11 alignment, stateless session improvements, enhanced batch processing, removed legacy APIs. Changed Boot 3.x — Hibernate 6 // Hibernate 6 in Boot 3 — jakarta namesp"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Jackson Version (2.x → 3.x default)",
+    "anchor": "jackson-version",
+    "text": "Jackson Version (2.x → 3.x default)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Jackson Version (2.x → 3.x default)",
+    "anchor": "jackson-version",
+    "text": "Jackson 2.x (2.17+) — com.fasterxml.jackson groupId. Standard ObjectMapper , JsonNode API. Jackson 3.x default — groupId changed to tools.jackson . Updated ObjectMapper , ValueType API, improved records support. Changed Boot 3.x — Jackson 2.x <!-- Boot 3 — jackson 2.x -->\n<dependency>\n  <groupId>com"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Security Version (6.x → 7.x)",
+    "anchor": "spring-security-version",
+    "text": "Spring Security Version (6.x → 7.x)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Spring Security Version (6.x → 7.x)",
+    "anchor": "spring-security-version",
+    "text": "Spring Security 6.x — SecurityFilterChain component model, HttpSecurity lambda DSL. AntPathRequestMatcher still available. Spring Security 7.x — AntPathRequestMatcher removed; use MvcRequestMatcher or PathPatternRequestMatcher . Enhanced OAuth2/OIDC. Changed Boot 3.x — Security 6 + AntPathRequestMat"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Virtual Threads (opt-in in Boot 3 → default in Boot 4)",
+    "anchor": "virtual-threads-default",
+    "text": "Virtual Threads (opt-in in Boot 3 → default in Boot 4)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Virtual Threads (opt-in in Boot 3 → default in Boot 4)",
+    "anchor": "virtual-threads-default",
+    "text": "Virtual threads available since Boot 3.2 on Java 21+; must opt in via spring.threads.virtual.enabled=true . Virtual threads are enabled by default in Boot 4 on Java 21+. Set spring.threads.virtual.enabled=false to disable. Changed Boot 3.x — virtual threads opt-in # Boot 3 application.properties\n# V"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Structured Logging (introduced in 3.4, enhanced in Boot 4)",
+    "anchor": "structured-logging",
+    "text": "Structured Logging (introduced in 3.4, enhanced in Boot 4)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Structured Logging (introduced in 3.4, enhanced in Boot 4)",
+    "anchor": "structured-logging",
+    "text": "Boot 3.4 introduced opt-in structured logging (JSON format via Logback/Log4j2) with logging.structured.format.console=ecs . Boot 4 matures structured logging — improved field ordering, additional built-in formats, structured MDC propagation with virtual threads. Changed Boot 3.4 — structured logging"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "AutoConfiguration Mechanism (.imports file improvements)",
+    "anchor": "autoconfiguration-mechanism",
+    "text": "AutoConfiguration Mechanism (.imports file improvements)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "AutoConfiguration Mechanism (.imports file improvements)",
+    "anchor": "autoconfiguration-mechanism",
+    "text": "Boot 3 replaced spring.factories with META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports . Boot 4 refines the imports format — supports conditional ordering annotations, improved failure analysis, and AOT-safe configuration ordering. Changed Boot 3.x — AutoConfiguration"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "@HttpExchange Interface Clients (enhanced in Boot 4)",
+    "anchor": "http-exchange-changes",
+    "text": "@HttpExchange Interface Clients (enhanced in Boot 4)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "@HttpExchange Interface Clients (enhanced in Boot 4)",
+    "anchor": "http-exchange-changes",
+    "text": "Boot 3 introduced @HttpExchange declarative HTTP clients (backed by RestClient or WebClient ). Boot 4 enhances @HttpExchange — auto-registration via @ImportHttpServices , improved error handling, reactive + sync unified API. Changed Boot 3.x — @HttpExchange manual registration // Boot 3 — must regis"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Null Safety via JSpecify Integration",
+    "anchor": "null-safety-jspecify",
+    "text": "Null Safety via JSpecify Integration"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Null Safety via JSpecify Integration",
+    "anchor": "null-safety-jspecify",
+    "text": "Spring Framework 6 used its own @NonNull / @Nullable annotations in org.springframework.lang . Boot 4 / Framework 7 adopts JSpecify ( org.jspecify.annotations ) for standardised null safety across the entire Spring API surface. New Boot 3.x — Spring's own null annotations // Spring Framework 6 null "
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "gRPC First-Class Support",
+    "anchor": "grpc-first-class-support",
+    "text": "gRPC First-Class Support"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "gRPC First-Class Support",
+    "anchor": "grpc-first-class-support",
+    "text": "Boot 3 offered no built-in gRPC support; required third-party starters (e.g. grpc-spring-boot-starter from the community). Boot 4 provides spring-boot-starter-grpc with auto-configuration for gRPC server/client, health checks, and Micrometer metrics. New Boot 3.x — third-party gRPC starter required "
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Built-in API Versioning",
+    "anchor": "api-versioning",
+    "text": "Built-in API Versioning"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Built-in API Versioning",
+    "anchor": "api-versioning",
+    "text": "Boot 3 had no built-in API versioning; developers implemented versioning manually (URL prefix, headers, content negotiation). Boot 4 introduces @ApiVersionMapping and configurable versioning strategies (URI, header, media type) supported natively by Spring MVC and WebFlux. New Boot 3.x — manual URL-"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "ListenableFuture Removed",
+    "anchor": "listenable-future-removed",
+    "text": "ListenableFuture Removed"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "ListenableFuture Removed",
+    "anchor": "listenable-future-removed",
+    "text": "Boot 3 deprecated ListenableFuture and AsyncResult ; CompletableFuture recommended as replacement. Boot 4 / Framework 7 removes ListenableFuture , AsyncResult , and SettableListenableFuture entirely. Removed Boot 3.x — ListenableFuture (deprecated) // Boot 3 — ListenableFuture deprecated\n// @Async r"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Undertow Embedded Server Removed",
+    "anchor": "undertow-removed",
+    "text": "Undertow Embedded Server Removed"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Undertow Embedded Server Removed",
+    "anchor": "undertow-removed",
+    "text": "Boot 3 supported Undertow as an embedded servlet container alongside Tomcat and Jetty via spring-boot-starter-undertow . Boot 4 removes Undertow support. Use Tomcat (default) or Jetty. Reactor Netty remains the reactive server. Removed Boot 3.x — Undertow as an option <!-- Boot 3 — switch to Underto"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Deprecated MVC APIs Removed (WebMvcConfigurationSupport legacy methods)",
+    "anchor": "deprecated-mvc-apis-removed",
+    "text": "Deprecated MVC APIs Removed (WebMvcConfigurationSupport legacy methods)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Deprecated MVC APIs Removed (WebMvcConfigurationSupport legacy methods)",
+    "anchor": "deprecated-mvc-apis-removed",
+    "text": "Boot 3 retained deprecated WebMvcConfigurationSupport override methods and legacy HandlerInterceptorAdapter . Boot 4 removes HandlerInterceptorAdapter and various deprecated WebMvcConfigurer / WebMvcConfigurationSupport methods. Removed Boot 3.x — HandlerInterceptorAdapter deprecated // Boot 3 — Han"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "CrudRepository count/exists Return Types (deprecated in Boot 4)",
+    "anchor": "crudrepository-count-exists",
+    "text": "CrudRepository count/exists Return Types (deprecated in Boot 4)"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "CrudRepository count/exists Return Types (deprecated in Boot 4)",
+    "anchor": "crudrepository-count-exists",
+    "text": "Boot 3: CrudRepository.count() returns long ; existsById() returns boolean . Boot 4: boxed Long / Boolean overloads added; primitive versions deprecated to align with null-safe API contracts. Deprecated Boot 3.x — primitive return types // Boot 3 — CrudRepository returns primitives\n@Repository\npubli"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Migration Cheatsheet: Boot 3.x → 4.x",
+    "anchor": "",
+    "text": "Migration Cheatsheet: Boot 3.x → 4.x"
+  },
+  {
+    "page": "Spring Boot 3.x vs 4.x — Version Comparison",
+    "href": "spring-boot/version-comparison.html",
+    "section": "Migration Cheatsheet: Boot 3.x → 4.x",
+    "anchor": "",
+    "text": "What to Change Spring Boot 3.x Spring Boot 4.x Parent POM version spring-boot-starter-parent:3.5.7 spring-boot-starter-parent:4.0.0 Jackson groupId com.fasterxml.jackson.core tools.jackson.core Security path matcher new AntPathRequestMatcher(\"/api/**\") .requestMatchers(\"/api/**\") (string literal) As"
+  },
+  {
     "page": "Spring Core Framework",
     "href": "spring-core/index.html",
     "section": "Spring Core Framework",
