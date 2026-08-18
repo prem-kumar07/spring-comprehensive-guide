@@ -9,7 +9,8 @@
   // If we're one dir deep (e.g. /spring-comprehensive-guide/spring-core/lifecycle.html → depth=2
   // on GH Pages, depth=1 on localhost), we need '../' to get back.
   // Simple heuristic: if the pathname contains '/spring-core/', go up one level.
-  const inSubdir = window.location.pathname.includes('/spring-core/');
+  const inSubdir = window.location.pathname.includes('/spring-core/')
+               || window.location.pathname.includes('/spring-boot/');
   const ROOT = inSubdir ? '../' : './';
 
   const NAV = [
@@ -26,7 +27,17 @@
         { label: 'Tooling & Setup',    href: ROOT + 'spring-core/tooling.html' },
       ],
     },
-    { group: 'Spring Boot',  items: [], locked: true },
+    {
+      group: 'Spring Boot',
+      items: [
+        { label: 'Overview',             href: ROOT + 'spring-boot/index.html' },
+        { label: 'Boot 3 Features',      href: ROOT + 'spring-boot/boot3-features.html' },
+        { label: 'Boot 4 Features',      href: ROOT + 'spring-boot/boot4-features.html' },
+        { label: 'Version Comparison',   href: ROOT + 'spring-boot/version-comparison.html' },
+        { label: 'Auto-Configuration',   href: ROOT + 'spring-boot/auto-configuration.html' },
+        { label: 'Production & Tooling', href: ROOT + 'spring-boot/production.html' },
+      ],
+    },
     { group: 'Spring AI',    items: [], locked: true },
   ];
 
