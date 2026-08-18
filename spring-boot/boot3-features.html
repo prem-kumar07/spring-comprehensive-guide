@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot 3 Features</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot 3 Features</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-boot3">Spring Boot 3.x — 3.5.7</span>
+    </div>
+    <p>Spring Boot 3.x is the first major revision since Spring Boot 2.0 (2018). It requires <strong>Java 17 or later</strong> as a baseline, is built on <strong>Spring Framework 6.x</strong>, and migrates fully to the <strong>Jakarta EE 9+ namespace</strong>. The headline themes of the 3.x generation are: first-class <strong>GraalVM native image</strong> support (superseding the experimental Spring Native project), unified <strong>Observability</strong> via Micrometer and Micrometer Tracing, declarative HTTP clients via <code>@HttpExchange</code>, and RFC-compliant error responses with <code>ProblemDetail</code>.</p>
+
+    <div class="callout info">
+      <strong>Jakarta EE 9 namespace migration</strong>
+      All <code>javax.*</code> imports became <code>jakarta.*</code> in Spring Boot 3. This is a breaking change from Spring Boot 2.x — update every import in your codebase when upgrading (e.g. <code>javax.servlet.http.HttpServletRequest</code> → <code>jakarta.servlet.http.HttpServletRequest</code>).
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-autoconfig">Auto-Configuration</button>
+        <button class="tab-btn" data-tab="tab-web">Web</button>
+        <button class="tab-btn" data-tab="tab-data">Data</button>
+        <button class="tab-btn" data-tab="tab-security">Security</button>
+        <button class="tab-btn" data-tab="tab-observability">Observability</button>
+        <button class="tab-btn" data-tab="tab-native">Native / AOT</button>
+      </div>
+
+      <!-- ── Auto-Configuration ─────────────────────── -->
+      <div class="tab-panel active" id="tab-autoconfig">
+
+        <div class="feature-card">
+          <h3 id="autoconfiguration-imports-file">AutoConfiguration.imports File</h3>
+          <p>Spring Boot 3 replaces the <code>spring.factories</code> mechanism for registering auto-configurations with a dedicated file at <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>. Each line of this file contains a fully-qualified class name of an auto-configuration class. The <code>spring.factories</code> <code>EnableAutoConfiguration</code> key is no longer supported in Boot 3, so custom starters must migrate to the new file. This improves startup performance and aligns with GraalVM native image requirements.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;3.5.7&lt;/version&gt;
+&lt;/parent&gt;</code></pre>
+
+          <h4>Example — registering a custom auto-configuration</h4>
+          <pre><code class="language-text"># File: META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+
+com.example.MyDatabaseAutoConfiguration
+com.example.MySecurityAutoConfiguration</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="enable-auto-configuration">@EnableAutoConfiguration and @SpringBootApplication</h3>
+          <p><code>@SpringBootApplication</code> is a composed annotation that includes <code>@EnableAutoConfiguration</code>, which triggers the auto-configuration machinery. Spring Boot scans the <code>AutoConfiguration.imports</code> file and applies only the configurations whose <code>@Conditional</code> conditions are satisfied — for example, <code>@ConditionalOnClass</code> checks for a class on the classpath, and <code>@ConditionalOnMissingBean</code> only wires a bean if the application has not already defined one of the same type. In Boot 3 the import mechanism is loaded via <code>AutoConfigurationImportSelector</code>, which now reads the new <code>.imports</code> file rather than <code>spring.factories</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Main application entry point — triggers auto-configuration
+@SpringBootApplication
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+
+// Custom auto-configuration class
+@AutoConfiguration
+@ConditionalOnClass(DataSource.class)
+@ConditionalOnMissingBean(DataSource.class)
+public class MyDataSourceAutoConfiguration {
+
+    @Bean
+    public DataSource dataSource(DataSourceProperties props) {
+        return props.initializeDataSourceBuilder().build();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="conditional-annotations">Conditional Annotations</h3>
+          <p>Conditional annotations are the foundation of Spring Boot auto-configuration — they prevent a configuration from being applied unless specific conditions are met at runtime. Boot 3 ships the full set of conditions inherited from Boot 2, including <code>@ConditionalOnProperty</code>, <code>@ConditionalOnWebApplication</code>, <code>@ConditionalOnBean</code>, and <code>@ConditionalOnExpression</code>. In Spring Boot 3, <code>@ConditionalOnSingleCandidate</code> is also useful for reactive-vs-blocking scenarios where only one implementation should exist. Writing your own <code>Condition</code> by implementing the <code>SpringBootCondition</code> base class continues to work unchanged.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnProperty(name = "myapp.cache.enabled", havingValue = "true",
+                       matchIfMissing = false)
+@ConditionalOnClass(name = "com.github.benmanes.caffeine.cache.Caffeine")
+public class CaffeineCacheAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CacheManager cacheManager() {
+        return new CaffeineCacheManager();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="auto-configuration-conditions-report">Auto-Configuration Conditions Report</h3>
+          <p>Running your Spring Boot 3 application with the <code>--debug</code> flag (or setting <code>debug=true</code> in <code>application.properties</code>) prints a detailed <strong>conditions evaluation report</strong> to the console. The report is split into "Positive matches" (configurations that were applied) and "Negative matches" (configurations that were excluded and why). In Boot 3 this report is also available as a structured JSON payload via the <code>/actuator/conditions</code> endpoint when the Actuator is on the classpath, making it easy to consume programmatically or in CI diagnostics.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Enable conditions report in the console
+debug=true
+
+# Expose the /actuator/conditions endpoint over HTTP
+management.endpoints.web.exposure.include=conditions,health,info</code></pre>
+        </div>
+
+      </div><!-- /tab-autoconfig -->
+
+      <!-- ── Web ───────────────────────────────────── -->
+      <div class="tab-panel" id="tab-web">
+
+        <div class="feature-card">
+          <h3 id="http-exchange-declarative-clients">@HttpExchange — Declarative HTTP Clients</h3>
+          <p>Spring Framework 6 (and therefore Spring Boot 3) introduced <strong>HTTP Interface</strong> support: you declare a Java interface annotated with <code>@HttpExchange</code> and method-level annotations like <code>@GetExchange</code>, <code>@PostExchange</code>, and <code>@PutExchange</code>, and Spring generates a proxy implementation at runtime. This replaces hand-written <code>RestTemplate</code> or <code>WebClient</code> call sites with a concise, testable interface, similar in spirit to Spring Data repositories. The proxy is created via <code>HttpServiceProxyFactory</code> backed by either the blocking <code>RestClient</code> or the reactive <code>WebClient</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// 1. Declare the HTTP interface
+@HttpExchange(url = "https://api.example.com/users", accept = "application/json")
+public interface UserClient {
+
+    @GetExchange("/{id}")
+    User getById(@PathVariable long id);
+
+    @PostExchange
+    User create(@RequestBody User user);
+
+    @DeleteExchange("/{id}")
+    void delete(@PathVariable long id);
+}
+
+// 2. Register the proxy as a Spring bean
+@Configuration
+public class HttpClientConfig {
+
+    @Bean
+    public UserClient userClient(RestClient.Builder builder) {
+        RestClient restClient = builder
+            .baseUrl("https://api.example.com")
+            .build();
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+            .builderFor(RestClientAdapter.create(restClient))
+            .build();
+        return factory.createClient(UserClient.class);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="problem-detail-rfc7807">ProblemDetail — RFC 7807 Error Responses</h3>
+          <p>Spring Boot 3 adds native support for <strong>RFC 7807 "Problem Details for HTTP APIs"</strong> via the <code>ProblemDetail</code> and <code>ErrorResponse</code> types. A <code>ProblemDetail</code> carries a standard set of fields — <code>type</code> (URI identifying the error), <code>title</code>, <code>status</code>, <code>detail</code>, and <code>instance</code> — and can carry extension properties. Spring MVC exception handlers and <code>ResponseEntityExceptionHandler</code> now produce <code>ProblemDetail</code> JSON automatically when you enable the feature via a property. This standardises error payloads across teams without requiring a custom <code>@ControllerAdvice</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-properties"># Enable RFC 7807 problem details for all Spring MVC exceptions
+spring.mvc.problemdetails.enabled=true</code></pre>
+
+          <pre><code class="language-java">// Custom exception handler returning ProblemDetail
+@ControllerAdvice
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    ProblemDetail handleOrderNotFound(OrderNotFoundException ex,
+                                      HttpServletRequest request) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage());
+        detail.setTitle("Order Not Found");
+        detail.setType(URI.create("https://api.example.com/errors/order-not-found"));
+        detail.setProperty("orderId", ex.getOrderId());
+        return detail;
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="rest-client">RestClient — Synchronous Fluent HTTP</h3>
+          <p><code>RestClient</code> was introduced in Spring Boot 3.2 as a modern, synchronous alternative to the now-deprecated <code>RestTemplate</code>. It provides a fluent builder API closely mirroring <code>WebClient</code> — with support for request interceptors, message converters, and URI templates — but executes requests on the calling thread, making it straightforward to use in blocking, servlet-based applications. <code>RestClient.Builder</code> is pre-configured by Spring Boot auto-configuration with codecs and base URL support, so you can inject it directly.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class ProductService {
+
+    private final RestClient restClient;
+
+    public ProductService(RestClient.Builder builder) {
+        this.restClient = builder
+            .baseUrl("https://api.example.com")
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+    }
+
+    public Product findById(Long id) {
+        return restClient.get()
+            .uri("/products/{id}", id)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError,
+                (req, res) -&gt; { throw new ProductNotFoundException(id); })
+            .body(Product.class);
+    }
+
+    public Product create(Product product) {
+        return restClient.post()
+            .uri("/products")
+            .body(product)
+            .retrieve()
+            .body(Product.class);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="virtual-threads-web">Virtual Threads for Web (Project Loom)</h3>
+          <p>Spring Boot 3.2 added first-class support for <strong>Project Loom virtual threads</strong> (Java 21+). Enabling virtual threads replaces the Tomcat/Jetty thread pool with one virtual thread per HTTP request, dramatically increasing throughput for I/O-bound workloads without changing application code. Each request still appears blocking from the developer's perspective (no reactive programming model needed), but the JVM schedules the lightweight virtual threads efficiently on OS threads. Pair this with <code>spring-boot-starter-web</code> and Java 21 to get near-WebFlux scalability with classic servlet code.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Requires Java 21+ --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Enable virtual threads (requires Java 21+)
+spring.threads.virtual.enabled=true</code></pre>
+
+          <pre><code class="language-java">// No code changes required — every @RestController method runs
+// on a virtual thread automatically once the property is enabled.
+@RestController
+public class OrderController {
+
+    @GetMapping("/orders/{id}")
+    public Order getOrder(@PathVariable Long id) {
+        // Blocking I/O call — fine on a virtual thread
+        return orderRepository.findById(id).orElseThrow();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-web -->
+
+      <!-- ── Data ──────────────────────────────────── -->
+      <div class="tab-panel" id="tab-data">
+
+        <div class="feature-card">
+          <h3 id="testcontainers-service-connection">Testcontainers @ServiceConnection</h3>
+          <p>Spring Boot 3.1 introduced <code>@ServiceConnection</code>, a companion annotation for Testcontainers that eliminates boilerplate property configuration in integration tests. Annotate a <code>@Container</code> field with <code>@ServiceConnection</code> and Spring Boot automatically discovers the container type (PostgreSQL, Redis, MongoDB, Kafka, RabbitMQ…) and registers a <code>ConnectionDetails</code> bean, setting up all connection properties without you having to remember property names or override them manually. Boot 3.1 also supports Testcontainers at <em>development time</em> — you can run an application locally with containers started automatically via a <code>TestApplication</code> class, removing the need for a local Docker Compose file.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-testcontainers&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@SpringBootTest
+@Testcontainers
+class OrderRepositoryTest {
+
+    // @ServiceConnection auto-configures spring.datasource.* from this container
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+    @Autowired
+    OrderRepository repository;
+
+    @Test
+    void saveAndFind() {
+        Order order = repository.save(new Order("PENDING", 42.00));
+        assertThat(repository.findById(order.getId())).isPresent();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="hibernate-6-jakarta">Hibernate 6 and Jakarta Persistence</h3>
+          <p>Spring Boot 3 ships with <strong>Hibernate 6.x</strong> — a major release that dropped the <code>javax.persistence</code> package in favour of <code>jakarta.persistence</code> from the Jakarta EE 9 specification. Hibernate 6 also rewrote its SQL generation layer for improved type-safety, native support for Java records as embeddable objects, and a new <code>@TenantId</code> annotation for multi-tenancy. The <code>spring-boot-starter-data-jpa</code> starter brings in the correct Hibernate 6 version automatically when you declare Spring Boot 3 as the parent.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — Jakarta Persistence entity</h4>
+          <pre><code class="language-java">// Import jakarta.persistence, not javax.persistence
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "orders")
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String status;
+
+    private Double amount;
+
+    // Java record as @Embeddable also supported in Hibernate 6
+    public record Address(String street, String city, String zip) {}
+
+    @Embedded
+    private Address shippingAddress;
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="r2dbc-reactive-data">R2DBC — Reactive Relational Data</h3>
+          <p>Spring Boot 3 ships improved auto-configuration for <strong>R2DBC</strong> (Reactive Relational Database Connectivity). The starter configures a reactive <code>ConnectionFactory</code> and a <code>DatabaseClient</code>, and as of Spring Boot 3.2, <code>@ServiceConnection</code> works with R2DBC containers too — the connection factory is configured automatically from a Testcontainers container. Spring Data R2DBC 3.x, bundled with Boot 3, moved to the <code>jakarta.*</code> namespace and added Kotlin coroutines extensions and <code>Criteria</code> query improvements.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-r2dbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.r2dbc&lt;/groupId&gt;
+  &lt;artifactId&gt;r2dbc-postgresql&lt;/artifactId&gt;
+  &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Reactive repository — Spring Data R2DBC
+public interface ProductRepository
+    extends ReactiveCrudRepository&lt;Product, Long&gt; {
+
+    Flux&lt;Product&gt; findByCategory(String category);
+
+    Mono&lt;Product&gt; findBySkuCode(String skuCode);
+}
+
+// application.properties
+// spring.r2dbc.url=r2dbc:postgresql://localhost:5432/shopdb
+// spring.r2dbc.username=shop
+// spring.r2dbc.password=secret</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-data-3-improvements">Spring Data 3 Improvements</h3>
+          <p>Spring Data 3.x (bundled with Spring Boot 3) brings several developer-experience improvements: <strong>pagination defaults</strong> are now configurable globally, <strong>scroll queries</strong> allow cursor-based pagination without offset, and the <code>CrudRepository</code> and <code>ListCrudRepository</code> split separates reactive from imperative APIs more cleanly. Spring Data MongoDB 4.x (Boot 3) adds aggregation pipeline support in <code>MongoTemplate</code>, while Spring Data Redis 3.x migrates to Lettuce 6 and Jakarta EE 9.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — scroll (cursor-based) pagination</h4>
+          <pre><code class="language-java">// Spring Data 3 scroll API — cursor-based, no offset
+public interface ProductRepository extends Repository&lt;Product, String&gt; {
+
+    Window&lt;Product&gt; findTop10ByCategory(String category,
+                                         ScrollPosition position);
+}
+
+// Usage
+Window&lt;Product&gt; page = repo.findTop10ByCategory(
+    "electronics", ScrollPosition.offset());
+while (!page.isEmpty()) {
+    processProducts(page.getContent());
+    if (!page.hasNext()) break;
+    page = repo.findTop10ByCategory(
+        "electronics", page.positionAt(page.size() - 1));
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-data -->
+
+      <!-- ── Security ───────────────────────────────── -->
+      <div class="tab-panel" id="tab-security">
+
+        <div class="feature-card">
+          <h3 id="security-filter-chain-configuration">SecurityFilterChain — Configuration-Only Approach</h3>
+          <p>Spring Security 6 (bundled with Spring Boot 3) removes <code>WebSecurityConfigurerAdapter</code>, which was deprecated in Security 5.7. You must now configure security exclusively by declaring a <code>@Bean</code> of type <code>SecurityFilterChain</code>. This component-based model is cleaner and allows multiple filter chains in the same application (e.g. one for an API and one for the management endpoints). Multiple <code>SecurityFilterChain</code> beans are ordered via <code>@Order</code>, and the first chain whose <code>securityMatcher</code> matches the request wins.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/api/**")
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers("/api/public/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -&gt; session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt(Customizer.withDefaults()));
+        return http.build();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="security-lambda-dsl">Spring Security Lambda DSL</h3>
+          <p>Spring Security 6 mandates the <strong>Lambda DSL</strong> for all HTTP security configuration. In Security 5, both a chained method style and a lambda style were accepted; in Security 6 the chained style was removed. Each configuration subsystem — <code>authorizeHttpRequests</code>, <code>formLogin</code>, <code>csrf</code>, <code>oauth2Login</code>, etc. — now accepts a lambda <code>Customizer</code>. This makes the configuration self-contained per block, easier to read, and simpler to compose in tests using <code>Customizer.withDefaults()</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — Lambda DSL vs old chained style</h4>
+          <pre><code class="language-java">// ✗ Old chained style — REMOVED in Spring Security 6
+// http.authorizeRequests().antMatchers("/admin").hasRole("ADMIN").and()
+//     .formLogin().loginPage("/login");
+
+// ✓ New Lambda DSL — required in Spring Security 6 / Spring Boot 3
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .authorizeHttpRequests(auth -&gt; auth
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/public/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .formLogin(form -&gt; form
+            .loginPage("/login")
+            .defaultSuccessUrl("/dashboard")
+        )
+        .logout(logout -&gt; logout
+            .logoutSuccessUrl("/login?logout")
+        );
+    return http.build();
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="method-security-spring6">Method Security — @PreAuthorize and SpEL</h3>
+          <p>Spring Security 6 rewrote the method security infrastructure with a new <code>AuthorizationManager</code>-based approach. Annotating a <code>@Configuration</code> class with <code>@EnableMethodSecurity</code> (replacing the old <code>@EnableGlobalMethodSecurity</code>) activates <code>@PreAuthorize</code>, <code>@PostAuthorize</code>, <code>@PreFilter</code>, and <code>@PostFilter</code> without requiring an XML-based <code>GlobalMethodSecurityConfiguration</code>. The new implementation runs without proxy composition limitations and supports programmatic customisation via <code>MethodSecurityExpressionHandler</code> beans.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Activate method-level security (replaces @EnableGlobalMethodSecurity)
+@Configuration
+@EnableMethodSecurity
+public class MethodSecurityConfig {}
+
+// Apply at service layer
+@Service
+public class OrderService {
+
+    @PreAuthorize("hasRole('MANAGER') or #order.ownerId == authentication.name")
+    public void cancelOrder(Order order) { /* ... */ }
+
+    @PostAuthorize("returnObject.ownerId == authentication.name")
+    public Order findOrder(Long id) {
+        return orderRepository.findById(id).orElseThrow();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="oauth2-authorization-server">OAuth2 Authorization Server</h3>
+          <p>Spring Boot 3 includes auto-configuration for the <strong>Spring Authorization Server</strong> — a production-grade OAuth2 / OpenID Connect authorization server that was promoted to a first-class Spring project. Adding <code>spring-boot-starter-oauth2-authorization-server</code> auto-configures an in-memory or JPA-backed authorization server with sensible defaults for client registration, token signing (RSA keys), and OIDC discovery. This is the recommended replacement for the deprecated Spring Security OAuth2 Authorization Server that shipped with Boot 2.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-oauth2-authorization-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Register a client in application.properties (dev/test convenience)
+spring.security.oauth2.authorizationserver.client.my-client.registration.client-id=my-client
+spring.security.oauth2.authorizationserver.client.my-client.registration.client-secret={noop}secret
+spring.security.oauth2.authorizationserver.client.my-client.registration.authorization-grant-types=client_credentials,authorization_code
+spring.security.oauth2.authorizationserver.client.my-client.registration.redirect-uris=http://localhost:8080/login/oauth2/code/my-client
+spring.security.oauth2.authorizationserver.client.my-client.registration.scopes=openid,profile,read</code></pre>
+        </div>
+
+      </div><!-- /tab-security -->
+
+      <!-- ── Observability ──────────────────────────── -->
+      <div class="tab-panel" id="tab-observability">
+
+        <div class="feature-card">
+          <h3 id="micrometer-observation-api">Micrometer Observation API</h3>
+          <p>Spring Boot 3 introduces the <strong>Micrometer Observation API</strong> as the single, unified abstraction for all instrumentation — replacing separate <code>Timer</code>, <code>Counter</code>, and distributed tracing calls with a single <code>Observation</code> that automatically produces both metrics and traces. You create an <code>Observation</code> via <code>ObservationRegistry</code>, wrap your code in <code>observe()</code>, and Micrometer handles propagating context to both the metrics back-end (Prometheus, CloudWatch, etc.) and the tracing back-end (Zipkin, Jaeger, OpenTelemetry). This eliminates the need to wire <code>Tracer</code> and <code>MeterRegistry</code> separately.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-observation&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class PaymentService {
+
+    private final ObservationRegistry registry;
+
+    public PaymentService(ObservationRegistry registry) {
+        this.registry = registry;
+    }
+
+    public PaymentResult charge(Order order) {
+        return Observation.createNotStarted("payment.charge", registry)
+            .lowCardinalityKeyValue("payment.provider", "stripe")
+            .highCardinalityKeyValue("order.id", order.getId().toString())
+            .observe(() -&gt; stripeClient.charge(order));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="micrometer-tracing-distributed">Micrometer Tracing — Distributed Tracing</h3>
+          <p>Spring Boot 3 ships auto-configuration for <strong>Micrometer Tracing</strong>, which provides a vendor-neutral tracing facade over Brave (Zipkin) and OpenTelemetry. Adding a bridge dependency and an exporter automatically injects <code>Tracer</code> and propagates <code>TraceId</code>/<code>SpanId</code> across HTTP calls, Kafka messages, and scheduled tasks. The <code>management.tracing.sampling.probability</code> property controls the sampling rate (1.0 = 100%). Log correlation is built in: trace IDs are appended to every log line when using a structured log pattern.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Micrometer Tracing + OpenTelemetry bridge + Zipkin exporter --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-tracing-bridge-otel&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-exporter-zipkin&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Sample every request during development (default is 0.1 = 10%)
+management.tracing.sampling.probability=1.0
+
+# Zipkin endpoint
+management.zipkin.tracing.endpoint=http://localhost:9411/api/v2/spans
+
+# Include trace/span IDs in log lines
+logging.pattern.level=%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="prometheus-metrics-actuator">Prometheus Metrics and Actuator</h3>
+          <p>Spring Boot 3 Actuator auto-configures a Prometheus-compatible <code>/actuator/prometheus</code> scrape endpoint when <code>micrometer-registry-prometheus</code> is on the classpath. All Spring Boot built-in meters — JVM memory, GC pauses, HTTP server request duration, data source pool statistics, Tomcat threads, Spring Data repository counts — are exposed automatically. Custom metrics added via <code>MeterRegistry</code> or the Observation API appear in the same scrape. The actuator endpoint security and exposure are controlled independently via <code>management.endpoints.*</code> properties.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
+  &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Expose the Prometheus scrape endpoint
+management.endpoints.web.exposure.include=prometheus,health,info
+management.endpoint.prometheus.enabled=true
+
+# Add application name as a common tag on all meters
+management.metrics.tags.application=${spring.application.name}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="structured-logging">Structured Logging</h3>
+          <p>Spring Boot 3.4 added first-class support for <strong>structured logging</strong> — outputting each log event as a JSON document rather than a plain-text line. Setting <code>logging.structured.format.console=ecs</code> (Elastic Common Schema) or <code>logstash</code> produces machine-parseable JSON directly from the default Logback or Log4j2 configuration without requiring a custom appender. Combined with Micrometer Tracing, each log line automatically includes <code>traceId</code> and <code>spanId</code> fields, enabling seamless correlation in Elasticsearch, Grafana Loki, or Splunk.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Output structured JSON to the console (ECS format)
+logging.structured.format.console=ecs
+
+# Or to a file
+logging.structured.format.file=logstash
+logging.file.name=logs/application.log</code></pre>
+
+          <pre><code class="language-json">// Example structured log line (ECS format):
+{
+  "@timestamp": "2025-03-12T10:15:32.123Z",
+  "log.level": "INFO",
+  "message": "Processing order 42",
+  "service.name": "order-service",
+  "trace.id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span.id": "00f067aa0ba902b7"
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-observability -->
+
+      <!-- ── Native / AOT ───────────────────────────── -->
+      <div class="tab-panel" id="tab-native">
+
+        <div class="feature-card">
+          <h3 id="graalvm-native-image">GraalVM Native Image</h3>
+          <p>Spring Boot 3 provides first-class support for compiling Spring Boot applications into <strong>GraalVM native executables</strong>. A native executable contains only the classes and code reachable at build time, launches in milliseconds, and uses far less memory than a JVM application — ideal for serverless functions and container environments where startup time and cold-boot cost matter. Spring Boot's AOT engine analyses the application at build time, generating native hints for reflection, serialization, and proxies so that most Spring applications can be natively compiled without manual configuration.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+      &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <h4>Example — build command</h4>
+          <pre><code class="language-bash"># Compile to native executable (requires GraalVM with native-image)
+./mvnw -Pnative native:compile
+
+# Or build a native OCI image with Paketo Buildpacks (no local GraalVM needed)
+./mvnw spring-boot:build-image -Pnative</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="aot-processing">AOT Processing — spring-boot:process-aot</h3>
+          <p>Spring Boot 3's <strong>Ahead-of-Time (AOT) processing</strong> runs before compilation and transforms the Spring application context into a static, optimised form. The <code>spring-boot:process-aot</code> Maven goal (or <code>bootBuildImage</code> with native profile) generates Java source files and resource descriptors that replace the runtime reflection and dynamic proxy creation normally performed at startup. AOT processing is a mandatory intermediate step for GraalVM native compilation, but it also yields faster startup even on the JVM when running with the <code>spring.aot.enabled=true</code> system property.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;executions&gt;
+        &lt;execution&gt;
+          &lt;id&gt;process-aot&lt;/id&gt;
+          &lt;goals&gt;&lt;goal&gt;process-aot&lt;/goal&gt;&lt;/goals&gt;
+        &lt;/execution&gt;
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <h4>Example — run AOT processing</h4>
+          <pre><code class="language-bash"># Run AOT: generates sources in target/spring-aot/main/sources/
+./mvnw spring-boot:process-aot
+
+# Generated class example (by the AOT engine)
+# target/spring-aot/main/sources/com/example/DemoApplication__BeanDefinitions.java</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="import-runtime-hints">@ImportRuntimeHints — Native Reflection Hints</h3>
+          <p>When the AOT engine cannot automatically derive a native hint — for example, because your code uses reflection to instantiate a class by name at runtime — you can provide it explicitly with <code>@ImportRuntimeHints</code>. This annotation references a <code>RuntimeHintsRegistrar</code> implementation where you register reflection, resource, serialisation, and proxy hints programmatically. Spring Boot also ships <code>@RegisterReflectionForBinding</code> as a convenience shortcut to register all members of a type (useful for DTO classes that Jackson deserialises via reflection).</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Register a custom RuntimeHintsRegistrar
+public class MyRuntimeHints implements RuntimeHintsRegistrar {
+
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        // Reflection hint: need all constructors + methods of ReportEngine
+        hints.reflection()
+             .registerType(ReportEngine.class,
+                           MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                           MemberCategory.INVOKE_PUBLIC_METHODS);
+
+        // Resource hint: include config file in the native image
+        hints.resources().registerPattern("templates/*.html");
+    }
+}
+
+// Apply the hints registrar on your @Configuration or @SpringBootApplication
+@SpringBootApplication
+@ImportRuntimeHints(MyRuntimeHints.class)
+public class DemoApplication { /* ... */ }
+
+// Shortcut for Jackson DTOs
+@RegisterReflectionForBinding(OrderDto.class)
+@Configuration
+public class JacksonConfig { /* ... */ }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="native-testing">Native Testing with @NativeTest</h3>
+          <p>Spring Boot 3 supports running your test suite against the native executable via <code>@SpringBootTest</code> combined with the <code>native-maven-plugin</code>'s <code>test</code> goal. The <code>process-test-aot</code> Maven goal (analogous to <code>process-aot</code>) runs AOT processing over your test classes, generating the corresponding native hints, so integration tests validate real native-image behaviour. This catches native-image-specific failures (missing hints, unsupported proxies) early in CI, before building the production image.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+      &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+      &lt;extensions&gt;true&lt;/extensions&gt;
+      &lt;configuration&gt;
+        &lt;classesDirectory&gt;${project.build.outputDirectory}&lt;/classesDirectory&gt;
+      &lt;/configuration&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <h4>Example — run tests in native image</h4>
+          <pre><code class="language-bash"># Compile test classes and run integration tests as a native executable
+./mvnw -PnativeTest test
+
+# Or with the native-maven-plugin directly
+./mvnw native:test</code></pre>
+
+          <pre><code class="language-java">// Regular @SpringBootTest — also runs in native image when using native:test
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderControllerNativeTest {
+
+    @Autowired
+    TestRestTemplate restTemplate;
+
+    @Test
+    void createOrderReturns201() {
+        ResponseEntity&lt;Order&gt; response = restTemplate.postForEntity(
+            "/orders", new Order("PENDING", 99.99), Order.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-native -->
+
+    </div><!-- /tab-container -->
+
+    <!-- ── Cheatsheet ──────────────────────────────── -->
+    <section class="cheatsheet">
+      <h2>Spring Boot 3 Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / Starter / Property</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>spring-boot-starter-parent 3.5.7</code></td>
+              <td>BOM + plugin defaults for Spring Boot 3.x</td>
+              <td>Java 17 minimum; Jakarta EE 9 namespace</td>
+            </tr>
+            <tr>
+              <td><code>META-INF/spring/…AutoConfiguration.imports</code></td>
+              <td>Register auto-configuration classes (replaces spring.factories)</td>
+              <td>One FQCN per line; mandatory from Boot 3</td>
+            </tr>
+            <tr>
+              <td><code>@AutoConfiguration</code></td>
+              <td>Marks a class as a Boot auto-configuration</td>
+              <td>Replaces bare <code>@Configuration</code> in starters</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnClass</code></td>
+              <td>Apply config only if a class is on the classpath</td>
+              <td>Most common condition in starters</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnMissingBean</code></td>
+              <td>Apply config only if user has not declared the bean type</td>
+              <td>Allows override without disabling the starter</td>
+            </tr>
+            <tr>
+              <td><code>debug=true</code></td>
+              <td>Print auto-configuration conditions report to console</td>
+              <td>Also available at <code>/actuator/conditions</code></td>
+            </tr>
+            <tr>
+              <td><code>@HttpExchange</code></td>
+              <td>Declare a declarative HTTP client interface</td>
+              <td>Spring Framework 6 / Boot 3; uses RestClient or WebClient</td>
+            </tr>
+            <tr>
+              <td><code>@GetExchange / @PostExchange</code></td>
+              <td>HTTP method annotations on HTTP interface methods</td>
+              <td>@PutExchange, @DeleteExchange, @PatchExchange also available</td>
+            </tr>
+            <tr>
+              <td><code>HttpServiceProxyFactory</code></td>
+              <td>Create the HTTP interface proxy at runtime</td>
+              <td>Backed by RestClientAdapter or WebClientAdapter</td>
+            </tr>
+            <tr>
+              <td><code>ProblemDetail</code></td>
+              <td>RFC 7807 structured error response body</td>
+              <td>Set <code>spring.mvc.problemdetails.enabled=true</code></td>
+            </tr>
+            <tr>
+              <td><code>RestClient</code></td>
+              <td>Modern synchronous HTTP client (Boot 3.2+)</td>
+              <td>Replaces deprecated RestTemplate; fluent API</td>
+            </tr>
+            <tr>
+              <td><code>spring.threads.virtual.enabled=true</code></td>
+              <td>Enable Loom virtual threads for Tomcat/Jetty (Java 21+)</td>
+              <td>One virtual thread per request; no reactive model needed</td>
+            </tr>
+            <tr>
+              <td><code>@ServiceConnection</code></td>
+              <td>Auto-configure ConnectionDetails from a Testcontainers container</td>
+              <td>Spring Boot 3.1+; works with JDBC, R2DBC, Redis, Kafka…</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-data-jpa</code></td>
+              <td>JPA persistence with Hibernate 6 and Jakarta Persistence</td>
+              <td>Use <code>jakarta.persistence.*</code> (not <code>javax</code>)</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-data-r2dbc</code></td>
+              <td>Reactive relational database access</td>
+              <td>Pairs with r2dbc-postgresql, r2dbc-h2, etc.</td>
+            </tr>
+            <tr>
+              <td><code>SecurityFilterChain @Bean</code></td>
+              <td>Declare HTTP security rules (replaces WebSecurityConfigurerAdapter)</td>
+              <td>Required in Spring Security 6 / Boot 3</td>
+            </tr>
+            <tr>
+              <td><code>@EnableMethodSecurity</code></td>
+              <td>Enable @PreAuthorize / @PostAuthorize annotations</td>
+              <td>Replaces deprecated @EnableGlobalMethodSecurity</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-oauth2-authorization-server</code></td>
+              <td>Embed an OAuth2 / OIDC Authorization Server</td>
+              <td>Production-ready; replaces legacy Spring Security OAuth2</td>
+            </tr>
+            <tr>
+              <td><code>ObservationRegistry</code></td>
+              <td>Unified API for metrics + tracing via Observation</td>
+              <td>Micrometer Observation API; auto-configured in Boot 3</td>
+            </tr>
+            <tr>
+              <td><code>micrometer-tracing-bridge-otel</code></td>
+              <td>Bridge Micrometer Observation to OpenTelemetry Tracer</td>
+              <td>Pair with opentelemetry-exporter-zipkin or OTLP exporter</td>
+            </tr>
+            <tr>
+              <td><code>management.tracing.sampling.probability</code></td>
+              <td>Control trace sampling rate (0.0–1.0)</td>
+              <td>Default 0.1 (10%); set 1.0 for dev/test</td>
+            </tr>
+            <tr>
+              <td><code>micrometer-registry-prometheus</code></td>
+              <td>Expose /actuator/prometheus scrape endpoint</td>
+              <td>All built-in JVM, HTTP, and pool meters included</td>
+            </tr>
+            <tr>
+              <td><code>logging.structured.format.console</code></td>
+              <td>Output structured JSON logs (ecs, logstash formats)</td>
+              <td>Spring Boot 3.4+; includes traceId/spanId automatically</td>
+            </tr>
+            <tr>
+              <td><code>native-maven-plugin</code></td>
+              <td>GraalVM native-image compilation via Maven</td>
+              <td>Group: org.graalvm.buildtools; use -Pnative profile</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot:process-aot</code></td>
+              <td>Run AOT processing — generate optimised sources for native</td>
+              <td>Mandatory before native:compile; also speeds JVM startup</td>
+            </tr>
+            <tr>
+              <td><code>@ImportRuntimeHints</code></td>
+              <td>Register reflection / resource / proxy hints for native image</td>
+              <td>Reference a RuntimeHintsRegistrar implementation</td>
+            </tr>
+            <tr>
+              <td><code>@RegisterReflectionForBinding</code></td>
+              <td>Shortcut to register all members of a class for reflection</td>
+              <td>Useful for Jackson DTOs in native images</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

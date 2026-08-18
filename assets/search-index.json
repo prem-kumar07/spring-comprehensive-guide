@@ -56,6 +56,370 @@
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Boot 3 Features",
+    "anchor": "",
+    "text": "Spring Boot 3 Features"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Boot 3 Features",
+    "anchor": "",
+    "text": "Spring Boot 3.x — 3.5.7 Spring Boot 3.x is the first major revision since Spring Boot 2.0 (2018). It requires Java 17 or later as a baseline, is built on Spring Framework 6.x , and migrates fully to the Jakarta EE 9+ namespace . The headline themes of the 3.x generation are: first-class GraalVM nati"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "AutoConfiguration.imports File",
+    "anchor": "autoconfiguration-imports-file",
+    "text": "AutoConfiguration.imports File"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "AutoConfiguration.imports File",
+    "anchor": "autoconfiguration-imports-file",
+    "text": "Spring Boot 3 replaces the spring.factories mechanism for registering auto-configurations with a dedicated file at META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports . Each line of this file contains a fully-qualified class name of an auto-configuration class. The sprin"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@EnableAutoConfiguration and @SpringBootApplication",
+    "anchor": "enable-auto-configuration",
+    "text": "@EnableAutoConfiguration and @SpringBootApplication"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@EnableAutoConfiguration and @SpringBootApplication",
+    "anchor": "enable-auto-configuration",
+    "text": "@SpringBootApplication is a composed annotation that includes @EnableAutoConfiguration , which triggers the auto-configuration machinery. Spring Boot scans the AutoConfiguration.imports file and applies only the configurations whose @Conditional conditions are satisfied — for example, @ConditionalOn"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Conditional Annotations",
+    "anchor": "conditional-annotations",
+    "text": "Conditional Annotations"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Conditional Annotations",
+    "anchor": "conditional-annotations",
+    "text": "Conditional annotations are the foundation of Spring Boot auto-configuration — they prevent a configuration from being applied unless specific conditions are met at runtime. Boot 3 ships the full set of conditions inherited from Boot 2, including @ConditionalOnProperty , @ConditionalOnWebApplication"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Auto-Configuration Conditions Report",
+    "anchor": "auto-configuration-conditions-report",
+    "text": "Auto-Configuration Conditions Report"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Auto-Configuration Conditions Report",
+    "anchor": "auto-configuration-conditions-report",
+    "text": "Running your Spring Boot 3 application with the --debug flag (or setting debug=true in application.properties ) prints a detailed conditions evaluation report to the console. The report is split into \"Positive matches\" (configurations that were applied) and \"Negative matches\" (configurations that we"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@HttpExchange — Declarative HTTP Clients",
+    "anchor": "http-exchange-declarative-clients",
+    "text": "@HttpExchange — Declarative HTTP Clients"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@HttpExchange — Declarative HTTP Clients",
+    "anchor": "http-exchange-declarative-clients",
+    "text": "Spring Framework 6 (and therefore Spring Boot 3) introduced HTTP Interface support: you declare a Java interface annotated with @HttpExchange and method-level annotations like @GetExchange , @PostExchange , and @PutExchange , and Spring generates a proxy implementation at runtime. This replaces hand"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "ProblemDetail — RFC 7807 Error Responses",
+    "anchor": "problem-detail-rfc7807",
+    "text": "ProblemDetail — RFC 7807 Error Responses"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "ProblemDetail — RFC 7807 Error Responses",
+    "anchor": "problem-detail-rfc7807",
+    "text": "Spring Boot 3 adds native support for RFC 7807 \"Problem Details for HTTP APIs\" via the ProblemDetail and ErrorResponse types. A ProblemDetail carries a standard set of fields — type (URI identifying the error), title , status , detail , and instance — and can carry extension properties. Spring MVC e"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "RestClient — Synchronous Fluent HTTP",
+    "anchor": "rest-client",
+    "text": "RestClient — Synchronous Fluent HTTP"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "RestClient — Synchronous Fluent HTTP",
+    "anchor": "rest-client",
+    "text": "RestClient was introduced in Spring Boot 3.2 as a modern, synchronous alternative to the now-deprecated RestTemplate . It provides a fluent builder API closely mirroring WebClient — with support for request interceptors, message converters, and URI templates — but executes requests on the calling th"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Virtual Threads for Web (Project Loom)",
+    "anchor": "virtual-threads-web",
+    "text": "Virtual Threads for Web (Project Loom)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Virtual Threads for Web (Project Loom)",
+    "anchor": "virtual-threads-web",
+    "text": "Spring Boot 3.2 added first-class support for Project Loom virtual threads (Java 21+). Enabling virtual threads replaces the Tomcat/Jetty thread pool with one virtual thread per HTTP request, dramatically increasing throughput for I/O-bound workloads without changing application code. Each request s"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Testcontainers @ServiceConnection",
+    "anchor": "testcontainers-service-connection",
+    "text": "Testcontainers @ServiceConnection"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Testcontainers @ServiceConnection",
+    "anchor": "testcontainers-service-connection",
+    "text": "Spring Boot 3.1 introduced @ServiceConnection , a companion annotation for Testcontainers that eliminates boilerplate property configuration in integration tests. Annotate a @Container field with @ServiceConnection and Spring Boot automatically discovers the container type (PostgreSQL, Redis, MongoD"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Hibernate 6 and Jakarta Persistence",
+    "anchor": "hibernate-6-jakarta",
+    "text": "Hibernate 6 and Jakarta Persistence"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Hibernate 6 and Jakarta Persistence",
+    "anchor": "hibernate-6-jakarta",
+    "text": "Spring Boot 3 ships with Hibernate 6.x — a major release that dropped the javax.persistence package in favour of jakarta.persistence from the Jakarta EE 9 specification. Hibernate 6 also rewrote its SQL generation layer for improved type-safety, native support for Java records as embeddable objects,"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "R2DBC — Reactive Relational Data",
+    "anchor": "r2dbc-reactive-data",
+    "text": "R2DBC — Reactive Relational Data"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "R2DBC — Reactive Relational Data",
+    "anchor": "r2dbc-reactive-data",
+    "text": "Spring Boot 3 ships improved auto-configuration for R2DBC (Reactive Relational Database Connectivity). The starter configures a reactive ConnectionFactory and a DatabaseClient , and as of Spring Boot 3.2, @ServiceConnection works with R2DBC containers too — the connection factory is configured autom"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Data 3 Improvements",
+    "anchor": "spring-data-3-improvements",
+    "text": "Spring Data 3 Improvements"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Data 3 Improvements",
+    "anchor": "spring-data-3-improvements",
+    "text": "Spring Data 3.x (bundled with Spring Boot 3) brings several developer-experience improvements: pagination defaults are now configurable globally, scroll queries allow cursor-based pagination without offset, and the CrudRepository and ListCrudRepository split separates reactive from imperative APIs m"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "SecurityFilterChain — Configuration-Only Approach",
+    "anchor": "security-filter-chain-configuration",
+    "text": "SecurityFilterChain — Configuration-Only Approach"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "SecurityFilterChain — Configuration-Only Approach",
+    "anchor": "security-filter-chain-configuration",
+    "text": "Spring Security 6 (bundled with Spring Boot 3) removes WebSecurityConfigurerAdapter , which was deprecated in Security 5.7. You must now configure security exclusively by declaring a @Bean of type SecurityFilterChain . This component-based model is cleaner and allows multiple filter chains in the sa"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Security Lambda DSL",
+    "anchor": "security-lambda-dsl",
+    "text": "Spring Security Lambda DSL"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Security Lambda DSL",
+    "anchor": "security-lambda-dsl",
+    "text": "Spring Security 6 mandates the Lambda DSL for all HTTP security configuration. In Security 5, both a chained method style and a lambda style were accepted; in Security 6 the chained style was removed. Each configuration subsystem — authorizeHttpRequests , formLogin , csrf , oauth2Login , etc. — now "
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Method Security — @PreAuthorize and SpEL",
+    "anchor": "method-security-spring6",
+    "text": "Method Security — @PreAuthorize and SpEL"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Method Security — @PreAuthorize and SpEL",
+    "anchor": "method-security-spring6",
+    "text": "Spring Security 6 rewrote the method security infrastructure with a new AuthorizationManager -based approach. Annotating a @Configuration class with @EnableMethodSecurity (replacing the old @EnableGlobalMethodSecurity ) activates @PreAuthorize , @PostAuthorize , @PreFilter , and @PostFilter without "
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "OAuth2 Authorization Server",
+    "anchor": "oauth2-authorization-server",
+    "text": "OAuth2 Authorization Server"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "OAuth2 Authorization Server",
+    "anchor": "oauth2-authorization-server",
+    "text": "Spring Boot 3 includes auto-configuration for the Spring Authorization Server — a production-grade OAuth2 / OpenID Connect authorization server that was promoted to a first-class Spring project. Adding spring-boot-starter-oauth2-authorization-server auto-configures an in-memory or JPA-backed authori"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Micrometer Observation API",
+    "anchor": "micrometer-observation-api",
+    "text": "Micrometer Observation API"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Micrometer Observation API",
+    "anchor": "micrometer-observation-api",
+    "text": "Spring Boot 3 introduces the Micrometer Observation API as the single, unified abstraction for all instrumentation — replacing separate Timer , Counter , and distributed tracing calls with a single Observation that automatically produces both metrics and traces. You create an Observation via Observa"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Micrometer Tracing — Distributed Tracing",
+    "anchor": "micrometer-tracing-distributed",
+    "text": "Micrometer Tracing — Distributed Tracing"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Micrometer Tracing — Distributed Tracing",
+    "anchor": "micrometer-tracing-distributed",
+    "text": "Spring Boot 3 ships auto-configuration for Micrometer Tracing , which provides a vendor-neutral tracing facade over Brave (Zipkin) and OpenTelemetry. Adding a bridge dependency and an exporter automatically injects Tracer and propagates TraceId / SpanId across HTTP calls, Kafka messages, and schedul"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Prometheus Metrics and Actuator",
+    "anchor": "prometheus-metrics-actuator",
+    "text": "Prometheus Metrics and Actuator"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Prometheus Metrics and Actuator",
+    "anchor": "prometheus-metrics-actuator",
+    "text": "Spring Boot 3 Actuator auto-configures a Prometheus-compatible /actuator/prometheus scrape endpoint when micrometer-registry-prometheus is on the classpath. All Spring Boot built-in meters — JVM memory, GC pauses, HTTP server request duration, data source pool statistics, Tomcat threads, Spring Data"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Structured Logging",
+    "anchor": "structured-logging",
+    "text": "Structured Logging"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Structured Logging",
+    "anchor": "structured-logging",
+    "text": "Spring Boot 3.4 added first-class support for structured logging — outputting each log event as a JSON document rather than a plain-text line. Setting logging.structured.format.console=ecs (Elastic Common Schema) or logstash produces machine-parseable JSON directly from the default Logback or Log4j2"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "GraalVM Native Image",
+    "anchor": "graalvm-native-image",
+    "text": "GraalVM Native Image"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "GraalVM Native Image",
+    "anchor": "graalvm-native-image",
+    "text": "Spring Boot 3 provides first-class support for compiling Spring Boot applications into GraalVM native executables . A native executable contains only the classes and code reachable at build time, launches in milliseconds, and uses far less memory than a JVM application — ideal for serverless functio"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "AOT Processing — spring-boot:process-aot",
+    "anchor": "aot-processing",
+    "text": "AOT Processing — spring-boot:process-aot"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "AOT Processing — spring-boot:process-aot",
+    "anchor": "aot-processing",
+    "text": "Spring Boot 3's Ahead-of-Time (AOT) processing runs before compilation and transforms the Spring application context into a static, optimised form. The spring-boot:process-aot Maven goal (or bootBuildImage with native profile) generates Java source files and resource descriptors that replace the run"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@ImportRuntimeHints — Native Reflection Hints",
+    "anchor": "import-runtime-hints",
+    "text": "@ImportRuntimeHints — Native Reflection Hints"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "@ImportRuntimeHints — Native Reflection Hints",
+    "anchor": "import-runtime-hints",
+    "text": "When the AOT engine cannot automatically derive a native hint — for example, because your code uses reflection to instantiate a class by name at runtime — you can provide it explicitly with @ImportRuntimeHints . This annotation references a RuntimeHintsRegistrar implementation where you register ref"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Native Testing with @NativeTest",
+    "anchor": "native-testing",
+    "text": "Native Testing with @NativeTest"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Native Testing with @NativeTest",
+    "anchor": "native-testing",
+    "text": "Spring Boot 3 supports running your test suite against the native executable via @SpringBootTest combined with the native-maven-plugin 's test goal. The process-test-aot Maven goal (analogous to process-aot ) runs AOT processing over your test classes, generating the corresponding native hints, so i"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Boot 3 Cheatsheet",
+    "anchor": "",
+    "text": "Spring Boot 3 Cheatsheet"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Spring Boot 3 Cheatsheet",
+    "anchor": "",
+    "text": "Annotation / Starter / Property Purpose Notes spring-boot-starter-parent 3.5.7 BOM + plugin defaults for Spring Boot 3.x Java 17 minimum; Jakarta EE 9 namespace META-INF/spring/…AutoConfiguration.imports Register auto-configuration classes (replaces spring.factories) One FQCN per line; mandatory fro"
+  },
+  {
     "page": "Spring Boot",
     "href": "spring-boot/index.html",
     "section": "Spring Boot",
