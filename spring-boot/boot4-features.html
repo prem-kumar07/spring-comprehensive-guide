@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot 4 Features</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot 4 Features</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-boot4">Spring Boot 4.x — 4.0.0</span>
+    </div>
+    <p>Spring Boot 4.0 was released on <strong>November 20, 2025</strong> — the beginning of a new Spring Boot generation built on <strong>Spring Framework 7.x</strong>. It requires <strong>Java 17 or later</strong> (Java 21 or Java 25 strongly recommended) and raises the baseline to <strong>Jakarta EE 11</strong> (Servlet 6.1, JPA 3.2, Bean Validation 3.1). The headline themes of the 4.x generation are: a fully <strong>modularized auto-configuration</strong> codebase (70+ focused modules), portfolio-wide <strong>null safety with JSpecify</strong>, first-class <strong>API versioning</strong> in Spring MVC, native <strong>gRPC auto-configuration</strong> (Boot 4.1), upgraded dependencies including <strong>Hibernate 7</strong> and <strong>Jackson 3</strong>, and improved GraalVM native image support with a smaller footprint.</p>
+
+    <div class="callout info">
+      <strong>Jakarta EE 11 baseline</strong>
+      Spring Boot 4 moves to Jakarta EE 11, requiring a Servlet 6.1-compatible container. JPA moves to version 3.2 and Bean Validation to 3.1. All <code>jakarta.*</code> imports from Boot 3 remain valid — this is not a namespace change, but API additions and removals within the <code>jakarta.*</code> packages may require minor adjustments.
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="b4-tab-autoconfig">Auto-Configuration</button>
+        <button class="tab-btn" data-tab="b4-tab-web">Web</button>
+        <button class="tab-btn" data-tab="b4-tab-data">Data</button>
+        <button class="tab-btn" data-tab="b4-tab-security">Security</button>
+        <button class="tab-btn" data-tab="b4-tab-observability">Observability</button>
+        <button class="tab-btn" data-tab="b4-tab-native">Native / AOT</button>
+        <button class="tab-btn" data-tab="b4-tab-migration">Architecture &amp; Migration</button>
+      </div>
+
+      <!-- ── Auto-Configuration ─────────────────────── -->
+      <div class="tab-panel active" id="b4-tab-autoconfig">
+
+        <div class="feature-card">
+          <h3 id="b4-modularized-auto-configuration">Modularized Auto-Configuration</h3>
+          <p>Spring Boot 4's most significant architectural change is the complete modularization of its auto-configuration layer. The previously monolithic <code>spring-boot-autoconfigure</code> jar has been split into 70+ focused, self-contained modules — one per technology domain. Each starter now ships its own dedicated auto-configuration module rather than delegating to the shared monolith. This means GraalVM AOT processing only needs to process reachable configurations, reducing native-image build times, binary sizes, and startup overhead significantly. If you rely on the old monolith, <strong>classic starters</strong> act as a compatibility shim that re-bundles all modular configurations without transitive dependencies.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;4.0.0&lt;/version&gt;
+&lt;/parent&gt;
+
+&lt;!-- Each starter now owns its auto-configuration module --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — registering a custom auto-configuration (unchanged from Boot 3)</h4>
+          <pre><code class="language-text"># File: META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+# This mechanism carries forward from Boot 3 — no change needed
+
+com.example.MyDatabaseAutoConfiguration
+com.example.MySecurityAutoConfiguration</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            If you published a custom starter that bundled all configurations inside <code>spring-boot-autoconfigure</code> via <code>spring.factories</code>, migrate to modular auto-configuration modules and declare them in <code>AutoConfiguration.imports</code> — the old approach is not supported in Boot 4.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-auto-configuration-conditions">@AutoConfiguration and Conditional Annotations</h3>
+          <p>Conditional annotations remain the cornerstone of Spring Boot auto-configuration in Boot 4. <code>@AutoConfiguration</code> marks a class as a Boot auto-configuration, and the conditional system — <code>@ConditionalOnClass</code>, <code>@ConditionalOnMissingBean</code>, <code>@ConditionalOnProperty</code>, and friends — determines whether each configuration is activated. In Boot 4 the modular split means conditionals are evaluated independently per module, improving performance at startup because Spring does not need to evaluate conditions for auto-configurations whose starter is not on the classpath at all.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Boot 4 auto-configuration class (structure unchanged from Boot 3)
+@AutoConfiguration
+@ConditionalOnClass(DataSource.class)
+@ConditionalOnMissingBean(DataSource.class)
+public class MyDataSourceAutoConfiguration {
+
+    @Bean
+    public DataSource dataSource(DataSourceProperties props) {
+        return props.initializeDataSourceBuilder().build();
+    }
+}
+
+// Main application — triggers auto-configuration discovery
+@SpringBootApplication
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-jspecify-null-safety">JSpecify Null Safety</h3>
+          <p>Spring Boot 4 introduces portfolio-wide <strong>null safety with JSpecify</strong>. JSpecify annotations (<code>@Nullable</code>, <code>@NonNull</code>, <code>@NullMarked</code>) are applied across the Spring Framework 7 and Spring Boot 4 public API surface. This allows IDEs and static analysis tools (SpotBugs, Error Prone, NullAway) to catch <code>NullPointerException</code> risks at compile time rather than at runtime. JSpecify replaces the older Spring-specific <code>@Nullable</code> annotations in <code>org.springframework.lang</code>. Your own code can adopt JSpecify annotations to benefit from the same analysis.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.jspecify&lt;/groupId&gt;
+  &lt;artifactId&gt;jspecify&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+
+// Mark the entire package as null-safe by default
+@NullMarked
+package com.example.service;
+
+// Any parameter or return value that CAN be null must be @Nullable
+@Service
+public class OrderService {
+
+    // Return is @NonNull by default (package is @NullMarked)
+    public Order findById(Long id) {
+        return orderRepository.findById(id)
+            .orElseThrow(() -&gt; new OrderNotFoundException(id));
+    }
+
+    // Explicitly allow null here
+    public @Nullable Order findByReference(@Nullable String ref) {
+        if (ref == null) return null;
+        return orderRepository.findByReference(ref).orElse(null);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Spring's own <code>org.springframework.lang.@Nullable</code> is still present for backward compatibility, but new APIs in Boot 4 and Framework 7 use JSpecify. Update your own code to use <code>org.jspecify.annotations.@Nullable</code> to get accurate static analysis coverage.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-auto-configuration-conditions-report">Auto-Configuration Conditions Report</h3>
+          <p>Running your Spring Boot 4 application with <code>debug=true</code> or the <code>--debug</code> flag still prints a detailed <strong>conditions evaluation report</strong> to the console. In Boot 4 the report is more useful because modular auto-configuration makes the "negative matches" section significantly shorter — only modules whose starters are on the classpath are evaluated at all. The <code>/actuator/conditions</code> endpoint continues to expose the report as structured JSON when the Actuator is present.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Enable conditions report in the console
+debug=true
+
+# Expose the /actuator/conditions endpoint over HTTP
+management.endpoints.web.exposure.include=conditions,health,info</code></pre>
+        </div>
+
+      </div><!-- /b4-tab-autoconfig -->
+
+      <!-- ── Web ───────────────────────────────────── -->
+      <div class="tab-panel" id="b4-tab-web">
+
+        <div class="feature-card">
+          <h3 id="b4-api-versioning">API Versioning — First-Class Request Mapping</h3>
+          <p>Spring Framework 7 (the foundation of Spring Boot 4) makes <strong>API versioning a first-class feature</strong> of request mapping. The <code>version</code> attribute is now available on <code>@GetMapping</code>, <code>@PostMapping</code>, <code>@PutMapping</code>, <code>@DeleteMapping</code>, <code>@PatchMapping</code>, and <code>@RequestMapping</code>. Spring resolves the version from the request using a pluggable <code>ApiVersionResolver</code> strategy — by default via a request header or URL path segment. Multiple versioned handlers can coexist, and Spring routes to the most specific version that satisfies the request, enabling backward-compatible evolution of REST APIs without path duplication.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Configure the API version resolver (header-based in this example)
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureApiVersioning(ApiVersioningConfigurer configurer) {
+        configurer.useRequestHeader("X-API-Version");
+    }
+}
+
+// Handlers for different API versions on the same path
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    // Handles X-API-Version: 1 and X-API-Version: 2
+    @GetMapping(value = "/{id}", version = "1")
+    public OrderV1 getOrderV1(@PathVariable Long id) {
+        return orderService.findV1(id);
+    }
+
+    // Handles X-API-Version: 2 only (more specific)
+    @GetMapping(value = "/{id}", version = "2")
+    public OrderV2 getOrderV2(@PathVariable Long id) {
+        return orderService.findV2(id);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Boot 3 had no built-in versioning — teams typically duplicated controller paths (<code>/v1/orders</code>, <code>/v2/orders</code>) or used content negotiation manually. Boot 4's built-in versioning is additive; existing path-based versioning continues to work, but migrating to <code>version</code> attributes enables cleaner routing and less boilerplate.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-http-service-clients">Enhanced HTTP Service Clients</h3>
+          <p>Spring Boot 4 extends the <code>@HttpExchange</code> declarative HTTP client model introduced in Boot 3. In Boot 4, <code>HttpServiceProxyFactory</code> gains support for request-level <strong>API version propagation</strong> — the version context set by the server-side versioning mechanism can be forwarded automatically to outbound HTTP service calls. Additionally, the <strong>SSRF (Server-Side Request Forgery) mitigation</strong> introduced in Boot 4.1 adds a configurable URL allowlist to the auto-configured <code>RestClient.Builder</code> and <code>WebClient.Builder</code>, preventing unintended outbound requests to internal network addresses.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Declare the HTTP interface (unchanged from Boot 3)
+@HttpExchange(url = "https://api.example.com/products", accept = "application/json")
+public interface ProductClient {
+
+    @GetExchange("/{id}")
+    Product getById(@PathVariable long id);
+
+    @PostExchange
+    Product create(@RequestBody Product product);
+}
+
+// Register the proxy — Boot 4 auto-configuration provides RestClient.Builder
+@Configuration
+public class HttpClientConfig {
+
+    @Bean
+    public ProductClient productClient(RestClient.Builder builder) {
+        RestClient restClient = builder
+            .baseUrl("https://api.example.com")
+            .build();
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+            .builderFor(RestClientAdapter.create(restClient))
+            .build();
+        return factory.createClient(ProductClient.class);
+    }
+}
+
+# application.properties — SSRF allowlist (Boot 4.1)
+# spring.http.client.allowed-host-patterns=api.example.com,*.internal.corp</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-virtual-threads-web">Virtual Threads — Enhanced for Boot 4</h3>
+          <p>Virtual threads (Project Loom) support that debuted in Spring Boot 3.2 is further polished in Spring Boot 4. With Java 21 or later, setting <code>spring.threads.virtual.enabled=true</code> replaces the embedded-server thread pool with one virtual thread per request. In Boot 4, <strong>async context propagation for <code>@Async</code> methods</strong> is improved so that observability context (trace IDs, security context) flows correctly across virtual-thread hand-offs without extra configuration. Boot 4 also enables virtual threads on the <code>@Scheduled</code> task executor when virtual threads are active.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Requires Java 21+ for virtual threads --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Enable virtual threads for Tomcat, @Async, and @Scheduled
+spring.threads.virtual.enabled=true</code></pre>
+
+          <pre><code class="language-java">// No code changes needed — controllers and async methods run on virtual threads
+@RestController
+public class OrderController {
+
+    @GetMapping("/orders/{id}")
+    public Order getOrder(@PathVariable Long id) {
+        // Blocking I/O — safe on a virtual thread
+        return orderRepository.findById(id).orElseThrow();
+    }
+}
+
+@Service
+public class ReportService {
+
+    // @Async runs on a virtual thread when spring.threads.virtual.enabled=true
+    @Async
+    public CompletableFuture&lt;Report&gt; generateAsync(Long reportId) {
+        return CompletableFuture.completedFuture(buildReport(reportId));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-grpc-auto-configuration">gRPC Auto-Configuration</h3>
+          <p>Spring Boot 4.1 introduces <strong>first-class gRPC auto-configuration</strong> via the Spring gRPC project. Adding <code>spring-boot-starter-grpc</code> auto-configures a gRPC server supporting both standalone Netty and Servlet HTTP/2 transports. Client-side auto-configuration provides a <code>GrpcChannelFactory</code> bean. The new <code>@GrpcAdvice</code> annotation enables centralized gRPC exception handling, analogous to <code>@ControllerAdvice</code> for REST. An auto-configured <code>ObservationGrpcServerInterceptor</code> adds Micrometer metrics and trace propagation to every gRPC call with no manual wiring.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Spring Boot 4.1+ --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-grpc&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// gRPC service implementation — annotate with @GrpcService
+@GrpcService
+public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
+
+    private final OrderService orderService;
+
+    @Override
+    public void getOrder(GetOrderRequest request,
+                         StreamObserver&lt;GetOrderResponse&gt; responseObserver) {
+        Order order = orderService.findById(request.getId());
+        GetOrderResponse response = GetOrderResponse.newBuilder()
+            .setOrderId(order.getId())
+            .setStatus(order.getStatus())
+            .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+}
+
+// Centralized exception handling for all gRPC services
+@GrpcAdvice
+public class GrpcExceptionHandler {
+
+    @GrpcExceptionHandler(OrderNotFoundException.class)
+    public StatusException handleOrderNotFound(OrderNotFoundException ex) {
+        return Status.NOT_FOUND.withDescription(ex.getMessage()).asException();
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Boot 3 had no built-in gRPC support — teams used the <code>grpc-spring-boot-starter</code> community library. Boot 4.1's official starter uses a different artifact ID and annotation set; migrating requires replacing <code>@GrpcService</code> from the community library with Spring Boot's native equivalent and updating configuration properties.
+          </div>
+        </div>
+
+      </div><!-- /b4-tab-web -->
+
+      <!-- ── Data ──────────────────────────────────── -->
+      <div class="tab-panel" id="b4-tab-data">
+
+        <div class="feature-card">
+          <h3 id="b4-hibernate-7-jakarta">Hibernate 7 and Jakarta Persistence 3.2</h3>
+          <p>Spring Boot 4 ships with <strong>Hibernate 7.x</strong> and <strong>Jakarta Persistence 3.2</strong> (the version bundled with Jakarta EE 11). Hibernate 7 brings improved SQL generation, enhanced support for Java records as embeddable objects and projections, a refined <code>@TenantId</code> API for multi-tenancy, and better integration with virtual threads. Jakarta Persistence 3.2 adds the <code>find()</code> overloads that accept <code>FindOption</code> parameters, a new <code>CriteriaSelect</code> interface, and improved JPQL features. The <code>spring-boot-starter-data-jpa</code> starter pulls in the correct Hibernate 7 version automatically.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — Jakarta Persistence 3.2 entity</h4>
+          <pre><code class="language-java">import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "orders")
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String status;
+
+    // Java record as @Embeddable (Hibernate 7 fully supports records)
+    public record Address(String street, String city, String zip) {}
+
+    @Embedded
+    private Address shippingAddress;
+}
+
+// Jakarta Persistence 3.2 EntityManager.find() with FindOption
+Order order = entityManager.find(Order.class, id,
+    LockModeType.PESSIMISTIC_READ);  // FindOption overload</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Boot 3 shipped Hibernate 6.x. Hibernate 7 removed several deprecated APIs and changed some SQL generation defaults. Run your full integration test suite against Hibernate 7 before upgrading; check the Hibernate 7 migration guide for removed <code>@Type</code> usages and renamed persistence provider settings.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-spring-data-2025">Spring Data 2025.1 Improvements</h3>
+          <p>Spring Boot 4 bundles <strong>Spring Data 2025.1</strong>, the generation aligned with Spring Framework 7. Key improvements include: refined <strong>scroll (cursor-based) pagination</strong> API with better keyset support, improved <strong>projection interfaces</strong> with null-safety annotations applied, enhanced <code>MongoTemplate</code> aggregation pipeline support, and better Kotlin coroutines integration across reactive repositories. The <code>ListCrudRepository</code> and <code>ListPagingAndSortingRepository</code> interfaces (introduced in Spring Data 3.x) continue as the recommended choice for imperative code returning <code>List&lt;T&gt;</code> instead of <code>Iterable&lt;T&gt;</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — scroll (cursor-based) pagination</h4>
+          <pre><code class="language-java">// Cursor-based pagination — no offset, consistent ordering
+public interface ProductRepository extends Repository&lt;Product, String&gt; {
+
+    Window&lt;Product&gt; findTop10ByCategory(String category, ScrollPosition position);
+}
+
+// Usage
+Window&lt;Product&gt; page = repo.findTop10ByCategory(
+    "electronics", ScrollPosition.keyset());
+while (!page.isEmpty()) {
+    processProducts(page.getContent());
+    if (!page.hasNext()) break;
+    page = repo.findTop10ByCategory(
+        "electronics", page.positionAt(page.size() - 1));
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-r2dbc-reactive-data">R2DBC — Reactive Relational Data</h3>
+          <p>Spring Boot 4 ships updated auto-configuration for <strong>R2DBC</strong> aligned with Spring Data 2025.1. The <code>@ServiceConnection</code> annotation (from Testcontainers integration) continues to work with R2DBC containers, auto-configuring the reactive <code>ConnectionFactory</code> without manual property overrides. Spring Data R2DBC gains improved Kotlin coroutine support and a cleaner <code>DatabaseClient</code> API for executing SQL templates. Virtual threads are also available in the non-reactive path when using <code>spring.threads.virtual.enabled=true</code> alongside blocking data access.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-r2dbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.r2dbc&lt;/groupId&gt;
+  &lt;artifactId&gt;r2dbc-postgresql&lt;/artifactId&gt;
+  &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Reactive repository — Spring Data R2DBC
+public interface ProductRepository
+    extends ReactiveCrudRepository&lt;Product, Long&gt; {
+
+    Flux&lt;Product&gt; findByCategory(String category);
+
+    Mono&lt;Product&gt; findBySkuCode(String skuCode);
+}
+
+// application.properties
+// spring.r2dbc.url=r2dbc:postgresql://localhost:5432/shopdb
+// spring.r2dbc.username=shop
+// spring.r2dbc.password=secret</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-testcontainers-service-connection">Testcontainers @ServiceConnection</h3>
+          <p>Spring Boot 4 continues and extends the <code>@ServiceConnection</code> support introduced in Boot 3.1. Annotating a Testcontainers <code>@Container</code> field with <code>@ServiceConnection</code> automatically derives all connection properties (URL, username, password, port) from the running container and registers a <code>ConnectionDetails</code> bean. Boot 4 adds <strong>lazy datasource connections</strong> (Boot 4.1): the application context can start without actually connecting to the database, so containers that take longer to become ready do not block the Spring context from initialising. <code>@ServiceConnection</code> now also supports more container types and third-party integrations.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-testcontainers&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@SpringBootTest
+@Testcontainers
+class OrderRepositoryTest {
+
+    // @ServiceConnection auto-configures spring.datasource.* from this container
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:17-alpine");
+
+    @Autowired
+    OrderRepository repository;
+
+    @Test
+    void saveAndFind() {
+        Order order = repository.save(new Order("PENDING", 42.00));
+        assertThat(repository.findById(order.getId())).isPresent();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /b4-tab-data -->
+
+      <!-- ── Security ───────────────────────────────── -->
+      <div class="tab-panel" id="b4-tab-security">
+
+        <div class="feature-card">
+          <h3 id="b4-spring-security-7">Spring Security 7 — SecurityFilterChain</h3>
+          <p>Spring Boot 4 bundles <strong>Spring Security 7</strong>. The component-based <code>SecurityFilterChain</code> model (mandatory since Spring Security 6 / Boot 3) is unchanged in Boot 4 — you declare security by providing a <code>@Bean</code> of type <code>SecurityFilterChain</code>. Spring Security 7 focuses on null-safety improvements (JSpecify), better integration with virtual threads, and removal of long-deprecated APIs. The Lambda DSL for <code>HttpSecurity</code> configuration remains mandatory and is unchanged from Boot 3.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/api/**")
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers("/api/public/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -&gt; session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt(Customizer.withDefaults()));
+        return http.build();
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Spring Security 7 removes APIs deprecated in Security 5.x and 6.x, including several <code>AuthenticationManagerBuilder</code> shortcuts and legacy LDAP configuration methods. Review the Spring Security 7 migration guide to identify removed APIs before upgrading.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-method-security">Method Security — @PreAuthorize and SpEL</h3>
+          <p>Spring Security 7's method security infrastructure, introduced in Security 6, is further refined in Boot 4. <code>@EnableMethodSecurity</code> activates <code>@PreAuthorize</code>, <code>@PostAuthorize</code>, <code>@PreFilter</code>, and <code>@PostFilter</code>. In Spring Security 7, the authorization manager chain is more extensible, and the handling of reactive method security via <code>@EnableReactiveMethodSecurity</code> is unified under the same <code>AuthorizationManager</code>-based infrastructure as imperative security. Custom <code>MethodSecurityExpressionHandler</code> beans continue to work unchanged.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Configuration
+@EnableMethodSecurity
+public class MethodSecurityConfig {}
+
+@Service
+public class OrderService {
+
+    @PreAuthorize("hasRole('MANAGER') or #order.ownerId == authentication.name")
+    public void cancelOrder(Order order) { /* ... */ }
+
+    @PostAuthorize("returnObject.ownerId == authentication.name")
+    public Order findOrder(Long id) {
+        return orderRepository.findById(id).orElseThrow();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-oauth2-authorization-server">OAuth2 Authorization Server</h3>
+          <p>Spring Boot 4 includes auto-configuration for the <strong>Spring Authorization Server</strong> — a production-grade OAuth2 / OpenID Connect authorization server. Adding <code>spring-boot-starter-oauth2-authorization-server</code> auto-configures token signing (RSA keys), client registration, and OIDC discovery metadata. Spring Authorization Server 2.x (bundled with Boot 4) adds improved PKCE enforcement, structured logging of token issuance events, and better integration with Spring Security 7's <code>SecurityFilterChain</code> composition model.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-oauth2-authorization-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Register a client (development convenience)
+spring.security.oauth2.authorizationserver.client.my-client.registration.client-id=my-client
+spring.security.oauth2.authorizationserver.client.my-client.registration.client-secret={noop}secret
+spring.security.oauth2.authorizationserver.client.my-client.registration.authorization-grant-types=client_credentials,authorization_code
+spring.security.oauth2.authorizationserver.client.my-client.registration.redirect-uris=http://localhost:8080/login/oauth2/code/my-client
+spring.security.oauth2.authorizationserver.client.my-client.registration.scopes=openid,profile,read</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-ssrf-mitigation">SSRF Mitigation for HTTP Clients</h3>
+          <p>Spring Boot 4.1 adds <strong>Server-Side Request Forgery (SSRF) mitigation</strong> to the auto-configured <code>RestClient.Builder</code> and <code>WebClient.Builder</code>. When enabled, the HTTP client validates outbound request URLs against a configurable allowlist of host patterns before making the request. Requests targeting private IP ranges (10.x.x.x, 172.16.x.x, 192.168.x.x, localhost) are blocked by default unless explicitly allowed. This prevents malicious user input from being used to forge requests to internal infrastructure.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties (Boot 4.1)</h4>
+          <pre><code class="language-properties"># Allow only specific external hosts for outbound HTTP (SSRF protection)
+spring.http.client.allowed-host-patterns=api.example.com,*.partner.com
+
+# To allow a private range for internal services (use with caution)
+# spring.http.client.allowed-host-patterns=api.internal.corp</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Boot 3 had no SSRF controls on auto-configured HTTP clients. When upgrading to Boot 4.1, if your application makes outbound requests to internal hostnames or IP addresses, configure <code>spring.http.client.allowed-host-patterns</code> explicitly, otherwise those requests will be blocked by default.
+          </div>
+        </div>
+
+      </div><!-- /b4-tab-security -->
+
+      <!-- ── Observability ──────────────────────────── -->
+      <div class="tab-panel" id="b4-tab-observability">
+
+        <div class="feature-card">
+          <h3 id="b4-opentelemetry-native">OpenTelemetry Native Support</h3>
+          <p>Spring Boot 4 deepens its commitment to <strong>OpenTelemetry</strong> as the primary observability standard. The auto-configuration for <code>OpenTelemetrySdk</code> and OTLP (OpenTelemetry Protocol) exporters is now simpler and first-class — adding <code>spring-boot-starter-actuator</code> and an OTel exporter on the classpath wires everything automatically. In Boot 4.1, <strong>async context propagation for <code>@Async</code> methods</strong> is improved so that OpenTelemetry trace context flows across virtual-thread and executor hand-offs without requiring manual <code>ContextPropagators</code> setup. The <code>management.otlp.tracing.endpoint</code> property configures the OTLP gRPC or HTTP endpoint.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-tracing-bridge-otel&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.opentelemetry&lt;/groupId&gt;
+  &lt;artifactId&gt;opentelemetry-exporter-otlp&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># OTLP endpoint (Jaeger, Grafana Tempo, or any OTel collector)
+management.otlp.tracing.endpoint=http://localhost:4317
+
+# Sample every request during development
+management.tracing.sampling.probability=1.0
+
+# Include trace/span IDs in log lines
+logging.pattern.level=%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-micrometer-observation-api">Micrometer Observation API</h3>
+          <p>Spring Boot 4 retains and expands the <strong>Micrometer Observation API</strong> as the unified abstraction for metrics and distributed tracing. A single <code>Observation.observe()</code> call on an <code>ObservationRegistry</code> automatically emits both a metric (timer/counter) and a trace span, with no separate <code>Tracer</code> and <code>MeterRegistry</code> calls needed. Boot 4 adds JSpecify null safety to the Micrometer Observation API so that IDE tooling can statically verify that <code>ObservationRegistry.NOOP</code> — the safe null-equivalent — is used as a default rather than actual null.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-observation&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class PaymentService {
+
+    private final ObservationRegistry registry;
+
+    public PaymentService(ObservationRegistry registry) {
+        this.registry = registry;
+    }
+
+    public PaymentResult charge(Order order) {
+        return Observation.createNotStarted("payment.charge", registry)
+            .lowCardinalityKeyValue("payment.provider", "stripe")
+            .highCardinalityKeyValue("order.id", order.getId().toString())
+            .observe(() -&gt; stripeClient.charge(order));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-prometheus-metrics-actuator">Prometheus Metrics and Actuator</h3>
+          <p>Spring Boot 4 Actuator auto-configures a Prometheus-compatible <code>/actuator/prometheus</code> scrape endpoint when <code>micrometer-registry-prometheus</code> is on the classpath. All built-in meters — JVM memory, GC pauses, HTTP server request duration, data source pool statistics, virtual thread statistics — are exposed automatically. In Boot 4, virtual-thread metrics are added to the JVM meter binder when <code>spring.threads.virtual.enabled=true</code>, giving visibility into virtual thread scheduling behaviour. Custom meters added via <code>MeterRegistry</code> or the Observation API appear in the same scrape endpoint.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
+  &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Expose the Prometheus scrape endpoint
+management.endpoints.web.exposure.include=prometheus,health,info
+management.endpoint.prometheus.enabled=true
+
+# Add application name as a common tag on all meters
+management.metrics.tags.application=${spring.application.name}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-structured-logging">Structured Logging Enhancements</h3>
+          <p>Spring Boot 4 continues the <strong>structured logging</strong> support introduced in Boot 3.4, with improvements for Boot 4's observability improvements. Structured log output (ECS or Logstash JSON format) now includes virtual thread metadata when virtual threads are enabled, and gRPC call context (Boot 4.1) propagates trace IDs into the structured log fields automatically. Boot 4 also adds a <code>logging.structured.format.file</code> option to write structured logs to a rotating file while keeping a human-readable format on the console — previously both had to use the same format.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — application.properties</h4>
+          <pre><code class="language-properties"># Human-readable on console, JSON to file (Boot 4 independent format support)
+logging.structured.format.file=ecs
+logging.file.name=logs/application.log
+
+# Console remains plain-text
+# logging.structured.format.console=  (leave unset for plain text)</code></pre>
+
+          <pre><code class="language-json">// Example structured log line (ECS format) including gRPC trace context:
+{
+  "@timestamp": "2026-01-10T14:20:11.456Z",
+  "log.level": "INFO",
+  "message": "Processed order charge",
+  "service.name": "payment-service",
+  "trace.id": "a3ce929d0e0e4736bf92f3577b34da6a",
+  "span.id": "00f067aa0ba902b7",
+  "grpc.method": "OrderService/Charge"
+}</code></pre>
+        </div>
+
+      </div><!-- /b4-tab-observability -->
+
+      <!-- ── Native / AOT ───────────────────────────── -->
+      <div class="tab-panel" id="b4-tab-native">
+
+        <div class="feature-card">
+          <h3 id="b4-graalvm-native-image">GraalVM Native Image — Smaller Footprint</h3>
+          <p>Spring Boot 4's modularized auto-configuration delivers <strong>significantly smaller GraalVM native images</strong>. Previously, the AOT engine had to process and generate native hints for the entire <code>spring-boot-autoconfigure</code> jar even when most of its configurations would never be activated. With modular auto-configuration, AOT processing only traverses the modules whose starters are on the classpath, reducing the number of generated hint files, compilation time, and the final binary size. The same <code>native-maven-plugin</code> workflow and <code>-Pnative</code> profile from Boot 3 continue to work unchanged.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+      &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <h4>Example — build command (unchanged from Boot 3)</h4>
+          <pre><code class="language-bash"># Compile to native executable (requires GraalVM with native-image)
+./mvnw -Pnative native:compile
+
+# Or build a native OCI image with Paketo Buildpacks (no local GraalVM needed)
+./mvnw spring-boot:build-image -Pnative</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-aot-processing">AOT Processing — Modular Efficiency</h3>
+          <p>Spring Boot 4's <strong>Ahead-of-Time (AOT) processing</strong> step is faster and produces leaner output because each auto-configuration module ships its own pre-computed AOT metadata. Previously, the AOT engine derived hints dynamically by analysing the single autoconfigure jar at build time. In Boot 4, modules with stable auto-configuration can ship pre-compiled AOT hints, reducing the <code>spring-boot:process-aot</code> build time. Running <code>spring-boot:process-aot</code> remains a mandatory intermediate step before <code>native:compile</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;executions&gt;
+        &lt;execution&gt;
+          &lt;id&gt;process-aot&lt;/id&gt;
+          &lt;goals&gt;&lt;goal&gt;process-aot&lt;/goal&gt;&lt;/goals&gt;
+        &lt;/execution&gt;
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-bash"># Run AOT: generates sources in target/spring-aot/main/sources/
+./mvnw spring-boot:process-aot
+
+# Boot 4: AOT output is smaller because modular starters ship pre-computed hints
+# target/spring-aot/main/sources/com/example/DemoApplication__BeanDefinitions.java</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-import-runtime-hints">@ImportRuntimeHints and @RegisterReflection</h3>
+          <p>Spring Boot 4 retains <code>@ImportRuntimeHints</code> and <code>@RegisterReflectionForBinding</code> from Boot 3 for registering custom native hints when the AOT engine cannot derive them automatically. In Boot 4, these annotations are null-safe (JSpecify annotated), and the AOT engine produces better diagnostics when a hint is redundant because the module already ships pre-computed metadata. Use <code>@ImportRuntimeHints</code> to register reflection, resource, serialisation, and proxy hints via a <code>RuntimeHintsRegistrar</code> implementation.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Custom RuntimeHintsRegistrar
+public class MyRuntimeHints implements RuntimeHintsRegistrar {
+
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        hints.reflection()
+             .registerType(ReportEngine.class,
+                           MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                           MemberCategory.INVOKE_PUBLIC_METHODS);
+        hints.resources().registerPattern("templates/*.html");
+    }
+}
+
+// Apply the registrar
+@SpringBootApplication
+@ImportRuntimeHints(MyRuntimeHints.class)
+public class DemoApplication { /* ... */ }
+
+// Shortcut for Jackson 3 DTOs in native images
+@RegisterReflectionForBinding(OrderDto.class)
+@Configuration
+public class JacksonConfig { /* ... */ }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-test-context-pausing">Test Context Pausing</h3>
+          <p>Spring Framework 7 introduces <strong>test context pausing</strong> — a new optimization for integration test suites. Previously, Spring contexts stored in the context cache remained fully active between test classes, holding open connections, threads, and other resources. In Boot 4 / Framework 7, the test framework can <strong>pause</strong> a cached context when it is not in use and <strong>resume</strong> it when the next test needs it, releasing idle resources. This is especially valuable when tests use real databases, Kafka consumers, or embedded servers — total resource consumption during long test runs drops noticeably.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Standard @SpringBootTest — context pausing is automatic when supported
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderControllerTest {
+
+    @Autowired
+    TestRestTemplate restTemplate;
+
+    @Test
+    void createOrderReturns201() {
+        ResponseEntity&lt;Order&gt; response = restTemplate.postForEntity(
+            "/orders", new Order("PENDING", 99.99), Order.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+}
+
+// Opt into pausable context explicitly (for fine-grained control)
+@SpringBootTest
+@PausableTestContext  // Framework 7 annotation
+class LongRunningIntegrationTest { /* ... */ }</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Test context pausing is a new capability in Framework 7 — no action needed to benefit, but be aware that listeners registered on application events (like <code>ContextRefreshedEvent</code>) may now also fire on context resume. Test tear-down logic that assumes the context is always active between test classes may need adjustment.
+          </div>
+        </div>
+
+      </div><!-- /b4-tab-native -->
+
+      <!-- ── Architecture & Migration ──────────────── -->
+      <div class="tab-panel" id="b4-tab-migration">
+
+        <div class="feature-card">
+          <h3 id="b4-jackson-3-migration">Jackson 3 Migration</h3>
+          <p>Spring Boot 4 upgrades to <strong>Jackson 3.x</strong>. Jackson 3 reorganised several internal packages and changed the default constructor detection strategy for serialization and deserialization. The <code>com.fasterxml.jackson.databind.ObjectMapper</code> class remains the primary entry point, but some rarely-used configuration methods have been removed or renamed. Spring Boot 4's auto-configured <code>ObjectMapper</code> applies sensible defaults compatible with Jackson 3. The most common migration impact is for custom <code>JsonSerializer</code> or <code>JsonDeserializer</code> subclasses that reference removed Jackson internals.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Jackson 3 is managed by spring-boot-starter-parent 4.0.0 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Optional: override Jackson version explicitly --&gt;
+&lt;properties&gt;
+  &lt;jackson.version&gt;3.0.0&lt;/jackson.version&gt;
+&lt;/properties&gt;</code></pre>
+
+          <h4>Example — custom ObjectMapper still works via auto-configuration</h4>
+          <pre><code class="language-java">@Configuration
+public class JacksonConfig {
+
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer customizer() {
+        return builder -&gt; builder
+            .featuresToDisable(
+                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .featuresToEnable(
+                DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Boot 3 used Jackson 2.x. Jackson 3 changes the package of some internal types (e.g., <code>com.fasterxml.jackson.core.util.*</code> reorganisation). Compile your project against Boot 4 to surface import errors early. Custom serializers that used internal Jackson 2 APIs will need updating; use public Jackson API only for forward compatibility.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-listenablefuture-removal">ListenableFuture Removal</h3>
+          <p>Spring Boot 4 (via Spring Framework 7) removes <strong><code>ListenableFuture</code></strong>, which was deprecated in Spring Framework 6 in favour of Java's standard <code>CompletableFuture</code>. Any Spring API that previously returned or accepted <code>ListenableFuture&lt;T&gt;</code> — including <code>AsyncRestTemplate</code>, <code>@Async</code> method return types, and <code>TaskExecutor</code> extensions — now uses <code>CompletableFuture&lt;T&gt;</code>. <code>AsyncRestTemplate</code> itself was removed; use <code>WebClient</code> or <code>RestClient</code> for async HTTP.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — migrate from ListenableFuture to CompletableFuture</h4>
+          <pre><code class="language-java">// ✗ Boot 3 — ListenableFuture removed in Boot 4
+// @Async
+// public ListenableFuture&lt;String&gt; computeAsync() { ... }
+
+// ✓ Boot 4 — use CompletableFuture
+@Service
+public class ComputeService {
+
+    @Async
+    public CompletableFuture&lt;String&gt; computeAsync() {
+        String result = heavyComputation();
+        return CompletableFuture.completedFuture(result);
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Search your codebase for <code>ListenableFuture</code> and replace with <code>CompletableFuture</code>. Also search for <code>AsyncRestTemplate</code> (removed) and replace with <code>WebClient</code> (reactive) or the synchronous <code>RestClient</code>. These are compile-time errors — the migration surface is easy to find.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-undertow-removed">Undertow Removed as Embedded Server</h3>
+          <p>Spring Boot 4 <strong>removes Undertow</strong> as a supported embedded web server option. Boot 3 supported three embedded server choices — Tomcat, Jetty, and Undertow — but Undertow's adoption was significantly lower than the other two and maintaining Jakarta EE 11 / Servlet 6.1 compatibility in Undertow posed ongoing challenges. Boot 4 ships with <strong>Tomcat</strong> (default) and <strong>Jetty</strong> as the two supported embedded server options. Applications currently using Undertow must migrate to Tomcat or Jetty before upgrading to Boot 4.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Default: Tomcat (no exclusion needed) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Switch to Jetty --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;exclusions&gt;
+    &lt;exclusion&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+    &lt;/exclusion&gt;
+  &lt;/exclusions&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            If your Boot 3 application excludes Tomcat and depends on <code>spring-boot-starter-undertow</code>, you must switch to Tomcat or Jetty before upgrading. Tomcat is the recommended default; Jetty is the right choice for applications already tuned for Jetty's threading model.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-deprecated-api-removals">Deprecated API Removals</h3>
+          <p>Spring Boot 4 removes all APIs that were deprecated in Spring Boot 3.x or Spring Framework 6.x (following the standard Spring two-major-version deprecation policy). Notable removals include: <code>WebSecurityConfigurerAdapter</code> (removed in Security 6, not re-added), <code>spring.factories</code> <code>EnableAutoConfiguration</code> key (replaced by <code>AutoConfiguration.imports</code> in Boot 3), <code>@EnableGlobalMethodSecurity</code> (replaced by <code>@EnableMethodSecurity</code>), and the Spring MVC <code>antMatchers()</code> / <code>mvcMatchers()</code> DSL methods (replaced by <code>requestMatchers()</code>). Running your test suite with Boot 3.5.x and the <code>-Werror</code> deprecation flag before upgrading catches all of these at compile time.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;4.0.0&lt;/version&gt;
+&lt;/parent&gt;</code></pre>
+
+          <h4>Example — compile-time check against Boot 3 deprecations first</h4>
+          <pre><code class="language-bash"># Build with Boot 3.5.x and -Werror to find removed APIs before upgrading
+./mvnw compile -Dmaven.compiler.failOnWarning=true
+
+# Common removals — search your codebase:
+# grep -r "antMatchers\|mvcMatchers\|WebSecurityConfigurerAdapter" src/
+# grep -r "EnableGlobalMethodSecurity\|ListenableFuture\|AsyncRestTemplate" src/
+# grep -r "spring.factories" src/main/resources/</code></pre>
+
+          <div class="callout warn">
+            <strong>Migration from Boot 3</strong>
+            Do not skip directly from Boot 2.x to Boot 4. Always upgrade to Boot 3.x first, resolve all deprecation warnings, then upgrade to Boot 4. The Spring Boot migration guide recommends treating the two upgrades as separate releases with their own test cycles.
+          </div>
+        </div>
+
+      </div><!-- /b4-tab-migration -->
+
+    </div><!-- /tab-container -->
+
+    <!-- ── Cheatsheet ──────────────────────────────── -->
+    <section class="cheatsheet">
+      <h2>Spring Boot 4 Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / Starter / Property</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>spring-boot-starter-parent 4.0.0</code></td>
+              <td>BOM + plugin defaults for Spring Boot 4.x</td>
+              <td>Java 17 min, Java 21/25 recommended; Jakarta EE 11</td>
+            </tr>
+            <tr>
+              <td>Modular auto-configuration (70+ modules)</td>
+              <td>Each starter owns its auto-configuration module</td>
+              <td>Smaller native images; faster AOT; classic starters available</td>
+            </tr>
+            <tr>
+              <td><code>@AutoConfiguration</code></td>
+              <td>Marks a class as a Boot auto-configuration</td>
+              <td>Unchanged from Boot 3; AutoConfiguration.imports still used</td>
+            </tr>
+            <tr>
+              <td><code>@NullMarked</code> (JSpecify)</td>
+              <td>Declares all return types / parameters non-null by default</td>
+              <td>Used across Spring Framework 7 + Boot 4 API; add to your packages</td>
+            </tr>
+            <tr>
+              <td><code>@Nullable</code> (org.jspecify)</td>
+              <td>Marks a parameter or return that may be null</td>
+              <td>Replaces <code>org.springframework.lang.@Nullable</code></td>
+            </tr>
+            <tr>
+              <td><code>@GetMapping(version="2")</code></td>
+              <td>Route requests matching a specific API version</td>
+              <td>Spring Framework 7 first-class API versioning; use with ApiVersionResolver</td>
+            </tr>
+            <tr>
+              <td><code>ApiVersionResolver</code></td>
+              <td>Strategy to extract the API version from a request</td>
+              <td>Configure in WebMvcConfigurer.configureApiVersioning()</td>
+            </tr>
+            <tr>
+              <td><code>spring.http.client.allowed-host-patterns</code></td>
+              <td>SSRF allowlist for auto-configured RestClient/WebClient (Boot 4.1)</td>
+              <td>Blocks requests to private IP ranges by default</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-grpc</code></td>
+              <td>gRPC auto-configuration for server and client (Boot 4.1)</td>
+              <td>Supports Netty and Servlet HTTP/2; adds ObservationGrpcServerInterceptor</td>
+            </tr>
+            <tr>
+              <td><code>@GrpcService</code></td>
+              <td>Mark a class as a gRPC service implementation (Boot 4.1)</td>
+              <td>Auto-registered with the gRPC server</td>
+            </tr>
+            <tr>
+              <td><code>@GrpcAdvice</code></td>
+              <td>Centralized gRPC exception handling (Boot 4.1)</td>
+              <td>Analogous to @ControllerAdvice for REST</td>
+            </tr>
+            <tr>
+              <td><code>spring.threads.virtual.enabled=true</code></td>
+              <td>Enable virtual threads for Tomcat, @Async, and @Scheduled</td>
+              <td>Java 21+; async context propagation improved in Boot 4.1</td>
+            </tr>
+            <tr>
+              <td><code>CompletableFuture&lt;T&gt;</code></td>
+              <td>Async return type (replaces removed ListenableFuture)</td>
+              <td>ListenableFuture removed in Spring Framework 7 / Boot 4</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-data-jpa</code></td>
+              <td>JPA persistence with Hibernate 7 and Jakarta Persistence 3.2</td>
+              <td>Hibernate 7: improved records, virtual thread support</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-data-r2dbc</code></td>
+              <td>Reactive relational database access</td>
+              <td>Lazy datasource connections in Boot 4.1</td>
+            </tr>
+            <tr>
+              <td><code>@ServiceConnection</code></td>
+              <td>Auto-configure ConnectionDetails from a Testcontainers container</td>
+              <td>Boot 3.1+; lazy connect in Boot 4.1; more container types</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-security</code></td>
+              <td>Spring Security 7 auto-configuration</td>
+              <td>Removed APIs: WebSecurityConfigurerAdapter, antMatchers</td>
+            </tr>
+            <tr>
+              <td><code>@EnableMethodSecurity</code></td>
+              <td>Enable @PreAuthorize / @PostAuthorize</td>
+              <td>@EnableGlobalMethodSecurity removed in Boot 4</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot-starter-oauth2-authorization-server</code></td>
+              <td>Embed an OAuth2 / OIDC Authorization Server</td>
+              <td>Spring Authorization Server 2.x; improved PKCE enforcement</td>
+            </tr>
+            <tr>
+              <td><code>management.otlp.tracing.endpoint</code></td>
+              <td>Configure the OTLP exporter endpoint for distributed tracing</td>
+              <td>Pair with micrometer-tracing-bridge-otel and opentelemetry-exporter-otlp</td>
+            </tr>
+            <tr>
+              <td><code>ObservationRegistry</code></td>
+              <td>Unified API for metrics + tracing via Observation</td>
+              <td>JSpecify null-annotated in Boot 4; use NOOP as null-safe default</td>
+            </tr>
+            <tr>
+              <td><code>logging.structured.format.file</code></td>
+              <td>Write structured JSON logs to a file (independent of console format)</td>
+              <td>Boot 4 allows different formats for file and console</td>
+            </tr>
+            <tr>
+              <td><code>native-maven-plugin</code></td>
+              <td>GraalVM native-image compilation via Maven</td>
+              <td>Faster and leaner in Boot 4 due to modular AOT metadata</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot:process-aot</code></td>
+              <td>Run AOT processing — generate optimised sources for native</td>
+              <td>Boot 4: modules ship pre-computed hints; overall step is faster</td>
+            </tr>
+            <tr>
+              <td><code>@ImportRuntimeHints</code></td>
+              <td>Register reflection / resource / proxy hints for native image</td>
+              <td>Unchanged from Boot 3; JSpecify annotated in Boot 4</td>
+            </tr>
+            <tr>
+              <td>Undertow</td>
+              <td>REMOVED — not available as embedded server in Boot 4</td>
+              <td>Migrate to Tomcat (default) or Jetty before upgrading</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

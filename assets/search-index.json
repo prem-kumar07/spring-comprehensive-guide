@@ -420,6 +420,426 @@
     "text": "Annotation / Starter / Property Purpose Notes spring-boot-starter-parent 3.5.7 BOM + plugin defaults for Spring Boot 3.x Java 17 minimum; Jakarta EE 9 namespace META-INF/spring/…AutoConfiguration.imports Register auto-configuration classes (replaces spring.factories) One FQCN per line; mandatory fro"
   },
   {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Boot 4 Features",
+    "anchor": "",
+    "text": "Spring Boot 4 Features"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Boot 4 Features",
+    "anchor": "",
+    "text": "Spring Boot 4.x — 4.0.0 Spring Boot 4.0 was released on November 20, 2025 — the beginning of a new Spring Boot generation built on Spring Framework 7.x . It requires Java 17 or later (Java 21 or Java 25 strongly recommended) and raises the baseline to Jakarta EE 11 (Servlet 6.1, JPA 3.2, Bean Valida"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Modularized Auto-Configuration",
+    "anchor": "b4-modularized-auto-configuration",
+    "text": "Modularized Auto-Configuration"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Modularized Auto-Configuration",
+    "anchor": "b4-modularized-auto-configuration",
+    "text": "Spring Boot 4's most significant architectural change is the complete modularization of its auto-configuration layer. The previously monolithic spring-boot-autoconfigure jar has been split into 70+ focused, self-contained modules — one per technology domain. Each starter now ships its own dedicated "
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@AutoConfiguration and Conditional Annotations",
+    "anchor": "b4-auto-configuration-conditions",
+    "text": "@AutoConfiguration and Conditional Annotations"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@AutoConfiguration and Conditional Annotations",
+    "anchor": "b4-auto-configuration-conditions",
+    "text": "Conditional annotations remain the cornerstone of Spring Boot auto-configuration in Boot 4. @AutoConfiguration marks a class as a Boot auto-configuration, and the conditional system — @ConditionalOnClass , @ConditionalOnMissingBean , @ConditionalOnProperty , and friends — determines whether each con"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "JSpecify Null Safety",
+    "anchor": "b4-jspecify-null-safety",
+    "text": "JSpecify Null Safety"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "JSpecify Null Safety",
+    "anchor": "b4-jspecify-null-safety",
+    "text": "Spring Boot 4 introduces portfolio-wide null safety with JSpecify . JSpecify annotations ( @Nullable , @NonNull , @NullMarked ) are applied across the Spring Framework 7 and Spring Boot 4 public API surface. This allows IDEs and static analysis tools (SpotBugs, Error Prone, NullAway) to catch NullPo"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Auto-Configuration Conditions Report",
+    "anchor": "b4-auto-configuration-conditions-report",
+    "text": "Auto-Configuration Conditions Report"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Auto-Configuration Conditions Report",
+    "anchor": "b4-auto-configuration-conditions-report",
+    "text": "Running your Spring Boot 4 application with debug=true or the --debug flag still prints a detailed conditions evaluation report to the console. In Boot 4 the report is more useful because modular auto-configuration makes the \"negative matches\" section significantly shorter — only modules whose start"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "API Versioning — First-Class Request Mapping",
+    "anchor": "b4-api-versioning",
+    "text": "API Versioning — First-Class Request Mapping"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "API Versioning — First-Class Request Mapping",
+    "anchor": "b4-api-versioning",
+    "text": "Spring Framework 7 (the foundation of Spring Boot 4) makes API versioning a first-class feature of request mapping. The version attribute is now available on @GetMapping , @PostMapping , @PutMapping , @DeleteMapping , @PatchMapping , and @RequestMapping . Spring resolves the version from the request"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Enhanced HTTP Service Clients",
+    "anchor": "b4-http-service-clients",
+    "text": "Enhanced HTTP Service Clients"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Enhanced HTTP Service Clients",
+    "anchor": "b4-http-service-clients",
+    "text": "Spring Boot 4 extends the @HttpExchange declarative HTTP client model introduced in Boot 3. In Boot 4, HttpServiceProxyFactory gains support for request-level API version propagation — the version context set by the server-side versioning mechanism can be forwarded automatically to outbound HTTP ser"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Virtual Threads — Enhanced for Boot 4",
+    "anchor": "b4-virtual-threads-web",
+    "text": "Virtual Threads — Enhanced for Boot 4"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Virtual Threads — Enhanced for Boot 4",
+    "anchor": "b4-virtual-threads-web",
+    "text": "Virtual threads (Project Loom) support that debuted in Spring Boot 3.2 is further polished in Spring Boot 4. With Java 21 or later, setting spring.threads.virtual.enabled=true replaces the embedded-server thread pool with one virtual thread per request. In Boot 4, async context propagation for @Asyn"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "gRPC Auto-Configuration",
+    "anchor": "b4-grpc-auto-configuration",
+    "text": "gRPC Auto-Configuration"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "gRPC Auto-Configuration",
+    "anchor": "b4-grpc-auto-configuration",
+    "text": "Spring Boot 4.1 introduces first-class gRPC auto-configuration via the Spring gRPC project. Adding spring-boot-starter-grpc auto-configures a gRPC server supporting both standalone Netty and Servlet HTTP/2 transports. Client-side auto-configuration provides a GrpcChannelFactory bean. The new @GrpcAd"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Hibernate 7 and Jakarta Persistence 3.2",
+    "anchor": "b4-hibernate-7-jakarta",
+    "text": "Hibernate 7 and Jakarta Persistence 3.2"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Hibernate 7 and Jakarta Persistence 3.2",
+    "anchor": "b4-hibernate-7-jakarta",
+    "text": "Spring Boot 4 ships with Hibernate 7.x and Jakarta Persistence 3.2 (the version bundled with Jakarta EE 11). Hibernate 7 brings improved SQL generation, enhanced support for Java records as embeddable objects and projections, a refined @TenantId API for multi-tenancy, and better integration with vir"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Data 2025.1 Improvements",
+    "anchor": "b4-spring-data-2025",
+    "text": "Spring Data 2025.1 Improvements"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Data 2025.1 Improvements",
+    "anchor": "b4-spring-data-2025",
+    "text": "Spring Boot 4 bundles Spring Data 2025.1 , the generation aligned with Spring Framework 7. Key improvements include: refined scroll (cursor-based) pagination API with better keyset support, improved projection interfaces with null-safety annotations applied, enhanced MongoTemplate aggregation pipeli"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "R2DBC — Reactive Relational Data",
+    "anchor": "b4-r2dbc-reactive-data",
+    "text": "R2DBC — Reactive Relational Data"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "R2DBC — Reactive Relational Data",
+    "anchor": "b4-r2dbc-reactive-data",
+    "text": "Spring Boot 4 ships updated auto-configuration for R2DBC aligned with Spring Data 2025.1. The @ServiceConnection annotation (from Testcontainers integration) continues to work with R2DBC containers, auto-configuring the reactive ConnectionFactory without manual property overrides. Spring Data R2DBC "
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Testcontainers @ServiceConnection",
+    "anchor": "b4-testcontainers-service-connection",
+    "text": "Testcontainers @ServiceConnection"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Testcontainers @ServiceConnection",
+    "anchor": "b4-testcontainers-service-connection",
+    "text": "Spring Boot 4 continues and extends the @ServiceConnection support introduced in Boot 3.1. Annotating a Testcontainers @Container field with @ServiceConnection automatically derives all connection properties (URL, username, password, port) from the running container and registers a ConnectionDetails"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Security 7 — SecurityFilterChain",
+    "anchor": "b4-spring-security-7",
+    "text": "Spring Security 7 — SecurityFilterChain"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Security 7 — SecurityFilterChain",
+    "anchor": "b4-spring-security-7",
+    "text": "Spring Boot 4 bundles Spring Security 7 . The component-based SecurityFilterChain model (mandatory since Spring Security 6 / Boot 3) is unchanged in Boot 4 — you declare security by providing a @Bean of type SecurityFilterChain . Spring Security 7 focuses on null-safety improvements (JSpecify), bett"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Method Security — @PreAuthorize and SpEL",
+    "anchor": "b4-method-security",
+    "text": "Method Security — @PreAuthorize and SpEL"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Method Security — @PreAuthorize and SpEL",
+    "anchor": "b4-method-security",
+    "text": "Spring Security 7's method security infrastructure, introduced in Security 6, is further refined in Boot 4. @EnableMethodSecurity activates @PreAuthorize , @PostAuthorize , @PreFilter , and @PostFilter . In Spring Security 7, the authorization manager chain is more extensible, and the handling of re"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "OAuth2 Authorization Server",
+    "anchor": "b4-oauth2-authorization-server",
+    "text": "OAuth2 Authorization Server"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "OAuth2 Authorization Server",
+    "anchor": "b4-oauth2-authorization-server",
+    "text": "Spring Boot 4 includes auto-configuration for the Spring Authorization Server — a production-grade OAuth2 / OpenID Connect authorization server. Adding spring-boot-starter-oauth2-authorization-server auto-configures token signing (RSA keys), client registration, and OIDC discovery metadata. Spring A"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "SSRF Mitigation for HTTP Clients",
+    "anchor": "b4-ssrf-mitigation",
+    "text": "SSRF Mitigation for HTTP Clients"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "SSRF Mitigation for HTTP Clients",
+    "anchor": "b4-ssrf-mitigation",
+    "text": "Spring Boot 4.1 adds Server-Side Request Forgery (SSRF) mitigation to the auto-configured RestClient.Builder and WebClient.Builder . When enabled, the HTTP client validates outbound request URLs against a configurable allowlist of host patterns before making the request. Requests targeting private I"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "OpenTelemetry Native Support",
+    "anchor": "b4-opentelemetry-native",
+    "text": "OpenTelemetry Native Support"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "OpenTelemetry Native Support",
+    "anchor": "b4-opentelemetry-native",
+    "text": "Spring Boot 4 deepens its commitment to OpenTelemetry as the primary observability standard. The auto-configuration for OpenTelemetrySdk and OTLP (OpenTelemetry Protocol) exporters is now simpler and first-class — adding spring-boot-starter-actuator and an OTel exporter on the classpath wires everyt"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Micrometer Observation API",
+    "anchor": "b4-micrometer-observation-api",
+    "text": "Micrometer Observation API"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Micrometer Observation API",
+    "anchor": "b4-micrometer-observation-api",
+    "text": "Spring Boot 4 retains and expands the Micrometer Observation API as the unified abstraction for metrics and distributed tracing. A single Observation.observe() call on an ObservationRegistry automatically emits both a metric (timer/counter) and a trace span, with no separate Tracer and MeterRegistry"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Prometheus Metrics and Actuator",
+    "anchor": "b4-prometheus-metrics-actuator",
+    "text": "Prometheus Metrics and Actuator"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Prometheus Metrics and Actuator",
+    "anchor": "b4-prometheus-metrics-actuator",
+    "text": "Spring Boot 4 Actuator auto-configures a Prometheus-compatible /actuator/prometheus scrape endpoint when micrometer-registry-prometheus is on the classpath. All built-in meters — JVM memory, GC pauses, HTTP server request duration, data source pool statistics, virtual thread statistics — are exposed"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Structured Logging Enhancements",
+    "anchor": "b4-structured-logging",
+    "text": "Structured Logging Enhancements"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Structured Logging Enhancements",
+    "anchor": "b4-structured-logging",
+    "text": "Spring Boot 4 continues the structured logging support introduced in Boot 3.4, with improvements for Boot 4's observability improvements. Structured log output (ECS or Logstash JSON format) now includes virtual thread metadata when virtual threads are enabled, and gRPC call context (Boot 4.1) propag"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "GraalVM Native Image — Smaller Footprint",
+    "anchor": "b4-graalvm-native-image",
+    "text": "GraalVM Native Image — Smaller Footprint"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "GraalVM Native Image — Smaller Footprint",
+    "anchor": "b4-graalvm-native-image",
+    "text": "Spring Boot 4's modularized auto-configuration delivers significantly smaller GraalVM native images . Previously, the AOT engine had to process and generate native hints for the entire spring-boot-autoconfigure jar even when most of its configurations would never be activated. With modular auto-conf"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "AOT Processing — Modular Efficiency",
+    "anchor": "b4-aot-processing",
+    "text": "AOT Processing — Modular Efficiency"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "AOT Processing — Modular Efficiency",
+    "anchor": "b4-aot-processing",
+    "text": "Spring Boot 4's Ahead-of-Time (AOT) processing step is faster and produces leaner output because each auto-configuration module ships its own pre-computed AOT metadata. Previously, the AOT engine derived hints dynamically by analysing the single autoconfigure jar at build time. In Boot 4, modules wi"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@ImportRuntimeHints and @RegisterReflection",
+    "anchor": "b4-import-runtime-hints",
+    "text": "@ImportRuntimeHints and @RegisterReflection"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@ImportRuntimeHints and @RegisterReflection",
+    "anchor": "b4-import-runtime-hints",
+    "text": "Spring Boot 4 retains @ImportRuntimeHints and @RegisterReflectionForBinding from Boot 3 for registering custom native hints when the AOT engine cannot derive them automatically. In Boot 4, these annotations are null-safe (JSpecify annotated), and the AOT engine produces better diagnostics when a hin"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Test Context Pausing",
+    "anchor": "b4-test-context-pausing",
+    "text": "Test Context Pausing"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Test Context Pausing",
+    "anchor": "b4-test-context-pausing",
+    "text": "Spring Framework 7 introduces test context pausing — a new optimization for integration test suites. Previously, Spring contexts stored in the context cache remained fully active between test classes, holding open connections, threads, and other resources. In Boot 4 / Framework 7, the test framework"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Jackson 3 Migration",
+    "anchor": "b4-jackson-3-migration",
+    "text": "Jackson 3 Migration"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Jackson 3 Migration",
+    "anchor": "b4-jackson-3-migration",
+    "text": "Spring Boot 4 upgrades to Jackson 3.x . Jackson 3 reorganised several internal packages and changed the default constructor detection strategy for serialization and deserialization. The com.fasterxml.jackson.databind.ObjectMapper class remains the primary entry point, but some rarely-used configurat"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "ListenableFuture Removal",
+    "anchor": "b4-listenablefuture-removal",
+    "text": "ListenableFuture Removal"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "ListenableFuture Removal",
+    "anchor": "b4-listenablefuture-removal",
+    "text": "Spring Boot 4 (via Spring Framework 7) removes ListenableFuture , which was deprecated in Spring Framework 6 in favour of Java's standard CompletableFuture . Any Spring API that previously returned or accepted ListenableFuture<T> — including AsyncRestTemplate , @Async method return types, and TaskEx"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Undertow Removed as Embedded Server",
+    "anchor": "b4-undertow-removed",
+    "text": "Undertow Removed as Embedded Server"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Undertow Removed as Embedded Server",
+    "anchor": "b4-undertow-removed",
+    "text": "Spring Boot 4 removes Undertow as a supported embedded web server option. Boot 3 supported three embedded server choices — Tomcat, Jetty, and Undertow — but Undertow's adoption was significantly lower than the other two and maintaining Jakarta EE 11 / Servlet 6.1 compatibility in Undertow posed ongo"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Deprecated API Removals",
+    "anchor": "b4-deprecated-api-removals",
+    "text": "Deprecated API Removals"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Deprecated API Removals",
+    "anchor": "b4-deprecated-api-removals",
+    "text": "Spring Boot 4 removes all APIs that were deprecated in Spring Boot 3.x or Spring Framework 6.x (following the standard Spring two-major-version deprecation policy). Notable removals include: WebSecurityConfigurerAdapter (removed in Security 6, not re-added), spring.factories EnableAutoConfiguration "
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Boot 4 Cheatsheet",
+    "anchor": "",
+    "text": "Spring Boot 4 Cheatsheet"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Boot 4 Cheatsheet",
+    "anchor": "",
+    "text": "Annotation / Starter / Property Purpose Notes spring-boot-starter-parent 4.0.0 BOM + plugin defaults for Spring Boot 4.x Java 17 min, Java 21/25 recommended; Jakarta EE 11 Modular auto-configuration (70+ modules) Each starter owns its auto-configuration module Smaller native images; faster AOT; clas"
+  },
+  {
     "page": "Spring Boot",
     "href": "spring-boot/index.html",
     "section": "Spring Boot",
