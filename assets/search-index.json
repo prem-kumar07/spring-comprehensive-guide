@@ -56,6 +56,482 @@
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Spring Boot Auto-Configuration",
+    "anchor": "",
+    "text": "Spring Boot Auto-Configuration"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Spring Boot Auto-Configuration",
+    "anchor": "",
+    "text": "Spring Boot auto-configuration automatically configures your application based on the dependencies present on the classpath, eliminating the need for manual bean declarations. It evaluates @Conditional annotations at startup and only registers beans when the relevant conditions — a class being prese"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "How Auto-Configuration Works",
+    "anchor": "",
+    "text": "How Auto-Configuration Works"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "How Auto-Configuration Works",
+    "anchor": "",
+    "text": "Auto-configuration is driven by a fixed loading sequence: @SpringBootApplication includes @EnableAutoConfiguration , which activates AutoConfigurationImportSelector . The selector reads a list of candidate configuration classes from a metadata file, then evaluates each class's @Conditional annotatio"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@SpringBootApplication as Entry Point",
+    "anchor": "auto-config-entry-point",
+    "text": "@SpringBootApplication as Entry Point"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@SpringBootApplication as Entry Point",
+    "anchor": "auto-config-entry-point",
+    "text": "@SpringBootApplication is a composed annotation that combines @SpringBootConfiguration , @EnableAutoConfiguration , and @ComponentScan . The @EnableAutoConfiguration part is what kicks off the entire auto-configuration process. Placing it on your main class tells Spring Boot to search for auto-confi"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfigurationImportSelector",
+    "anchor": "auto-config-import-selector",
+    "text": "AutoConfigurationImportSelector"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfigurationImportSelector",
+    "anchor": "auto-config-import-selector",
+    "text": "AutoConfigurationImportSelector implements DeferredImportSelector and is the class responsible for reading the list of auto-configuration candidates. In Spring Boot 3 it reads META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports (one fully-qualified class name per line). "
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Auto-Configuration Ordering",
+    "anchor": "auto-config-ordering",
+    "text": "Auto-Configuration Ordering"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Auto-Configuration Ordering",
+    "anchor": "auto-config-ordering",
+    "text": "Auto-configuration classes can declare ordering constraints using @AutoConfigureBefore and @AutoConfigureAfter to control which configurations are processed first. For example, a security auto-configuration may need to run after the data-source auto-configuration. Additionally, @AutoConfigureOrder ("
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@Conditional Annotations",
+    "anchor": "",
+    "text": "@Conditional Annotations"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@Conditional Annotations",
+    "anchor": "",
+    "text": "Spring Boot ships a rich set of @Conditional annotations that allow auto-configuration classes to declare precisely when they should apply. All of these annotations can be placed on @Configuration classes or individual @Bean methods. When multiple conditions are present, all must pass for the config"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnClass",
+    "anchor": "conditional-on-class",
+    "text": "@ConditionalOnClass"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnClass",
+    "anchor": "conditional-on-class",
+    "text": "Matches when the specified class (or all specified classes) are present on the classpath. This is the most common condition in auto-configurations — it ensures that a driver or library class exists before registering beans that depend on it. The check is done at the bytecode level without actually l"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnMissingBean",
+    "anchor": "conditional-on-missing-bean",
+    "text": "@ConditionalOnMissingBean"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnMissingBean",
+    "anchor": "conditional-on-missing-bean",
+    "text": "Matches when no bean of the specified type (or name) has been registered yet in the application context. This is the primary mechanism that lets users override auto-configured beans — by declaring their own bean of the same type, they suppress the auto-configuration's bean silently. When used withou"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnProperty",
+    "anchor": "conditional-on-property",
+    "text": "@ConditionalOnProperty"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnProperty",
+    "anchor": "conditional-on-property",
+    "text": "Matches based on the value of a Spring Environment property. You can require the property to exist ( matchIfMissing = false , the default) or to have a specific value. The havingValue attribute enables matching only when the property equals a particular string. This is the standard way to make a fea"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnWebApplication",
+    "anchor": "conditional-on-web-application",
+    "text": "@ConditionalOnWebApplication"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnWebApplication",
+    "anchor": "conditional-on-web-application",
+    "text": "Matches when the application is a web application. You can restrict to a specific web application type using type = Type.SERVLET (traditional blocking Spring MVC) or type = Type.REACTIVE (Spring WebFlux). The default matches either. Web auto-configurations like DispatcherServletAutoConfiguration use"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnExpression",
+    "anchor": "conditional-on-expression",
+    "text": "@ConditionalOnExpression"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnExpression",
+    "anchor": "conditional-on-expression",
+    "text": "Matches when a SpEL (Spring Expression Language) expression evaluates to true . This is the most flexible — and most expensive — condition because the expression is evaluated at runtime. It should be used as a last resort when no simpler condition covers the requirement, because SpEL expressions are"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnBean",
+    "anchor": "conditional-on-bean",
+    "text": "@ConditionalOnBean"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnBean",
+    "anchor": "conditional-on-bean",
+    "text": "Matches when at least one bean of the specified type or name is already registered in the context. This is the inverse of @ConditionalOnMissingBean . A common pattern is to declare additional infrastructure beans (metrics adapters, health indicators) only when the primary service bean already exists"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnSingleCandidate",
+    "anchor": "conditional-on-single-candidate",
+    "text": "@ConditionalOnSingleCandidate"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnSingleCandidate",
+    "anchor": "conditional-on-single-candidate",
+    "text": "Matches when exactly one bean of the specified type exists in the context, or when multiple candidates exist but one is marked @Primary . This is especially useful in reactive vs. blocking scenarios where a configuration should activate only when there is an unambiguous primary candidate, rather tha"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnNotWebApplication",
+    "anchor": "conditional-on-not-web-application",
+    "text": "@ConditionalOnNotWebApplication"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnNotWebApplication",
+    "anchor": "conditional-on-not-web-application",
+    "text": "Matches only when the application is not a web application — the complement of @ConditionalOnWebApplication . Useful for configurations that should only apply in batch jobs, command-line runners, or standalone Spring contexts where no embedded server is present. Scheduling and batch auto-configurati"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnJava",
+    "anchor": "conditional-on-java",
+    "text": "@ConditionalOnJava"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnJava",
+    "anchor": "conditional-on-java",
+    "text": "Matches based on the JVM version at runtime. You specify a range using JavaVersion enum constants and a range attribute ( EQUAL_OR_NEWER or OLDER_THAN ). This allows library authors to provide different implementation strategies depending on which language features are available, without branching a"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnResource",
+    "anchor": "conditional-on-resource",
+    "text": "@ConditionalOnResource"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnResource",
+    "anchor": "conditional-on-resource",
+    "text": "Matches when a specific resource (file, classpath entry) is present. The resource location uses the standard Spring resource syntax: classpath: , file: , etc. This is useful for auto-configurations that need a configuration file (such as a logback.xml ) to be present before they activate their defau"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnCloudPlatform",
+    "anchor": "conditional-on-cloud-platform",
+    "text": "@ConditionalOnCloudPlatform"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@ConditionalOnCloudPlatform",
+    "anchor": "conditional-on-cloud-platform",
+    "text": "Matches when the application is running on a specific cloud platform. Spring Boot detects platforms like CLOUD_FOUNDRY , HEROKU , SAP , and KUBERNETES by inspecting environment variables. This allows starters to register cloud-native infrastructure beans — such as service binding adapters — only whe"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Writing a Custom @Condition",
+    "anchor": "custom-condition",
+    "text": "Writing a Custom @Condition"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Writing a Custom @Condition",
+    "anchor": "custom-condition",
+    "text": "When none of the built-in conditions fit, extend SpringBootCondition and implement getMatchOutcome() . Return a ConditionOutcome that carries both a boolean match result and a human-readable message explaining the decision. The message appears in the conditions evaluation report (accessible via --de"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfiguration.imports vs spring.factories",
+    "anchor": "",
+    "text": "AutoConfiguration.imports vs spring.factories"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfiguration.imports vs spring.factories",
+    "anchor": "",
+    "text": "Spring Boot 2 used META-INF/spring.factories to register many extension points, including auto-configurations. Spring Boot 3 introduced a dedicated file for auto-configurations to improve startup performance, AOT compatibility, and tooling support. Understanding this change is critical when upgradin"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "spring.factories — Legacy Mechanism (Boot 2)",
+    "anchor": "spring-factories-legacy-mechanism",
+    "text": "spring.factories — Legacy Mechanism (Boot 2)"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "spring.factories — Legacy Mechanism (Boot 2)",
+    "anchor": "spring-factories-legacy-mechanism",
+    "text": "In Spring Boot 2, auto-configuration classes were registered under the org.springframework.boot.autoconfigure.EnableAutoConfiguration key in META-INF/spring.factories . The file used a Java properties format and supported multiple comma-separated class names per key. SpringFactoriesLoader read this "
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfiguration.imports — Boot 3+ Mechanism",
+    "anchor": "auto-configuration-imports-mechanism",
+    "text": "AutoConfiguration.imports — Boot 3+ Mechanism"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "AutoConfiguration.imports — Boot 3+ Mechanism",
+    "anchor": "auto-configuration-imports-mechanism",
+    "text": "Spring Boot 3 introduced a dedicated file at META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports . Each line contains exactly one fully-qualified auto-configuration class name. The new mechanism is more efficient because it is parsed lazily and is compatible with GraalVM"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Migrating from spring.factories to AutoConfiguration.imports",
+    "anchor": "migration-from-spring-factories",
+    "text": "Migrating from spring.factories to AutoConfiguration.imports"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Migrating from spring.factories to AutoConfiguration.imports",
+    "anchor": "migration-from-spring-factories",
+    "text": "To migrate a Boot 2 starter to Boot 3: create the directory src/main/resources/META-INF/spring/ , add a file named org.springframework.boot.autoconfigure.AutoConfiguration.imports , and list each auto-configuration class on its own line. Remove the EnableAutoConfiguration entry from spring.factories"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@AutoConfiguration Annotation",
+    "anchor": "auto-configuration-annotation",
+    "text": "@AutoConfiguration Annotation"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "@AutoConfiguration Annotation",
+    "anchor": "auto-configuration-annotation",
+    "text": "Spring Boot 3 introduced the @AutoConfiguration annotation as a replacement for bare @Configuration on auto-configuration classes. It is a meta-annotation that includes @Configuration(proxyBeanMethods = false) for performance, plus support for before and after ordering attributes directly on the ann"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Debugging Auto-Configuration",
+    "anchor": "",
+    "text": "Debugging Auto-Configuration"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Debugging Auto-Configuration",
+    "anchor": "",
+    "text": "Spring Boot provides several mechanisms for understanding which auto-configurations were applied and why others were skipped. The conditions evaluation report is the primary tool, available both at startup via the --debug flag and at runtime via the Actuator /actuator/conditions endpoint."
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "--debug Flag — Conditions Evaluation Report",
+    "anchor": "debug-flag-conditions-report",
+    "text": "--debug Flag — Conditions Evaluation Report"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "--debug Flag — Conditions Evaluation Report",
+    "anchor": "debug-flag-conditions-report",
+    "text": "Launching a Spring Boot application with --debug (or setting debug=true in application.properties ) prints the full conditions evaluation report to the console at startup. The report lists three sections: Positive matches (conditions that passed and beans that were registered), Negative matches (con"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Actuator /actuator/conditions Endpoint",
+    "anchor": "actuator-conditions-endpoint",
+    "text": "Actuator /actuator/conditions Endpoint"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Actuator /actuator/conditions Endpoint",
+    "anchor": "actuator-conditions-endpoint",
+    "text": "When spring-boot-starter-actuator is on the classpath, the /actuator/conditions endpoint exposes the same conditions evaluation report as a JSON response, queryable at runtime without restarting the application. This is useful for production troubleshooting — combine it with /actuator/beans to see e"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Reading the Conditions Report",
+    "anchor": "reading-conditions-report",
+    "text": "Reading the Conditions Report"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Reading the Conditions Report",
+    "anchor": "reading-conditions-report",
+    "text": "Each entry in the positive-matches section shows the auto-configuration class name, the conditions that were evaluated, and the outcome message explaining why the condition passed. Negative-match entries show which specific condition failed and the class or property that was missing. The message tex"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Excluding Auto-Configurations",
+    "anchor": "exclude-auto-configuration",
+    "text": "Excluding Auto-Configurations"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Excluding Auto-Configurations",
+    "anchor": "exclude-auto-configuration",
+    "text": "If an auto-configuration is activating when you do not want it to, you can exclude it explicitly using the exclude attribute of @SpringBootApplication , or via the spring.autoconfigure.exclude property. The property approach is useful when the class you want to exclude is not on your compile-time cl"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Building a Custom Starter",
+    "anchor": "",
+    "text": "Building a Custom Starter"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Building a Custom Starter",
+    "anchor": "",
+    "text": "A Spring Boot starter is a convention-based packaging of auto-configuration and dependencies that other projects can consume with a single Maven or Gradle dependency. The recommended structure separates the auto-configuration logic into an -autoconfigure module and exposes a thin -starter module tha"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 1 — The autoconfigure Module",
+    "anchor": "custom-starter-autoconfigure-module",
+    "text": "Step 1 — The autoconfigure Module"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 1 — The autoconfigure Module",
+    "anchor": "custom-starter-autoconfigure-module",
+    "text": "Create a separate Maven module named my-feature-spring-boot-autoconfigure . This module contains the @AutoConfiguration class, any @ConfigurationProperties classes, and the AutoConfiguration.imports registration file. The only required dependency is spring-boot-autoconfigure . Do not add spring-boot"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 2 — The starter Module",
+    "anchor": "custom-starter-module",
+    "text": "Step 2 — The starter Module"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 2 — The starter Module",
+    "anchor": "custom-starter-module",
+    "text": "Create a second Maven module named my-feature-spring-boot-starter . This module is intentionally lightweight — it contains no Java source, only a pom.xml that declares dependencies on both the autoconfigure module and any other libraries the feature requires. Consumers add just this single starter d"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 3 — Register via AutoConfiguration.imports",
+    "anchor": "custom-starter-registration",
+    "text": "Step 3 — Register via AutoConfiguration.imports"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 3 — Register via AutoConfiguration.imports",
+    "anchor": "custom-starter-registration",
+    "text": "Inside the autoconfigure module, create the file src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports . Add one line per auto-configuration class. This file is what Spring Boot reads at startup to discover your configuration — without it, the @AutoConfi"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 4 — Consuming the Starter",
+    "anchor": "custom-starter-consuming",
+    "text": "Step 4 — Consuming the Starter"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Step 4 — Consuming the Starter",
+    "anchor": "custom-starter-consuming",
+    "text": "In any Spring Boot project that wants to use your feature, add a single dependency on the starter module. No @Import , no component-scan of the library's package — Spring Boot discovers and applies the auto-configuration automatically via the AutoConfiguration.imports file. If the user wants to over"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Auto-Configuration Cheatsheet",
+    "anchor": "",
+    "text": "Auto-Configuration Cheatsheet"
+  },
+  {
+    "page": "Spring Boot Auto-Configuration",
+    "href": "spring-boot/auto-configuration.html",
+    "section": "Auto-Configuration Cheatsheet",
+    "anchor": "",
+    "text": "@Conditional Annotation Fires when Example use case @ConditionalOnClass Specified class(es) present on classpath Activate JDBC support when DataSource.class is present @ConditionalOnMissingBean No bean of the type/name exists yet Allow user to override auto-configured ObjectMapper @ConditionalOnBean"
+  },
+  {
     "page": "Spring Boot 3 Features",
     "href": "spring-boot/boot3-features.html",
     "section": "Spring Boot 3 Features",

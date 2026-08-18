@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot Auto-Configuration</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot Auto-Configuration</h1>
+    <p>Spring Boot auto-configuration automatically configures your application based on the dependencies present on the classpath, eliminating the need for manual bean declarations. It evaluates <code>@Conditional</code> annotations at startup and only registers beans when the relevant conditions — a class being present, a property being set, a bean being absent — are satisfied, so user-defined beans always take precedence over auto-configured ones.</p>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: HOW AUTO-CONFIGURATION WORKS
+         ═══════════════════════════════════════════════════ -->
+    <h2>How Auto-Configuration Works</h2>
+    <p>Auto-configuration is driven by a fixed loading sequence: <code>@SpringBootApplication</code> includes <code>@EnableAutoConfiguration</code>, which activates <code>AutoConfigurationImportSelector</code>. The selector reads a list of candidate configuration classes from a metadata file, then evaluates each class's <code>@Conditional</code> annotations before deciding whether to register its beans.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" aria-label="Auto-configuration loading sequence" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="var(--border)"/>
+          </marker>
+          <marker id="arr-accent" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="var(--accent)"/>
+          </marker>
+          <marker id="arr-muted" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="var(--text-muted)"/>
+          </marker>
+        </defs>
+        <!-- Node 1: @SpringBootApplication -->
+        <rect x="190" y="10" width="300" height="44" rx="8" fill="var(--accent)" stroke="none"/>
+        <text x="340" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text-inverse)">@SpringBootApplication</text>
+        <!-- Arrow 1→2 -->
+        <line x1="340" y1="54" x2="340" y2="74" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+        <!-- Node 2: @EnableAutoConfiguration -->
+        <rect x="190" y="74" width="300" height="44" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="101" text-anchor="middle" font-size="13" fill="var(--text)">@EnableAutoConfiguration</text>
+        <!-- Arrow 2→3 -->
+        <line x1="340" y1="118" x2="340" y2="138" stroke="var(--border)" stroke-width="2" marker-end="url(#arr)"/>
+        <!-- Node 3: AutoConfiguration.imports lookup -->
+        <rect x="150" y="138" width="380" height="44" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="159" text-anchor="middle" font-size="12" fill="var(--text)">META-INF/spring/</text>
+        <text x="340" y="175" text-anchor="middle" font-size="11" fill="var(--text-muted)">AutoConfiguration.imports lookup</text>
+        <!-- Arrow 3→4 -->
+        <line x1="340" y1="182" x2="340" y2="202" stroke="var(--border)" stroke-width="2" marker-end="url(#arr)"/>
+        <!-- Node 4: Diamond — @Conditional checks -->
+        <polygon points="340,202 460,242 340,282 220,242" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="340" y="238" text-anchor="middle" font-size="12" fill="var(--text)">@Conditional</text>
+        <text x="340" y="255" text-anchor="middle" font-size="11" fill="var(--text-muted)">checks pass?</text>
+        <!-- Yes arrow → Register beans -->
+        <line x1="340" y1="282" x2="340" y2="302" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-accent)"/>
+        <text x="350" y="296" font-size="11" fill="var(--accent)">Yes</text>
+        <rect x="215" y="302" width="250" height="32" rx="8" fill="var(--accent)" stroke="none"/>
+        <text x="340" y="323" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text-inverse)">Register Beans</text>
+        <!-- No arrow → Skip (right side) -->
+        <line x1="460" y1="242" x2="580" y2="242" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arr-muted)"/>
+        <text x="515" y="233" font-size="11" fill="var(--text-muted)">No</text>
+        <rect x="580" y="220" width="80" height="44" rx="8" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="620" y="247" text-anchor="middle" font-size="12" fill="var(--text-muted)">Skip</text>
+      </svg>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="auto-config-entry-point">@SpringBootApplication as Entry Point</h3>
+      <p><code>@SpringBootApplication</code> is a composed annotation that combines <code>@SpringBootConfiguration</code>, <code>@EnableAutoConfiguration</code>, and <code>@ComponentScan</code>. The <code>@EnableAutoConfiguration</code> part is what kicks off the entire auto-configuration process. Placing it on your main class tells Spring Boot to search for auto-configuration candidates and selectively apply them before the application context is fully refreshed.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@SpringBootApplication
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="auto-config-import-selector">AutoConfigurationImportSelector</h3>
+      <p><code>AutoConfigurationImportSelector</code> implements <code>DeferredImportSelector</code> and is the class responsible for reading the list of auto-configuration candidates. In Spring Boot 3 it reads <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code> (one fully-qualified class name per line). It then filters the list by excluding any classes listed in <code>spring.autoconfigure.exclude</code>, and hands the remaining candidates to the condition evaluation engine.</p>
+      <h4>Relevant dependency</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="auto-config-ordering">Auto-Configuration Ordering</h3>
+      <p>Auto-configuration classes can declare ordering constraints using <code>@AutoConfigureBefore</code> and <code>@AutoConfigureAfter</code> to control which configurations are processed first. For example, a security auto-configuration may need to run after the data-source auto-configuration. Additionally, <code>@AutoConfigureOrder</code> (analogous to <code>@Order</code>) provides numeric ordering. These hints are resolved by <code>AutoConfigurationSorter</code> before the conditions are evaluated.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@ConditionalOnBean(DataSource.class)
+public class MyDataAutoConfiguration {
+    // Only applied after DataSourceAutoConfiguration
+}</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: @CONDITIONAL ANNOTATIONS
+         ═══════════════════════════════════════════════════ -->
+    <h2>@Conditional Annotations</h2>
+    <p>Spring Boot ships a rich set of <code>@Conditional</code> annotations that allow auto-configuration classes to declare precisely when they should apply. All of these annotations can be placed on <code>@Configuration</code> classes or individual <code>@Bean</code> methods. When multiple conditions are present, all must pass for the configuration to be applied.</p>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-class">@ConditionalOnClass</h3>
+      <p>Matches when the specified class (or all specified classes) are present on the classpath. This is the most common condition in auto-configurations — it ensures that a driver or library class exists before registering beans that depend on it. The check is done at the bytecode level without actually loading the class, so it is safe to reference classes that may not be on the classpath.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnClass({ DataSource.class, EmbeddedDatabaseType.class })
+public class DataSourceAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSource dataSource(DataSourceProperties props) {
+        return props.initializeDataSourceBuilder().build();
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-missing-bean">@ConditionalOnMissingBean</h3>
+      <p>Matches when no bean of the specified type (or name) has been registered yet in the application context. This is the primary mechanism that lets users override auto-configured beans — by declaring their own bean of the same type, they suppress the auto-configuration's bean silently. When used without arguments it checks for a bean of the same type as the return type of the <code>@Bean</code> method.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnClass(ObjectMapper.class)
+public class JacksonAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean(ObjectMapper.class)
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-property">@ConditionalOnProperty</h3>
+      <p>Matches based on the value of a Spring Environment property. You can require the property to exist (<code>matchIfMissing = false</code>, the default) or to have a specific value. The <code>havingValue</code> attribute enables matching only when the property equals a particular string. This is the standard way to make a feature opt-in or opt-out via <code>application.properties</code>.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnProperty(
+    prefix = "my.feature",
+    name = "enabled",
+    havingValue = "true",
+    matchIfMissing = false
+)
+public class MyFeatureAutoConfiguration {
+
+    @Bean
+    public MyFeatureService myFeatureService() {
+        return new MyFeatureService();
+    }
+}</code></pre>
+      <h4>application.properties</h4>
+      <pre><code class="language-properties">my.feature.enabled=true</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-web-application">@ConditionalOnWebApplication</h3>
+      <p>Matches when the application is a web application. You can restrict to a specific web application type using <code>type = Type.SERVLET</code> (traditional blocking Spring MVC) or <code>type = Type.REACTIVE</code> (Spring WebFlux). The default matches either. Web auto-configurations like <code>DispatcherServletAutoConfiguration</code> use this to avoid registering servlet-specific beans in non-web contexts.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnClass(DispatcherServlet.class)
+public class WebMvcAutoConfiguration {
+    // Only applied in a Servlet-based web application
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-expression">@ConditionalOnExpression</h3>
+      <p>Matches when a SpEL (Spring Expression Language) expression evaluates to <code>true</code>. This is the most flexible — and most expensive — condition because the expression is evaluated at runtime. It should be used as a last resort when no simpler condition covers the requirement, because SpEL expressions are not optimised for AOT/GraalVM native image compilation.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnExpression(
+    "${my.feature.enabled:false} and '${my.feature.mode:default}' == 'advanced'"
+)
+public class AdvancedFeatureAutoConfiguration {
+    // Only applied when both conditions are met via SpEL
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-bean">@ConditionalOnBean</h3>
+      <p>Matches when at least one bean of the specified type or name is already registered in the context. This is the inverse of <code>@ConditionalOnMissingBean</code>. A common pattern is to declare additional infrastructure beans (metrics adapters, health indicators) only when the primary service bean already exists, ensuring the extension is activated only when the feature it decorates is present.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnBean(DataSource.class)
+public class DataSourceHealthIndicatorAutoConfiguration {
+
+    @Bean
+    public DataSourceHealthIndicator dbHealthIndicator(DataSource ds) {
+        return new DataSourceHealthIndicator(ds, "SELECT 1");
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-single-candidate">@ConditionalOnSingleCandidate</h3>
+      <p>Matches when exactly one bean of the specified type exists in the context, or when multiple candidates exist but one is marked <code>@Primary</code>. This is especially useful in reactive vs. blocking scenarios where a configuration should activate only when there is an unambiguous primary candidate, rather than failing with a <code>NoUniqueBeanDefinitionException</code>.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnSingleCandidate(DataSource.class)
+public class JdbcTemplateAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JdbcTemplate jdbcTemplate(DataSource ds) {
+        return new JdbcTemplate(ds);
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-not-web-application">@ConditionalOnNotWebApplication</h3>
+      <p>Matches only when the application is <em>not</em> a web application — the complement of <code>@ConditionalOnWebApplication</code>. Useful for configurations that should only apply in batch jobs, command-line runners, or standalone Spring contexts where no embedded server is present. Scheduling and batch auto-configurations use this to register lightweight executors that would otherwise conflict with web-thread management.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnNotWebApplication
+@ConditionalOnClass(Job.class)
+public class BatchAutoConfiguration {
+    // Only applies in non-web (e.g. batch) contexts
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-java">@ConditionalOnJava</h3>
+      <p>Matches based on the JVM version at runtime. You specify a range using <code>JavaVersion</code> enum constants and a <code>range</code> attribute (<code>EQUAL_OR_NEWER</code> or <code>OLDER_THAN</code>). This allows library authors to provide different implementation strategies depending on which language features are available, without branching at the application level.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnJava(JavaVersion.TWENTY_ONE)
+public class VirtualThreadAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AsyncTaskExecutor virtualThreadExecutor() {
+        return new SimpleAsyncTaskExecutor("vt-");
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-resource">@ConditionalOnResource</h3>
+      <p>Matches when a specific resource (file, classpath entry) is present. The resource location uses the standard Spring resource syntax: <code>classpath:</code>, <code>file:</code>, etc. This is useful for auto-configurations that need a configuration file (such as a <code>logback.xml</code>) to be present before they activate their default logging configuration.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnResource(resources = "classpath:myconfig.properties")
+public class MyConfigAutoConfiguration {
+    // Only applied if myconfig.properties exists on the classpath
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="conditional-on-cloud-platform">@ConditionalOnCloudPlatform</h3>
+      <p>Matches when the application is running on a specific cloud platform. Spring Boot detects platforms like <code>CLOUD_FOUNDRY</code>, <code>HEROKU</code>, <code>SAP</code>, and <code>KUBERNETES</code> by inspecting environment variables. This allows starters to register cloud-native infrastructure beans — such as service binding adapters — only when running on the target platform.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnCloudPlatform(CloudPlatform.KUBERNETES)
+public class KubernetesAutoConfiguration {
+    // Registers k8s-specific health indicators and config sources
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-condition">Writing a Custom @Condition</h3>
+      <p>When none of the built-in conditions fit, extend <code>SpringBootCondition</code> and implement <code>getMatchOutcome()</code>. Return a <code>ConditionOutcome</code> that carries both a boolean match result and a human-readable message explaining the decision. The message appears in the conditions evaluation report (accessible via <code>--debug</code> or <code>/actuator/conditions</code>), which is invaluable during development.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">public class OnWeekdayCondition extends SpringBootCondition {
+
+    @Override
+    public ConditionOutcome getMatchOutcome(ConditionContext ctx, AnnotatedTypeMetadata meta) {
+        int day = LocalDate.now().getDayOfWeek().getValue();
+        boolean weekday = day >= 1 &amp;&amp; day &lt;= 5;
+        String message = weekday ? "Is a weekday" : "Is weekend";
+        return new ConditionOutcome(weekday, ConditionMessage.of(message));
+    }
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Conditional(OnWeekdayCondition.class)
+public @interface ConditionalOnWeekday {}
+
+@AutoConfiguration
+@ConditionalOnWeekday
+public class WeekdayJobAutoConfiguration {
+    // Only active Monday–Friday
+}</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: AutoConfiguration.imports vs spring.factories
+         ═══════════════════════════════════════════════════ -->
+    <h2>AutoConfiguration.imports vs spring.factories</h2>
+    <p>Spring Boot 2 used <code>META-INF/spring.factories</code> to register many extension points, including auto-configurations. Spring Boot 3 introduced a dedicated file for auto-configurations to improve startup performance, AOT compatibility, and tooling support. Understanding this change is critical when upgrading starters or writing new ones.</p>
+
+    <div class="feature-card">
+      <h3 id="spring-factories-legacy-mechanism">spring.factories — Legacy Mechanism (Boot 2)</h3>
+      <p>In Spring Boot 2, auto-configuration classes were registered under the <code>org.springframework.boot.autoconfigure.EnableAutoConfiguration</code> key in <code>META-INF/spring.factories</code>. The file used a Java properties format and supported multiple comma-separated class names per key. <code>SpringFactoriesLoader</code> read this file and loaded all extension points — not just auto-configurations — from a single place, which caused class-loading overhead even for unused extension points.</p>
+      <h4>Boot 2 registration (legacy — do not use in Boot 3)</h4>
+      <pre><code class="language-properties"># META-INF/spring.factories
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.example.MyFeatureAutoConfiguration,\
+  com.example.AnotherAutoConfiguration</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="auto-configuration-imports-mechanism">AutoConfiguration.imports — Boot 3+ Mechanism</h3>
+      <p>Spring Boot 3 introduced a dedicated file at <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>. Each line contains exactly one fully-qualified auto-configuration class name. The new mechanism is more efficient because it is parsed lazily and is compatible with GraalVM native image compilation. The <code>spring.factories</code> <code>EnableAutoConfiguration</code> key is <strong>no longer supported</strong> in Spring Boot 3 — migrating to the new file is mandatory.</p>
+      <h4>Boot 3 registration</h4>
+      <pre><code class="language-text"># META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+com.example.MyFeatureAutoConfiguration
+com.example.AnotherAutoConfiguration</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="migration-from-spring-factories">Migrating from spring.factories to AutoConfiguration.imports</h3>
+      <p>To migrate a Boot 2 starter to Boot 3: create the directory <code>src/main/resources/META-INF/spring/</code>, add a file named <code>org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>, and list each auto-configuration class on its own line. Remove the <code>EnableAutoConfiguration</code> entry from <code>spring.factories</code> (you may keep other keys in <code>spring.factories</code> for non-auto-configuration extension points). Replace <code>@Configuration</code> with <code>@AutoConfiguration</code> on each class.</p>
+      <h4>File layout after migration</h4>
+      <pre><code class="language-text">src/main/resources/
+  META-INF/
+    spring/
+      org.springframework.boot.autoconfigure.AutoConfiguration.imports
+    # spring.factories may still exist for other extension points</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="auto-configuration-annotation">@AutoConfiguration Annotation</h3>
+      <p>Spring Boot 3 introduced the <code>@AutoConfiguration</code> annotation as a replacement for bare <code>@Configuration</code> on auto-configuration classes. It is a meta-annotation that includes <code>@Configuration(proxyBeanMethods = false)</code> for performance, plus support for <code>before</code> and <code>after</code> ordering attributes directly on the annotation (equivalent to <code>@AutoConfigureBefore</code> / <code>@AutoConfigureAfter</code>). Using <code>@AutoConfiguration</code> is now the idiomatic way to write auto-configuration classes in Boot 3+.</p>
+      <h4>Example</h4>
+      <pre><code class="language-java">// Boot 3+ — preferred
+@AutoConfiguration(after = DataSourceAutoConfiguration.class)
+@ConditionalOnClass(DataSource.class)
+public class MyAutoConfiguration {
+    @Bean
+    @ConditionalOnMissingBean
+    public MyService myService(DataSource ds) {
+        return new MyService(ds);
+    }
+}
+
+// Boot 2 equivalent (still works in Boot 3 but not idiomatic)
+@Configuration
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@ConditionalOnClass(DataSource.class)
+public class MyAutoConfigurationLegacy { ... }</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: DEBUGGING AUTO-CONFIGURATION
+         ═══════════════════════════════════════════════════ -->
+    <h2>Debugging Auto-Configuration</h2>
+    <p>Spring Boot provides several mechanisms for understanding which auto-configurations were applied and why others were skipped. The conditions evaluation report is the primary tool, available both at startup via the <code>--debug</code> flag and at runtime via the Actuator <code>/actuator/conditions</code> endpoint.</p>
+
+    <div class="feature-card">
+      <h3 id="debug-flag-conditions-report">--debug Flag — Conditions Evaluation Report</h3>
+      <p>Launching a Spring Boot application with <code>--debug</code> (or setting <code>debug=true</code> in <code>application.properties</code>) prints the full conditions evaluation report to the console at startup. The report lists three sections: <strong>Positive matches</strong> (conditions that passed and beans that were registered), <strong>Negative matches</strong> (conditions that failed and why), and <strong>Unconditional classes</strong> (applied without any condition). Reading negative matches tells you exactly which condition blocked an auto-configuration from activating.</p>
+      <h4>Enable via command line</h4>
+      <pre><code class="language-bash">java -jar myapp.jar --debug</code></pre>
+      <h4>Enable via application.properties</h4>
+      <pre><code class="language-properties">debug=true</code></pre>
+      <h4>Sample report output</h4>
+      <pre><code class="language-text">============================
+CONDITIONS EVALUATION REPORT
+============================
+
+Positive matches:
+-----------------
+   DataSourceAutoConfiguration matched:
+      - @ConditionalOnClass found required classes
+      - @ConditionalOnMissingBean (types: javax.sql.DataSource) did not find any beans (OnBeanCondition)
+
+Negative matches:
+-----------------
+   ActiveMQAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.jms.ConnectionFactory'</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="actuator-conditions-endpoint">Actuator /actuator/conditions Endpoint</h3>
+      <p>When <code>spring-boot-starter-actuator</code> is on the classpath, the <code>/actuator/conditions</code> endpoint exposes the same conditions evaluation report as a JSON response, queryable at runtime without restarting the application. This is useful for production troubleshooting — combine it with <code>/actuator/beans</code> to see exactly which beans are registered and where they came from.</p>
+      <h4>Enable actuator dependency</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+      <h4>Expose the endpoint in application.properties</h4>
+      <pre><code class="language-properties">management.endpoints.web.exposure.include=conditions,beans,health
+management.endpoint.conditions.access=read-only</code></pre>
+      <h4>Query</h4>
+      <pre><code class="language-bash">curl http://localhost:8080/actuator/conditions | jq .positiveMatches</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="reading-conditions-report">Reading the Conditions Report</h3>
+      <p>Each entry in the positive-matches section shows the auto-configuration class name, the conditions that were evaluated, and the outcome message explaining why the condition passed. Negative-match entries show <em>which specific condition failed</em> and the class or property that was missing. The message text comes directly from the <code>ConditionOutcome</code> returned by the condition — so well-written custom conditions should always provide a clear message for this report.</p>
+      <h4>Key fields in the JSON response</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>positiveMatches</code></td>
+              <td>Auto-configurations that matched — beans were registered</td>
+            </tr>
+            <tr>
+              <td><code>negativeMatches</code></td>
+              <td>Auto-configurations that did not match — beans were skipped</td>
+            </tr>
+            <tr>
+              <td><code>unconditionalClasses</code></td>
+              <td>Auto-configurations applied with no conditions at all</td>
+            </tr>
+            <tr>
+              <td><code>exclusions</code></td>
+              <td>Auto-configurations excluded by <code>spring.autoconfigure.exclude</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="exclude-auto-configuration">Excluding Auto-Configurations</h3>
+      <p>If an auto-configuration is activating when you do not want it to, you can exclude it explicitly using the <code>exclude</code> attribute of <code>@SpringBootApplication</code>, or via the <code>spring.autoconfigure.exclude</code> property. The property approach is useful when the class you want to exclude is not on your compile-time classpath. Excluded classes appear in the <code>exclusions</code> section of the conditions report.</p>
+      <h4>Via annotation</h4>
+      <pre><code class="language-java">@SpringBootApplication(exclude = {
+    DataSourceAutoConfiguration.class,
+    SecurityAutoConfiguration.class
+})
+public class DemoApplication { ... }</code></pre>
+      <h4>Via application.properties</h4>
+      <pre><code class="language-properties">spring.autoconfigure.exclude=\
+  org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\
+  org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: BUILDING A CUSTOM STARTER
+         ═══════════════════════════════════════════════════ -->
+    <h2>Building a Custom Starter</h2>
+    <p>A Spring Boot starter is a convention-based packaging of auto-configuration and dependencies that other projects can consume with a single Maven or Gradle dependency. The recommended structure separates the auto-configuration logic into an <code>-autoconfigure</code> module and exposes a thin <code>-starter</code> module that aggregates dependencies. Following the naming convention <code>{name}-spring-boot-starter</code> (for third-party starters) signals that it is a community starter rather than an official Spring Boot starter.</p>
+
+    <div class="feature-card">
+      <h3 id="custom-starter-autoconfigure-module">Step 1 — The autoconfigure Module</h3>
+      <p>Create a separate Maven module named <code>my-feature-spring-boot-autoconfigure</code>. This module contains the <code>@AutoConfiguration</code> class, any <code>@ConfigurationProperties</code> classes, and the <code>AutoConfiguration.imports</code> registration file. The only required dependency is <code>spring-boot-autoconfigure</code>. Do not add <code>spring-boot-starter</code> here — that goes in the starter module.</p>
+      <h4>pom.xml (autoconfigure module)</h4>
+      <pre><code class="language-xml">&lt;artifactId&gt;my-feature-spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+      <h4>@AutoConfiguration class</h4>
+      <pre><code class="language-java">@AutoConfiguration
+@ConditionalOnClass(MyFeatureService.class)
+public class MyFeatureAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MyFeatureService myFeatureService() {
+        return new MyFeatureService();
+    }
+}</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-starter-module">Step 2 — The starter Module</h3>
+      <p>Create a second Maven module named <code>my-feature-spring-boot-starter</code>. This module is intentionally lightweight — it contains no Java source, only a <code>pom.xml</code> that declares dependencies on both the autoconfigure module and any other libraries the feature requires. Consumers add just this single starter dependency; Maven pulls in the autoconfigure module and the feature library transitively.</p>
+      <h4>pom.xml (starter module)</h4>
+      <pre><code class="language-xml">&lt;artifactId&gt;my-feature-spring-boot-starter&lt;/artifactId&gt;
+&lt;dependencies&gt;
+  &lt;!-- The autoconfigure module --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;my-feature-spring-boot-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- The actual feature library --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;my-feature-lib&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- Pull in Spring Boot starter basics (logging, core, etc.) --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-starter-registration">Step 3 — Register via AutoConfiguration.imports</h3>
+      <p>Inside the autoconfigure module, create the file <code>src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>. Add one line per auto-configuration class. This file is what Spring Boot reads at startup to discover your configuration — without it, the <code>@AutoConfiguration</code> class is never found, even if the JAR is on the classpath.</p>
+      <h4>File path</h4>
+      <pre><code class="language-text">src/main/resources/
+  META-INF/
+    spring/
+      org.springframework.boot.autoconfigure.AutoConfiguration.imports</code></pre>
+      <h4>File contents</h4>
+      <pre><code class="language-text">com.example.myfeature.autoconfigure.MyFeatureAutoConfiguration</code></pre>
+      <h4>Optional: add annotation processor for metadata</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-autoconfigure-processor&lt;/artifactId&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-starter-consuming">Step 4 — Consuming the Starter</h3>
+      <p>In any Spring Boot project that wants to use your feature, add a single dependency on the starter module. No <code>@Import</code>, no component-scan of the library's package — Spring Boot discovers and applies the auto-configuration automatically via the <code>AutoConfiguration.imports</code> file. If the user wants to override the auto-configured bean, they simply declare their own <code>@Bean</code> of the same type and <code>@ConditionalOnMissingBean</code> suppresses the starter's bean.</p>
+      <h4>Consumer pom.xml</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;com.example&lt;/groupId&gt;
+  &lt;artifactId&gt;my-feature-spring-boot-starter&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+      <h4>Optional override in consumer application</h4>
+      <pre><code class="language-java">@Configuration
+public class AppConfig {
+
+    // This bean suppresses MyFeatureAutoConfiguration's default bean
+    @Bean
+    public MyFeatureService customFeatureService() {
+        MyFeatureService svc = new MyFeatureService();
+        svc.setMode("custom");
+        return svc;
+    }
+}</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SECTION: CHEATSHEET
+         ═══════════════════════════════════════════════════ -->
+    <section class="cheatsheet">
+      <h2>Auto-Configuration Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>@Conditional Annotation</th>
+              <th>Fires when</th>
+              <th>Example use case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>@ConditionalOnClass</code></td>
+              <td>Specified class(es) present on classpath</td>
+              <td>Activate JDBC support when <code>DataSource.class</code> is present</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnMissingBean</code></td>
+              <td>No bean of the type/name exists yet</td>
+              <td>Allow user to override auto-configured <code>ObjectMapper</code></td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnBean</code></td>
+              <td>Bean of the type/name already exists</td>
+              <td>Register health indicator only when <code>DataSource</code> is present</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnProperty</code></td>
+              <td>Property present (and optionally equals a value)</td>
+              <td>Enable feature via <code>my.feature.enabled=true</code></td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnWebApplication</code></td>
+              <td>Application is a web app (Servlet or Reactive)</td>
+              <td>Activate MVC auto-configuration only in web contexts</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnNotWebApplication</code></td>
+              <td>Application is <em>not</em> a web app</td>
+              <td>Activate batch auto-configuration in non-web contexts</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnExpression</code></td>
+              <td>SpEL expression evaluates to true</td>
+              <td>Complex multi-property conditions</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnSingleCandidate</code></td>
+              <td>Exactly one bean of type exists (or one is <code>@Primary</code>)</td>
+              <td>Activate <code>JdbcTemplate</code> only when one <code>DataSource</code> is present</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnJava</code></td>
+              <td>JVM version matches</td>
+              <td>Activate virtual-thread executor on Java 21+</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnResource</code></td>
+              <td>Resource file exists (classpath or file path)</td>
+              <td>Activate logging config when <code>logback.xml</code> is absent</td>
+            </tr>
+            <tr>
+              <td><code>@ConditionalOnCloudPlatform</code></td>
+              <td>Running on a specific cloud platform</td>
+              <td>Activate Kubernetes health checks on Kubernetes</td>
+            </tr>
+            <tr>
+              <td><code>@AutoConfiguration</code></td>
+              <td>N/A — marks the class itself</td>
+              <td>Replaces <code>@Configuration</code> on auto-config classes in Boot 3</td>
+            </tr>
+            <tr>
+              <td><code>@AutoConfigureBefore/After</code></td>
+              <td>N/A — ordering hint</td>
+              <td>Ensure your config runs after <code>DataSourceAutoConfiguration</code></td>
+            </tr>
+            <tr>
+              <td><code>debug=true</code> / <code>--debug</code></td>
+              <td>N/A — diagnostic flag</td>
+              <td>Print full conditions report to console at startup</td>
+            </tr>
+            <tr>
+              <td><code>/actuator/conditions</code></td>
+              <td>N/A — Actuator endpoint</td>
+              <td>Query conditions report as JSON at runtime</td>
+            </tr>
+            <tr>
+              <td><code>AutoConfiguration.imports</code></td>
+              <td>N/A — registration file</td>
+              <td>Register custom auto-configs in Boot 3 (replaces spring.factories)</td>
+            </tr>
+            <tr>
+              <td><code>spring.autoconfigure.exclude</code></td>
+              <td>N/A — exclusion property</td>
+              <td>Disable specific auto-configurations without modifying code</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
