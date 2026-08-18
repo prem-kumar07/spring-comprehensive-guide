@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot Production</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">&#9776;</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide&#x2026;" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">&#x2600;&#xFE0F; Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot Production &amp; Tooling</h1>
+    <p>Production-grade topics that go beyond getting an app running locally: Kubernetes health probes, custom Micrometer metrics, structured JSON logging, containerization with layered JARs, integration testing with Testcontainers, and graceful shutdown. All topics target Spring Boot 3.x (Java 17+) and are compatible with Spring Boot 4.x (Java 21+).</p>
+
+    <div class="callout info">
+      <strong>Phase 1 tooling page</strong>
+      Basic setup (Initializr, DevTools, Actuator overview, IDE configuration) is covered in <a href="../spring-core/tooling.html">Spring Core &#x2014; Tooling &amp; Setup</a>. This page picks up where that page ends.
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         ACTUATOR HEALTH GROUPS
+    ════════════════════════════════════════════ -->
+    <h2>Actuator Health Groups</h2>
+
+    <p>Spring Boot Actuator supports <strong>health groups</strong> &#x2014; named collections of health indicators that are exposed on their own sub-path under <code>/actuator/health/&lt;group&gt;</code>. When the application is deployed to Kubernetes, Boot automatically maps the built-in <em>liveness</em> and <em>readiness</em> availability states to two dedicated groups, giving the cluster exact endpoints for its probes without any polling of the aggregate <code>/health</code> response.</p>
+
+    <div class="feature-card">
+      <h3 id="health-groups-kubernetes">Health Groups for Kubernetes</h3>
+      <p>Spring Boot detects that it is running inside Kubernetes via the <code>KUBERNETES_SERVICE_HOST</code> environment variable and automatically enables liveness and readiness probes. You can also enable them explicitly. The <strong>liveness</strong> probe (<code>/actuator/health/liveness</code>) reports whether the JVM is alive and not stuck; if it fails, Kubernetes restarts the pod. The <strong>readiness</strong> probe (<code>/actuator/health/readiness</code>) reports whether the application has finished starting and is ready to receive traffic; if it fails, Kubernetes removes the pod from load-balancer rotation without restarting it.</p>
+
+      <h4>application.yml &#x2014; enabling probes and health groups</h4>
+      <pre><code class="language-yaml"># application.yml
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus</code></pre>
+
+      <h4>Kubernetes Deployment YAML &#x2014; liveness and readiness probes</h4>
+      <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-spring-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-spring-app
+  template:
+    metadata:
+      labels:
+        app: my-spring-app
+    spec:
+      containers:
+        - name: my-spring-app
+          image: my-spring-app:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 3</code></pre>
+
+      <h4>Adding dependency checks to the readiness group</h4>
+      <pre><code class="language-yaml">management:
+  health:
+    group:
+      readiness:
+        include: readinessState,db,redis</code></pre>
+
+      <p>Keep the liveness group limited to <code>livenessState</code> only. Adding slow dependency checks to liveness causes unnecessary pod restarts when a downstream service is temporarily unavailable.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-health-indicator">Custom HealthIndicator</h3>
+      <p>Implement the <code>HealthIndicator</code> interface (or <code>ReactiveHealthIndicator</code> for WebFlux) to contribute a custom signal to the aggregate health endpoint. Spring Boot discovers the bean automatically via component scanning and names the indicator after the class by stripping the <code>HealthIndicator</code> suffix and converting to lower-case. For example, <code>ExternalApiHealthIndicator</code> appears as <code>externalApi</code> in the health JSON.</p>
+
+      <h4>Dependency (pom.xml)</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+      <h4>Example &#x2014; custom HealthIndicator</h4>
+      <pre><code class="language-java">import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ExternalApiHealthIndicator implements HealthIndicator {
+
+    private final ExternalApiClient client;
+
+    public ExternalApiHealthIndicator(ExternalApiClient client) {
+        this.client = client;
+    }
+
+    @Override
+    public Health health() {
+        try {
+            boolean ok = client.ping();
+            if (ok) {
+                return Health.up()
+                        .withDetail("latencyMs", client.lastLatencyMs())
+                        .build();
+            }
+            return Health.down()
+                    .withDetail("reason", "ping returned false")
+                    .build();
+        } catch (Exception ex) {
+            return Health.down(ex)
+                    .withDetail("reason", ex.getMessage())
+                    .build();
+        }
+    }
+}</code></pre>
+
+      <p>To include a custom indicator in only one health group, configure <code>management.health.group.&lt;name&gt;.include</code> explicitly and omit the indicator from other groups.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="securing-actuator-endpoints">Securing Actuator Endpoints</h3>
+      <p>By default, Spring Security (if present) protects all endpoints including Actuator. Best practice is to allow the liveness and readiness probes without authentication (since Kubernetes nodes cannot authenticate), and require <code>ACTUATOR</code> role for sensitive endpoints like <code>/actuator/env</code>, <code>/actuator/beans</code>, and <code>/actuator/heapdump</code>. The configuration below uses a <code>SecurityFilterChain</code> with request matchers.</p>
+
+      <h4>Dependency (pom.xml)</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+      <h4>Example &#x2014; SecurityFilterChain for Actuator</h4>
+      <pre><code class="language-java">import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class ActuatorSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain actuatorSecurity(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher(EndpointRequest.toAnyEndpoint())
+            .authorizeHttpRequests(auth -> auth
+                // Probe endpoints are accessible without auth (used by Kubernetes)
+                .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
+                // All other actuator endpoints require the ACTUATOR role
+                .anyRequest().hasRole("ACTUATOR")
+            )
+            .httpBasic(Customizer.withDefaults());
+        return http.build();
+    }
+}</code></pre>
+
+      <h4>application.properties</h4>
+      <pre><code class="language-properties"># Expose only the endpoints you need
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+# Require roles for sensitive endpoints
+management.endpoint.health.show-details=when-authorized</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         MICROMETER METRICS
+    ════════════════════════════════════════════ -->
+    <h2>Micrometer Metrics</h2>
+
+    <p>Micrometer is the metrics instrumentation facade that Spring Boot uses out of the box. It provides a vendor-neutral API for counters, timers, gauges, and distribution summaries, and ships with registry implementations for Prometheus, Datadog, CloudWatch, InfluxDB, and many others. Spring Boot auto-configures a <code>MeterRegistry</code> composite and automatically registers dozens of meters without any application code.</p>
+
+    <div class="feature-card">
+      <h3 id="auto-configured-meters">Auto-Configured Meters</h3>
+      <p>Spring Boot auto-registers the following meter sets when the relevant classes are on the classpath. <strong>JVM metrics</strong> include garbage collection pause times, heap/non-heap memory pools, loaded class counts, and thread states &#x2014; contributed by <code>JvmGcMetrics</code>, <code>JvmMemoryMetrics</code>, and <code>JvmThreadMetrics</code>. <strong>HTTP server metrics</strong> are instrumented via <code>WebMvcMetricsFilter</code> (Servlet) or <code>MetricsWebFilter</code> (WebFlux) and produce <code>http.server.requests</code> timers tagged with URI, method, status, and outcome. <strong>DataSource metrics</strong> instrument HikariCP connection pool size and wait times via <code>HikariDataSourcePoolMetrics</code>.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Meter group</th><th>Key metric names</th><th>Auto-condition</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>JVM GC</td><td><code>jvm.gc.pause</code>, <code>jvm.gc.memory.promoted</code></td><td>Always (JVM)</td></tr>
+            <tr><td>JVM Memory</td><td><code>jvm.memory.used</code>, <code>jvm.memory.max</code></td><td>Always (JVM)</td></tr>
+            <tr><td>JVM Threads</td><td><code>jvm.threads.live</code>, <code>jvm.threads.daemon</code></td><td>Always (JVM)</td></tr>
+            <tr><td>HTTP server</td><td><code>http.server.requests</code> (timer)</td><td>spring-webmvc or spring-webflux</td></tr>
+            <tr><td>HikariCP</td><td><code>hikaricp.connections.active</code>, <code>hikaricp.connections.pending</code></td><td>spring-jdbc + HikariCP</td></tr>
+            <tr><td>Tomcat</td><td><code>tomcat.sessions.active.current</code>, <code>tomcat.threads.busy</code></td><td>embedded Tomcat</td></tr>
+            <tr><td>System CPU / load</td><td><code>system.cpu.usage</code>, <code>process.cpu.usage</code></td><td>Always</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="custom-counter-timer-gauge">Custom Counter, Timer, and Gauge</h3>
+      <p>Inject <code>MeterRegistry</code> into any Spring bean to register custom meters. Use a <strong>Counter</strong> for things that only go up (orders placed, errors thrown). Use a <strong>Timer</strong> for latency-sensitive operations &#x2014; it records both count and total duration so Prometheus can compute percentiles. Use a <strong>Gauge</strong> for values that go up and down (queue depth, cache size). Always add meaningful <code>tags</code> to slice metrics by business dimensions.</p>
+
+      <h4>Example &#x2014; registering custom meters</h4>
+      <pre><code class="language-java">import io.micrometer.core.instrument.*;
+import org.springframework.stereotype.Service;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Service
+public class OrderService {
+
+    private final Counter ordersCreated;
+    private final Timer  orderProcessingTimer;
+    private final AtomicInteger pendingOrders = new AtomicInteger(0);
+
+    public OrderService(MeterRegistry registry) {
+        // Counter: total orders created, tagged by region
+        this.ordersCreated = Counter.builder("orders.created")
+                .description("Total number of orders created")
+                .tag("region", "us-east-1")
+                .register(registry);
+
+        // Timer: how long order processing takes
+        this.orderProcessingTimer = Timer.builder("orders.processing.duration")
+                .description("Time taken to process an order")
+                .tag("flow", "standard")
+                .publishPercentiles(0.5, 0.95, 0.99)
+                .register(registry);
+
+        // Gauge: current size of the pending-orders queue
+        Gauge.builder("orders.pending", pendingOrders, AtomicInteger::get)
+                .description("Number of orders awaiting processing")
+                .register(registry);
+    }
+
+    public void createOrder(Order order) {
+        pendingOrders.incrementAndGet();
+        orderProcessingTimer.record(() -> {
+            // ... process the order ...
+            ordersCreated.increment();
+        });
+        pendingOrders.decrementAndGet();
+    }
+}</code></pre>
+
+      <p>Spring Boot 3.x also supports the <code>@Timed</code> and <code>@Counted</code> annotations from <code>micrometer-core</code> combined with AspectJ, letting you instrument methods without injecting <code>MeterRegistry</code> directly.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="prometheus-export">Prometheus Export</h3>
+      <p>Add <code>micrometer-registry-prometheus</code> to the classpath. Spring Boot auto-configures a <code>PrometheusMeterRegistry</code> and exposes the <code>/actuator/prometheus</code> endpoint in the OpenMetrics text format that the Prometheus scraper understands. No additional Java code is required &#x2014; all auto-configured and custom meters are published automatically.</p>
+
+      <h4>Dependency (pom.xml) &#x2014; version managed by Spring Boot BOM</h4>
+      <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+  &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
+  &lt;!-- version managed by spring-boot-dependencies BOM --&gt;
+&lt;/dependency&gt;</code></pre>
+
+      <h4>application.properties</h4>
+      <pre><code class="language-properties"># Expose the prometheus scrape endpoint
+management.endpoints.web.exposure.include=health,info,prometheus
+# Optional: set base path (default is /actuator)
+management.endpoints.web.base-path=/actuator</code></pre>
+
+      <h4>Sample output from GET /actuator/prometheus</h4>
+      <pre><code class="language-text"># HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="heap",id="G1 Eden Space",} 2.9360128E7
+
+# HELP http_server_requests_seconds Timer of HTTP server requests
+# TYPE http_server_requests_seconds summary
+http_server_requests_seconds_count{method="GET",outcome="SUCCESS",status="200",uri="/orders",} 142.0
+http_server_requests_seconds_sum{method="GET",outcome="SUCCESS",status="200",uri="/orders",}   0.821
+
+# HELP orders_created_total Total number of orders created
+# TYPE orders_created_total counter
+orders_created_total{region="us-east-1",} 37.0</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         STRUCTURED LOGGING
+    ════════════════════════════════════════════ -->
+    <h2>Structured Logging</h2>
+
+    <p>Spring Boot 3.4 introduced first-class support for <strong>structured logging</strong> &#x2014; emitting each log record as a machine-readable JSON object instead of a free-text line. Structured logs are consumed directly by log aggregation pipelines (Elasticsearch/Logstash, Splunk, Loki) without fragile regex parsing. The feature is built into Spring Boot&#x2019;s logging infrastructure and requires no extra dependencies.</p>
+
+    <div class="feature-card">
+      <h3 id="json-structured-logging">JSON Structured Logging</h3>
+      <p>Set <code>logging.structured.format.console</code> or <code>logging.structured.format.file</code> in <code>application.properties</code> to one of the built-in formats: <code>ecs</code> (Elastic Common Schema), <code>logstash</code> (Logstash JSON), or <code>gelf</code> (Graylog Extended Log Format). No additional libraries are required &#x2014; Spring Boot 3.4 includes the formatters in <code>spring-boot</code> core. For production containers, you typically write to stdout and let the container runtime forward logs to a collector.</p>
+
+      <h4>application.properties &#x2014; enable JSON logging</h4>
+      <pre><code class="language-properties"># Choose the structured format for console output
+logging.structured.format.console=ecs
+
+# Or write JSON to a file
+# logging.structured.format.file=logstash
+# logging.file.name=/var/log/app/application.log
+
+# Include MDC context (trace IDs, user IDs, etc.)
+logging.include-application-name=true</code></pre>
+
+      <h4>Example JSON log output (ECS format)</h4>
+      <pre><code class="language-json">{
+  "@timestamp": "2024-11-15T10:32:01.123Z",
+  "log.level": "INFO",
+  "message": "Order 7842 created for customer 1001",
+  "service.name": "order-service",
+  "service.version": "2.1.0",
+  "service.environment": "production",
+  "process.pid": 1,
+  "process.thread.name": "http-nio-8080-exec-3",
+  "log.logger": "com.example.order.OrderService",
+  "transaction.id": "b4e8a1c2d3f4",
+  "trace.id": "7a9b2c3d4e5f6g7h"
+}</code></pre>
+
+      <h4>Logstash format example</h4>
+      <pre><code class="language-json">{
+  "@timestamp": "2024-11-15T10:32:01.123+00:00",
+  "@version": "1",
+  "message": "Order 7842 created for customer 1001",
+  "logger_name": "com.example.order.OrderService",
+  "thread_name": "http-nio-8080-exec-3",
+  "level": "INFO",
+  "level_value": 20000
+}</code></pre>
+
+      <p>Structured logging works with both Logback (the default) and Log4j2. When using Logback, Boot auto-configures the appender &#x2014; you do not need to modify <code>logback-spring.xml</code>.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         CONTAINERIZATION
+    ════════════════════════════════════════════ -->
+    <h2>Containerization</h2>
+
+    <p>Spring Boot provides two complementary strategies for packaging applications as container images: <strong>layered JARs</strong> with a multi-stage Dockerfile and <strong>Cloud Native Buildpacks</strong> via the <code>spring-boot:build-image</code> Maven/Gradle goal. Layered JARs optimise Docker layer caching by separating slowly-changing dependencies from rapidly-changing application code. Cloud Native Buildpacks do the same automatically without requiring a Dockerfile at all.</p>
+
+    <div class="feature-card">
+      <h3 id="layered-jars">Layered JARs</h3>
+      <p>Spring Boot&#x2019;s fat JAR is split into four layers ordered by change frequency: <strong>dependencies</strong> (third-party JARs that rarely change), <strong>spring-boot-loader</strong> (the Boot launcher, almost never changes), <strong>snapshot-dependencies</strong> (SNAPSHOT JARs that change often), and <strong>application</strong> (your classes and resources, changes with every build). By copying each layer separately in the Dockerfile, Docker can re-use the cached layers when only the application layer changes &#x2014; saving minutes of pull time in CI/CD pipelines.</p>
+
+      <h4>pom.xml &#x2014; enable layers (enabled by default in Spring Boot 2.3+)</h4>
+      <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;configuration&gt;
+        &lt;layers&gt;
+          &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/layers&gt;
+      &lt;/configuration&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+
+      <h4>Listing layers</h4>
+      <pre><code class="language-bash">java -Djarmode=layertools -jar target/myapp.jar list
+# Output:
+# dependencies
+# spring-boot-loader
+# snapshot-dependencies
+# application</code></pre>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="cloud-native-buildpacks">Cloud Native Buildpacks</h3>
+      <p>Cloud Native Buildpacks (CNB) is a CNCF specification that turns application source into an OCI-compliant container image without a Dockerfile. Spring Boot integrates with Buildpacks through the <code>spring-boot:build-image</code> Maven goal (or <code>bootBuildImage</code> Gradle task). The resulting image uses Paketo Buildpacks and includes a hardened OS layer, a JRE, and your application &#x2014; all following security best practices like running as a non-root user.</p>
+
+      <h4>Build and push the image</h4>
+      <pre><code class="language-bash"># Build an OCI image using Paketo Buildpacks (no Dockerfile required)
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=myorg/myapp:latest
+
+# Publish directly to a registry
+./mvnw spring-boot:build-image \
+  -Dspring-boot.build-image.imageName=registry.example.com/myorg/myapp:1.0.0 \
+  -Dspring-boot.build-image.publish=true</code></pre>
+
+      <h4>pom.xml &#x2014; configure image name in the build</h4>
+      <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+  &lt;configuration&gt;
+    &lt;image&gt;
+      &lt;name&gt;myorg/${project.artifactId}:${project.version}&lt;/name&gt;
+      &lt;!-- Use a specific Paketo builder --&gt;
+      &lt;builder&gt;paketobuildpacks/builder-jammy-base&lt;/builder&gt;
+    &lt;/image&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+
+      <p>The resulting image contains a Bill of Materials (SBOM) layer and is rebased (OS security updates applied without a full rebuild) via the <code>pack rebase</code> command from the Buildpacks CLI.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3 id="dockerfile-layered-extraction">Dockerfile with Layer Extraction</h3>
+      <p>The canonical multi-stage Dockerfile for Spring Boot uses <code>jarmode=layertools</code> in a builder stage to extract the four layers, then copies them one-by-one into the final image. Because Docker re-uses a layer only if the <code>COPY</code> source has not changed since the previous build, placing <code>dependencies</code> first (they rarely change) and <code>application</code> last (it changes every build) maximises cache hits. Spring Boot 3.2+ uses the fully-qualified <code>org.springframework.boot.loader.launch.JarLauncher</code> class name.</p>
+
+      <h4>Dockerfile &#x2014; multi-stage layered JAR extraction</h4>
+      <pre><code class="language-dockerfile">FROM eclipse-temurin:21-jre AS builder
+WORKDIR /application
+COPY target/*.jar application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
+FROM eclipse-temurin:21-jre
+WORKDIR /application
+COPY --from=builder /application/dependencies/ ./
+COPY --from=builder /application/spring-boot-loader/ ./
+COPY --from=builder /application/snapshot-dependencies/ ./
+COPY --from=builder /application/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]</code></pre>
+
+      <h4>Build and run</h4>
+      <pre><code class="language-bash"># Build the JAR first
+./mvnw clean package -DskipTests
+
+# Build the Docker image
+docker build -t myapp:latest .
+
+# Run
+docker run -p 8080:8080 myapp:latest</code></pre>
+
+      <p>On subsequent builds where only application code changed, Docker reuses the cached <code>dependencies</code> and <code>spring-boot-loader</code> layers, reducing the layer diff pushed to the registry to a few kilobytes.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         TESTCONTAINERS
+    ════════════════════════════════════════════ -->
+    <h2>Testcontainers</h2>
+
+    <p>Testcontainers is a Java library that manages Docker containers in JUnit tests. Spring Boot 3.1 added first-class integration via the <code>@ServiceConnection</code> annotation, which automatically wires the container&#x2019;s host/port into the matching Spring Boot auto-configuration &#x2014; eliminating the need to manually set <code>spring.datasource.url</code>, <code>spring.redis.host</code>, etc. from a <code>DynamicPropertySource</code> method.</p>
+
+    <div class="feature-card">
+      <h3 id="testcontainers-service-connection">@ServiceConnection</h3>
+      <p><code>@ServiceConnection</code> is a Spring Boot 3.1+ annotation that, when placed on a <code>@Bean</code> method returning a Testcontainers container, instructs the auto-configuration layer to source its connection properties from the live container rather than from <code>application.properties</code>. This works for PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, and more via the corresponding <code>ConnectionDetails</code> factories shipped in <code>spring-boot-testcontainers</code>.</p>
+
+      <h4>Dependencies (pom.xml)</h4>
+      <pre><code class="language-xml">&lt;!-- Testcontainers BOM for version alignment --&gt;
+&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+      &lt;artifactId&gt;testcontainers-bom&lt;/artifactId&gt;
+      &lt;version&gt;1.20.4&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;!-- Spring Boot Testcontainers integration (version managed by Boot BOM) --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-testcontainers&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+  &lt;/dependency&gt;
+
+  &lt;!-- Testcontainers PostgreSQL module --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+  &lt;/dependency&gt;
+
+  &lt;!-- JUnit 5 support --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+      <h4>Example &#x2014; @ServiceConnection with PostgreSQL</h4>
+      <pre><code class="language-java">import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@SpringBootTest
+@Testcontainers
+class OrderRepositoryTest {
+
+    // @ServiceConnection wires host/port/credentials into DataSource auto-config
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres =
+            new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Test
+    void savesAndFindsOrder() {
+        Order order = new Order("customer-42", BigDecimal.valueOf(99.99));
+        orderRepository.save(order);
+
+        Order found = orderRepository.findById(order.getId()).orElseThrow();
+        assertThat(found.getCustomerId()).isEqualTo("customer-42");
+    }
+}</code></pre>
+
+      <p>The container is static so it is shared across all test methods in the class. Spring Boot automatically tears down containers after the test context closes. Use <code>@RestartScope</code> (Spring Boot DevTools) in the <code>TestApplication</code> class to keep containers alive across context restarts during local development.</p>
+
+      <h4>Multiple containers in one test</h4>
+      <pre><code class="language-java">@Container
+@ServiceConnection
+static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+@Container
+@ServiceConnection
+static GenericContainer&lt;?&gt; redis =
+        new GenericContainer&lt;&gt;("redis:7-alpine").withExposedPorts(6379);</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         GRACEFUL SHUTDOWN
+    ════════════════════════════════════════════ -->
+    <h2>Graceful Shutdown</h2>
+
+    <p>When Kubernetes sends <code>SIGTERM</code> to a pod, the JVM receives it and, by default, exits immediately &#x2014; dropping any in-flight HTTP requests. Setting <code>server.shutdown=graceful</code> tells the embedded server (Tomcat, Jetty, Undertow, or Reactor Netty) to stop accepting new connections and then wait for active requests to complete before the JVM exits. This makes zero-downtime rolling deployments possible.</p>
+
+    <div class="feature-card">
+      <h3 id="graceful-shutdown-config">Graceful Shutdown Configuration</h3>
+      <p>Enable graceful shutdown with two properties. <code>server.shutdown=graceful</code> activates drain mode on the web server. <code>spring.lifecycle.timeout-per-shutdown-phase</code> sets the maximum time the JVM waits for each shutdown phase &#x2014; including the web server drain phase &#x2014; before forcing termination. The default is <code>30s</code>. Set it to match your longest expected request duration plus a small buffer.</p>
+
+      <h4>application.properties</h4>
+      <pre><code class="language-properties"># Enable graceful shutdown (drain mode)
+server.shutdown=graceful
+
+# Maximum time to wait for active requests to complete
+spring.lifecycle.timeout-per-shutdown-phase=20s</code></pre>
+
+      <h4>What happens when SIGTERM arrives</h4>
+      <ol>
+        <li>The embedded server switches to <strong>drain mode</strong>: new connections are rejected (Tomcat/Jetty/Netty) or immediately receive HTTP 503 (Undertow).</li>
+        <li>Already-accepted requests continue processing normally.</li>
+        <li>When all active requests finish (or the timeout elapses), the servlet context is destroyed.</li>
+        <li>Spring&#x2019;s <code>ApplicationContext</code> closes in reverse bean-registration order &#x2014; <code>@PreDestroy</code> methods and <code>DisposableBean.destroy()</code> are called.</li>
+        <li>The JVM exits with code 0.</li>
+      </ol>
+
+      <h4>Kubernetes pre-stop hook &#x2014; give kube-proxy time to update routing tables</h4>
+      <pre><code class="language-yaml">lifecycle:
+  preStop:
+    exec:
+      # Delay SIGTERM by 5 seconds so kube-proxy finishes removing the pod
+      # from load-balancer rules before the server stops accepting connections
+      command: ["sh", "-c", "sleep 5"]</code></pre>
+
+      <p>Without the <code>preStop</code> hook, there is a race between Kubernetes removing the pod from its Endpoints list (and updating kube-proxy rules) and the pod receiving SIGTERM. The sleep gives kube-proxy time to propagate the removal so no new requests are routed to a draining pod.</p>
+
+      <h4>Verifying graceful shutdown in a test</h4>
+      <pre><code class="language-java">@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class GracefulShutdownTest {
+
+    @Autowired
+    private ConfigurableApplicationContext context;
+
+    @Test
+    void shutdownDrainsInFlightRequests() throws Exception {
+        // Start a slow request in a background thread
+        CountDownLatch started = new CountDownLatch(1);
+        CompletableFuture&lt;Integer&gt; status = CompletableFuture.supplyAsync(() -&gt; {
+            started.countDown();
+            // ... send HTTP request that takes 2 seconds ...
+            return 200;
+        });
+
+        started.await();
+        context.close(); // triggers graceful shutdown
+
+        assertThat(status.get(5, TimeUnit.SECONDS)).isEqualTo(200);
+    }
+}</code></pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         CHEATSHEET
+    ════════════════════════════════════════════ -->
+    <section class="cheatsheet">
+      <h2>Production Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Property / Annotation</th><th>Purpose</th><th>Default</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>management.endpoint.health.probes.enabled</code></td>
+              <td>Enable <code>/actuator/health/liveness</code> and <code>/actuator/health/readiness</code> endpoints</td>
+              <td>Auto-detected in Kubernetes; <code>false</code> elsewhere</td>
+            </tr>
+            <tr>
+              <td><code>management.health.livenessState.enabled</code></td>
+              <td>Include <code>LivenessStateHealthIndicator</code> in the health output</td>
+              <td><code>false</code> (enabled when probes are enabled)</td>
+            </tr>
+            <tr>
+              <td><code>management.health.readinessState.enabled</code></td>
+              <td>Include <code>ReadinessStateHealthIndicator</code> in the health output</td>
+              <td><code>false</code> (enabled when probes are enabled)</td>
+            </tr>
+            <tr>
+              <td><code>management.health.group.&lt;name&gt;.include</code></td>
+              <td>Comma-separated list of health indicators included in a named health group</td>
+              <td>All indicators</td>
+            </tr>
+            <tr>
+              <td><code>management.endpoint.health.show-details</code></td>
+              <td>When to show health indicator details: <code>always</code>, <code>never</code>, <code>when-authorized</code></td>
+              <td><code>never</code></td>
+            </tr>
+            <tr>
+              <td><code>management.endpoints.web.exposure.include</code></td>
+              <td>Comma-separated list of Actuator endpoints to expose over HTTP</td>
+              <td><code>health</code></td>
+            </tr>
+            <tr>
+              <td><code>HealthIndicator</code></td>
+              <td>Interface to implement for a custom health check bean</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>logging.structured.format.console</code></td>
+              <td>Structured log format for stdout: <code>ecs</code>, <code>logstash</code>, <code>gelf</code></td>
+              <td>None (plain text)</td>
+            </tr>
+            <tr>
+              <td><code>logging.structured.format.file</code></td>
+              <td>Structured log format for the log file</td>
+              <td>None (plain text)</td>
+            </tr>
+            <tr>
+              <td><code>server.shutdown</code></td>
+              <td>Shutdown strategy: <code>graceful</code> (drain in-flight requests) or <code>immediate</code></td>
+              <td><code>immediate</code></td>
+            </tr>
+            <tr>
+              <td><code>spring.lifecycle.timeout-per-shutdown-phase</code></td>
+              <td>Max time to wait for each shutdown phase (e.g. web server drain) before forcing exit</td>
+              <td><code>30s</code></td>
+            </tr>
+            <tr>
+              <td><code>@ServiceConnection</code></td>
+              <td>Wires a Testcontainers container&#x2019;s connection details into Spring Boot auto-configuration</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>@Testcontainers</code></td>
+              <td>JUnit 5 extension that manages Testcontainers container lifecycle in tests</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>@Container</code></td>
+              <td>Marks a Testcontainers field so the JUnit 5 extension starts and stops it</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>MeterRegistry</code></td>
+              <td>Central Micrometer registry; inject to register custom counters, timers, and gauges</td>
+              <td>Auto-configured (composite)</td>
+            </tr>
+            <tr>
+              <td><code>micrometer-registry-prometheus</code></td>
+              <td>Adds <code>/actuator/prometheus</code> scrape endpoint in OpenMetrics text format</td>
+              <td>Not included by default</td>
+            </tr>
+            <tr>
+              <td><code>spring-boot:build-image</code></td>
+              <td>Maven goal that builds an OCI image using Cloud Native Buildpacks (no Dockerfile)</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>java -Djarmode=layertools -jar app.jar list</code></td>
+              <td>Lists the four layers in a layered Spring Boot JAR for Dockerfile COPY optimisation</td>
+              <td>&#x2014;</td>
+            </tr>
+            <tr>
+              <td><code>org.springframework.boot.loader.launch.JarLauncher</code></td>
+              <td>ENTRYPOINT class for layered-JAR Docker images (Spring Boot 3.2+)</td>
+              <td>&#x2014;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

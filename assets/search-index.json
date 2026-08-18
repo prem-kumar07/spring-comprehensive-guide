@@ -1435,6 +1435,286 @@
     "text": "Actuator health groups, Micrometer metrics, containerization, Testcontainers, graceful shutdown"
   },
   {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Spring Boot Production & Tooling",
+    "anchor": "",
+    "text": "Spring Boot Production & Tooling"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Spring Boot Production & Tooling",
+    "anchor": "",
+    "text": "Production-grade topics that go beyond getting an app running locally: Kubernetes health probes, custom Micrometer metrics, structured JSON logging, containerization with layered JARs, integration testing with Testcontainers, and graceful shutdown. All topics target Spring Boot 3.x (Java 17+) and ar"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Actuator Health Groups",
+    "anchor": "",
+    "text": "Actuator Health Groups"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Actuator Health Groups",
+    "anchor": "",
+    "text": "Spring Boot Actuator supports health groups — named collections of health indicators that are exposed on their own sub-path under /actuator/health/<group> . When the application is deployed to Kubernetes, Boot automatically maps the built-in liveness and readiness availability states to two dedicate"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Health Groups for Kubernetes",
+    "anchor": "health-groups-kubernetes",
+    "text": "Health Groups for Kubernetes"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Health Groups for Kubernetes",
+    "anchor": "health-groups-kubernetes",
+    "text": "Spring Boot detects that it is running inside Kubernetes via the KUBERNETES_SERVICE_HOST environment variable and automatically enables liveness and readiness probes. You can also enable them explicitly. The liveness probe ( /actuator/health/liveness ) reports whether the JVM is alive and not stuck;"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Custom HealthIndicator",
+    "anchor": "custom-health-indicator",
+    "text": "Custom HealthIndicator"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Custom HealthIndicator",
+    "anchor": "custom-health-indicator",
+    "text": "Implement the HealthIndicator interface (or ReactiveHealthIndicator for WebFlux) to contribute a custom signal to the aggregate health endpoint. Spring Boot discovers the bean automatically via component scanning and names the indicator after the class by stripping the HealthIndicator suffix and con"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Securing Actuator Endpoints",
+    "anchor": "securing-actuator-endpoints",
+    "text": "Securing Actuator Endpoints"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Securing Actuator Endpoints",
+    "anchor": "securing-actuator-endpoints",
+    "text": "By default, Spring Security (if present) protects all endpoints including Actuator. Best practice is to allow the liveness and readiness probes without authentication (since Kubernetes nodes cannot authenticate), and require ACTUATOR role for sensitive endpoints like /actuator/env , /actuator/beans "
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Micrometer Metrics",
+    "anchor": "",
+    "text": "Micrometer Metrics"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Micrometer Metrics",
+    "anchor": "",
+    "text": "Micrometer is the metrics instrumentation facade that Spring Boot uses out of the box. It provides a vendor-neutral API for counters, timers, gauges, and distribution summaries, and ships with registry implementations for Prometheus, Datadog, CloudWatch, InfluxDB, and many others. Spring Boot auto-c"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Auto-Configured Meters",
+    "anchor": "auto-configured-meters",
+    "text": "Auto-Configured Meters"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Auto-Configured Meters",
+    "anchor": "auto-configured-meters",
+    "text": "Spring Boot auto-registers the following meter sets when the relevant classes are on the classpath. JVM metrics include garbage collection pause times, heap/non-heap memory pools, loaded class counts, and thread states — contributed by JvmGcMetrics , JvmMemoryMetrics , and JvmThreadMetrics . HTTP se"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Custom Counter, Timer, and Gauge",
+    "anchor": "custom-counter-timer-gauge",
+    "text": "Custom Counter, Timer, and Gauge"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Custom Counter, Timer, and Gauge",
+    "anchor": "custom-counter-timer-gauge",
+    "text": "Inject MeterRegistry into any Spring bean to register custom meters. Use a Counter for things that only go up (orders placed, errors thrown). Use a Timer for latency-sensitive operations — it records both count and total duration so Prometheus can compute percentiles. Use a Gauge for values that go "
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Prometheus Export",
+    "anchor": "prometheus-export",
+    "text": "Prometheus Export"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Prometheus Export",
+    "anchor": "prometheus-export",
+    "text": "Add micrometer-registry-prometheus to the classpath. Spring Boot auto-configures a PrometheusMeterRegistry and exposes the /actuator/prometheus endpoint in the OpenMetrics text format that the Prometheus scraper understands. No additional Java code is required — all auto-configured and custom meters"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Structured Logging",
+    "anchor": "",
+    "text": "Structured Logging"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Structured Logging",
+    "anchor": "",
+    "text": "Spring Boot 3.4 introduced first-class support for structured logging — emitting each log record as a machine-readable JSON object instead of a free-text line. Structured logs are consumed directly by log aggregation pipelines (Elasticsearch/Logstash, Splunk, Loki) without fragile regex parsing. The"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "JSON Structured Logging",
+    "anchor": "json-structured-logging",
+    "text": "JSON Structured Logging"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "JSON Structured Logging",
+    "anchor": "json-structured-logging",
+    "text": "Set logging.structured.format.console or logging.structured.format.file in application.properties to one of the built-in formats: ecs (Elastic Common Schema), logstash (Logstash JSON), or gelf (Graylog Extended Log Format). No additional libraries are required — Spring Boot 3.4 includes the formatte"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Containerization",
+    "anchor": "",
+    "text": "Containerization"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Containerization",
+    "anchor": "",
+    "text": "Spring Boot provides two complementary strategies for packaging applications as container images: layered JARs with a multi-stage Dockerfile and Cloud Native Buildpacks via the spring-boot:build-image Maven/Gradle goal. Layered JARs optimise Docker layer caching by separating slowly-changing depende"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Layered JARs",
+    "anchor": "layered-jars",
+    "text": "Layered JARs"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Layered JARs",
+    "anchor": "layered-jars",
+    "text": "Spring Boot’s fat JAR is split into four layers ordered by change frequency: dependencies (third-party JARs that rarely change), spring-boot-loader (the Boot launcher, almost never changes), snapshot-dependencies (SNAPSHOT JARs that change often), and application (your classes and resources, changes"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Cloud Native Buildpacks",
+    "anchor": "cloud-native-buildpacks",
+    "text": "Cloud Native Buildpacks"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Cloud Native Buildpacks",
+    "anchor": "cloud-native-buildpacks",
+    "text": "Cloud Native Buildpacks (CNB) is a CNCF specification that turns application source into an OCI-compliant container image without a Dockerfile. Spring Boot integrates with Buildpacks through the spring-boot:build-image Maven goal (or bootBuildImage Gradle task). The resulting image uses Paketo Build"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Dockerfile with Layer Extraction",
+    "anchor": "dockerfile-layered-extraction",
+    "text": "Dockerfile with Layer Extraction"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Dockerfile with Layer Extraction",
+    "anchor": "dockerfile-layered-extraction",
+    "text": "The canonical multi-stage Dockerfile for Spring Boot uses jarmode=layertools in a builder stage to extract the four layers, then copies them one-by-one into the final image. Because Docker re-uses a layer only if the COPY source has not changed since the previous build, placing dependencies first (t"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Testcontainers",
+    "anchor": "",
+    "text": "Testcontainers"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Testcontainers",
+    "anchor": "",
+    "text": "Testcontainers is a Java library that manages Docker containers in JUnit tests. Spring Boot 3.1 added first-class integration via the @ServiceConnection annotation, which automatically wires the container’s host/port into the matching Spring Boot auto-configuration — eliminating the need to manually"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "@ServiceConnection",
+    "anchor": "testcontainers-service-connection",
+    "text": "@ServiceConnection"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "@ServiceConnection",
+    "anchor": "testcontainers-service-connection",
+    "text": "@ServiceConnection is a Spring Boot 3.1+ annotation that, when placed on a @Bean method returning a Testcontainers container, instructs the auto-configuration layer to source its connection properties from the live container rather than from application.properties . This works for PostgreSQL, MySQL,"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Graceful Shutdown",
+    "anchor": "",
+    "text": "Graceful Shutdown"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Graceful Shutdown",
+    "anchor": "",
+    "text": "When Kubernetes sends SIGTERM to a pod, the JVM receives it and, by default, exits immediately — dropping any in-flight HTTP requests. Setting server.shutdown=graceful tells the embedded server (Tomcat, Jetty, Undertow, or Reactor Netty) to stop accepting new connections and then wait for active req"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Graceful Shutdown Configuration",
+    "anchor": "graceful-shutdown-config",
+    "text": "Graceful Shutdown Configuration"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Graceful Shutdown Configuration",
+    "anchor": "graceful-shutdown-config",
+    "text": "Enable graceful shutdown with two properties. server.shutdown=graceful activates drain mode on the web server. spring.lifecycle.timeout-per-shutdown-phase sets the maximum time the JVM waits for each shutdown phase — including the web server drain phase — before forcing termination. The default is 3"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Production Cheatsheet",
+    "anchor": "",
+    "text": "Production Cheatsheet"
+  },
+  {
+    "page": "Spring Boot Production",
+    "href": "spring-boot/production.html",
+    "section": "Production Cheatsheet",
+    "anchor": "",
+    "text": "Property / Annotation Purpose Default management.endpoint.health.probes.enabled Enable /actuator/health/liveness and /actuator/health/readiness endpoints Auto-detected in Kubernetes; false elsewhere management.health.livenessState.enabled Include LivenessStateHealthIndicator in the health output fal"
+  },
+  {
     "page": "Spring Boot 3.x vs 4.x — Version Comparison",
     "href": "spring-boot/version-comparison.html",
     "section": "Spring Boot 3.x vs 4.x — Feature Comparison",
