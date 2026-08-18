@@ -56,6 +56,125 @@
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot",
+    "anchor": "",
+    "text": "Spring Boot"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot",
+    "anchor": "",
+    "text": "Spring Boot 3.x Spring Boot 4.x Spring Boot removes the boilerplate configuration tax of plain Spring Framework by adding three complementary layers on top: auto-configuration that detects what is on the classpath and wires sensible beans automatically, embedded server support (Tomcat, Jetty, or Und"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Version Timeline",
+    "anchor": "version-timeline",
+    "text": "Version Timeline"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Version Timeline",
+    "anchor": "version-timeline",
+    "text": "Spring Boot has followed a roughly four-year major-version cadence since its first GA release in April 2014, with each major version tracking a new Spring Framework generation and raising the Java baseline. 1.0 Apr 2014 Spring 4 · Java 6 2.0 Mar 2018 Spring 5 · Java 8 3.0 Nov 2022 Spring 6 · Java 17"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Architecture Overview",
+    "anchor": "architecture-overview",
+    "text": "Architecture Overview"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Architecture Overview",
+    "anchor": "architecture-overview",
+    "text": "Spring Boot layers opinionated defaults on top of Spring Framework. The diagram below shows the dependency stack from your application code down to the core IoC container. Your Application @SpringBootApplication Spring Boot Auto-Configuration · Starters · Embedded Server Spring Framework IoC · DI · "
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Explore the Guide",
+    "anchor": "explore-the-guide",
+    "text": "Explore the Guide"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot 3 Features",
+    "anchor": "spring-boot-3-features",
+    "text": "Spring Boot 3 Features"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot 3 Features",
+    "anchor": "spring-boot-3-features",
+    "text": "Auto-configuration, native image, observability, security — Spring 6 / Java 17 baseline"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot 4 Features",
+    "anchor": "spring-boot-4-features",
+    "text": "Spring Boot 4 Features"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Spring Boot 4 Features",
+    "anchor": "spring-boot-4-features",
+    "text": "Modularized jars, first-class Java 25 support, API versioning, HTTP service clients — Spring 7 baseline"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Version Comparison",
+    "anchor": "version-comparison",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Version Comparison",
+    "anchor": "version-comparison",
+    "text": "Side-by-side diff of Spring Boot 3.x vs 4.x — API changes, migration guide"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Auto-Configuration",
+    "anchor": "auto-configuration",
+    "text": "Auto-Configuration"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Auto-Configuration",
+    "anchor": "auto-configuration",
+    "text": "How @EnableAutoConfiguration works, @Conditional annotations, building custom starters"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Production & Tooling",
+    "anchor": "production-tooling",
+    "text": "Production & Tooling"
+  },
+  {
+    "page": "Spring Boot",
+    "href": "spring-boot/index.html",
+    "section": "Production & Tooling",
+    "anchor": "production-tooling",
+    "text": "Actuator health groups, Micrometer metrics, containerization, Testcontainers, graceful shutdown"
+  },
+  {
     "page": "Spring Core Framework",
     "href": "spring-core/index.html",
     "section": "Spring Core Framework",
@@ -2174,7 +2293,7 @@
     "href": "spring-core/version-comparison.html",
     "section": "Jackson Version (2.x → 3.x required)",
     "anchor": "jackson-3-support",
-    "text": "N/A Jackson 2.x (2.14+) Jackson 3.x required; Jackson 2.x support dropped Changed Spring 6 — Jackson 2.x <!-- Spring 6 — Jackson 2.x -->\n<dependency>\n  <groupId>com.fasterxml.jackson.core</groupId>\n  <artifactId>jackson-databind</artifactId>\n  <version>2.17.x</version>\n</dependency>\n\n// @JsonPropert"
+    "text": "N/A Jackson 2.x (2.14+) Jackson 3.x default; Jackson 2.x retained but deprecated (removed in 7.2) Changed Spring 6 — Jackson 2.x <!-- Spring 6 — Jackson 2.x -->\n<dependency>\n  <groupId>com.fasterxml.jackson.core</groupId>\n  <artifactId>jackson-databind</artifactId>\n  <version>2.17.x</version>\n</depe"
   },
   {
     "page": "Spring 5 vs 6 vs 7 — Version Comparison",
