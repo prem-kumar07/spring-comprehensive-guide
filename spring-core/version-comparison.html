@@ -957,7 +957,7 @@ public interface UserRepository
           <td><h3 class="comparison-feature" id="jackson-3-support">Jackson Version (2.x → 3.x required)</h3></td>
           <td><span style="color:var(--text-muted)">N/A</span></td>
           <td>Jackson 2.x (2.14+)</td>
-          <td>Jackson 3.x required; Jackson 2.x support dropped</td>
+          <td>Jackson 3.x default; Jackson 2.x retained but deprecated (removed in 7.2)</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr class="diff-row" style="display:none" id="detail-15">
@@ -1162,7 +1162,7 @@ restClient.get().uri("/api")
         <tr><td>Error responses</td><td>Custom error body (no standard)</td><td>ProblemDetail (RFC 7807 / RFC 9457)</td><td>No change</td><td>New</td></tr>
         <tr><td>RestTemplate</td><td>Primary REST client</td><td>Deprecated — prefer WebClient / HTTP interfaces</td><td>Still deprecated, maintained for compatibility</td><td>Deprecated</td></tr>
         <tr><td>Resilience</td><td>External spring-retry library</td><td>External spring-retry library</td><td>Built-in org.springframework.core.retry; @Retryable</td><td>New</td></tr>
-        <tr><td>Jackson version</td><td>Jackson 2.x</td><td>Jackson 2.x (2.14+)</td><td>Jackson 3.x required (groupId: tools.jackson)</td><td>Changed</td></tr>
+        <tr><td>Jackson version</td><td>Jackson 2.x</td><td>Jackson 2.x (2.14+)</td><td>Jackson 3.x default; 2.x deprecated (groupId: tools.jackson)</td><td>Changed</td></tr>
         <tr><td>JUnit support</td><td>JUnit 4 + 5</td><td>JUnit 4 + JUnit Jupiter 5</td><td>JUnit 4 removed; JUnit Jupiter 5 only</td><td>Removed</td></tr>
         <tr><td>Virtual threads</td><td>Not supported</td><td>Opt-in via spring.threads.virtual.enabled=true</td><td>Default-enabled in Spring Boot 4</td><td>Changed</td></tr>
         <tr><td>HttpHeaders API</td><td>Extends MultiValueMap</td><td>Extends MultiValueMap&lt;String,String&gt;</td><td>No longer extends MultiValueMap; use asMultiValueMap()</td><td>Changed</td></tr>
