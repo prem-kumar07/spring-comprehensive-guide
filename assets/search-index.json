@@ -56,6 +56,139 @@
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Spring AI",
+    "anchor": "",
+    "text": "Spring AI"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Spring AI",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x Spring AI is an application framework for AI engineering that provides a portable, unified API across AI model providers — covering chat, text-to-image, audio transcription, text-to-speech, and embedding models. Rather than shipping a model of its own, Spring AI acts as t"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Architecture",
+    "anchor": "",
+    "text": "Architecture"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Architecture",
+    "anchor": "",
+    "text": "Spring AI inserts a vendor-neutral abstraction layer between your application and the chosen model provider, translating Spring idioms (auto-configuration, dependency injection, @Tool annotations) into each provider's native API format at runtime. Your Spring Boot Application ChatClient · VectorStor"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Provider Landscape",
+    "anchor": "",
+    "text": "Provider Landscape"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Provider Landscape",
+    "anchor": "",
+    "text": "Spring AI 2.0 ships first-class support for 20+ providers organized into three tiers: commercial frontier APIs with the deepest feature coverage, additional cloud APIs for specialized workloads, and local runtimes for air-gapped or cost-sensitive deployments. Tier 1 — Commercial OpenAI (GPT-4o, o-se"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Explore the Guide",
+    "anchor": "",
+    "text": "Explore the Guide"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "ChatClient API",
+    "anchor": "nav-chat-client",
+    "text": "ChatClient API"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "ChatClient API",
+    "anchor": "nav-chat-client",
+    "text": "Fluent API for chat, streaming, conversation memory, multimodal input"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "RAG & VectorStore",
+    "anchor": "nav-rag",
+    "text": "RAG & VectorStore"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "RAG & VectorStore",
+    "anchor": "nav-rag",
+    "text": "Document ingestion pipeline, VectorStore implementations, retrieval advisors"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Tools & Advisors",
+    "anchor": "nav-tools-advisors",
+    "text": "Tools & Advisors"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Tools & Advisors",
+    "anchor": "nav-tools-advisors",
+    "text": "@Tool function calling, agentic loops, Advisor interceptor chain"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Structured Output",
+    "anchor": "nav-structured-output",
+    "text": "Structured Output"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Structured Output",
+    "anchor": "nav-structured-output",
+    "text": "BeanOutputConverter, self-correcting output, provider-native JSON mode"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Version Comparison",
+    "anchor": "nav-version-comparison",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Version Comparison",
+    "anchor": "nav-version-comparison",
+    "text": "Spring AI 1.x vs 2.x — API changes, new features, migration guide"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Providers",
+    "anchor": "nav-providers",
+    "text": "Providers"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Providers",
+    "anchor": "nav-providers",
+    "text": "20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini and more"
+  },
+  {
     "page": "Spring Boot Auto-Configuration",
     "href": "spring-boot/auto-configuration.html",
     "section": "Spring Boot Auto-Configuration",
