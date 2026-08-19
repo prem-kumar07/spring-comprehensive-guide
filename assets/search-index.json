@@ -1662,14 +1662,14 @@
     "page": "Spring Boot Production",
     "href": "spring-boot/production.html",
     "section": "@ServiceConnection",
-    "anchor": "testcontainers-service-connection",
+    "anchor": "prod-testcontainers-service-connection",
     "text": "@ServiceConnection"
   },
   {
     "page": "Spring Boot Production",
     "href": "spring-boot/production.html",
     "section": "@ServiceConnection",
-    "anchor": "testcontainers-service-connection",
+    "anchor": "prod-testcontainers-service-connection",
     "text": "@ServiceConnection is a Spring Boot 3.1+ annotation that, when placed on a @Bean method returning a Testcontainers container, instructs the auto-configuration layer to source its connection properties from the live container rather than from application.properties . This works for PostgreSQL, MySQL,"
   },
   {
@@ -1830,14 +1830,14 @@
     "page": "Spring Boot 3.x vs 4.x — Version Comparison",
     "href": "spring-boot/version-comparison.html",
     "section": "Structured Logging (introduced in 3.4, enhanced in Boot 4)",
-    "anchor": "structured-logging",
+    "anchor": "vc-structured-logging",
     "text": "Structured Logging (introduced in 3.4, enhanced in Boot 4)"
   },
   {
     "page": "Spring Boot 3.x vs 4.x — Version Comparison",
     "href": "spring-boot/version-comparison.html",
     "section": "Structured Logging (introduced in 3.4, enhanced in Boot 4)",
-    "anchor": "structured-logging",
+    "anchor": "vc-structured-logging",
     "text": "Boot 3.4 introduced opt-in structured logging (JSON format via Logback/Log4j2) with logging.structured.format.console=ecs . Boot 4 matures structured logging — improved field ordering, additional built-in formats, structured MDC propagation with virtual threads. Changed Boot 3.4 — structured logging"
   },
   {

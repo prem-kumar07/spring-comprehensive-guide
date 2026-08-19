@@ -9,10 +9,10 @@
 <body>
 <div id="main">
   <header id="header">
-    <button id="hamburger" aria-label="Toggle nav">&#9776;</button>
-    <input id="search-input" type="search" placeholder="Search Spring Guide&#x2026;" autocomplete="off" />
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
     <div id="search-results"></div>
-    <button id="theme-toggle">&#x2600;&#xFE0F; Light</button>
+    <button id="theme-toggle">☀️ Light</button>
   </header>
   <div id="content">
 
@@ -454,7 +454,7 @@ docker run -p 8080:8080 myapp:latest</code></pre>
     <p>Testcontainers is a Java library that manages Docker containers in JUnit tests. Spring Boot 3.1 added first-class integration via the <code>@ServiceConnection</code> annotation, which automatically wires the container&#x2019;s host/port into the matching Spring Boot auto-configuration &#x2014; eliminating the need to manually set <code>spring.datasource.url</code>, <code>spring.redis.host</code>, etc. from a <code>DynamicPropertySource</code> method.</p>
 
     <div class="feature-card">
-      <h3 id="testcontainers-service-connection">@ServiceConnection</h3>
+      <h3 id="prod-testcontainers-service-connection">@ServiceConnection</h3>
       <p><code>@ServiceConnection</code> is a Spring Boot 3.1+ annotation that, when placed on a <code>@Bean</code> method returning a Testcontainers container, instructs the auto-configuration layer to source its connection properties from the live container rather than from <code>application.properties</code>. This works for PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, and more via the corresponding <code>ConnectionDetails</code> factories shipped in <code>spring-boot-testcontainers</code>.</p>
 
       <h4>Dependencies (pom.xml)</h4>
