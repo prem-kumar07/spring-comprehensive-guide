@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI 1.x vs 2.x — Version Comparison</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI 1.x vs 2.x — Feature Comparison</h1>
+    <p>Spring AI reached its first GA milestone with 1.0 (May 2024), introducing a stable API contract and modular starter structure. The 1.x line continued with 1.1 (July 2024), adding Model Context Protocol (MCP) client/server support, <code>RetrievalAugmentationAdvisor</code>, reasoning-model streaming, and the <code>RecursiveAdvisor</code> for agentic loops. Spring AI 2.0 (2025) is the current major line, introducing composable tool-calling with <code>ToolCallingManager</code>, self-correcting structured output, and provider-native schema validation. This page compares each significant area of change. Click any row to expand a side-by-side code diff.</p>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:1.5rem 0 1rem;align-items:center">
+      <label style="color:var(--text-muted);font-size:0.875rem">Filter:</label>
+      <button class="filter-btn active" data-filter="all" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-size:0.8rem">All</button>
+      <button class="filter-btn" data-filter="new" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">New</button>
+      <button class="filter-btn" data-filter="changed" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Changed</button>
+      <button class="filter-btn" data-filter="removed" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Removed</button>
+      <button class="filter-btn" data-filter="deprecated" style="padding:0.3rem 0.75rem;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.8rem">Deprecated</button>
+      <span id="filter-count" style="color:var(--text-muted);font-size:0.875rem;margin-left:0.5rem"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table id="comparison-table">
+        <thead>
+          <tr>
+            <th style="width:25%">Feature</th>
+            <th style="width:30%"><span class="version-badge badge-ai1">Spring AI 1.x</span></th>
+            <th style="width:30%"><span class="version-badge badge-ai2">Spring AI 2.x</span></th>
+            <th style="width:15%">Type</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1: Tool Calling API -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-tool-calling-api">Tool Calling API (@FunctionCallback → @Tool → ToolCallingManager)</h3></td>
+            <td>Spring AI 1.0 introduced the <code>@Tool</code> annotation for declaring callable functions. Earlier milestones used <code>@Bean</code>-registered <code>FunctionCallback</code> instances passed via <code>ChatClient.functions()</code>.</td>
+            <td>Spring AI 2.0 introduced the composable <code>ToolCallingManager</code> — a dedicated service that resolves, validates, and executes tools in the agentic loop. Tool definitions are now first-class beans with lifecycle management.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.x — @Tool annotation</div>
+                  <pre><code class="language-java">// Spring AI 1.x — @Tool on a service method
+@Service
+public class WeatherService {
+
+    @Tool(description = "Get current weather for a city")
+    public String getWeather(String city) {
+        return weatherClient.fetch(city);
+    }
+}
+
+// Wire into ChatClient:
+@Autowired WeatherService weatherService;
+
+String response = chatClient.prompt()
+    .user("What's the weather in London?")
+    .tools(weatherService)
+    .call()
+    .content();</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 2.x — ToolCallingManager</div>
+                  <pre><code class="language-java">// Spring AI 2.x — composable ToolCallingManager
+// Tools still declared with @Tool, but the manager
+// controls execution strategy and context propagation.
+
+@Service
+public class WeatherService {
+
+    @Tool(description = "Get current weather for a city")
+    public String getWeather(
+            String city, ToolContext ctx) {
+        // ToolContext carries conversation state
+        String userId = (String) ctx.getContext()
+            .get("userId");
+        return weatherClient.fetch(city);
+    }
+}
+
+// ToolCallingManager wired automatically;
+// override to customise execution order or retry</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: Structured Output -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-structured-output">Structured Output (BeanOutputConverter → provider-native schemas)</h3></td>
+            <td>Spring AI 1.x used <code>BeanOutputConverter</code> to generate a JSON schema string, embed it in the prompt, and then parse the model's text response back into a Java bean — a pure prompt-engineering approach.</td>
+            <td>Spring AI 2.0 adds <code>useProviderStructuredOutput()</code> to leverage the model provider's native JSON-mode or function-calling constraint, plus <code>validateSchema()</code> for a self-correcting retry loop when the response does not match.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.x — BeanOutputConverter</div>
+                  <pre><code class="language-java">// Spring AI 1.x — prompt-based structured output
+record Actor(String name, List&lt;String&gt; movies) {}
+
+ActorFilms result = chatClient.prompt()
+    .user(u -&gt; u.text(
+        "Generate filmography for {name}")
+        .param("name", "Tom Hanks"))
+    .call()
+    .entity(ActorFilms.class);
+// Schema injected into prompt as system text;
+// parsing via Jackson on the returned string</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 2.x — provider-native + validateSchema</div>
+                  <pre><code class="language-java">// Spring AI 2.x — provider-native JSON mode
+ActorFilms result = chatClient.prompt()
+    .user(u -&gt; u.text(
+        "Generate filmography for {name}")
+        .param("name", "Tom Hanks"))
+    .call()
+    .entity(
+        EntityResponseSpec.forEntity(
+            ActorFilms.class)
+        .useProviderStructuredOutput()
+        // ↑ uses OpenAI response_format / Anthropic
+        //   tool-use constraint instead of prompt text
+        .validateSchema()
+        // ↑ retries automatically if schema mismatch
+    );</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: MCP Support -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-mcp-support">Model Context Protocol (MCP) Client and Server</h3></td>
+            <td>Spring AI 1.0 had no built-in MCP support. Tool calling relied on custom <code>FunctionCallback</code> or <code>@Tool</code> beans defined within the same application context.</td>
+            <td>Spring AI 1.1+ ships <code>spring-ai-mcp-client-spring-boot-starter</code> and <code>spring-ai-mcp-server-spring-boot-starter</code>. The client auto-discovers MCP servers via SSE or stdin/stdout; the server exposes any <code>@Tool</code>-annotated bean as an MCP endpoint.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.0 — no MCP, local tools only</div>
+                  <pre><code class="language-xml">&lt;!-- Spring AI 1.0 — only local tool calling --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!-- Tools must live in the same JVM --&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.1+ — MCP client starter</div>
+                  <pre><code class="language-xml">&lt;!-- MCP client: auto-discover remote tool servers --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-mcp-client-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                  <pre><code class="language-yaml"># application.yml — connect to an MCP server
+spring:
+  ai:
+    mcp:
+      client:
+        sse:
+          connections:
+            filesystem-server:
+              url: http://localhost:3001/sse</code></pre>
+                  <pre><code class="language-java">// @Tool beans on the remote server auto-exposed
+// ChatClient discovers and invokes them via MCP</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4: RecursiveAdvisor -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-recursive-advisor">RecursiveAdvisor for Self-Refining Agentic Loops</h3></td>
+            <td>Spring AI 1.0 offered <code>QuestionAnswerAdvisor</code> and basic advisor chaining, but no built-in support for iterative self-refinement loops where a model evaluates and corrects its own output.</td>
+            <td>Spring AI 1.1 introduced <code>RecursiveAdvisor</code>, which wraps the inner advisor chain and re-invokes it when a configured condition (such as a validation failure or a low-confidence score) is met, up to a configurable maximum number of iterations.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.0 — manual retry loop</div>
+                  <pre><code class="language-java">// Spring AI 1.0 — manual validation + retry
+for (int attempt = 0; attempt &lt; 3; attempt++) {
+    String response = chatClient.prompt()
+        .user("Summarise the document")
+        .advisors(ragAdvisor)
+        .call().content();
+    if (isValid(response)) break;
+    // otherwise retry — no framework support
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.1+ — RecursiveAdvisor</div>
+                  <pre><code class="language-java">// Spring AI 1.1 — RecursiveAdvisor built-in
+RecursiveAdvisor recursive = RecursiveAdvisor
+    .builder()
+    .delegate(ragAdvisor)
+    .maxIterations(3)
+    .continueCondition(ctx -&gt; {
+        String answer = ctx.response()
+            .getResult().getOutput().getContent();
+        return !isValid(answer); // retry if invalid
+    })
+    .build();
+
+String response = chatClient.prompt()
+    .user("Summarise the document")
+    .advisors(recursive)
+    .call().content();</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 5: Agentic Architecture -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-agentic-architecture">Agentic Architecture (ToolCallingManager, ToolContext)</h3></td>
+            <td>Spring AI 1.x wired tool execution inline within the <code>ChatClient</code> request — tools were resolved and invoked in a single embedded loop with limited lifecycle control. <code>ToolContext</code> was introduced late in the 1.x line.</td>
+            <td>Spring AI 2.x extracts the agentic loop into a dedicated <code>ToolCallingManager</code> bean. It handles tool resolution, invocation, result injection, and maximum-call-depth enforcement, and supports custom execution strategies (parallel, sequential).</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.x — inline tool execution</div>
+                  <pre><code class="language-java">// Spring AI 1.x — tools executed inside ChatClient
+String result = chatClient.prompt()
+    .user("Book a flight from LHR to JFK")
+    .tools(flightSearchService, bookingService)
+    .call()
+    .content();
+// Tool loop runs transparently inside .call()
+// — no direct control over execution order</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 2.x — ToolCallingManager</div>
+                  <pre><code class="language-java">// Spring AI 2.x — override ToolCallingManager
+@Bean
+ToolCallingManager toolCallingManager(
+        List&lt;ToolCallback&gt; tools) {
+    return DefaultToolCallingManager.builder()
+        .toolCallbacks(tools)
+        .maxToolCalls(10)
+        // parallel execution for independent tools:
+        .executionStrategy(
+            ToolCallingManager.Strategy.PARALLEL)
+        .build();
+}
+
+// ToolContext passed to every @Tool method
+// carries conversation-scoped state</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 6: Reasoning Models -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-reasoning-models">Reasoning Model Support (streaming thinking events)</h3></td>
+            <td>Spring AI 1.0 treated all models uniformly via the <code>ChatModel</code> abstraction — no special handling for chain-of-thought or reasoning tokens beyond what the provider returned in the final <code>content</code> field.</td>
+            <td>Spring AI 1.1 introduced first-class streaming support for reasoning models (Anthropic Claude thinking, OpenAI o-series, Ollama reasoning). A new <code>ThinkingEvent</code> (or <code>reasoning_content</code> metadata) surfaces intermediate reasoning steps during streaming before the final answer arrives.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.0 — no reasoning token visibility</div>
+                  <pre><code class="language-java">// Spring AI 1.0 — streaming gives final content only
+Flux&lt;String&gt; stream = chatClient.prompt()
+    .user("Solve: if 2x + 3 = 11, what is x?")
+    .stream()
+    .content();
+
+// No way to observe intermediate reasoning steps;
+// model's chain-of-thought is opaque</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.1+ — ThinkingEvent streaming</div>
+                  <pre><code class="language-java">// Spring AI 1.1 — Anthropic extended thinking
+AnthropicChatOptions options =
+    AnthropicChatOptions.builder()
+        .model("claude-opus-4-5")
+        .thinkingEnabled(true)
+        .thinkingBudgetTokens(8000)
+        .build();
+
+chatClient.prompt()
+    .user("Solve: if 2x + 3 = 11, what is x?")
+    .options(options)
+    .stream()
+    .chatResponse()
+    .doOnNext(resp -&gt; {
+        // metadata contains reasoning_content
+        // when thinking block arrives before answer
+        resp.getResults().forEach(g -&gt;
+            System.out.println(
+                g.getMetadata()));
+    })
+    .blockLast();</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 7: Provider Additions -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-provider-additions">New Model Providers (DeepSeek, Groq, NVIDIA NIM, ZhipuAI)</h3></td>
+            <td>Spring AI 1.0 GA shipped with starters for OpenAI, Anthropic, Azure OpenAI, Amazon Bedrock, Google Vertex AI, Mistral AI, and Ollama.</td>
+            <td>The 1.x and 2.x release trains added DeepSeek (<code>spring-ai-deepseek-spring-boot-starter</code>), Groq, NVIDIA NIM, and ZhipuAI (Zhipu ChatGLM) starters, all conforming to the same <code>ChatModel</code> / <code>EmbeddingModel</code> API.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.0 GA — initial provider set</div>
+                  <pre><code class="language-xml">&lt;!-- Spring AI 1.0 GA providers (selection) --&gt;
+&lt;!-- OpenAI --&gt;
+spring-ai-openai-spring-boot-starter
+&lt;!-- Anthropic --&gt;
+spring-ai-anthropic-spring-boot-starter
+&lt;!-- Azure OpenAI --&gt;
+spring-ai-azure-openai-spring-boot-starter
+&lt;!-- Ollama (local) --&gt;
+spring-ai-ollama-spring-boot-starter
+&lt;!-- Mistral --&gt;
+spring-ai-mistral-ai-spring-boot-starter</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.1+ / 2.x — new providers</div>
+                  <pre><code class="language-xml">&lt;!-- DeepSeek (added 1.1) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-deepseek-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Groq (added 1.1) --&gt;
+spring-ai-groq-spring-boot-starter
+
+&lt;!-- NVIDIA NIM (added 1.1) --&gt;
+spring-ai-nvidia-spring-boot-starter
+
+&lt;!-- ZhipuAI / ChatGLM (added 1.x) --&gt;
+spring-ai-zhipuai-spring-boot-starter
+
+&lt;!-- All conform to ChatModel / EmbeddingModel --&gt;
+&lt;!-- swap providers by changing the starter --&gt;</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 8: RetrievalAugmentationAdvisor -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-retrieval-augmentation-advisor">RetrievalAugmentationAdvisor (modular RAG pipeline)</h3></td>
+            <td>Spring AI 0.x / early 1.x provided <code>QuestionAnswerAdvisor</code> — a fixed advisor that performed similarity search against a <code>VectorStore</code> and injected the results into the prompt. The retrieval, augmentation, and filtering steps were not independently customisable.</td>
+            <td>Spring AI 1.x introduced <code>RetrievalAugmentationAdvisor</code> built on a composable pipeline: <code>QueryTransformer</code> → <code>DocumentRetriever</code> → <code>DocumentPostProcessor</code> → <code>ContextualQueryAugmenter</code>. Each stage is a separate interface you can replace.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 0.x / early 1.x — QuestionAnswerAdvisor</div>
+                  <pre><code class="language-java">// Fixed RAG pipeline — minimal customisation
+QuestionAnswerAdvisor advisor =
+    new QuestionAnswerAdvisor(vectorStore);
+
+String answer = chatClient.prompt()
+    .user(question)
+    .advisors(advisor)
+    .call()
+    .content();
+// Cannot customise re-ranking, query rewriting,
+// or document post-processing independently</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.x — RetrievalAugmentationAdvisor</div>
+                  <pre><code class="language-java">// Modular RAG pipeline
+RetrievalAugmentationAdvisor advisor =
+    RetrievalAugmentationAdvisor.builder()
+        .queryTransformers(
+            // rewrite query for better retrieval:
+            RewriteQueryTransformer.builder()
+                .chatClientBuilder(
+                    chatClient.mutate())
+                .build())
+        .documentRetriever(
+            VectorStoreDocumentRetriever.builder()
+                .vectorStore(vectorStore)
+                .similarityThreshold(0.7)
+                .topK(6)
+                .build())
+        .documentPostProcessors(
+            // re-rank by relevance score:
+            new CohereRerankDocumentPostProcessor(
+                cohereClient))
+        .build();</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 9: Dependency Structure -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-dependency-structure">Dependency Structure (monolithic 0.x → modular starters in 1.0)</h3></td>
+            <td>Spring AI 0.x milestone releases were distributed as a single monolithic artifact (<code>spring-ai-core</code> pulling in all model adapters). Dependency management was done via the BOM but all providers were bundled.</td>
+            <td>Spring AI 1.0 GA introduced provider-specific starters (<code>spring-ai-openai-spring-boot-starter</code>, <code>spring-ai-anthropic-spring-boot-starter</code>, etc.) with auto-configuration isolation. The BOM (<code>spring-ai-bom</code>) still manages all versions.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 0.x — milestone monolith</div>
+                  <pre><code class="language-xml">&lt;!-- Spring AI 0.x (milestone) --&gt;
+&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;spring-milestones&lt;/id&gt;
+    &lt;url&gt;https://repo.spring.io/milestone&lt;/url&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai&lt;/artifactId&gt;
+  &lt;version&gt;0.8.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- No modular Boot auto-configuration --&gt;</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.0 GA — modular starters + BOM</div>
+                  <pre><code class="language-xml">&lt;!-- Spring AI 1.0 GA — Maven Central --&gt;
+&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!-- Only OpenAI classes on the classpath --&gt;</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 10: Self-Correcting Output -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-self-correcting-output">Self-Correcting Structured Output (validateSchema loop)</h3></td>
+            <td>Spring AI 1.x relied on prompt engineering to constrain output format. If the model returned malformed JSON, the application had to handle the parsing exception itself and decide whether to retry.</td>
+            <td>Spring AI 2.0 adds a <code>validateSchema()</code> option on <code>EntityResponseSpec</code> that automatically re-prompts the model with the validation error when the returned JSON does not satisfy the declared schema, up to a configurable retry count.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 1.x — manual exception handling</div>
+                  <pre><code class="language-java">// Spring AI 1.x — catch parse failures manually
+for (int i = 0; i &lt; 3; i++) {
+    try {
+        Recipe recipe = chatClient.prompt()
+            .user("Give me a pasta recipe as JSON")
+            .call()
+            .entity(Recipe.class);
+        return recipe; // success
+    } catch (JsonParseException e) {
+        // log and retry — no framework help
+        log.warn("Parse failed, retrying: {}", e);
+    }
+}
+throw new RuntimeException("Gave up after 3 tries");</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 2.x — validateSchema() auto-retry</div>
+                  <pre><code class="language-java">// Spring AI 2.x — built-in self-correcting loop
+Recipe recipe = chatClient.prompt()
+    .user("Give me a pasta recipe as JSON")
+    .call()
+    .entity(
+        EntityResponseSpec.forEntity(Recipe.class)
+        .validateSchema()          // auto-retry on mismatch
+        .maxRetries(3)             // default: 3
+        .useProviderStructuredOutput() // optional
+    );
+// Framework re-prompts with the validation error;
+// no try/catch needed in application code</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 11: Observe API -->
+          <tr class="comparison-row" data-type="new" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-observe-api">Observability API (Micrometer auto-instrumentation)</h3></td>
+            <td>Spring AI 0.x / early 1.x had no built-in observability. Token usage, latency, and model metadata required custom logging or third-party wrappers around the <code>ChatModel</code> interface.</td>
+            <td>Spring AI 1.x introduced automatic Micrometer instrumentation via <code>ObservationRegistry</code>. When Micrometer is on the classpath, every <code>ChatModel.call()</code> produces an observation that records latency, prompt token count, completion token count, model name, and finish reason.</td>
+            <td><span class="version-badge badge-ai2">New</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 0.x — no built-in observability</div>
+                  <pre><code class="language-java">// Spring AI 0.x — wrap manually to track tokens
+public class InstrumentedChatModel
+        implements ChatModel {
+
+    private final ChatModel delegate;
+    private final MeterRegistry registry;
+
+    @Override
+    public ChatResponse call(Prompt prompt) {
+        long start = System.nanoTime();
+        ChatResponse resp = delegate.call(prompt);
+        long elapsed = System.nanoTime() - start;
+        registry.timer("ai.call.latency")
+            .record(elapsed, TimeUnit.NANOSECONDS);
+        // Token counts: parse from resp manually
+        return resp;
+    }
+}</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.x — auto Micrometer observations</div>
+                  <pre><code class="language-yaml"># application.yml — enable AI observations
+management:
+  observations:
+    spring-ai:
+      chat:
+        enabled: true
+        # records: gen_ai.operation.name,
+        # gen_ai.system, gen_ai.response.model,
+        # gen_ai.usage.input_tokens,
+        # gen_ai.usage.output_tokens</code></pre>
+                  <pre><code class="language-java">// No wrapper needed — auto-configured
+// ChatModel bean is already instrumented.
+// Works with Prometheus, Zipkin, OTLP, etc.
+// Access via Actuator /actuator/metrics/
+//   gen_ai.client.operation.duration</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 12: 0.x to 1.x -->
+          <tr class="comparison-row" data-type="changed" style="cursor:pointer" title="Click to expand">
+            <td><h3 class="comparison-feature" id="ai-vc-0x-to-1x">0.x → 1.0 Breaking Changes (package renames, ChatClient refactor)</h3></td>
+            <td>Spring AI 0.x was a milestone series with no stability guarantee. Key classes lived in <code>org.springframework.ai.client</code>; the fluent <code>ChatClient</code> API did not exist — you called <code>ChatModel.call(Prompt)</code> directly.</td>
+            <td>Spring AI 1.0 GA formalised the <code>ChatClient</code> fluent builder API (wrapping <code>ChatModel</code>), renamed packages from <code>org.springframework.ai.client</code> to <code>org.springframework.ai.chat.client</code>, and introduced the semantic versioning stability guarantee.</td>
+            <td><span class="version-badge badge-v7">Changed</span></td>
+          </tr>
+          <tr class="diff-row" style="display:none">
+            <td colspan="4" style="padding:0.75rem 1rem;background:var(--surface)">
+              <div class="diff-grid">
+                <div class="diff-before">
+                  <div class="diff-label">Spring AI 0.x — direct ChatModel.call()</div>
+                  <pre><code class="language-java">// Spring AI 0.x milestones — low-level call
+import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+// package: org.springframework.ai.openai.OpenAiChatModel
+
+@Autowired OpenAiChatModel chatModel;
+
+ChatResponse response = chatModel.call(
+    new Prompt("Tell me a joke"));
+String text = response
+    .getResult()
+    .getOutput()
+    .getContent();</code></pre>
+                </div>
+                <div class="diff-after">
+                  <div class="diff-label">Spring AI 1.0 GA — ChatClient fluent API</div>
+                  <pre><code class="language-java">// Spring AI 1.0 GA — ChatClient builder
+import org.springframework.ai.chat.client.ChatClient;
+// Auto-configured ChatClient.Builder injected
+
+@Autowired ChatClient.Builder builder;
+
+ChatClient chatClient = builder.build();
+
+// Fluent API — replaces direct ChatModel usage
+String joke = chatClient.prompt()
+    .user("Tell me a joke")
+    .call()
+    .content();
+
+// ChatModel still accessible for low-level use;
+// ChatClient is the recommended entry point</code></pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Migration Cheatsheet -->
+    <section class="cheatsheet" id="migration-cheatsheet">
+      <h2>Migration Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>What to Change</th>
+              <th>Spring AI 1.x</th>
+              <th>Spring AI 2.x</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BOM version</td>
+              <td><code>spring-ai-bom:1.0.0</code></td>
+              <td><code>spring-ai-bom:2.0.0</code></td>
+            </tr>
+            <tr>
+              <td>Entry point</td>
+              <td><code>chatClient.prompt()...call().content()</code></td>
+              <td>Same API; <code>ChatClient</code> is unchanged at the surface</td>
+            </tr>
+            <tr>
+              <td>Tool declaration</td>
+              <td><code>@Tool</code> method + <code>.tools(bean)</code></td>
+              <td><code>@Tool</code> + <code>ToolCallingManager</code> bean (auto-configured)</td>
+            </tr>
+            <tr>
+              <td>Tool context</td>
+              <td>Not available in 1.0; added late 1.x</td>
+              <td><code>ToolContext ctx</code> parameter in every <code>@Tool</code> method</td>
+            </tr>
+            <tr>
+              <td>Structured output</td>
+              <td><code>.entity(MyClass.class)</code> via <code>BeanOutputConverter</code></td>
+              <td><code>.entity(EntityResponseSpec.forEntity(MyClass.class).useProviderStructuredOutput())</code></td>
+            </tr>
+            <tr>
+              <td>Self-correcting output</td>
+              <td>Manual try/catch + retry loop</td>
+              <td><code>.validateSchema().maxRetries(3)</code> on <code>EntityResponseSpec</code></td>
+            </tr>
+            <tr>
+              <td>RAG advisor</td>
+              <td><code>new QuestionAnswerAdvisor(vectorStore)</code></td>
+              <td><code>RetrievalAugmentationAdvisor.builder()...build()</code></td>
+            </tr>
+            <tr>
+              <td>MCP tools</td>
+              <td>Not available in 1.0</td>
+              <td><code>spring-ai-mcp-client-spring-boot-starter</code> + YAML config</td>
+            </tr>
+            <tr>
+              <td>Agentic retry</td>
+              <td>Manual loop</td>
+              <td><code>RecursiveAdvisor.builder().maxIterations(n)...build()</code></td>
+            </tr>
+            <tr>
+              <td>Observability</td>
+              <td>Manual wrapping of <code>ChatModel</code></td>
+              <td>Auto via Micrometer; enable <code>management.observations.spring-ai.chat.enabled=true</code></td>
+            </tr>
+            <tr>
+              <td>Reasoning model tokens</td>
+              <td>Opaque — final content only</td>
+              <td>Enable <code>.thinkingEnabled(true)</code> on provider options; stream <code>reasoning_content</code></td>
+            </tr>
+            <tr>
+              <td>Package (ChatClient)</td>
+              <td><code>org.springframework.ai.chat.client</code> (since 1.0)</td>
+              <td>Same package — no change in 2.x</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- #content -->
+</div><!-- #main -->
+
+<script>
+(function () {
+  const rows = document.querySelectorAll('.comparison-row');
+  let activeFilter = 'all';
+
+  function updateCount() {
+    const visible = document.querySelectorAll(
+      '.comparison-row:not([style*="display: none"]):not([style*="display:none"])'
+    ).length;
+    const counter = document.getElementById('filter-count');
+    if (counter) counter.textContent = visible + ' of ' + rows.length + ' features';
+  }
+
+  function applyFilter() {
+    rows.forEach(row => {
+      const show = activeFilter === 'all' || row.dataset.type === activeFilter;
+      row.style.display = show ? '' : 'none';
+      const diffRow = row.nextElementSibling;
+      if (diffRow && diffRow.classList.contains('diff-row')) {
+        if (!show) diffRow.style.display = 'none';
+      }
+    });
+    updateCount();
+  }
+
+  // Filter button clicks
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.style.background = 'var(--surface)';
+        b.style.color = 'var(--text-muted)';
+        b.classList.remove('active');
+      });
+      btn.style.background = 'var(--surface-2)';
+      btn.style.color = 'var(--text)';
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  // Expandable rows
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      const diffRow = row.nextElementSibling;
+      if (diffRow && diffRow.classList.contains('diff-row')) {
+        diffRow.style.display =
+          diffRow.style.display === 'none' ? '' : 'none';
+      }
+    });
+  });
+
+  updateCount();
+})();
+</script>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

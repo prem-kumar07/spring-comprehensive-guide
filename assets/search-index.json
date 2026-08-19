@@ -1575,6 +1575,202 @@
     "text": "Annotation / Class Purpose Notes @Tool Expose a Java method as a callable function to the model String argument is the tool description read by the model @ToolParam Document a tool method parameter description required; required=false marks optional .tools(bean) Register all @Tool methods on a bean "
   },
   {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Spring AI 1.x vs 2.x — Feature Comparison",
+    "anchor": "",
+    "text": "Spring AI 1.x vs 2.x — Feature Comparison"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Spring AI 1.x vs 2.x — Feature Comparison",
+    "anchor": "",
+    "text": "Spring AI reached its first GA milestone with 1.0 (May 2024), introducing a stable API contract and modular starter structure. The 1.x line continued with 1.1 (July 2024), adding Model Context Protocol (MCP) client/server support, RetrievalAugmentationAdvisor , reasoning-model streaming, and the Rec"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Tool Calling API (@FunctionCallback → @Tool → ToolCallingManager)",
+    "anchor": "ai-vc-tool-calling-api",
+    "text": "Tool Calling API (@FunctionCallback → @Tool → ToolCallingManager)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Tool Calling API (@FunctionCallback → @Tool → ToolCallingManager)",
+    "anchor": "ai-vc-tool-calling-api",
+    "text": "Spring AI 1.0 introduced the @Tool annotation for declaring callable functions. Earlier milestones used @Bean -registered FunctionCallback instances passed via ChatClient.functions() . Spring AI 2.0 introduced the composable ToolCallingManager — a dedicated service that resolves, validates, and exec"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Structured Output (BeanOutputConverter → provider-native schemas)",
+    "anchor": "ai-vc-structured-output",
+    "text": "Structured Output (BeanOutputConverter → provider-native schemas)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Structured Output (BeanOutputConverter → provider-native schemas)",
+    "anchor": "ai-vc-structured-output",
+    "text": "Spring AI 1.x used BeanOutputConverter to generate a JSON schema string, embed it in the prompt, and then parse the model's text response back into a Java bean — a pure prompt-engineering approach. Spring AI 2.0 adds useProviderStructuredOutput() to leverage the model provider's native JSON-mode or "
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Model Context Protocol (MCP) Client and Server",
+    "anchor": "ai-vc-mcp-support",
+    "text": "Model Context Protocol (MCP) Client and Server"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Model Context Protocol (MCP) Client and Server",
+    "anchor": "ai-vc-mcp-support",
+    "text": "Spring AI 1.0 had no built-in MCP support. Tool calling relied on custom FunctionCallback or @Tool beans defined within the same application context. Spring AI 1.1+ ships spring-ai-mcp-client-spring-boot-starter and spring-ai-mcp-server-spring-boot-starter . The client auto-discovers MCP servers via"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "RecursiveAdvisor for Self-Refining Agentic Loops",
+    "anchor": "ai-vc-recursive-advisor",
+    "text": "RecursiveAdvisor for Self-Refining Agentic Loops"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "RecursiveAdvisor for Self-Refining Agentic Loops",
+    "anchor": "ai-vc-recursive-advisor",
+    "text": "Spring AI 1.0 offered QuestionAnswerAdvisor and basic advisor chaining, but no built-in support for iterative self-refinement loops where a model evaluates and corrects its own output. Spring AI 1.1 introduced RecursiveAdvisor , which wraps the inner advisor chain and re-invokes it when a configured"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Agentic Architecture (ToolCallingManager, ToolContext)",
+    "anchor": "ai-vc-agentic-architecture",
+    "text": "Agentic Architecture (ToolCallingManager, ToolContext)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Agentic Architecture (ToolCallingManager, ToolContext)",
+    "anchor": "ai-vc-agentic-architecture",
+    "text": "Spring AI 1.x wired tool execution inline within the ChatClient request — tools were resolved and invoked in a single embedded loop with limited lifecycle control. ToolContext was introduced late in the 1.x line. Spring AI 2.x extracts the agentic loop into a dedicated ToolCallingManager bean. It ha"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Reasoning Model Support (streaming thinking events)",
+    "anchor": "ai-vc-reasoning-models",
+    "text": "Reasoning Model Support (streaming thinking events)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Reasoning Model Support (streaming thinking events)",
+    "anchor": "ai-vc-reasoning-models",
+    "text": "Spring AI 1.0 treated all models uniformly via the ChatModel abstraction — no special handling for chain-of-thought or reasoning tokens beyond what the provider returned in the final content field. Spring AI 1.1 introduced first-class streaming support for reasoning models (Anthropic Claude thinking"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "New Model Providers (DeepSeek, Groq, NVIDIA NIM, ZhipuAI)",
+    "anchor": "ai-vc-provider-additions",
+    "text": "New Model Providers (DeepSeek, Groq, NVIDIA NIM, ZhipuAI)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "New Model Providers (DeepSeek, Groq, NVIDIA NIM, ZhipuAI)",
+    "anchor": "ai-vc-provider-additions",
+    "text": "Spring AI 1.0 GA shipped with starters for OpenAI, Anthropic, Azure OpenAI, Amazon Bedrock, Google Vertex AI, Mistral AI, and Ollama. The 1.x and 2.x release trains added DeepSeek ( spring-ai-deepseek-spring-boot-starter ), Groq, NVIDIA NIM, and ZhipuAI (Zhipu ChatGLM) starters, all conforming to th"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "RetrievalAugmentationAdvisor (modular RAG pipeline)",
+    "anchor": "ai-vc-retrieval-augmentation-advisor",
+    "text": "RetrievalAugmentationAdvisor (modular RAG pipeline)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "RetrievalAugmentationAdvisor (modular RAG pipeline)",
+    "anchor": "ai-vc-retrieval-augmentation-advisor",
+    "text": "Spring AI 0.x / early 1.x provided QuestionAnswerAdvisor — a fixed advisor that performed similarity search against a VectorStore and injected the results into the prompt. The retrieval, augmentation, and filtering steps were not independently customisable. Spring AI 1.x introduced RetrievalAugmenta"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Dependency Structure (monolithic 0.x → modular starters in 1.0)",
+    "anchor": "ai-vc-dependency-structure",
+    "text": "Dependency Structure (monolithic 0.x → modular starters in 1.0)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Dependency Structure (monolithic 0.x → modular starters in 1.0)",
+    "anchor": "ai-vc-dependency-structure",
+    "text": "Spring AI 0.x milestone releases were distributed as a single monolithic artifact ( spring-ai-core pulling in all model adapters). Dependency management was done via the BOM but all providers were bundled. Spring AI 1.0 GA introduced provider-specific starters ( spring-ai-openai-spring-boot-starter "
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Self-Correcting Structured Output (validateSchema loop)",
+    "anchor": "ai-vc-self-correcting-output",
+    "text": "Self-Correcting Structured Output (validateSchema loop)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Self-Correcting Structured Output (validateSchema loop)",
+    "anchor": "ai-vc-self-correcting-output",
+    "text": "Spring AI 1.x relied on prompt engineering to constrain output format. If the model returned malformed JSON, the application had to handle the parsing exception itself and decide whether to retry. Spring AI 2.0 adds a validateSchema() option on EntityResponseSpec that automatically re-prompts the mo"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Observability API (Micrometer auto-instrumentation)",
+    "anchor": "ai-vc-observe-api",
+    "text": "Observability API (Micrometer auto-instrumentation)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Observability API (Micrometer auto-instrumentation)",
+    "anchor": "ai-vc-observe-api",
+    "text": "Spring AI 0.x / early 1.x had no built-in observability. Token usage, latency, and model metadata required custom logging or third-party wrappers around the ChatModel interface. Spring AI 1.x introduced automatic Micrometer instrumentation via ObservationRegistry . When Micrometer is on the classpat"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "0.x → 1.0 Breaking Changes (package renames, ChatClient refactor)",
+    "anchor": "ai-vc-0x-to-1x",
+    "text": "0.x → 1.0 Breaking Changes (package renames, ChatClient refactor)"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "0.x → 1.0 Breaking Changes (package renames, ChatClient refactor)",
+    "anchor": "ai-vc-0x-to-1x",
+    "text": "Spring AI 0.x was a milestone series with no stability guarantee. Key classes lived in org.springframework.ai.client ; the fluent ChatClient API did not exist — you called ChatModel.call(Prompt) directly. Spring AI 1.0 GA formalised the ChatClient fluent builder API (wrapping ChatModel ), renamed pa"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Migration Cheatsheet",
+    "anchor": "",
+    "text": "Migration Cheatsheet"
+  },
+  {
+    "page": "Spring AI 1.x vs 2.x — Version Comparison",
+    "href": "spring-ai/version-comparison.html",
+    "section": "Migration Cheatsheet",
+    "anchor": "",
+    "text": "What to Change Spring AI 1.x Spring AI 2.x BOM version spring-ai-bom:1.0.0 spring-ai-bom:2.0.0 Entry point chatClient.prompt()...call().content() Same API; ChatClient is unchanged at the surface Tool declaration @Tool method + .tools(bean) @Tool + ToolCallingManager bean (auto-configured) Tool conte"
+  },
+  {
     "page": "Spring Boot Auto-Configuration",
     "href": "spring-boot/auto-configuration.html",
     "section": "Spring Boot Auto-Configuration",
