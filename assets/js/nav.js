@@ -10,7 +10,8 @@
   // on GH Pages, depth=1 on localhost), we need '../' to get back.
   // Simple heuristic: if the pathname contains '/spring-core/', go up one level.
   const inSubdir = window.location.pathname.includes('/spring-core/')
-               || window.location.pathname.includes('/spring-boot/');
+               || window.location.pathname.includes('/spring-boot/')
+               || window.location.pathname.includes('/spring-ai/');
   const ROOT = inSubdir ? '../' : './';
 
   const NAV = [
@@ -38,7 +39,18 @@
         { label: 'Production & Tooling', href: ROOT + 'spring-boot/production.html' },
       ],
     },
-    { group: 'Spring AI',    items: [], locked: true },
+    {
+      group: 'Spring AI',
+      items: [
+        { label: 'Overview',           href: ROOT + 'spring-ai/index.html' },
+        { label: 'ChatClient API',     href: ROOT + 'spring-ai/chat-client.html' },
+        { label: 'RAG & VectorStore',  href: ROOT + 'spring-ai/rag.html' },
+        { label: 'Tools & Advisors',   href: ROOT + 'spring-ai/tools-advisors.html' },
+        { label: 'Structured Output',  href: ROOT + 'spring-ai/structured-output.html' },
+        { label: 'Version Comparison', href: ROOT + 'spring-ai/version-comparison.html' },
+        { label: 'Providers',          href: ROOT + 'spring-ai/providers.html' },
+      ],
+    },
   ];
 
   function currentPath() {
