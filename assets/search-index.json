@@ -931,6 +931,370 @@
     "text": "Class / Method Purpose Notes TextReader(resource) Read plain text, Markdown, CSV as Document Returns single Document; pass to TokenTextSplitter PdfDocumentReader(resource) Parse PDF to List<Document> — one per page Requires spring-ai-pdf-document-reader TikaDocumentReader(resource) Parse Word, Excel"
   },
   {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Spring AI Tools & Advisors",
+    "anchor": "",
+    "text": "Spring AI Tools & Advisors"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Spring AI Tools & Advisors",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x Tools (function calling) let an AI model invoke Java methods at runtime — the model decides when to call a tool, Spring AI dispatches it, and the result is fed back automatically so the model can produce a final answer. Advisors are the middleware layer around every ChatC"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@Tool — Declaring a Java Method as a Tool",
+    "anchor": "tool-annotation",
+    "text": "@Tool — Declaring a Java Method as a Tool"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@Tool — Declaring a Java Method as a Tool",
+    "anchor": "tool-annotation",
+    "text": "Annotate any Spring-managed bean method with @Tool to expose it to the model as a callable function. Spring AI reads the method signature at startup and auto-generates a JSON schema that describes the function name, description, and parameters. The description string is what the model reads to decid"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@ToolParam — Documenting Tool Parameters",
+    "anchor": "tool-param",
+    "text": "@ToolParam — Documenting Tool Parameters"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@ToolParam — Documenting Tool Parameters",
+    "anchor": "tool-param",
+    "text": "@ToolParam annotates individual method parameters to provide the model with a human-readable description and optionally mark a parameter as not required. Without @ToolParam , Spring AI uses the Java parameter name and type only. Rich descriptions significantly improve tool selection accuracy, especi"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Transparent Tool Invocation Loop",
+    "anchor": "tool-response",
+    "text": "Transparent Tool Invocation Loop"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Transparent Tool Invocation Loop",
+    "anchor": "tool-response",
+    "text": "When the model decides to invoke a tool, it returns a response containing a tool_calls array rather than a text answer. Spring AI detects this, dispatches the tool call to the registered Java method, serializes the result as a tool message, and automatically re-submits the conversation — including t"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "ToolCallbackProvider — Global Tool Registration",
+    "anchor": "tool-callback-provider",
+    "text": "ToolCallbackProvider — Global Tool Registration"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "ToolCallbackProvider — Global Tool Registration",
+    "anchor": "tool-callback-provider",
+    "text": "ToolCallbackProvider is a Spring bean interface that registers a set of tools globally so they are available to every ChatClient call without being passed explicitly via .tools() . Implement ToolCallbackProvider and return a list of ToolCallback instances, or use Spring AI's built-in MethodToolCallb"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Return Types and Schema Generation",
+    "anchor": "tool-output-schema",
+    "text": "Tool Return Types and Schema Generation"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Return Types and Schema Generation",
+    "anchor": "tool-output-schema",
+    "text": "Spring AI generates the tool's parameter schema from the Java method signature at startup. Supported parameter types include String , primitive wrappers ( Integer , Double , Boolean ), enums, and POJOs. Nested POJOs are recursively converted to nested JSON schema objects. Return types are not part o"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "returnDirect — Bypassing the Model After Tool Execution",
+    "anchor": "tool-return-direct",
+    "text": "returnDirect — Bypassing the Model After Tool Execution"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "returnDirect — Bypassing the Model After Tool Execution",
+    "anchor": "tool-return-direct",
+    "text": "By default, tool results are fed back to the model so it can generate a natural-language final answer. Setting returnDirect = true on @Tool makes Spring AI return the raw tool result string directly to the caller, skipping the second model call. This is useful for deterministic tools where the answe"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "ToolContext — Injecting Runtime State into Tools",
+    "anchor": "tool-context",
+    "text": "ToolContext — Injecting Runtime State into Tools"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "ToolContext — Injecting Runtime State into Tools",
+    "anchor": "tool-context",
+    "text": "ToolContext provides a mechanism for passing runtime state — such as the authenticated user's ID, a tenant identifier, a security token, or a request-scoped value — into a tool method without polluting the model's prompt with that data. The context is set by the caller and is available to all tools "
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Invocation Loop — Internals",
+    "anchor": "tool-agentic-loop",
+    "text": "Tool Invocation Loop — Internals"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Invocation Loop — Internals",
+    "anchor": "tool-agentic-loop",
+    "text": "Understanding the internal flow helps debug tool-calling issues and design more reliable agentic pipelines. Spring AI's tool loop follows the standard function-calling protocol: the model signals intent via a structured tool_calls block in its response, Spring AI dispatches the calls, and the result"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Spring AI 2.x Composable Tool Architecture",
+    "anchor": "tool-2x-composable",
+    "text": "Spring AI 2.x Composable Tool Architecture"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Spring AI 2.x Composable Tool Architecture",
+    "anchor": "tool-2x-composable",
+    "text": "Spring AI 2.0 introduced a fully redesigned tool-calling architecture based on composable, explicit components. The ToolCallingManager interface encapsulates the dispatch-and-loop logic. You can provide a custom implementation to add retry, circuit-breaking, observability spans per tool call, or cus"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Handling Tool Execution Exceptions",
+    "anchor": "tool-execution-exception",
+    "text": "Handling Tool Execution Exceptions"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Handling Tool Execution Exceptions",
+    "anchor": "tool-execution-exception",
+    "text": "When a tool throws an unchecked exception, Spring AI's default behavior in 2.x is to convert it to a tool error result string and feed it back to the model rather than immediately propagating the exception to the caller. This gives the model a chance to recover or inform the user. You can customize "
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Multi-Tool Orchestration",
+    "anchor": "multi-tool-agent",
+    "text": "Multi-Tool Orchestration"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Multi-Tool Orchestration",
+    "anchor": "multi-tool-agent",
+    "text": "A single agent can be equipped with multiple tools, enabling it to decompose a complex task into a sequence of tool calls. The model acts as the orchestrator — it selects which tool to call, in what order, and how to combine the results into a final answer. No explicit routing code is needed in the "
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Error Handling in Tool Responses",
+    "anchor": "tool-error-handling",
+    "text": "Error Handling in Tool Responses"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Error Handling in Tool Responses",
+    "anchor": "tool-error-handling",
+    "text": "When a tool method encounters an error, the recommended approach is to return a structured error string (or JSON) rather than throwing an exception. The model receives the error message as the tool result and can decide how to proceed — retry with different arguments, use a fallback tool, or inform "
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Result Formatting — JSON vs Plain String",
+    "anchor": "tool-result-formatting",
+    "text": "Tool Result Formatting — JSON vs Plain String"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tool Result Formatting — JSON vs Plain String",
+    "anchor": "tool-result-formatting",
+    "text": "Spring AI passes whatever your tool method returns (as a String ) directly to the model as the tool result message. The model treats it as raw content. Choosing the right format affects how reliably the model can parse and use the result in its final answer. Prefer JSON for structured data (lists, o"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Parallel Tool Calls",
+    "anchor": "tool-parallel-calls",
+    "text": "Parallel Tool Calls"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Parallel Tool Calls",
+    "anchor": "tool-parallel-calls",
+    "text": "When the model requests multiple tools in a single response (parallel tool calling), Spring AI 2.x dispatches them concurrently by default using a CompletableFuture -based dispatcher. Parallel dispatch significantly reduces end-to-end latency when tools perform independent I/O (e.g. querying weather"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tools with Structured Output",
+    "anchor": "tool-structured-output",
+    "text": "Tools with Structured Output"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tools with Structured Output",
+    "anchor": "tool-structured-output",
+    "text": "Combining Spring AI's BeanOutputConverter with tool calling lets you receive the model's final answer as a typed Java object rather than a raw string. The model uses the tools to gather data and then produces a structured JSON answer conforming to a schema generated from your target class. This patt"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "CallAdvisor and StreamAdvisor Interfaces",
+    "anchor": "advisor-interface",
+    "text": "CallAdvisor and StreamAdvisor Interfaces"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "CallAdvisor and StreamAdvisor Interfaces",
+    "anchor": "advisor-interface",
+    "text": "Advisors in Spring AI are middleware that wrap the ChatClient call pipeline. CallAdvisor wraps blocking calls; StreamAdvisor wraps streaming calls. Both receive the request before it reaches the model and the response after the model replies, giving them the ability to modify, enrich, log, filter, o"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "QuestionAnswerAdvisor — RAG in One Line",
+    "anchor": "builtin-question-answer-advisor",
+    "text": "QuestionAnswerAdvisor — RAG in One Line"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "QuestionAnswerAdvisor — RAG in One Line",
+    "anchor": "builtin-question-answer-advisor",
+    "text": "QuestionAnswerAdvisor implements Retrieval-Augmented Generation (RAG) by intercepting the request, retrieving the most semantically similar documents from a VectorStore , and injecting them into the system prompt as context before the model sees the user's question. The default retrieval retrieves t"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MessageChatMemoryAdvisor vs VectorStoreChatMemoryAdvisor",
+    "anchor": "builtin-memory-advisors",
+    "text": "MessageChatMemoryAdvisor vs VectorStoreChatMemoryAdvisor"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MessageChatMemoryAdvisor vs VectorStoreChatMemoryAdvisor",
+    "anchor": "builtin-memory-advisors",
+    "text": "MessageChatMemoryAdvisor stores and retrieves the raw conversation messages in chronological order using a sliding window. It is simple, fast, and requires no embedding model — ideal for short-to-medium conversations where recency matters more than semantic relevance. The window size bounds token co"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "SafeGuardAdvisor — Content Filtering",
+    "anchor": "builtin-safe-guard-advisor",
+    "text": "SafeGuardAdvisor — Content Filtering"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "SafeGuardAdvisor — Content Filtering",
+    "anchor": "builtin-safe-guard-advisor",
+    "text": "SafeGuardAdvisor is a pre-call advisor that inspects the user's message for blocked phrases before the request reaches the model. If any blocked phrase is found (case-insensitive substring match), the advisor short-circuits the chain and returns a configurable rejection message instead of calling th"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "SimpleLoggerAdvisor — Request/Response Logging",
+    "anchor": "builtin-logger-advisor",
+    "text": "SimpleLoggerAdvisor — Request/Response Logging"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "SimpleLoggerAdvisor — Request/Response Logging",
+    "anchor": "builtin-logger-advisor",
+    "text": "SimpleLoggerAdvisor logs the full AdvisedRequest and AdvisedResponse at DEBUG level using SLF4J. It is the recommended first advisor to add during development and debugging because it surfaces the exact prompt, model parameters, advisor parameters, and response that the framework sees — after all ot"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "RecursiveAdvisor — Self-Refining Agentic Loops",
+    "anchor": "recursive-advisor",
+    "text": "RecursiveAdvisor — Self-Refining Agentic Loops"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "RecursiveAdvisor — Self-Refining Agentic Loops",
+    "anchor": "recursive-advisor",
+    "text": "RecursiveAdvisor (introduced in Spring AI 1.1) enables a self-refining agentic loop by re-invoking the chat pipeline from within an advisor. After the model produces a response, the advisor evaluates it (e.g. against a quality criterion, a format check, or a factuality constraint) and can resubmit t"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Writing a Custom CallAdvisor",
+    "anchor": "custom-advisor",
+    "text": "Writing a Custom CallAdvisor"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Writing a Custom CallAdvisor",
+    "anchor": "custom-advisor",
+    "text": "Implement CallAdvisor to insert custom logic into the ChatClient pipeline. Common use cases include: request enrichment (inject tenant metadata), response transformation (strip PII from output), latency measurement, audit logging, token-budget enforcement, and A/B testing different system prompts. T"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Advisor Chain Ordering — Design Rules",
+    "anchor": "advisor-chain-ordering",
+    "text": "Advisor Chain Ordering — Design Rules"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Advisor Chain Ordering — Design Rules",
+    "anchor": "advisor-chain-ordering",
+    "text": "The order in which advisors run matters because each advisor can transform both the request (going in) and the response (coming out). Think of the chain as a stack: the advisor with the lowest order number runs first on the way in (closest to the caller) and last on the way out (post-processing). Th"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Modifying Requests and Responses in an Advisor",
+    "anchor": "advisor-request-modification",
+    "text": "Modifying Requests and Responses in an Advisor"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Modifying Requests and Responses in an Advisor",
+    "anchor": "advisor-request-modification",
+    "text": "Advisors modify requests by creating a new AdvisedRequest via AdvisedRequest.from(request).with...().build() and passing the modified request to the chain. Response modification works the same way with AdvisedResponse . Common modifications include: appending instructions to the system message, inje"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tools & Advisors Cheatsheet",
+    "anchor": "",
+    "text": "Tools & Advisors Cheatsheet"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Tools & Advisors Cheatsheet",
+    "anchor": "",
+    "text": "Annotation / Class Purpose Notes @Tool Expose a Java method as a callable function to the model String argument is the tool description read by the model @ToolParam Document a tool method parameter description required; required=false marks optional .tools(bean) Register all @Tool methods on a bean "
+  },
+  {
     "page": "Spring Boot Auto-Configuration",
     "href": "spring-boot/auto-configuration.html",
     "section": "Spring Boot Auto-Configuration",
