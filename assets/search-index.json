@@ -567,6 +567,384 @@
     "text": "20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini and more"
   },
   {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Spring AI Providers",
+    "anchor": "",
+    "text": "Spring AI Providers"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Spring AI Providers",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x Spring AI abstracts AI provider differences behind a uniform ChatModel / ChatClient API. Swapping providers requires only a different starter dependency and a set of spring.ai.<provider>.* properties — no application code changes. This page covers setup, available model I"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Setup",
+    "anchor": "openai-setup",
+    "text": "OpenAI Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Setup",
+    "anchor": "openai-setup",
+    "text": "Add spring-ai-openai-spring-boot-starter to your project. Set your API key via spring.ai.openai.api-key . Spring AI's auto-configuration registers a ChatModel bean backed by the OpenAI API, which is then available to ChatClient.Builder . The default model is gpt-4o ; override with spring.ai.openai.c"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Model IDs",
+    "anchor": "openai-model-ids",
+    "text": "OpenAI Model IDs"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Model IDs",
+    "anchor": "openai-model-ids",
+    "text": "OpenAI provides a range of GPT-4o family and o-series reasoning models. The gpt-4o and gpt-4o-mini models are multimodal (text + vision). The o1 , o1-mini , and o3-mini models are reasoning-optimised and support the reasoningEffort option (Spring AI 2.0+). Set the model globally in properties or per"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Vision (GPT-4o)",
+    "anchor": "openai-vision",
+    "text": "OpenAI Vision (GPT-4o)"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Vision (GPT-4o)",
+    "anchor": "openai-vision",
+    "text": "gpt-4o and gpt-4o-mini support image input. Attach images to a UserMessage as Media objects. Images can be provided as public URLs (the model fetches them) or as base64-encoded local resources ( ClassPathResource , FileSystemResource ). Multiple images may be included in a single message. The model "
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Reasoning Models (o1 / o3)",
+    "anchor": "openai-reasoning",
+    "text": "OpenAI Reasoning Models (o1 / o3)"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Reasoning Models (o1 / o3)",
+    "anchor": "openai-reasoning",
+    "text": "The o1 , o1-mini , and o3-mini models perform internal chain-of-thought reasoning before producing a response. In Spring AI 2.0+ you can control reasoning depth with the reasoningEffort option ( low , medium , high ). These models do not support temperature — omit it. Reasoning models are slower and"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Function Calling / Tool Use",
+    "anchor": "openai-function-calling",
+    "text": "OpenAI Function Calling / Tool Use"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "OpenAI Function Calling / Tool Use",
+    "anchor": "openai-function-calling",
+    "text": "OpenAI models support function calling (tool use). In Spring AI, annotate a Spring bean method with @Tool (Spring AI 2.0+) or use FunctionCallback to expose it as a callable tool. The model decides when to invoke the function, Spring AI dispatches the call and feeds the result back automatically. To"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Setup",
+    "anchor": "anthropic-setup",
+    "text": "Anthropic Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Setup",
+    "anchor": "anthropic-setup",
+    "text": "Add spring-ai-anthropic-spring-boot-starter to your project and set spring.ai.anthropic.api-key . Spring AI auto-configures an Anthropic ChatModel using the Claude API. The default model is claude-3-5-sonnet-20241022 . The same ChatClient API works unchanged — only the starter and properties differ "
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Model IDs",
+    "anchor": "anthropic-model-ids",
+    "text": "Anthropic Model IDs"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Model IDs",
+    "anchor": "anthropic-model-ids",
+    "text": "Anthropic's Claude 3 family covers three tiers: Haiku (fastest, cheapest), Sonnet (balanced), and Opus (most capable). Claude 3.5 Sonnet and the 2025 Claude 3.7 Sonnet add extended thinking. Use the full version string as the model ID. Set globally in properties or per-request via AnthropicChatOptio"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Extended Thinking / Streaming Thinking",
+    "anchor": "anthropic-streaming-thinking",
+    "text": "Anthropic Extended Thinking / Streaming Thinking"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Extended Thinking / Streaming Thinking",
+    "anchor": "anthropic-streaming-thinking",
+    "text": "Claude 3.7 Sonnet and later models support extended thinking : the model generates internal reasoning tokens before the final answer. In Spring AI 1.1+ / 2.0+, enable this via AnthropicChatOptions.thinkingEnabled(true) . When streaming, the Flux<ChatResponse> emits thinking delta chunks (type THINKI"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Image Input (Claude 3+)",
+    "anchor": "anthropic-image-input",
+    "text": "Anthropic Image Input (Claude 3+)"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Image Input (Claude 3+)",
+    "anchor": "anthropic-image-input",
+    "text": "Claude 3 and later models (Haiku, Sonnet, Opus) support image input. Spring AI handles base64 encoding automatically when you provide a Resource . Images may be PNG, JPEG, GIF, or WebP. Provide the image alongside a text prompt in a UserMessage . Claude is particularly strong at reading charts, diag"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Tool Use",
+    "anchor": "anthropic-tools",
+    "text": "Anthropic Tool Use"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Anthropic Tool Use",
+    "anchor": "anthropic-tools",
+    "text": "Claude 3 models support tool use (function calling). Register tools the same way as with OpenAI — Spring AI's abstraction handles the provider-specific wire format automatically. Claude may call the tool zero or more times per turn. Spring AI manages the round-trip: it sends tool results back to Cla"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Local Setup",
+    "anchor": "ollama-setup",
+    "text": "Ollama Local Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Local Setup",
+    "anchor": "ollama-setup",
+    "text": "Ollama runs open-source LLMs locally with zero cloud dependencies. Install the Ollama CLI, pull a model, then add spring-ai-ollama-spring-boot-starter . Set spring.ai.ollama.base-url to the local Ollama server address (default http://localhost:11434 ). Ollama is ideal for development, air-gapped dep"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Model Pull Commands",
+    "anchor": "ollama-model-pull",
+    "text": "Ollama Model Pull Commands"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Model Pull Commands",
+    "anchor": "ollama-model-pull",
+    "text": "Use ollama pull <model> to download a model before Spring AI can use it. Ollama stores models locally and serves them from the same daemon process. Pull the specific variant you need: general chat, embeddings, or vision. Models are identified by name; append a tag for specific sizes (e.g. llama3.2:3"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Embedding for Local RAG",
+    "anchor": "ollama-embedding",
+    "text": "Ollama Embedding for Local RAG"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Embedding for Local RAG",
+    "anchor": "ollama-embedding",
+    "text": "Ollama also serves embedding models via spring.ai.ollama.embedding.options.model . The nomic-embed-text model produces high-quality 768-dimension embeddings suitable for a local RAG pipeline. Spring AI's OllamaEmbeddingModel implements EmbeddingModel , making it a drop-in replacement for cloud embed"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Multimodal with LLaVA",
+    "anchor": "ollama-multimodal",
+    "text": "Ollama Multimodal with LLaVA"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Ollama Multimodal with LLaVA",
+    "anchor": "ollama-multimodal",
+    "text": "Vision-capable models like llava , llava-phi3 , and moondream accept image input via the same UserMessage.media() API used for cloud providers. Pull the vision model with ollama pull llava , set it as the active model, and pass a local image resource. LLaVA performs image captioning, visual QA, and "
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Running Ollama in Docker",
+    "anchor": "ollama-docker",
+    "text": "Running Ollama in Docker"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Running Ollama in Docker",
+    "anchor": "ollama-docker",
+    "text": "Ollama publishes an official Docker image for containerised environments. Mount a host directory for the model cache so models persist across container restarts. In a Docker Compose setup, Spring Boot can reference the Ollama container by service name. Set spring.ai.ollama.base-url to http://ollama:"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Amazon Bedrock Setup",
+    "anchor": "bedrock-setup",
+    "text": "Amazon Bedrock Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Amazon Bedrock Setup",
+    "anchor": "bedrock-setup",
+    "text": "Amazon Bedrock provides managed access to models from Anthropic (Claude), Amazon (Titan), Meta (Llama), and others. Use spring-ai-bedrock-converse-spring-boot-starter (Spring AI 2.0), which uses the unified Bedrock Converse API. Authenticate via the standard AWS credential chain — environment variab"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Bedrock Model IDs",
+    "anchor": "bedrock-model-ids",
+    "text": "Bedrock Model IDs"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Bedrock Model IDs",
+    "anchor": "bedrock-model-ids",
+    "text": "Bedrock model IDs use a namespaced format: provider.model-version . You must enable model access in the AWS Console for each model before use. The Converse API supports Claude, Llama, Titan, Cohere, and Mistral models. Use BedrockConverseApi model identifiers, not the native provider IDs. Common Bed"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Google Gemini / Vertex AI Setup",
+    "anchor": "gemini-setup",
+    "text": "Google Gemini / Vertex AI Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Google Gemini / Vertex AI Setup",
+    "anchor": "gemini-setup",
+    "text": "Spring AI connects to Google Gemini via the Vertex AI API using spring-ai-vertex-ai-gemini-spring-boot-starter . Authenticate with Application Default Credentials (ADC) using gcloud auth application-default login , or set a service-account key path. Specify your GCP project ID and region. The gemini"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Azure OpenAI Setup",
+    "anchor": "azure-openai-setup",
+    "text": "Azure OpenAI Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Azure OpenAI Setup",
+    "anchor": "azure-openai-setup",
+    "text": "Azure OpenAI hosts OpenAI models within Microsoft's cloud infrastructure. Use spring-ai-azure-openai-spring-boot-starter . Unlike the OpenAI starter, you specify an Azure deployment name (not a raw model ID) and your Azure endpoint. API key authentication and Azure Active Directory token authenticat"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Gemini Multimodal (Images, Video, Audio)",
+    "anchor": "gemini-multimodal",
+    "text": "Gemini Multimodal (Images, Video, Audio)"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Gemini Multimodal (Images, Video, Audio)",
+    "anchor": "gemini-multimodal",
+    "text": "Gemini 1.5 Pro and Gemini 2.0 Flash support images, video clips, audio files, and PDFs as input alongside text — all via the same UserMessage.media() pattern. The gemini-1.5-pro model has a 1-million token context window and can reason across very long documents or lengthy video transcripts. Pass th"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Mistral AI Setup",
+    "anchor": "mistral-setup",
+    "text": "Mistral AI Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Mistral AI Setup",
+    "anchor": "mistral-setup",
+    "text": "Mistral AI offers open and proprietary models via its cloud API. Add spring-ai-mistral-ai-spring-boot-starter and set spring.ai.mistralai.api-key . The mistral-large-latest model is Mistral's most capable offering; mistral-small-latest is cost-optimised. Mistral models are strong at code generation,"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Groq Setup",
+    "anchor": "groq-setup",
+    "text": "Groq Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Groq Setup",
+    "anchor": "groq-setup",
+    "text": "Groq provides ultra-fast LLM inference via its proprietary LPU hardware. Spring AI supports Groq through spring-ai-groq-spring-boot-starter . Groq serves popular open-source models (Llama 3, Mistral, Gemma) at very high token throughput — ideal for low-latency applications and streaming. Set spring."
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "DeepSeek Setup",
+    "anchor": "deepseek-setup",
+    "text": "DeepSeek Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "DeepSeek Setup",
+    "anchor": "deepseek-setup",
+    "text": "DeepSeek provides powerful reasoning and chat models at competitive pricing. The deepseek-chat model is a strong general-purpose chat model. deepseek-reasoner (DeepSeek-R1) performs multi-step chain-of-thought reasoning similar to OpenAI o1. Add spring-ai-deepseek-spring-boot-starter and set your AP"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Provider Switching Pattern",
+    "anchor": "other-provider-switching",
+    "text": "Provider Switching Pattern"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Provider Switching Pattern",
+    "anchor": "other-provider-switching",
+    "text": "The key benefit of Spring AI's abstraction layer is that swapping providers requires zero application code changes . The same ChatClient bean works identically regardless of the underlying provider. To switch providers: remove the current starter dependency, add the new one, update the API key prope"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "NVIDIA NIM Setup",
+    "anchor": "nvidia-nim-setup",
+    "text": "NVIDIA NIM Setup"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "NVIDIA NIM Setup",
+    "anchor": "nvidia-nim-setup",
+    "text": "NVIDIA NIM (NVIDIA Inference Microservices) provides OpenAI-compatible endpoints for a wide range of optimised models including Llama 3, Mistral, and NVIDIA-proprietary models. Because NIM exposes an OpenAI-compatible REST API, use spring-ai-openai-spring-boot-starter with a custom base URL pointing"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Providers Cheatsheet",
+    "anchor": "",
+    "text": "Providers Cheatsheet"
+  },
+  {
+    "page": "Spring AI Providers",
+    "href": "spring-ai/providers.html",
+    "section": "Providers Cheatsheet",
+    "anchor": "",
+    "text": "Provider Starter Artifact Key Config Property Key Model IDs OpenAI spring-ai-openai-spring-boot-starter spring.ai.openai.api-key gpt-4o , gpt-4o-mini , o3-mini Anthropic spring-ai-anthropic-spring-boot-starter spring.ai.anthropic.api-key claude-3-5-sonnet-20241022 , claude-3-7-sonnet-20250219 Ollama"
+  },
+  {
     "page": "Spring AI RAG & VectorStore",
     "href": "spring-ai/rag.html",
     "section": "Spring AI RAG & VectorStore",
