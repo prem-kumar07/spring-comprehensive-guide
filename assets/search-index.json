@@ -931,6 +931,286 @@
     "text": "Class / Method Purpose Notes TextReader(resource) Read plain text, Markdown, CSV as Document Returns single Document; pass to TokenTextSplitter PdfDocumentReader(resource) Parse PDF to List<Document> — one per page Requires spring-ai-pdf-document-reader TikaDocumentReader(resource) Parse Word, Excel"
   },
   {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Spring AI Structured Output",
+    "anchor": "",
+    "text": "Spring AI Structured Output"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Spring AI Structured Output",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x Structured Output lets you instruct an AI model to return JSON that maps directly to a Java record or class, turning unstructured language model responses into strongly-typed objects your application can work with immediately. Spring AI ships several StructuredOutputConve"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "How Structured Output Works",
+    "anchor": "how-structured-output-works",
+    "text": "How Structured Output Works"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "How Structured Output Works",
+    "anchor": "how-structured-output-works",
+    "text": "Spring AI's structured output pipeline has three stages. First, a StructuredOutputConverter derives a JSON Schema (JSON Schema DRAFT_2020_12) from your target class and calls getFormat() to produce instructions telling the model to output JSON matching that schema. Second, those instructions are app"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "BeanOutputConverter<T> — Basics and ChatClient Shorthand",
+    "anchor": "bean-output-converter-basics",
+    "text": "BeanOutputConverter<T> — Basics and ChatClient Shorthand"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "BeanOutputConverter<T> — Basics and ChatClient Shorthand",
+    "anchor": "bean-output-converter-basics",
+    "text": "BeanOutputConverter<T> is the primary StructuredOutputConverter for mapping model output to a specific Java class. It derives a JSON Schema (DRAFT_2020_12) from the target class using Jackson's schema module and injects schema instructions into the prompt via getFormat() . The ChatClient fluent API "
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Defining a Java Record as the Target Type",
+    "anchor": "bean-output-java-record",
+    "text": "Defining a Java Record as the Target Type"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Defining a Java Record as the Target Type",
+    "anchor": "bean-output-java-record",
+    "text": "Java records are the ideal target type for BeanOutputConverter : they are concise, immutable, and their component names map directly to JSON property names. For richer schema generation, annotate record components with @JsonPropertyDescription(\"...\") to embed human-readable hints in the schema — the"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Extracting a List — ParameterizedTypeReference",
+    "anchor": "bean-output-list",
+    "text": "Extracting a List — ParameterizedTypeReference"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Extracting a List — ParameterizedTypeReference",
+    "anchor": "bean-output-list",
+    "text": "Java type erasure means that List.class carries no information about its element type at runtime. To extract a List<T> of records, pass a ParameterizedTypeReference<List<T>> anonymous subclass to .entity() . This preserves the full generic type information so BeanOutputConverter can derive the corre"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "ListOutputConverter and MapOutputConverter",
+    "anchor": "structured-output-converters",
+    "text": "ListOutputConverter and MapOutputConverter"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "ListOutputConverter and MapOutputConverter",
+    "anchor": "structured-output-converters",
+    "text": "ListOutputConverter and MapOutputConverter are simpler alternatives to BeanOutputConverter for common output shapes. ListOutputConverter instructs the model to output a comma-separated list and converts the text to a List<String> using Spring's ConversionService — no JSON schema involved. MapOutputC"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "BeanOutputConverter with the Low-Level ChatModel API",
+    "anchor": "bean-output-low-level-api",
+    "text": "BeanOutputConverter with the Low-Level ChatModel API"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "BeanOutputConverter with the Low-Level ChatModel API",
+    "anchor": "bean-output-low-level-api",
+    "text": "When you need explicit control over the conversion process — for example, in batch jobs, test stubs, or when using the lower-level ChatModel API without ChatClient — you can instantiate BeanOutputConverter<T> directly. Call getFormat() to obtain the schema instructions string, embed it in a PromptTe"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "validateSchema() — Automatic Self-Correction",
+    "anchor": "validate-schema",
+    "text": "validateSchema() — Automatic Self-Correction"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "validateSchema() — Automatic Self-Correction",
+    "anchor": "validate-schema",
+    "text": "Spring AI 2.x — validateSchema() is a new Spring AI 2.0 feature. It is available on the .entity() spec consumer and requires no manual wiring beyond enabling it. validateSchema() activates a retry loop that validates the model's JSON response against the derived schema before returning the result. I"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Configuring Max Retry Attempts",
+    "anchor": "self-correct-max-retries",
+    "text": "Configuring Max Retry Attempts"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Configuring Max Retry Attempts",
+    "anchor": "self-correct-max-retries",
+    "text": "The default retry count of 3 (1 original call + 2 corrective retries) is suitable for most use cases. For schemas that are complex or for models that frequently deviate from structured output, you can increase the retry limit. Conversely, for cost-sensitive pipelines, setting a lower retry count (or"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Self-Correction with Complex Nested Records",
+    "anchor": "self-correct-complex-schema",
+    "text": "Self-Correction with Complex Nested Records"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Self-Correction with Complex Nested Records",
+    "anchor": "self-correct-complex-schema",
+    "text": "Deeply nested records with required fields and constrained types are the cases most likely to trip up a language model on the first attempt. A model might omit a nested object's required field, return a number as a string, or emit an enum value with different casing. validateSchema() catches all of "
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Combining validateSchema() with ParameterizedTypeReference",
+    "anchor": "self-correct-combined",
+    "text": "Combining validateSchema() with ParameterizedTypeReference"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Combining validateSchema() with ParameterizedTypeReference",
+    "anchor": "self-correct-combined",
+    "text": "Self-correction works with ParameterizedTypeReference for list extraction as well. Pass the type reference as the first argument to .entity() and chain the spec consumer as the second argument. Spring AI validates that the model returned a JSON array with all element objects conforming to the elemen"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "useProviderStructuredOutput() — Provider-Native JSON Schema",
+    "anchor": "provider-native-structured-output",
+    "text": "useProviderStructuredOutput() — Provider-Native JSON Schema"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "useProviderStructuredOutput() — Provider-Native JSON Schema",
+    "anchor": "provider-native-structured-output",
+    "text": "Spring AI 2.x — useProviderStructuredOutput() is a new Spring AI 2.0 feature. It replaces prompt-based schema injection with a provider API-level constraint, producing more reliable structured output without consuming additional prompt tokens for format instructions. useProviderStructuredOutput() in"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "OpenAI response_format: json_schema",
+    "anchor": "openai-json-mode",
+    "text": "OpenAI response_format: json_schema"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "OpenAI response_format: json_schema",
+    "anchor": "openai-json-mode",
+    "text": "OpenAI's Structured Outputs feature (available on GPT-4o models from gpt-4o-2024-08-06 and later) guarantees that the model's response conforms to the provided JSON Schema. When useProviderStructuredOutput() is active, Spring AI generates the JSON Schema from your record using BeanOutputConverter 's"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Trade-offs: Provider-Native vs BeanOutputConverter",
+    "anchor": "provider-native-trade-offs",
+    "text": "Trade-offs: Provider-Native vs BeanOutputConverter"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Trade-offs: Provider-Native vs BeanOutputConverter",
+    "anchor": "provider-native-trade-offs",
+    "text": "Choosing between useProviderStructuredOutput() (provider-native) and the default prompt-based BeanOutputConverter approach involves three main trade-offs: reliability, portability, and token cost. Provider-native structured output offers stronger guarantees — the model's output is constrained at the"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Anthropic Claude — Tool-Use JSON Mode",
+    "anchor": "provider-native-anthropic",
+    "text": "Anthropic Claude — Tool-Use JSON Mode"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Anthropic Claude — Tool-Use JSON Mode",
+    "anchor": "provider-native-anthropic",
+    "text": "For Anthropic Claude models (Claude 3.5 Sonnet and later), useProviderStructuredOutput() works by instructing Spring AI to use Anthropic's tool-use mechanism as a structured output channel. Rather than using a response_format field (which OpenAI-style APIs provide), Anthropic's API exposes structure"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Image to Java Record — Parsing a Receipt Photo",
+    "anchor": "image-to-record",
+    "text": "Image to Java Record — Parsing a Receipt Photo"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Image to Java Record — Parsing a Receipt Photo",
+    "anchor": "image-to-record",
+    "text": "Spring AI supports combining multimodal input (an image) with structured output (a Java record) in a single call. Attach the image via UserMessage with a Media object, and instead of calling .content() for raw text, call .entity(ReceiptRecord.class) . Spring AI injects the JSON Schema instructions a"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Combining Text and Image for Structured Extraction",
+    "anchor": "multimodal-combined-prompt",
+    "text": "Combining Text and Image for Structured Extraction"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Combining Text and Image for Structured Extraction",
+    "anchor": "multimodal-combined-prompt",
+    "text": "You can mix a detailed text instruction with an image reference in a single UserMessage to guide the model's visual reasoning and constrain its output format simultaneously. Adding clear extraction instructions (which fields to include, how to handle ambiguous values, what to do with missing data) a"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Provider Support for Multimodal Structured Output",
+    "anchor": "multimodal-output-providers",
+    "text": "Provider Support for Multimodal Structured Output"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Provider Support for Multimodal Structured Output",
+    "anchor": "multimodal-output-providers",
+    "text": "Multimodal structured output requires both vision capability (to process the image) and structured output support (to return typed JSON). Not all providers support both simultaneously. OpenAI's GPT-4o family and Anthropic's Claude 3+ family are the primary production choices for combining image inpu"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "validateSchema() with Multimodal Calls",
+    "anchor": "multimodal-schema-validation",
+    "text": "validateSchema() with Multimodal Calls"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "validateSchema() with Multimodal Calls",
+    "anchor": "multimodal-schema-validation",
+    "text": "Vision models are more likely to miss required fields or produce slightly malformed JSON than text-only models — they are simultaneously reasoning about the image and following schema instructions. Adding validateSchema() to multimodal .entity() calls is therefore especially recommended. The retry m"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Structured Output Cheatsheet",
+    "anchor": "",
+    "text": "Structured Output Cheatsheet"
+  },
+  {
+    "page": "Spring AI Structured Output",
+    "href": "spring-ai/structured-output.html",
+    "section": "Structured Output Cheatsheet",
+    "anchor": "",
+    "text": "Method / Class Purpose Version (1.x / 2.x) BeanOutputConverter<T> Derive JSON Schema from a Java class/record and convert model output 1.x / 2.x .call().entity(MyClass.class) ChatClient shorthand — creates BeanOutputConverter internally 1.x / 2.x .call().entity(new ParameterizedTypeReference<List<T>"
+  },
+  {
     "page": "Spring AI Tools & Advisors",
     "href": "spring-ai/tools-advisors.html",
     "section": "Spring AI Tools & Advisors",
