@@ -567,6 +567,370 @@
     "text": "20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini and more"
   },
   {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Spring AI RAG & VectorStore",
+    "anchor": "",
+    "text": "Spring AI RAG & VectorStore"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Spring AI RAG & VectorStore",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x Retrieval-Augmented Generation (RAG) is a pattern that grounds an LLM's responses in your own documents and data. Spring AI provides a complete pipeline — from ingesting source documents into a vector store, to wiring retrieval advisors that inject relevant context into e"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RAG — Retrieval-Augmented Generation",
+    "anchor": "",
+    "text": "RAG — Retrieval-Augmented Generation"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RAG — Retrieval-Augmented Generation",
+    "anchor": "",
+    "text": "RAG addresses a fundamental limitation of LLMs: their knowledge is frozen at training time. By pairing any chat model with a vector store, you extend its knowledge base with your own documents — with no fine-tuning required. The pipeline runs in two distinct phases: an offline ingestion phase that i"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "What is RAG and Why Use It",
+    "anchor": "rag-overview",
+    "text": "What is RAG and Why Use It"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "What is RAG and Why Use It",
+    "anchor": "rag-overview",
+    "text": "Large Language Models are trained on a fixed corpus with a knowledge cutoff date. They cannot answer questions about your internal documentation, recent events, or private data without being retrained — an expensive and slow process. Retrieval-Augmented Generation solves this by breaking the problem"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Ingestion Phase — Indexing Your Documents",
+    "anchor": "rag-ingestion-phase",
+    "text": "Ingestion Phase — Indexing Your Documents"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Ingestion Phase — Indexing Your Documents",
+    "anchor": "rag-ingestion-phase",
+    "text": "The ingestion pipeline runs once (or on a schedule as your documents change). It reads source documents with a DocumentReader , splits them into overlapping chunks with a TextSplitter , converts each chunk to an embedding vector via EmbeddingModel , and stores both the vector and the original text i"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Retrieval Phase — Answering Questions with Context",
+    "anchor": "rag-retrieval-phase",
+    "text": "Retrieval Phase — Answering Questions with Context"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Retrieval Phase — Answering Questions with Context",
+    "anchor": "rag-retrieval-phase",
+    "text": "At query time, the user's question is converted to an embedding using the same EmbeddingModel used during ingestion. A cosine similarity search finds the K most semantically relevant document chunks. Those chunks are formatted as a context block and injected into the model prompt alongside the origi"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Document Readers and Transformers",
+    "anchor": "",
+    "text": "Document Readers and Transformers"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Document Readers and Transformers",
+    "anchor": "",
+    "text": "Spring AI's ETL pipeline follows the Extract-Transform-Load (ETL) pattern. Extract with a DocumentReader that understands the source format; Transform with one or more DocumentTransformer implementations that split, enrich, or reformat documents; Load by calling VectorStore.add() which embeds and pe"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TextReader — Plain Text Files",
+    "anchor": "text-reader",
+    "text": "TextReader — Plain Text Files"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TextReader — Plain Text Files",
+    "anchor": "text-reader",
+    "text": "TextReader is the simplest DocumentReader : it reads a Spring Resource (classpath file, file-system path, URL, or any Resource implementation) and returns a List<Document> containing a single Document with all the file's text as its content. Use TextReader for Markdown, plain text, CSV, YAML, or any"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "PdfDocumentReader — PDF Files",
+    "anchor": "pdf-document-reader",
+    "text": "PdfDocumentReader — PDF Files"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "PdfDocumentReader — PDF Files",
+    "anchor": "pdf-document-reader",
+    "text": "PdfDocumentReader parses PDF files using the Apache PDFBox library. It produces one Document per page by default, which keeps chunks naturally sized and preserves page number metadata. The PdfDocumentReaderConfig lets you control page splitting, whether to extract images, and how to handle multi-col"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TikaDocumentReader — Word, HTML, CSV, and More",
+    "anchor": "tika-document-reader",
+    "text": "TikaDocumentReader — Word, HTML, CSV, and More"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TikaDocumentReader — Word, HTML, CSV, and More",
+    "anchor": "tika-document-reader",
+    "text": "TikaDocumentReader uses Apache Tika to extract text from almost any file format: Microsoft Word (.docx), Excel (.xlsx), PowerPoint (.pptx), HTML, RTF, EPUB, CSV, and dozens more. This makes it the Swiss-army reader for heterogeneous document collections. Tika auto-detects the content type from the f"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TokenTextSplitter — Chunking Documents",
+    "anchor": "token-text-splitter",
+    "text": "TokenTextSplitter — Chunking Documents"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "TokenTextSplitter — Chunking Documents",
+    "anchor": "token-text-splitter",
+    "text": "TokenTextSplitter divides large documents into overlapping chunks measured in tokens (using a CL100K tokenizer compatible with OpenAI models). The default chunk size is 800 tokens with a minimum chunk size of 350 characters. Overlapping chunks ensure that sentences spanning a chunk boundary appear i"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "KeywordMetadataEnricher — Tagging Documents",
+    "anchor": "keyword-metadata-enricher",
+    "text": "KeywordMetadataEnricher — Tagging Documents"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "KeywordMetadataEnricher — Tagging Documents",
+    "anchor": "keyword-metadata-enricher",
+    "text": "KeywordMetadataEnricher is a DocumentTransformer that calls an AI model to extract keywords from each document chunk and stores them in the document's metadata under the \"excerpt_keywords\" key. This enriches chunks with extractive keyword metadata that can later be used for hybrid search (keyword + "
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Vector Store Backends and Search API",
+    "anchor": "",
+    "text": "Vector Store Backends and Search API"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Vector Store Backends and Search API",
+    "anchor": "",
+    "text": "A VectorStore stores document embeddings and answers cosine similarity queries. Spring AI defines a uniform VectorStore interface with two primary operations: add(List<Document>) for ingestion and similaritySearch(SearchRequest) for retrieval. Switching vector store backends requires only a Maven de"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "SimpleVectorStore — In-Memory / Development",
+    "anchor": "simple-vector-store",
+    "text": "SimpleVectorStore — In-Memory / Development"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "SimpleVectorStore — In-Memory / Development",
+    "anchor": "simple-vector-store",
+    "text": "SimpleVectorStore is a pure-Java in-memory vector store backed by a ConcurrentHashMap . It computes cosine similarity in memory on every search. No external infrastructure is required, making it ideal for local development, integration tests, and prototyping RAG pipelines before choosing a productio"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "PGVector — Production PostgreSQL Vector Store",
+    "anchor": "pgvector-setup",
+    "text": "PGVector — Production PostgreSQL Vector Store"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "PGVector — Production PostgreSQL Vector Store",
+    "anchor": "pgvector-setup",
+    "text": "PgVectorStore stores embeddings in a PostgreSQL database with the pgvector extension installed. It supports HNSW and IVFFlat indexes for fast approximate nearest-neighbor search and scales to millions of documents. Spring Boot auto-configuration creates the required vector_store table and registers "
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "SearchRequest — Controlling Similarity Search",
+    "anchor": "vector-search-request",
+    "text": "SearchRequest — Controlling Similarity Search"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "SearchRequest — Controlling Similarity Search",
+    "anchor": "vector-search-request",
+    "text": "SearchRequest is the query object passed to VectorStore.similaritySearch() . It encapsulates the query text, the maximum number of results ( topK ), a minimum similarity score threshold, and an optional metadata filter expression. Raising the similarity threshold improves precision at the cost of re"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "VectorStore Implementations Reference",
+    "anchor": "vectorstore-implementations",
+    "text": "VectorStore Implementations Reference"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "VectorStore Implementations Reference",
+    "anchor": "vectorstore-implementations",
+    "text": "Spring AI provides starters for 15 vector store backends. Each starter auto-configures a VectorStore bean when it is on the classpath and the required connection properties are present. The VectorStore interface is uniform across all implementations, so migrating between stores requires only a pom.x"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Retrieval Advisors and Query Pipeline",
+    "anchor": "",
+    "text": "Retrieval Advisors and Query Pipeline"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Retrieval Advisors and Query Pipeline",
+    "anchor": "",
+    "text": "Spring AI provides two retrieval advisors that plug into ChatClient via .defaultAdvisors() . QuestionAnswerAdvisor is the quick-start option: one line of code wires RAG into any chat call. RetrievalAugmentationAdvisor is the modular option: its builder accepts pluggable query transformers, document "
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "QuestionAnswerAdvisor",
+    "anchor": "question-answer-advisor",
+    "text": "QuestionAnswerAdvisor"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "QuestionAnswerAdvisor",
+    "anchor": "question-answer-advisor",
+    "text": "QuestionAnswerAdvisor is the primary RAG advisor in Spring AI 1.x and 2.x. It intercepts every ChatClient call, extracts the user's question, runs a VectorStore.similaritySearch() with the configured SearchRequest , formats the retrieved chunks as a context block, and prepends them to the system pro"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RetrievalAugmentationAdvisor — Modular RAG",
+    "anchor": "retrieval-augmentation-advisor",
+    "text": "RetrievalAugmentationAdvisor — Modular RAG"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RetrievalAugmentationAdvisor — Modular RAG",
+    "anchor": "retrieval-augmentation-advisor",
+    "text": "RetrievalAugmentationAdvisor is the modular, composable RAG advisor introduced in Spring AI 1.x. Unlike QuestionAnswerAdvisor , which is a single monolithic component, RetrievalAugmentationAdvisor accepts pluggable QueryTransformer , DocumentRetriever , DocumentRanker , and AugmentationAdvisor compo"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Query Rewriting with RewriteQueryTransformer",
+    "anchor": "retrieval-query-rewriting",
+    "text": "Query Rewriting with RewriteQueryTransformer"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Query Rewriting with RewriteQueryTransformer",
+    "anchor": "retrieval-query-rewriting",
+    "text": "A user's raw query is often too short or ambiguous for high-quality vector search. Query rewriting transforms the query before similarity search to improve recall. RewriteQueryTransformer uses a ChatModel to rewrite the query into a more explicit form optimized for semantic matching. A variant, Mult"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Re-Ranking with DocumentRanker",
+    "anchor": "retrieval-re-ranking",
+    "text": "Re-Ranking with DocumentRanker"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Re-Ranking with DocumentRanker",
+    "anchor": "retrieval-re-ranking",
+    "text": "Initial vector similarity retrieval is fast but approximate. Re-ranking applies a more accurate (but slower) scoring model to the top-K candidates to reorder them before injection into the prompt. Spring AI supports re-ranking via the DocumentRanker interface. CohereReranker is the built-in implemen"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Advanced RAG Patterns",
+    "anchor": "",
+    "text": "Advanced RAG Patterns"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Advanced RAG Patterns",
+    "anchor": "",
+    "text": "Basic vector similarity search is sufficient for many use cases, but demanding applications need higher precision and recall. Advanced patterns include hybrid keyword-plus-vector search, metadata pre-filtering to scope retrieval to relevant document subsets, and chained transformer pipelines that en"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Hybrid Search — Keyword + Vector Combined",
+    "anchor": "hybrid-search",
+    "text": "Hybrid Search — Keyword + Vector Combined"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Hybrid Search — Keyword + Vector Combined",
+    "anchor": "hybrid-search",
+    "text": "Pure vector search excels at semantic matching but can miss exact keywords (product codes, version numbers, proper nouns). Hybrid search combines BM25 keyword scoring with vector cosine similarity, then fuses the ranked lists using reciprocal rank fusion (RRF) or a weighted linear combination. Some "
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Metadata Filtering with FilterExpressionBuilder",
+    "anchor": "metadata-filtering",
+    "text": "Metadata Filtering with FilterExpressionBuilder"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "Metadata Filtering with FilterExpressionBuilder",
+    "anchor": "metadata-filtering",
+    "text": "Every Document carries a metadata map of arbitrary key-value pairs. At search time, SearchRequest.withFilterExpression() applies a predicate over metadata to limit the search scope before or during similarity scoring. The FilterExpressionBuilder provides a fluent Java DSL for constructing filter exp"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "DocumentTransformer Chain — Composable ETL",
+    "anchor": "document-transformer-chain",
+    "text": "DocumentTransformer Chain — Composable ETL"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "DocumentTransformer Chain — Composable ETL",
+    "anchor": "document-transformer-chain",
+    "text": "DocumentTransformer is a functional interface ( Function<List<Document>, List<Document>> ) that transforms a list of documents. Spring AI ships with several implementations: TokenTextSplitter , KeywordMetadataEnricher , SummaryMetadataEnricher , and ContentFormatTransformer . You can chain multiple "
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RAG & VectorStore Cheatsheet",
+    "anchor": "",
+    "text": "RAG & VectorStore Cheatsheet"
+  },
+  {
+    "page": "Spring AI RAG & VectorStore",
+    "href": "spring-ai/rag.html",
+    "section": "RAG & VectorStore Cheatsheet",
+    "anchor": "",
+    "text": "Class / Method Purpose Notes TextReader(resource) Read plain text, Markdown, CSV as Document Returns single Document; pass to TokenTextSplitter PdfDocumentReader(resource) Parse PDF to List<Document> — one per page Requires spring-ai-pdf-document-reader TikaDocumentReader(resource) Parse Word, Excel"
+  },
+  {
     "page": "Spring Boot Auto-Configuration",
     "href": "spring-boot/auto-configuration.html",
     "section": "Spring Boot Auto-Configuration",
