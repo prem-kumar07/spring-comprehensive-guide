@@ -56,6 +56,384 @@
     "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
   },
   {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Spring AI ChatClient API",
+    "anchor": "",
+    "text": "Spring AI ChatClient API"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Spring AI ChatClient API",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring AI 2.x ChatClient is the primary developer-facing API in Spring AI for interacting with AI chat models. Modeled after Spring's RestClient and WebClient , it provides a fluent builder pattern for constructing prompts, attaching advisors (such as conversation memory), streaming re"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Creating a ChatClient",
+    "anchor": "chatclient-builder",
+    "text": "Creating a ChatClient"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Creating a ChatClient",
+    "anchor": "chatclient-builder",
+    "text": "ChatClient instances are created via ChatClient.builder(chatModel) . You typically call .build() once in a constructor or @Bean method and hold the resulting client as a field. The builder accepts default system text, default options, and default advisors — everything that should apply to every call"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Auto-wiring ChatClient.Builder",
+    "anchor": "chatclient-autowire",
+    "text": "Auto-wiring ChatClient.Builder"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Auto-wiring ChatClient.Builder",
+    "anchor": "chatclient-autowire",
+    "text": "Spring AI's auto-configuration registers a ChatClient.Builder bean with prototype scope : every injection point receives a freshly cloned builder instance pre-configured for the auto-detected ChatModel . This is the recommended way to obtain a ChatClient in Spring Boot applications. Simply inject Ch"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Making a Call — .call().content()",
+    "anchor": "chatclient-call",
+    "text": "Making a Call — .call().content()"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Making a Call — .call().content()",
+    "anchor": "chatclient-call",
+    "text": "The simplest ChatClient interaction is .prompt().user(text).call().content() , which sends a user message, waits for the model to complete, and returns the response as a plain String . The .call() terminal initiates a blocking, non-streaming request. Chaining .content() extracts just the text; other"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Full ChatResponse with Metadata",
+    "anchor": "chatclient-response",
+    "text": "Full ChatResponse with Metadata"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Full ChatResponse with Metadata",
+    "anchor": "chatclient-response",
+    "text": "Calling .call().chatResponse() returns the full ChatResponse object, which carries not just the model output but also token usage, finish reason, and any provider-specific metadata. This is useful when you need to track costs, enforce token budgets, or inspect why a generation ended (e.g. stop token"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ChatOptions — Temperature, Model, Tokens",
+    "anchor": "chatclient-options",
+    "text": "ChatOptions — Temperature, Model, Tokens"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ChatOptions — Temperature, Model, Tokens",
+    "anchor": "chatclient-options",
+    "text": "ChatOptions lets you control inference parameters such as temperature , maxTokens , and model name at either the builder (default) or the per-call level. Provider-specific option classes (e.g. OpenAiChatOptions ) extend the base interface and expose additional knobs like topP and frequencyPenalty . "
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Streaming with .stream().content()",
+    "anchor": "chatclient-stream",
+    "text": "Streaming with .stream().content()"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Streaming with .stream().content()",
+    "anchor": "chatclient-stream",
+    "text": "Replacing .call() with .stream() switches from blocking to reactive delivery. .stream().content() returns a Flux<String> that emits each token or chunk as it arrives from the model, rather than waiting for the full completion. Streaming dramatically lowers perceived latency for longer responses. The"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "SSE Streaming in a Spring MVC Controller",
+    "anchor": "chatclient-stream-sse",
+    "text": "SSE Streaming in a Spring MVC Controller"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "SSE Streaming in a Spring MVC Controller",
+    "anchor": "chatclient-stream-sse",
+    "text": "A Spring MVC @GetMapping can return Flux<String> directly when the media type is text/event-stream . Spring's WebFlux integration handles the chunked HTTP transfer automatically. Clients (browsers, EventSource API, curl) receive tokens in real time without any long-polling. Spring Boot 3+ supports t"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Per-Chunk ChatResponse via .stream().chatResponse()",
+    "anchor": "chatclient-stream-chatresponse",
+    "text": "Per-Chunk ChatResponse via .stream().chatResponse()"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Per-Chunk ChatResponse via .stream().chatResponse()",
+    "anchor": "chatclient-stream-chatresponse",
+    "text": "Instead of raw text chunks, .stream().chatResponse() returns a Flux<ChatResponse> where every element is a partially populated ChatResponse . This lets you inspect per-chunk metadata such as finish reason or provider-specific deltas while still streaming. The final element in the flux typically carr"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Collecting a Stream to a List or String",
+    "anchor": "chatclient-stream-collect",
+    "text": "Collecting a Stream to a List or String"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Collecting a Stream to a List or String",
+    "anchor": "chatclient-stream-collect",
+    "text": "Reactive streams are lazy — nothing is sent to the model until a subscriber exists. In service-layer code or tests where you do not need incremental delivery, you can collect the Flux into a Mono<List<String>> with collectList() , or reduce the chunks with reduce() . Both approaches still benefit fr"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "InMemoryChatMemory and MessageChatMemoryAdvisor",
+    "anchor": "in-memory-chat-memory",
+    "text": "InMemoryChatMemory and MessageChatMemoryAdvisor"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "InMemoryChatMemory and MessageChatMemoryAdvisor",
+    "anchor": "in-memory-chat-memory",
+    "text": "InMemoryChatMemory is a volatile, in-process store backed by a ConcurrentHashMap . It is ideal for local development and integration tests. MessageChatMemoryAdvisor bridges ChatClient and ChatMemory : before each model call it prepends the stored messages as conversation history; after the call it s"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Isolating Memory with conversationId",
+    "anchor": "chat-memory-conversationid",
+    "text": "Isolating Memory with conversationId"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Isolating Memory with conversationId",
+    "anchor": "chat-memory-conversationid",
+    "text": "When serving multiple users, each conversation must be isolated by a unique ID. Pass the CHAT_MEMORY_CONVERSATION_ID_KEY parameter through the advisor spec on every call. InMemoryChatMemory (and any ChatMemory implementation) partitions history by this key, so user A's messages never bleed into user"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Controlling History Window Size",
+    "anchor": "chat-memory-limit",
+    "text": "Controlling History Window Size"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Controlling History Window Size",
+    "anchor": "chat-memory-limit",
+    "text": "MessageChatMemoryAdvisor accepts an optional history window size parameter that limits how many past messages are prepended to each request. A smaller window reduces token consumption; a larger window gives the model more context. The default is to include all stored messages. When the window is exc"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "VectorStoreChatMemoryAdvisor for Persistent Memory",
+    "anchor": "vectorstore-chat-memory",
+    "text": "VectorStoreChatMemoryAdvisor for Persistent Memory"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "VectorStoreChatMemoryAdvisor for Persistent Memory",
+    "anchor": "vectorstore-chat-memory",
+    "text": "VectorStoreChatMemoryAdvisor replaces the simple in-memory store with a VectorStore backend (e.g. PGVector, Redis, Pinecone). Unlike message-window memory, it performs a semantic similarity search to retrieve the most relevant past messages for the current query — enabling long-term memory across ma"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "PromptTemplate with Variable Substitution",
+    "anchor": "prompt-template",
+    "text": "PromptTemplate with Variable Substitution"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "PromptTemplate with Variable Substitution",
+    "anchor": "prompt-template",
+    "text": "PromptTemplate uses the {variableName} syntax backed by the StringTemplate (ST4) engine. Call template.create(Map.of(\"key\", \"value\")) to produce a Prompt object with all placeholders resolved. The resulting Prompt can be passed directly to chatClient.prompt(prompt) . This approach is useful when you"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Inline Variable Substitution with .param()",
+    "anchor": "chatclient-param",
+    "text": "Inline Variable Substitution with .param()"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Inline Variable Substitution with .param()",
+    "anchor": "chatclient-param",
+    "text": "The fluent ChatClient API supports inline template variable binding via .user(u -> u.text(\"...{var}...\").param(\"var\", value)) and the equivalent .system() overload. This is a shortcut for PromptTemplate when you want to keep the template string close to the call site. The same StTemplateRenderer res"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": ".system() vs .user() — Role Semantics",
+    "anchor": "system-user-messages",
+    "text": ".system() vs .user() — Role Semantics"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": ".system() vs .user() — Role Semantics",
+    "anchor": "system-user-messages",
+    "text": "The .system() call sets the system message : instructions to the model about persona, tone, output format, or constraints. It is processed before user input and generally carries higher trust. The .user() call sets the user message : the actual end-user query or instruction. Most models treat these "
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Per-Call ChatOptions Override",
+    "anchor": "chat-options-per-call",
+    "text": "Per-Call ChatOptions Override"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Per-Call ChatOptions Override",
+    "anchor": "chat-options-per-call",
+    "text": "Options set on the ChatClient.Builder become defaults; options passed to .options() on a specific call override those defaults for that request only. This lets you use conservative defaults (low temperature, smaller model) for most calls while escalating to a more capable model for specific tasks — "
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Image Input via URL",
+    "anchor": "image-url-input",
+    "text": "Image Input via URL"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Image Input via URL",
+    "anchor": "image-url-input",
+    "text": "For models that support vision (GPT-4o, Claude 3+, Gemini 1.5+), you can pass an image URL by creating a Media object with URI.create(url) . The Media is attached to a UserMessage alongside the text prompt. The model receives both the image reference and your question and returns a text response des"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Image Input via Resource (Local File or Classpath)",
+    "anchor": "image-resource-input",
+    "text": "Image Input via Resource (Local File or Classpath)"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Image Input via Resource (Local File or Classpath)",
+    "anchor": "image-resource-input",
+    "text": "When the image is on the local filesystem or in the classpath, pass a Spring Resource (e.g. ClassPathResource ) instead of a URI. Spring AI reads the binary content and encodes it as base64 before sending to the provider. This approach works offline and keeps sensitive images out of public URLs. Use"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Audio Input",
+    "anchor": "audio-input",
+    "text": "Audio Input"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Audio Input",
+    "anchor": "audio-input",
+    "text": "Some providers (notably OpenAI with gpt-4o-audio-preview ) accept audio files alongside or instead of text. Attach audio with MimeTypeUtils.parseMimeType(\"audio/mp3\") or \"audio/wav\" and a Resource pointing to the audio file. The model can transcribe, summarize, or reason about the audio content. Che"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Multimodal Provider Support Matrix",
+    "anchor": "multimodal-provider-support",
+    "text": "Multimodal Provider Support Matrix"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Multimodal Provider Support Matrix",
+    "anchor": "multimodal-provider-support",
+    "text": "Not every Spring AI provider supports images or audio. The table below shows the Spring AI 2.x support matrix for multimodal input types. Always verify the specific model (not just the provider) supports the modality you need, because within one provider, only certain model variants (e.g. GPT-4o but"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "MockChatModel for Unit Tests",
+    "anchor": "mock-chat-model",
+    "text": "MockChatModel for Unit Tests"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "MockChatModel for Unit Tests",
+    "anchor": "mock-chat-model",
+    "text": "Spring AI's test support module provides MockChatModel (and a Mockito-friendly alternative) for unit-testing code that depends on ChatClient or ChatModel without hitting a real API. Inject the mock model into ChatClient.builder(mockModel) to get a fully configured client. The simplest approach uses "
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Asserting Prompt Content with ArgumentCaptor",
+    "anchor": "chatclient-test-assertion",
+    "text": "Asserting Prompt Content with ArgumentCaptor"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Asserting Prompt Content with ArgumentCaptor",
+    "anchor": "chatclient-test-assertion",
+    "text": "Use Mockito's ArgumentCaptor<Prompt> to capture the Prompt object that was actually sent to the model. This lets you verify that your service correctly assembled the system message, user message, chat history, and options before delegating to the AI layer — without coupling tests to the response con"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Test-Scoped ChatClient.Builder Bean",
+    "anchor": "chatclient-test-builder",
+    "text": "Test-Scoped ChatClient.Builder Bean"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Test-Scoped ChatClient.Builder Bean",
+    "anchor": "chatclient-test-builder",
+    "text": "In Spring Boot integration tests, you can replace the real ChatModel with a mock via a @TestConfiguration class. Spring AI's auto-configuration detects the mock bean and wires it into the auto-configured ChatClient.Builder . Your service beans receive the builder pointing at the mock, so the full au"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Evaluator-Based AI Testing",
+    "anchor": "chatclient-evaluator-testing",
+    "text": "Evaluator-Based AI Testing"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "Evaluator-Based AI Testing",
+    "anchor": "chatclient-evaluator-testing",
+    "text": "Spring AI ships an RelevancyEvaluator (and FactCheckingEvaluator ) that use a second AI model call to judge whether the primary model's output is relevant to the question. This \"LLM-as-judge\" approach is useful for regression tests on AI output quality: the evaluator returns a score, and your test a"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ChatClient Cheatsheet",
+    "anchor": "",
+    "text": "ChatClient Cheatsheet"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ChatClient Cheatsheet",
+    "anchor": "",
+    "text": "Method / Class Purpose Notes ChatClient.builder(chatModel) Create a builder for a ChatClient Or autowire ChatClient.Builder (prototype bean) .defaultSystem(text) Set a default system prompt for every call Set on builder; overridable per-call .prompt().user(text).call().content() Simple blocking call"
+  },
+  {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
     "section": "Spring AI",

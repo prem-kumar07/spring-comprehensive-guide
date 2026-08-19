@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI ChatClient API</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI ChatClient API</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span>
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+    </div>
+    <p><code>ChatClient</code> is the primary developer-facing API in Spring AI for interacting with AI chat models. Modeled after Spring's <code>RestClient</code> and <code>WebClient</code>, it provides a fluent builder pattern for constructing prompts, attaching advisors (such as conversation memory), streaming responses reactively, and sending multimodal inputs — all with a consistent API that works across every supported provider.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-basic">Basic Usage</button>
+        <button class="tab-btn" data-tab="tab-streaming">Streaming</button>
+        <button class="tab-btn" data-tab="tab-memory">Conversation Memory</button>
+        <button class="tab-btn" data-tab="tab-prompts">Prompt Templates</button>
+        <button class="tab-btn" data-tab="tab-multimodal">Multimodal</button>
+        <button class="tab-btn" data-tab="tab-testing">Testing</button>
+      </div>
+
+      <!-- ── Basic Usage ──────────────────────────────── -->
+      <div class="tab-panel active" id="tab-basic">
+
+        <div class="feature-card">
+          <h3 id="chatclient-builder">Creating a ChatClient</h3>
+          <p><code>ChatClient</code> instances are created via <code>ChatClient.builder(chatModel)</code>. You typically call <code>.build()</code> once in a constructor or <code>@Bean</code> method and hold the resulting client as a field. The builder accepts default system text, default options, and default advisors — everything that should apply to every call made through that client. At runtime the builder delegates to the injected <code>ChatModel</code>, so the same <code>ChatClient</code> code works unchanged across providers.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Manual construction from a ChatModel bean
+@Service
+public class AssistantService {
+    private final ChatClient chatClient;
+
+    public AssistantService(ChatModel chatModel) {
+        this.chatClient = ChatClient.builder(chatModel)
+            .defaultSystem("You are a helpful assistant.")
+            .build();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-autowire">Auto-wiring ChatClient.Builder</h3>
+          <p>Spring AI's auto-configuration registers a <code>ChatClient.Builder</code> bean with <strong>prototype scope</strong>: every injection point receives a freshly cloned builder instance pre-configured for the auto-detected <code>ChatModel</code>. This is the recommended way to obtain a <code>ChatClient</code> in Spring Boot applications. Simply inject <code>ChatClient.Builder</code> in your constructor, call <code>.build()</code> (optionally chaining defaults), and Spring manages the rest.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class ChatService {
+    private final ChatClient chatClient;
+
+    // Spring AI auto-configures ChatClient.Builder as a prototype bean
+    public ChatService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a concise assistant.")
+            .build();
+    }
+
+    public String chat(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-call">Making a Call — .call().content()</h3>
+          <p>The simplest <code>ChatClient</code> interaction is <code>.prompt().user(text).call().content()</code>, which sends a user message, waits for the model to complete, and returns the response as a plain <code>String</code>. The <code>.call()</code> terminal initiates a blocking, non-streaming request. Chaining <code>.content()</code> extracts just the text; other terminals on the call spec give you richer response objects.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Minimal blocking call
+String answer = chatClient.prompt()
+    .user("What are the main features of Spring AI?")
+    .call()
+    .content();
+
+// With system and user messages
+String response = chatClient.prompt()
+    .system("Answer in bullet points.")
+    .user("List three benefits of reactive programming.")
+    .call()
+    .content();
+
+System.out.println(response);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-response">Full ChatResponse with Metadata</h3>
+          <p>Calling <code>.call().chatResponse()</code> returns the full <code>ChatResponse</code> object, which carries not just the model output but also token usage, finish reason, and any provider-specific metadata. This is useful when you need to track costs, enforce token budgets, or inspect why a generation ended (e.g. stop token vs. length limit).</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">ChatResponse response = chatClient.prompt()
+    .user("Explain reactive streams in two sentences.")
+    .call()
+    .chatResponse();
+
+// Extract text from the first generation
+String text = response.getResult().getOutput().getText();
+
+// Inspect token usage
+Usage usage = response.getMetadata().getUsage();
+System.out.printf("Prompt tokens: %d%n", usage.getPromptTokens());
+System.out.printf("Completion tokens: %d%n", usage.getGenerationTokens());
+System.out.printf("Total tokens: %d%n", usage.getTotalTokens());
+
+// Finish reason
+String finishReason = response.getResult().getMetadata().getFinishReason();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-options">ChatOptions — Temperature, Model, Tokens</h3>
+          <p><code>ChatOptions</code> lets you control inference parameters such as <code>temperature</code>, <code>maxTokens</code>, and model name at either the builder (default) or the per-call level. Provider-specific option classes (e.g. <code>OpenAiChatOptions</code>) extend the base interface and expose additional knobs like <code>topP</code> and <code>frequencyPenalty</code>. Options passed to <code>.options()</code> on a call override the builder defaults for that request only.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Provider-specific options (OpenAI example)
+ChatOptions precise = OpenAiChatOptions.builder()
+    .model("gpt-4o")
+    .temperature(0.1)   // near-deterministic
+    .maxTokens(512)
+    .build();
+
+String summary = chatClient.prompt()
+    .user("Summarize the Spring AI architecture.")
+    .options(precise)
+    .call()
+    .content();
+
+// Portable options work with any provider
+ChatOptions portable = ChatOptionsBuilder.builder()
+    .temperature(0.8)
+    .build();
+
+String creative = chatClient.prompt()
+    .user("Write a haiku about microservices.")
+    .options(portable)
+    .call()
+    .content();</code></pre>
+        </div>
+
+      </div><!-- /tab-basic -->
+
+      <!-- ── Streaming ─────────────────────────────────── -->
+      <div class="tab-panel" id="tab-streaming">
+
+        <div class="feature-card">
+          <h3 id="chatclient-stream">Streaming with .stream().content()</h3>
+          <p>Replacing <code>.call()</code> with <code>.stream()</code> switches from blocking to reactive delivery. <code>.stream().content()</code> returns a <code>Flux&lt;String&gt;</code> that emits each token or chunk as it arrives from the model, rather than waiting for the full completion. Streaming dramatically lowers perceived latency for longer responses. The Reactive stack (<code>spring-boot-starter-webflux</code>) must be on the classpath to use it, even in a standard MVC application that only needs <code>Flux</code> in tests or service layer code.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-webflux&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Returns Flux&lt;String&gt; — each element is a partial chunk
+Flux&lt;String&gt; stream = chatClient.prompt()
+    .user("Tell me a short story about a robot.")
+    .stream()
+    .content();
+
+// Subscribe and print each chunk
+stream.subscribe(chunk -> System.out.print(chunk));
+
+// Or collect to a single String (blocks)
+String full = stream.collectList()
+    .block()
+    .stream()
+    .collect(java.util.stream.Collectors.joining());</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-stream-sse">SSE Streaming in a Spring MVC Controller</h3>
+          <p>A Spring MVC <code>@GetMapping</code> can return <code>Flux&lt;String&gt;</code> directly when the media type is <code>text/event-stream</code>. Spring's WebFlux integration handles the chunked HTTP transfer automatically. Clients (browsers, <code>EventSource</code> API, curl) receive tokens in real time without any long-polling. Spring Boot 3+ supports this in the MVC dispatcher via the Reactor adapter on the classpath.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@RestController
+@RequestMapping("/ai")
+public class StreamController {
+
+    private final ChatClient chatClient;
+
+    public StreamController(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux&lt;String&gt; streamResponse(@RequestParam String message) {
+        return chatClient.prompt()
+            .user(message)
+            .stream()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-stream-chatresponse">Per-Chunk ChatResponse via .stream().chatResponse()</h3>
+          <p>Instead of raw text chunks, <code>.stream().chatResponse()</code> returns a <code>Flux&lt;ChatResponse&gt;</code> where every element is a partially populated <code>ChatResponse</code>. This lets you inspect per-chunk metadata such as finish reason or provider-specific deltas while still streaming. The final element in the flux typically carries the usage statistics for the entire generation.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">Flux&lt;ChatResponse&gt; responseFlux = chatClient.prompt()
+    .user("Explain the CAP theorem.")
+    .stream()
+    .chatResponse();
+
+responseFlux.subscribe(response -&gt; {
+    String chunk = response.getResult().getOutput().getText();
+    if (chunk != null) {
+        System.out.print(chunk);
+    }
+    // Last chunk carries usage
+    Usage usage = response.getMetadata().getUsage();
+    if (usage != null &amp;&amp; usage.getTotalTokens() &gt; 0) {
+        System.out.printf("%nTotal tokens: %d%n", usage.getTotalTokens());
+    }
+});</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-stream-collect">Collecting a Stream to a List or String</h3>
+          <p>Reactive streams are lazy — nothing is sent to the model until a subscriber exists. In service-layer code or tests where you do not need incremental delivery, you can collect the <code>Flux</code> into a <code>Mono&lt;List&lt;String&gt;&gt;</code> with <code>collectList()</code>, or reduce the chunks with <code>reduce()</code>. Both approaches still benefit from lower time-to-first-token because the request is issued before all chunks are collected. Never call <code>.block()</code> inside a reactive pipeline — only do so at the application boundary.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Collect all chunks into one String (use at boundary only)
+String complete = chatClient.prompt()
+    .user("What is Project Reactor?")
+    .stream()
+    .content()
+    .reduce("", String::concat)
+    .block();
+
+// In a WebFlux handler, return Mono&lt;String&gt; without blocking
+@GetMapping("/ai/answer")
+public Mono&lt;String&gt; answer(@RequestParam String q) {
+    return chatClient.prompt()
+        .user(q)
+        .stream()
+        .content()
+        .reduce("", String::concat);
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-streaming -->
+
+      <!-- ── Conversation Memory ───────────────────────── -->
+      <div class="tab-panel" id="tab-memory">
+
+        <div class="feature-card">
+          <h3 id="in-memory-chat-memory">InMemoryChatMemory and MessageChatMemoryAdvisor</h3>
+          <p><code>InMemoryChatMemory</code> is a volatile, in-process store backed by a <code>ConcurrentHashMap</code>. It is ideal for local development and integration tests. <code>MessageChatMemoryAdvisor</code> bridges <code>ChatClient</code> and <code>ChatMemory</code>: before each model call it prepends the stored messages as conversation history; after the call it saves the new user and assistant messages. Add it via <code>ChatClient.Builder.defaultAdvisors()</code> to enable memory globally.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-advisors-vector-store&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Create in-memory store and wire the advisor
+ChatMemory memory = new InMemoryChatMemory();
+
+ChatClient chatClient = ChatClient.builder(chatModel)
+    .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
+    .build();
+
+// First turn
+String r1 = chatClient.prompt()
+    .user("My name is Alice.")
+    .call()
+    .content();
+
+// Second turn — model remembers "Alice"
+String r2 = chatClient.prompt()
+    .user("What is my name?")
+    .call()
+    .content();
+
+System.out.println(r2); // "Your name is Alice."</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chat-memory-conversationid">Isolating Memory with conversationId</h3>
+          <p>When serving multiple users, each conversation must be isolated by a unique ID. Pass the <code>CHAT_MEMORY_CONVERSATION_ID_KEY</code> parameter through the advisor spec on every call. <code>InMemoryChatMemory</code> (and any <code>ChatMemory</code> implementation) partitions history by this key, so user A's messages never bleed into user B's context. A common pattern is to use the authenticated user's ID or a UUID generated at session start.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class ChatService {
+    private final ChatClient chatClient;
+    private final ChatMemory memory = new InMemoryChatMemory();
+
+    public ChatService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
+            .build();
+    }
+
+    public String chat(String userId, String message) {
+        return chatClient.prompt()
+            .user(message)
+            .advisors(spec -&gt; spec.param(
+                MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,
+                userId))
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chat-memory-limit">Controlling History Window Size</h3>
+          <p><code>MessageChatMemoryAdvisor</code> accepts an optional history window size parameter that limits how many past messages are prepended to each request. A smaller window reduces token consumption; a larger window gives the model more context. The default is to include all stored messages. When the window is exceeded, the oldest messages are dropped first, keeping the most recent exchanges in context.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Keep last 10 messages in context (reduces prompt token cost)
+int historyWindow = 10;
+ChatMemory memory = new InMemoryChatMemory();
+
+ChatClient chatClient = ChatClient.builder(chatModel)
+    .defaultAdvisors(
+        new MessageChatMemoryAdvisor(memory,
+            MessageChatMemoryAdvisor.DEFAULT_CHAT_MEMORY_CONVERSATION_ID,
+            historyWindow))
+    .build();
+
+// Alternatively set window per-call via advisor parameters
+String response = chatClient.prompt()
+    .user("Continue our discussion.")
+    .advisors(spec -&gt; spec
+        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, "user-42")
+        .param(MessageChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="vectorstore-chat-memory">VectorStoreChatMemoryAdvisor for Persistent Memory</h3>
+          <p><code>VectorStoreChatMemoryAdvisor</code> replaces the simple in-memory store with a <code>VectorStore</code> backend (e.g. PGVector, Redis, Pinecone). Unlike message-window memory, it performs a semantic similarity search to retrieve the most relevant past messages for the current query — enabling long-term memory across many sessions without blowing up the context window. Messages are embedded and stored as vectors; retrieval is similarity-based rather than chronological.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// VectorStore bean provided by your chosen store starter
+@Service
+public class LongTermMemoryService {
+    private final ChatClient chatClient;
+
+    public LongTermMemoryService(ChatClient.Builder builder,
+                                  VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(
+                VectorStoreChatMemoryAdvisor.builder(vectorStore)
+                    .conversationId("global-memory")
+                    .order(Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER)
+                    .build())
+            .build();
+    }
+
+    public String recall(String userId, String query) {
+        return chatClient.prompt()
+            .user(query)
+            .advisors(spec -&gt; spec.param(
+                AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,
+                userId))
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-memory -->
+
+      <!-- ── Prompt Templates ──────────────────────────── -->
+      <div class="tab-panel" id="tab-prompts">
+
+        <div class="feature-card">
+          <h3 id="prompt-template">PromptTemplate with Variable Substitution</h3>
+          <p><code>PromptTemplate</code> uses the <code>{variableName}</code> syntax backed by the StringTemplate (ST4) engine. Call <code>template.create(Map.of("key", "value"))</code> to produce a <code>Prompt</code> object with all placeholders resolved. The resulting <code>Prompt</code> can be passed directly to <code>chatClient.prompt(prompt)</code>. This approach is useful when your prompt text lives in a <code>.st</code> resource file or a <code>@Value</code>-injected string, keeping business logic separate from prompt wording.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.Prompt;
+
+// Template with two variables
+PromptTemplate template = new PromptTemplate(
+    "Explain {concept} in {language} using simple terms.");
+
+Prompt prompt = template.create(
+    Map.of("concept", "reactive streams", "language", "English"));
+
+String answer = chatClient.prompt(prompt)
+    .call()
+    .content();
+
+// Template from classpath resource
+@Value("classpath:prompts/explain.st")
+private Resource explainPromptResource;
+
+PromptTemplate fileTemplate = new PromptTemplate(explainPromptResource);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-param">Inline Variable Substitution with .param()</h3>
+          <p>The fluent <code>ChatClient</code> API supports inline template variable binding via <code>.user(u -&gt; u.text("...{var}...").param("var", value))</code> and the equivalent <code>.system()</code> overload. This is a shortcut for <code>PromptTemplate</code> when you want to keep the template string close to the call site. The same <code>StTemplateRenderer</code> resolves the <code>{}</code> placeholders at call time. Multiple params can be chained.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Inline param substitution on user message
+String answer = chatClient.prompt()
+    .user(u -&gt; u.text("Translate '{phrase}' from {source} to {target}.")
+                .param("phrase", "Hello World")
+                .param("source", "English")
+                .param("target", "Japanese"))
+    .call()
+    .content();
+
+// Param substitution on system message
+String response = chatClient.prompt()
+    .system(s -&gt; s.text("You are a {role} assistant. Respond in {language}.")
+                  .param("role", "coding")
+                  .param("language", "English"))
+    .user("Explain dependency injection.")
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="system-user-messages">.system() vs .user() — Role Semantics</h3>
+          <p>The <code>.system()</code> call sets the <strong>system message</strong>: instructions to the model about persona, tone, output format, or constraints. It is processed before user input and generally carries higher trust. The <code>.user()</code> call sets the <strong>user message</strong>: the actual end-user query or instruction. Most models treat these differently — system instructions are harder to override with prompt injection than user text. Use <code>.system()</code> for application-controlled context and <code>.user()</code> for runtime user input.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// System sets the persona; user provides the query
+String answer = chatClient.prompt()
+    .system("""
+        You are a senior Spring Boot engineer.
+        Answer questions with code examples in Java 21.
+        Keep answers under 200 words.
+        """)
+    .user("How do I write a @RestController in Spring Boot?")
+    .call()
+    .content();
+
+// Default system text at builder level (applies to every call)
+ChatClient client = ChatClient.builder(chatModel)
+    .defaultSystem("You are a helpful assistant. Be concise.")
+    .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chat-options-per-call">Per-Call ChatOptions Override</h3>
+          <p>Options set on the <code>ChatClient.Builder</code> become defaults; options passed to <code>.options()</code> on a specific call override those defaults for that request only. This lets you use conservative defaults (low temperature, smaller model) for most calls while escalating to a more capable model for specific tasks — without creating separate <code>ChatClient</code> instances.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// Builder-level defaults: cheap, fast model
+ChatClient client = ChatClient.builder(chatModel)
+    .defaultOptions(OpenAiChatOptions.builder()
+        .model("gpt-4o-mini")
+        .temperature(0.5)
+        .build())
+    .build();
+
+// Most calls use the default
+String quickAnswer = client.prompt()
+    .user("What day is it?")
+    .call()
+    .content();
+
+// This call overrides to the full model
+String detailedAnswer = client.prompt()
+    .user("Analyze the trade-offs between SQL and NoSQL databases.")
+    .options(OpenAiChatOptions.builder()
+        .model("gpt-4o")
+        .temperature(0.2)
+        .maxTokens(1024)
+        .build())
+    .call()
+    .content();</code></pre>
+        </div>
+
+      </div><!-- /tab-prompts -->
+
+      <!-- ── Multimodal ────────────────────────────────── -->
+      <div class="tab-panel" id="tab-multimodal">
+
+        <div class="feature-card">
+          <h3 id="image-url-input">Image Input via URL</h3>
+          <p>For models that support vision (GPT-4o, Claude 3+, Gemini 1.5+), you can pass an image URL by creating a <code>Media</code> object with <code>URI.create(url)</code>. The <code>Media</code> is attached to a <code>UserMessage</code> alongside the text prompt. The model receives both the image reference and your question and returns a text response describing or reasoning about the image. URL-based media avoids base64 overhead but requires the model to fetch the URL at inference time.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.Media;
+import org.springframework.util.MimeTypeUtils;
+
+// Describe an image from a public URL
+UserMessage message = new UserMessage(
+    "What is in this image? Describe the main subject.",
+    List.of(new Media(MimeTypeUtils.IMAGE_JPEG,
+        URI.create("https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"))));
+
+String description = ChatClient.builder(chatModel)
+    .build()
+    .prompt()
+    .options(OpenAiChatOptions.builder().model("gpt-4o").build())
+    .messages(message)
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="image-resource-input">Image Input via Resource (Local File or Classpath)</h3>
+          <p>When the image is on the local filesystem or in the classpath, pass a Spring <code>Resource</code> (e.g. <code>ClassPathResource</code>) instead of a URI. Spring AI reads the binary content and encodes it as base64 before sending to the provider. This approach works offline and keeps sensitive images out of public URLs. Use <code>MimeTypeUtils.IMAGE_PNG</code>, <code>IMAGE_JPEG</code>, or <code>IMAGE_GIF</code> depending on the file format.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.core.io.ClassPathResource;
+
+// Load image from classpath
+Resource imageResource = new ClassPathResource("images/diagram.png");
+
+UserMessage message = new UserMessage(
+    "Explain the architecture shown in this diagram.",
+    List.of(new Media(MimeTypeUtils.IMAGE_PNG, imageResource)));
+
+ChatClient chatClient = ChatClient.builder(chatModel).build();
+
+String explanation = chatClient.prompt()
+    .options(OpenAiChatOptions.builder().model("gpt-4o").build())
+    .messages(message)
+    .call()
+    .content();
+
+// FileSystemResource for external files
+Resource externalFile = new FileSystemResource("/tmp/screenshot.png");
+UserMessage fileMessage = new UserMessage(
+    "Describe any errors visible in this screenshot.",
+    List.of(new Media(MimeTypeUtils.IMAGE_PNG, externalFile)));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="audio-input">Audio Input</h3>
+          <p>Some providers (notably OpenAI with <code>gpt-4o-audio-preview</code>) accept audio files alongside or instead of text. Attach audio with <code>MimeTypeUtils.parseMimeType("audio/mp3")</code> or <code>"audio/wav"</code> and a <code>Resource</code> pointing to the audio file. The model can transcribe, summarize, or reason about the audio content. Check provider-specific documentation for supported audio formats and duration limits before relying on this feature in production.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.util.MimeType;
+
+MimeType mp3Type = MimeTypeUtils.parseMimeType("audio/mp3");
+Resource audioFile = new ClassPathResource("recordings/meeting.mp3");
+
+UserMessage audioMessage = new UserMessage(
+    "Summarize the key action items from this meeting recording.",
+    List.of(new Media(mp3Type, audioFile)));
+
+ChatClient chatClient = ChatClient.builder(chatModel).build();
+
+String summary = chatClient.prompt()
+    .options(OpenAiChatOptions.builder()
+        .model("gpt-4o-audio-preview")
+        .build())
+    .messages(audioMessage)
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="multimodal-provider-support">Multimodal Provider Support Matrix</h3>
+          <p>Not every Spring AI provider supports images or audio. The table below shows the Spring AI 2.x support matrix for multimodal input types. Always verify the specific model (not just the provider) supports the modality you need, because within one provider, only certain model variants (e.g. GPT-4o but not GPT-3.5-turbo) have vision capabilities. Attempting multimodal input on an unsupported model results in a provider API error.</p>
+
+          <h4>Support Matrix</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Image (URL)</th>
+                  <th>Image (Resource)</th>
+                  <th>Audio</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>OpenAI</td><td>Yes</td><td>Yes (base64)</td><td>Yes (audio models)</td><td>gpt-4o, gpt-4o-audio-preview</td></tr>
+                <tr><td>Anthropic</td><td>Yes</td><td>Yes (base64)</td><td>No</td><td>claude-3-opus, claude-3.5-sonnet</td></tr>
+                <tr><td>Google Gemini</td><td>Yes</td><td>Yes</td><td>Yes</td><td>gemini-1.5-pro, gemini-2.0-flash</td></tr>
+                <tr><td>Ollama</td><td>No</td><td>Yes (vision models)</td><td>No</td><td>llava, llava-phi3, moondream</td></tr>
+                <tr><td>Azure OpenAI</td><td>Yes</td><td>Yes</td><td>Limited</td><td>Same model support as OpenAI</td></tr>
+                <tr><td>Amazon Bedrock</td><td>Yes</td><td>Yes</td><td>No</td><td>Anthropic, Titan models</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-multimodal -->
+
+      <!-- ── Testing ───────────────────────────────────── -->
+      <div class="tab-panel" id="tab-testing">
+
+        <div class="feature-card">
+          <h3 id="mock-chat-model">MockChatModel for Unit Tests</h3>
+          <p>Spring AI's test support module provides <code>MockChatModel</code> (and a Mockito-friendly alternative) for unit-testing code that depends on <code>ChatClient</code> or <code>ChatModel</code> without hitting a real API. Inject the mock model into <code>ChatClient.builder(mockModel)</code> to get a fully configured client. The simplest approach uses Mockito to stub <code>chatModel.call(any(Prompt.class))</code> with a canned <code>ChatResponse</code>.</p>
+
+          <h4>Dependency (pom.xml — test scope)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-test&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@ExtendWith(MockitoExtension.class)
+class AssistantServiceTest {
+
+    @Mock
+    ChatModel chatModel;
+
+    @Test
+    void shouldReturnModelResponse() {
+        // Arrange — stub a fixed ChatResponse
+        AssistantMessage assistantMsg = new AssistantMessage("Spring AI is great!");
+        ChatResponse stubResponse =
+            new ChatResponse(List.of(new Generation(assistantMsg)));
+        when(chatModel.call(any(Prompt.class))).thenReturn(stubResponse);
+
+        ChatClient chatClient = ChatClient.builder(chatModel).build();
+        AssistantService service = new AssistantService(chatClient);
+
+        // Act
+        String result = service.answer("What is Spring AI?");
+
+        // Assert
+        assertThat(result).isEqualTo("Spring AI is great!");
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-test-assertion">Asserting Prompt Content with ArgumentCaptor</h3>
+          <p>Use Mockito's <code>ArgumentCaptor&lt;Prompt&gt;</code> to capture the <code>Prompt</code> object that was actually sent to the model. This lets you verify that your service correctly assembled the system message, user message, chat history, and options before delegating to the AI layer — without coupling tests to the response content. Inspect <code>prompt.getInstructions()</code> for the list of <code>Message</code> objects.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Test
+void shouldSendCorrectSystemMessage() {
+    // Arrange
+    AssistantMessage reply = new AssistantMessage("OK");
+    when(chatModel.call(any(Prompt.class)))
+        .thenReturn(new ChatResponse(List.of(new Generation(reply))));
+
+    ChatClient chatClient = ChatClient.builder(chatModel)
+        .defaultSystem("You are a test assistant.")
+        .build();
+
+    // Act
+    chatClient.prompt().user("Hello").call().content();
+
+    // Assert — capture the Prompt that reached the model
+    ArgumentCaptor&lt;Prompt&gt; captor = ArgumentCaptor.forClass(Prompt.class);
+    verify(chatModel).call(captor.capture());
+
+    Prompt captured = captor.getValue();
+    List&lt;Message&gt; messages = captured.getInstructions();
+
+    assertThat(messages).anyMatch(m -&gt;
+        m.getMessageType() == MessageType.SYSTEM
+        &amp;&amp; m.getText().contains("test assistant"));
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-test-builder">Test-Scoped ChatClient.Builder Bean</h3>
+          <p>In Spring Boot integration tests, you can replace the real <code>ChatModel</code> with a mock via a <code>@TestConfiguration</code> class. Spring AI's auto-configuration detects the mock bean and wires it into the auto-configured <code>ChatClient.Builder</code>. Your service beans receive the builder pointing at the mock, so the full auto-wiring path is exercised without making real API calls. Use <code>@MockBean</code> (Spring Boot) or a <code>@TestConfiguration</code> <code>@Bean</code> for the model.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@SpringBootTest
+@AutoConfigureMockMvc
+class ChatControllerIntegrationTest {
+
+    @MockBean
+    ChatModel chatModel;
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        AssistantMessage msg = new AssistantMessage("Mocked response");
+        ChatResponse stubbed =
+            new ChatResponse(List.of(new Generation(msg)));
+        when(chatModel.call(any(Prompt.class))).thenReturn(stubbed);
+    }
+
+    @Test
+    void endpointReturnsModelContent() throws Exception {
+        mockMvc.perform(get("/ai/chat").param("q", "Hello"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("Mocked response"));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="chatclient-evaluator-testing">Evaluator-Based AI Testing</h3>
+          <p>Spring AI ships an <code>RelevancyEvaluator</code> (and <code>FactCheckingEvaluator</code>) that use a second AI model call to judge whether the primary model's output is relevant to the question. This "LLM-as-judge" approach is useful for regression tests on AI output quality: the evaluator returns a score, and your test asserts the score exceeds a threshold. It is inherently non-deterministic but catches major regressions. Run evaluator tests in a dedicated CI stage with real API credentials, not in every build.</p>
+
+          <h4>Dependency (pom.xml — test scope)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-test&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@SpringBootTest
+class QualityEvaluationTest {
+
+    @Autowired
+    ChatClient.Builder builder;
+
+    @Test
+    void answerIsRelevantToQuestion() {
+        ChatClient client = builder.build();
+        String question = "What is Spring AI?";
+
+        String answer = client.prompt()
+            .user(question)
+            .call()
+            .content();
+
+        // Use a second client call to evaluate relevancy
+        RelevancyEvaluator evaluator = new RelevancyEvaluator(builder);
+        EvaluationRequest evalRequest =
+            new EvaluationRequest(question, List.of(), answer);
+
+        EvaluationResponse evalResponse = evaluator.evaluate(evalRequest);
+        assertThat(evalResponse.isPass())
+            .as("Expected answer to be relevant to the question")
+            .isTrue();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-testing -->
+
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>ChatClient Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method / Class</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ChatClient.builder(chatModel)</code></td>
+              <td>Create a builder for a ChatClient</td>
+              <td>Or autowire <code>ChatClient.Builder</code> (prototype bean)</td>
+            </tr>
+            <tr>
+              <td><code>.defaultSystem(text)</code></td>
+              <td>Set a default system prompt for every call</td>
+              <td>Set on builder; overridable per-call</td>
+            </tr>
+            <tr>
+              <td><code>.prompt().user(text).call().content()</code></td>
+              <td>Simple blocking call returning String</td>
+              <td>Most concise usage pattern</td>
+            </tr>
+            <tr>
+              <td><code>.call().chatResponse()</code></td>
+              <td>Return full <code>ChatResponse</code> with metadata</td>
+              <td>Includes token usage and finish reason</td>
+            </tr>
+            <tr>
+              <td><code>.options(ChatOptions)</code></td>
+              <td>Override model, temperature, maxTokens per call</td>
+              <td>Overrides builder defaults for this request</td>
+            </tr>
+            <tr>
+              <td><code>.stream().content()</code></td>
+              <td>Return <code>Flux&lt;String&gt;</code> of incremental chunks</td>
+              <td>Requires Reactor / WebFlux on classpath</td>
+            </tr>
+            <tr>
+              <td><code>.stream().chatResponse()</code></td>
+              <td>Return <code>Flux&lt;ChatResponse&gt;</code> per chunk</td>
+              <td>Last chunk carries usage statistics</td>
+            </tr>
+            <tr>
+              <td><code>InMemoryChatMemory</code></td>
+              <td>Volatile in-process conversation store</td>
+              <td>ConcurrentHashMap — lost on restart</td>
+            </tr>
+            <tr>
+              <td><code>MessageChatMemoryAdvisor</code></td>
+              <td>Prepend history + save turns automatically</td>
+              <td>Wire via <code>.defaultAdvisors()</code></td>
+            </tr>
+            <tr>
+              <td><code>CHAT_MEMORY_CONVERSATION_ID_KEY</code></td>
+              <td>Advisor param to isolate per-user history</td>
+              <td>Pass via <code>.advisors(spec -&gt; spec.param(...))</code></td>
+            </tr>
+            <tr>
+              <td><code>VectorStoreChatMemoryAdvisor</code></td>
+              <td>Semantic long-term memory via VectorStore</td>
+              <td>Similarity search, not chronological window</td>
+            </tr>
+            <tr>
+              <td><code>PromptTemplate</code></td>
+              <td>Resolve <code>{variable}</code> placeholders</td>
+              <td>Backed by ST4 (StringTemplate engine)</td>
+            </tr>
+            <tr>
+              <td><code>.user(u -&gt; u.text(...).param(k, v))</code></td>
+              <td>Inline variable substitution in user text</td>
+              <td>Same for <code>.system()</code></td>
+            </tr>
+            <tr>
+              <td><code>UserMessage(text, media)</code></td>
+              <td>Multimodal message with text + media list</td>
+              <td>Pass to <code>.messages(userMessage)</code></td>
+            </tr>
+            <tr>
+              <td><code>Media(mimeType, resource)</code></td>
+              <td>Attach image, audio, or video content</td>
+              <td>Accepts URL (URI) or Resource (file/classpath)</td>
+            </tr>
+            <tr>
+              <td><code>MimeTypeUtils.IMAGE_PNG</code></td>
+              <td>PNG MIME type constant</td>
+              <td>Also: IMAGE_JPEG, IMAGE_GIF</td>
+            </tr>
+            <tr>
+              <td><code>ChatModel</code> (mock)</td>
+              <td>Interface to mock for unit tests</td>
+              <td>Stub <code>call(Prompt)</code> with Mockito</td>
+            </tr>
+            <tr>
+              <td><code>ArgumentCaptor&lt;Prompt&gt;</code></td>
+              <td>Capture the Prompt sent to the model</td>
+              <td>Inspect messages, system text, options</td>
+            </tr>
+            <tr>
+              <td><code>RelevancyEvaluator</code></td>
+              <td>LLM-as-judge relevancy scoring</td>
+              <td>Returns <code>EvaluationResponse.isPass()</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
