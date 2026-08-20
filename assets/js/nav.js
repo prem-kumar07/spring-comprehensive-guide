@@ -11,7 +11,8 @@
   // Simple heuristic: if the pathname contains '/spring-core/', go up one level.
   const inSubdir = window.location.pathname.includes('/spring-core/')
                || window.location.pathname.includes('/spring-boot/')
-               || window.location.pathname.includes('/spring-ai/');
+               || window.location.pathname.includes('/spring-ai/')
+               || window.location.pathname.includes('/build-tools/');
   const ROOT = inSubdir ? '../' : './';
 
   const NAV = [
@@ -37,6 +38,13 @@
         { label: 'Version Comparison',   href: ROOT + 'spring-boot/version-comparison.html' },
         { label: 'Auto-Configuration',   href: ROOT + 'spring-boot/auto-configuration.html' },
         { label: 'Production & Tooling', href: ROOT + 'spring-boot/production.html' },
+      ],
+    },
+    {
+      group: 'Build Tools',
+      items: [
+        { label: 'Maven', href: ROOT + 'build-tools/maven.html' },
+        { label: 'Gradle', href: ROOT + 'build-tools/gradle.html' },
       ],
     },
     {

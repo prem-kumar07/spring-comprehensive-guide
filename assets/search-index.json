@@ -1,5 +1,411 @@
 [
   {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Deep Dive",
+    "anchor": "",
+    "text": "Gradle Deep Dive"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Deep Dive",
+    "anchor": "",
+    "text": "Gradle 8.x Gradle is a flexible, high-performance build tool using a Groovy or Kotlin DSL. Unlike Maven's fixed lifecycle, Gradle models the build as a directed acyclic graph (DAG) of tasks — giving you fine-grained control and incremental, cacheable builds out of the box. General Java Spring Ecosys"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Build File Structure (Kotlin DSL)",
+    "anchor": "gradle-build-file",
+    "text": "Build File Structure (Kotlin DSL)"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Build File Structure (Kotlin DSL)",
+    "anchor": "gradle-build-file",
+    "text": "The build.gradle.kts file is Kotlin script that configures the project. Gradle recommends the Kotlin DSL (`.kts`) over the Groovy DSL for new projects because it provides type safety, IDE completion, and refactoring support. The settings.gradle.kts file defines the project name and included subproje"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task DAG & Lifecycle",
+    "anchor": "gradle-task-lifecycle",
+    "text": "Task DAG & Lifecycle"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task DAG & Lifecycle",
+    "anchor": "gradle-task-lifecycle",
+    "text": "Gradle builds are not phases — they are a graph of tasks. When you run ./gradlew build , Gradle computes which tasks need to run based on dependencies and up-to-date checks, then executes them in dependency order. Incremental builds skip tasks whose inputs and outputs haven't changed. # Show all ava"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Dependency Configurations",
+    "anchor": "gradle-dependency-configs",
+    "text": "Dependency Configurations"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Dependency Configurations",
+    "anchor": "gradle-dependency-configs",
+    "text": "Dependency configurations in Gradle correspond roughly to Maven scopes, but they're more granular. The Java plugin (and Spring Boot plugin) define the common ones; you can also create custom configurations for specific needs. dependencies {\n    // implementation: compile + runtime, NOT exposed to co"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Custom Tasks",
+    "anchor": "gradle-custom-tasks",
+    "text": "Custom Tasks"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Custom Tasks",
+    "anchor": "gradle-custom-tasks",
+    "text": "Tasks are first-class objects in Gradle. You can define custom tasks, make them depend on others, and configure inputs/outputs for incremental builds. Declaring inputs and outputs lets Gradle skip the task when nothing has changed. // Simple ad-hoc task\ntasks.register(\"hello\") {\n    doLast {\n       "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Multi-Project Builds",
+    "anchor": "gradle-multi-project",
+    "text": "Multi-Project Builds"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Multi-Project Builds",
+    "anchor": "gradle-multi-project",
+    "text": "Multi-project builds use settings.gradle.kts to declare included subprojects. A root build.gradle.kts can apply common configuration to all subprojects using allprojects {} or subprojects {} . Subprojects declare dependencies on siblings by project path. // settings.gradle.kts\nrootProject.name = \"my"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Wrapper",
+    "anchor": "gradle-wrapper",
+    "text": "Gradle Wrapper"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Wrapper",
+    "anchor": "gradle-wrapper",
+    "text": "The Gradle Wrapper ( gradlew ) pins the exact Gradle version for the project and auto-downloads it on first run. Commit the wrapper files — never the Gradle distribution itself. CI servers and other developers automatically use the same version without any installation. # Generate wrapper (requires "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "org.springframework.boot Plugin",
+    "anchor": "gradle-spring-boot-plugin",
+    "text": "org.springframework.boot Plugin"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "org.springframework.boot Plugin",
+    "anchor": "gradle-spring-boot-plugin",
+    "text": "The org.springframework.boot plugin is the entry point for all Spring Boot Gradle builds. It adds bootJar (executable fat JAR), bootRun (run with DevTools), and bootBuildImage (OCI image) tasks. It also disables the plain jar task by default and configures the main class automatically if only one @S"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "io.spring.dependency-management Plugin",
+    "anchor": "gradle-dependency-management",
+    "text": "io.spring.dependency-management Plugin"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "io.spring.dependency-management Plugin",
+    "anchor": "gradle-dependency-management",
+    "text": "Imports the Spring Boot BOM so all Spring dependency versions are managed centrally — just like spring-boot-starter-parent does in Maven. Without this plugin you'd need to specify versions on every Spring dependency. Alternatively you can use Gradle's native platform() / enforcedPlatform() BOM suppo"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Layered JARs for Docker",
+    "anchor": "gradle-layered-jar",
+    "text": "Layered JARs for Docker"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Layered JARs for Docker",
+    "anchor": "gradle-layered-jar",
+    "text": "Layered JARs split the fat JAR into Docker-cacheable layers ordered by change frequency: dependencies (rarely change), Spring Boot loader, snapshot dependencies, and application classes (change on every commit). The Docker build only re-uploads the thin application layer on most changes, cutting ima"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootBuildImage (Cloud Native Buildpacks)",
+    "anchor": "gradle-build-image",
+    "text": "bootBuildImage (Cloud Native Buildpacks)"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootBuildImage (Cloud Native Buildpacks)",
+    "anchor": "gradle-build-image",
+    "text": "bootBuildImage creates an OCI-compliant container image using Cloud Native Buildpacks — no Dockerfile required. It detects your Java version, sets memory limits intelligently, and produces a production-ready image. The Spring Boot Gradle plugin configures Paketo Buildpacks by default. // Configure i"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Native Image (GraalVM)",
+    "anchor": "gradle-native",
+    "text": "Native Image (GraalVM)"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Native Image (GraalVM)",
+    "anchor": "gradle-native",
+    "text": "The org.graalvm.buildtools.native plugin enables AOT compilation to a GraalVM native binary. Native images start in <50ms and use a fraction of the JVM heap — ideal for AWS Lambda, Google Cloud Run, and CLI tools. Spring Boot 3.x includes all necessary AOT processing. plugins {\n    java\n    id(\"org."
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Testcontainers + @ServiceConnection",
+    "anchor": "gradle-testcontainers",
+    "text": "Testcontainers + @ServiceConnection"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Testcontainers + @ServiceConnection",
+    "anchor": "gradle-testcontainers",
+    "text": "Spring Boot 3.1+ works with Testcontainers using @ServiceConnection — the annotation wires the container's dynamic port to the matching Spring property automatically. Gradle includes Testcontainers BOM management when using the Spring dependency-management plugin. dependencies {\n    testImplementati"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Kotlin DSL Tips for Spring Projects",
+    "anchor": "gradle-kotlin-dsl-spring",
+    "text": "Kotlin DSL Tips for Spring Projects"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Kotlin DSL Tips for Spring Projects",
+    "anchor": "gradle-kotlin-dsl-spring",
+    "text": "When writing Spring Boot builds in Kotlin DSL, a few patterns come up constantly: configuring compiler options for Kotlin projects, using extra[] to override managed versions, and using tasks.withType<> for type-safe task configuration. import org.jetbrains.kotlin.gradle.tasks.KotlinCompile\n\nplugins"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Cheatsheet",
+    "anchor": "",
+    "text": "Gradle Cheatsheet"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Cheatsheet",
+    "anchor": "",
+    "text": "Command / Element Purpose Notes ./gradlew build Compile + test + jar Skips up-to-date tasks automatically ./gradlew test Run unit tests Reports in build/reports/tests/ ./gradlew bootRun Run Spring Boot app DevTools hot reload ./gradlew bootJar Build executable fat JAR Output: build/libs/*.jar ./grad"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Deep Dive",
+    "anchor": "",
+    "text": "Maven Deep Dive"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Deep Dive",
+    "anchor": "",
+    "text": "Maven 3.x Apache Maven is a build automation and project management tool based on the Project Object Model (POM). It manages dependencies, compiles source code, runs tests, packages artifacts, and publishes to repositories — all driven by convention over configuration. General Java Spring Ecosystem"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Coordinates & POM Structure",
+    "anchor": "maven-coordinates",
+    "text": "Maven Coordinates & POM Structure"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Coordinates & POM Structure",
+    "anchor": "maven-coordinates",
+    "text": "Every Maven project is uniquely identified by its GAV coordinates — groupId, artifactId, version. These three values form the address of your artifact in any repository. The pom.xml is the single source of truth for the project's build metadata, dependencies, plugins, and inherited configuration. <?"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Build Lifecycle & Phases",
+    "anchor": "maven-lifecycle",
+    "text": "Build Lifecycle & Phases"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Build Lifecycle & Phases",
+    "anchor": "maven-lifecycle",
+    "text": "Maven defines three built-in lifecycles: default (build and deploy), clean (remove target/), and site (generate documentation). The default lifecycle runs phases in strict order — you run a phase and every phase before it executes automatically. # Run all phases up to and including package\nmvn packa"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Scopes",
+    "anchor": "maven-dependency-scopes",
+    "text": "Dependency Scopes"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Scopes",
+    "anchor": "maven-dependency-scopes",
+    "text": "Scopes control when a dependency is available on the classpath and whether it is included in the packaged artifact. Choosing the wrong scope is a common source of \"works in test, fails in prod\" bugs. <dependencies>\n  <!-- compile (default): on classpath everywhere, included in jar -->\n  <dependency>"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Key Build Plugins",
+    "anchor": "maven-key-plugins",
+    "text": "Key Build Plugins"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Key Build Plugins",
+    "anchor": "maven-key-plugins",
+    "text": "Maven does all real work through plugins. The three most important plugins in any Java project are bound to lifecycle phases automatically — but you often need to configure them explicitly to control Java version, test behaviour, or output format. <build>\n  <plugins>\n    <!-- Compiler: set Java vers"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Multi-Module Projects",
+    "anchor": "maven-multi-module",
+    "text": "Multi-Module Projects"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Multi-Module Projects",
+    "anchor": "maven-multi-module",
+    "text": "A multi-module project has a root POM with packaging=pom that lists child modules. Each child module has its own pom.xml and can depend on sibling modules. The parent POM centralises dependency versions via <dependencyManagement> so child POMs declare dependencies without specifying versions. <!-- r"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Wrapper",
+    "anchor": "maven-wrapper",
+    "text": "Maven Wrapper"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Wrapper",
+    "anchor": "maven-wrapper",
+    "text": "The Maven Wrapper ( mvnw ) pins a specific Maven version to the project and downloads it automatically. No local Maven installation required. Every developer and CI server uses exactly the same version — eliminates \"works on my machine\" build differences. # Generate wrapper (requires Maven installed"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "spring-boot-starter-parent",
+    "anchor": "maven-spring-parent",
+    "text": "spring-boot-starter-parent"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "spring-boot-starter-parent",
+    "anchor": "maven-spring-parent",
+    "text": "The easiest way to manage Spring Boot dependencies. Declaring spring-boot-starter-parent as your parent POM inherits pre-configured plugin versions, encoding settings, resource filtering, and the entire spring-boot-dependencies BOM — so all Spring starters are versioned automatically. You only speci"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "BOM Import (without parent)",
+    "anchor": "maven-spring-bom",
+    "text": "BOM Import (without parent)"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "BOM Import (without parent)",
+    "anchor": "maven-spring-bom",
+    "text": "When you already have a corporate parent POM and can't use spring-boot-starter-parent , import the spring-boot-dependencies BOM via <dependencyManagement> with scope=import, type=pom . You lose the plugin pre-configuration from the parent but gain the same dependency version management. <dependencyM"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "spring-boot-maven-plugin",
+    "anchor": "maven-spring-boot-plugin",
+    "text": "spring-boot-maven-plugin"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "spring-boot-maven-plugin",
+    "anchor": "maven-spring-boot-plugin",
+    "text": "Provides the goals that make Spring Boot work: repackage creates an executable fat JAR (bound to the package phase automatically when you use spring-boot-starter-parent ), run starts the application with hot-reload via DevTools, and build-image creates an OCI container image using Cloud Native Build"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Layered JARs for Docker",
+    "anchor": "maven-spring-layered-jar",
+    "text": "Layered JARs for Docker"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Layered JARs for Docker",
+    "anchor": "maven-spring-layered-jar",
+    "text": "By default, the fat JAR packs everything together — meaning a one-line code change rebuilds and re-pushes the full JAR layer in Docker. Layered JARs split the artifact into four layers (dependencies, Spring Boot loader, snapshot-dependencies, application) ordered by change frequency. Docker caches t"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Native Image (GraalVM)",
+    "anchor": "maven-spring-native",
+    "text": "Native Image (GraalVM)"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Native Image (GraalVM)",
+    "anchor": "maven-spring-native",
+    "text": "Spring Boot 3.x supports GraalVM native image compilation via the native-maven-plugin . Native images start in milliseconds and use a fraction of the heap — ideal for serverless and CLI tools. AOT processing runs at build time to generate reflection hints, proxy configurations, and serialization met"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Testcontainers + @ServiceConnection",
+    "anchor": "maven-testcontainers",
+    "text": "Testcontainers + @ServiceConnection"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Testcontainers + @ServiceConnection",
+    "anchor": "maven-testcontainers",
+    "text": "Spring Boot 3.1+ integrates Testcontainers with @ServiceConnection — the annotation reads the container's exposed port and sets the matching spring.datasource.* / spring.redis.* etc. properties automatically. No manual @DynamicPropertySource needed. <dependency>\n  <groupId>org.springframework.boot</"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Cheatsheet",
+    "anchor": "",
+    "text": "Maven Cheatsheet"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Cheatsheet",
+    "anchor": "",
+    "text": "Command / Element Purpose Notes mvn compile Compile main sources Output: target/classes mvn test Run unit tests Surefire plugin; skips packaging mvn package Create JAR/WAR Output: target/*.jar mvn verify Run integration tests Failsafe plugin; needs packaged artifact mvn install Install to local repo"
+  },
+  {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
     "section": "Spring Comprehensive Guide",
@@ -11,7 +417,7 @@
     "href": "index.html",
     "section": "Spring Comprehensive Guide",
     "anchor": "",
-    "text": "A complete reference for Spring Core, Spring Boot, and Spring AI — from basics to advanced, with working code examples, version comparisons, and quick cheatsheets."
+    "text": "A complete reference for Spring Core, Spring Boot, and Spring AI — working code examples, version comparisons, and quick cheatsheets. Spring Core 5 · 6 · 7 Spring Boot 3 · 4 Spring AI 1.x · 2.x"
   },
   {
     "page": "Spring Comprehensive Guide",
@@ -25,35 +431,315 @@
     "href": "index.html",
     "section": "Spring Core",
     "anchor": "",
-    "text": "Covers Spring Framework 5.x and 6.x — IoC container, AOP, lifecycle, web, data, testing, and more. Spring Core Overview Spring 5 Features Spring 6 Features Version Comparison (5 → 6) Bean Lifecycle Deep-Dive Tooling & Local Setup"
+    "text": "The IoC container, AOP, bean lifecycle, web, data, testing, and major version changes across Spring 5, 6, and 7. 🌿"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Spring Boot Coming soon",
+    "section": "Overview",
     "anchor": "",
-    "text": "Spring Boot Coming soon"
+    "text": "Overview"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Spring Boot Coming soon",
+    "section": "Overview",
     "anchor": "",
-    "text": "Spring Boot 3.x and 3.3.x features, auto-configuration, starters, Actuator, and more."
+    "text": "What Spring Core is and how the IoC container works 5️⃣"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Spring AI Coming soon",
+    "section": "Spring 5 Features",
     "anchor": "",
-    "text": "Spring AI Coming soon"
+    "text": "Spring 5 Features"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Spring AI Coming soon",
+    "section": "Spring 5 Features",
     "anchor": "",
-    "text": "Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores."
+    "text": "WebFlux, functional beans, Kotlin DSL, JUnit 5 6️⃣"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring 6 Features",
+    "anchor": "",
+    "text": "Spring 6 Features"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring 6 Features",
+    "anchor": "",
+    "text": "Jakarta EE 9, AOT compilation, HTTP interface clients, Micrometer 7️⃣"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring 7 Features",
+    "anchor": "",
+    "text": "Spring 7 Features"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring 7 Features",
+    "anchor": "",
+    "text": "Project Loom, Jackson 3, RestClient, HTTP/2, Records 📊"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Spring 5 → 6 → 7 side-by-side with expandable diffs ♻️"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Bean Lifecycle",
+    "anchor": "",
+    "text": "Bean Lifecycle"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Bean Lifecycle",
+    "anchor": "",
+    "text": "14-stage lifecycle diagram from instantiation to destroy 🔧"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Tooling & Setup",
+    "anchor": "",
+    "text": "Tooling & Setup"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Tooling & Setup",
+    "anchor": "",
+    "text": "Spring Initializr, DevTools, Actuator, IDE setup"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring Boot",
+    "anchor": "",
+    "text": "Spring Boot"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring Boot",
+    "anchor": "",
+    "text": "Auto-configuration, opinionated starters, embedded server, production tooling, and what changed in Boot 3 and 4. 🚀"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Overview",
+    "anchor": "",
+    "text": "Overview"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Overview",
+    "anchor": "",
+    "text": "How Boot layers on Spring Core — auto-config, starters, embedded server 3️⃣"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Boot 3 Features",
+    "anchor": "",
+    "text": "Boot 3 Features"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Boot 3 Features",
+    "anchor": "",
+    "text": "Jakarta EE, Native/AOT, Observability, Security defaults 4️⃣"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Boot 4 Features",
+    "anchor": "",
+    "text": "Boot 4 Features"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Boot 4 Features",
+    "anchor": "",
+    "text": "Spring 7.x, virtual threads, revised auto-config, new starters 📊"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Boot 3.x vs 4.x — every changed, new, and removed API ⚙️"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Auto-Configuration",
+    "anchor": "",
+    "text": "Auto-Configuration"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Auto-Configuration",
+    "anchor": "",
+    "text": "@Conditional family, custom starters, debugging conditions 🏭"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Production & Tooling",
+    "anchor": "",
+    "text": "Production & Tooling"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Production & Tooling",
+    "anchor": "",
+    "text": "Actuator, Micrometer, Testcontainers, layered JARs, graceful shutdown"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring AI",
+    "anchor": "",
+    "text": "Spring AI"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring AI",
+    "anchor": "",
+    "text": "Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output, and the leap from 1.x to 2.x. 🤖"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Overview",
+    "anchor": "",
+    "text": "Overview"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Overview",
+    "anchor": "",
+    "text": "What Spring AI is, 8 core pillars, provider landscape 💬"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "ChatClient API",
+    "anchor": "",
+    "text": "ChatClient API"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "ChatClient API",
+    "anchor": "",
+    "text": "Fluent builder, streaming, memory, multimodal, testing 📚"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "RAG & VectorStore",
+    "anchor": "",
+    "text": "RAG & VectorStore"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "RAG & VectorStore",
+    "anchor": "",
+    "text": "Document ETL, 15+ VectorStore backends, retrieval advisors 🔨"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Tools & Advisors",
+    "anchor": "",
+    "text": "Tools & Advisors"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Tools & Advisors",
+    "anchor": "",
+    "text": "@Tool function calling, agentic loops, Advisor chain 📋"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Structured Output",
+    "anchor": "",
+    "text": "Structured Output"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Structured Output",
+    "anchor": "",
+    "text": "BeanOutputConverter, self-correcting, provider-native JSON 📊"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Version Comparison"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Version Comparison",
+    "anchor": "",
+    "text": "Spring AI 1.x vs 2.x — API changes, MCP, agentic architecture 🔌"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Providers",
+    "anchor": "",
+    "text": "Providers"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Providers",
+    "anchor": "",
+    "text": "OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more"
   },
   {
     "page": "Spring AI ChatClient API",
