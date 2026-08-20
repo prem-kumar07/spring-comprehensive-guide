@@ -63,15 +63,52 @@ body {
   transition: transform 0.2s ease;
 }
 #sidebar .logo {
-  padding: 0 1.25rem 1.25rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--accent);
+  padding: 0.75rem 1.25rem 1.25rem;
   border-bottom: 1px solid var(--border);
   margin-bottom: 1rem;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   text-decoration: none;
 }
+#sidebar .logo .logo-leaf { width: 28px; height: 28px; flex-shrink: 0; }
+#sidebar .logo .logo-text { font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+
+/* Hero banner */
+.hero {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2.5rem 2rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.875rem;
+}
+.hero-leaf { width: 72px; height: 72px; }
+.hero h1 { font-size: 1.9rem; margin: 0; color: var(--text); }
+.hero p  { color: var(--text-muted); margin: 0; font-size: 1rem; max-width: 520px; line-height: 1.6; }
+.hero-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.25rem; }
+.hero-badge {
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.hero-badge-core  { background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid #58a6ff44; }
+.hero-badge-boot  { background: rgba(63,185,80,0.15);  color: #3fb950; border: 1px solid #3fb95044; }
+.hero-badge-ai    { background: rgba(163,113,247,0.15); color: #a371f7; border: 1px solid #a371f744; }
+
+/* Section cards on homepage */
+.section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1rem; margin: 1.5rem 0; }
+.section-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; text-decoration: none; display: block; transition: border-color 0.15s; }
+.section-card:hover { border-color: var(--accent); }
+.section-card-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+.section-card h3 { margin: 0 0 0.4rem; font-size: 1rem; color: var(--text); }
+.section-card p  { margin: 0; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
 #sidebar .nav-group { margin-bottom: 0.25rem; }
 #sidebar .nav-group-label {
   padding: 0.35rem 1.25rem;

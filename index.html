@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spring Comprehensive Guide</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-<!-- PAGE TEMPLATE: copy this shell for new pages -->
 <div id="main">
   <header id="header">
     <button id="hamburger" aria-label="Toggle nav">☰</button>
@@ -16,28 +16,142 @@
     <button id="theme-toggle">☀️ Light</button>
   </header>
   <div id="content">
-    <h1>Spring Comprehensive Guide</h1>
-    <p>A complete reference for Spring Core, Spring Boot, and Spring AI — from basics to advanced, with working code examples, version comparisons, and quick cheatsheets.</p>
 
+    <!-- Hero -->
+    <div class="hero">
+      <svg class="hero-leaf" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 4C20 8 10 20 12 38c4-10 12-16 22-18-8 8-14 18-16 30 8 6 18 2 24-10 8-14 6-34-10-36z" fill="#3fb950"/>
+        <path d="M26 52C22 42 22 30 28 20" stroke="#1a5c30" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <h1>Spring Comprehensive Guide</h1>
+      <p>A complete reference for Spring Core, Spring Boot, and Spring AI — working code examples, version comparisons, and quick cheatsheets.</p>
+      <div class="hero-badges">
+        <span class="hero-badge hero-badge-core">Spring Core 5 · 6 · 7</span>
+        <span class="hero-badge hero-badge-boot">Spring Boot 3 · 4</span>
+        <span class="hero-badge hero-badge-ai">Spring AI 1.x · 2.x</span>
+      </div>
+    </div>
+
+    <!-- Spring Core -->
     <h2>Spring Core</h2>
-    <p>Covers Spring Framework 5.x and 6.x — IoC container, AOP, lifecycle, web, data, testing, and more.</p>
-    <ul>
-      <li><a href="spring-core/index.html">Spring Core Overview</a></li>
-      <li><a href="spring-core/spring5-features.html">Spring 5 Features</a></li>
-      <li><a href="spring-core/spring6-features.html">Spring 6 Features</a></li>
-      <li><a href="spring-core/version-comparison.html">Version Comparison (5 → 6)</a></li>
-      <li><a href="spring-core/lifecycle.html">Bean Lifecycle Deep-Dive</a></li>
-      <li><a href="spring-core/tooling.html">Tooling &amp; Local Setup</a></li>
-    </ul>
+    <p>The IoC container, AOP, bean lifecycle, web, data, testing, and major version changes across Spring 5, 6, and 7.</p>
+    <div class="section-grid">
+      <a href="spring-core/index.html" class="section-card">
+        <div class="section-card-icon">🌿</div>
+        <h3>Overview</h3>
+        <p>What Spring Core is and how the IoC container works</p>
+      </a>
+      <a href="spring-core/spring5-features.html" class="section-card">
+        <div class="section-card-icon">5️⃣</div>
+        <h3>Spring 5 Features</h3>
+        <p>WebFlux, functional beans, Kotlin DSL, JUnit 5</p>
+      </a>
+      <a href="spring-core/spring6-features.html" class="section-card">
+        <div class="section-card-icon">6️⃣</div>
+        <h3>Spring 6 Features</h3>
+        <p>Jakarta EE 9, AOT compilation, HTTP interface clients, Micrometer</p>
+      </a>
+      <a href="spring-core/spring7-features.html" class="section-card">
+        <div class="section-card-icon">7️⃣</div>
+        <h3>Spring 7 Features</h3>
+        <p>Project Loom, Jackson 3, RestClient, HTTP/2, Records</p>
+      </a>
+      <a href="spring-core/version-comparison.html" class="section-card">
+        <div class="section-card-icon">📊</div>
+        <h3>Version Comparison</h3>
+        <p>Spring 5 → 6 → 7 side-by-side with expandable diffs</p>
+      </a>
+      <a href="spring-core/lifecycle.html" class="section-card">
+        <div class="section-card-icon">♻️</div>
+        <h3>Bean Lifecycle</h3>
+        <p>14-stage lifecycle diagram from instantiation to destroy</p>
+      </a>
+      <a href="spring-core/tooling.html" class="section-card">
+        <div class="section-card-icon">🔧</div>
+        <h3>Tooling &amp; Setup</h3>
+        <p>Spring Initializr, DevTools, Actuator, IDE setup</p>
+      </a>
+    </div>
 
-    <h2>Spring Boot <span class="version-badge badge-v5">Coming soon</span></h2>
-    <p>Spring Boot 3.x and 3.3.x features, auto-configuration, starters, Actuator, and more.</p>
+    <!-- Spring Boot -->
+    <h2>Spring Boot</h2>
+    <p>Auto-configuration, opinionated starters, embedded server, production tooling, and what changed in Boot 3 and 4.</p>
+    <div class="section-grid">
+      <a href="spring-boot/index.html" class="section-card">
+        <div class="section-card-icon">🚀</div>
+        <h3>Overview</h3>
+        <p>How Boot layers on Spring Core — auto-config, starters, embedded server</p>
+      </a>
+      <a href="spring-boot/boot3-features.html" class="section-card">
+        <div class="section-card-icon">3️⃣</div>
+        <h3>Boot 3 Features</h3>
+        <p>Jakarta EE, Native/AOT, Observability, Security defaults</p>
+      </a>
+      <a href="spring-boot/boot4-features.html" class="section-card">
+        <div class="section-card-icon">4️⃣</div>
+        <h3>Boot 4 Features</h3>
+        <p>Spring 7.x, virtual threads, revised auto-config, new starters</p>
+      </a>
+      <a href="spring-boot/version-comparison.html" class="section-card">
+        <div class="section-card-icon">📊</div>
+        <h3>Version Comparison</h3>
+        <p>Boot 3.x vs 4.x — every changed, new, and removed API</p>
+      </a>
+      <a href="spring-boot/auto-configuration.html" class="section-card">
+        <div class="section-card-icon">⚙️</div>
+        <h3>Auto-Configuration</h3>
+        <p>@Conditional family, custom starters, debugging conditions</p>
+      </a>
+      <a href="spring-boot/production.html" class="section-card">
+        <div class="section-card-icon">🏭</div>
+        <h3>Production &amp; Tooling</h3>
+        <p>Actuator, Micrometer, Testcontainers, layered JARs, graceful shutdown</p>
+      </a>
+    </div>
 
-    <h2>Spring AI <span class="version-badge badge-v5">Coming soon</span></h2>
-    <p>Latest Spring AI — chat models, embeddings, RAG, function calling, and vector stores.</p>
+    <!-- Spring AI -->
+    <h2>Spring AI</h2>
+    <p>Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output, and the leap from 1.x to 2.x.</p>
+    <div class="section-grid">
+      <a href="spring-ai/index.html" class="section-card">
+        <div class="section-card-icon">🤖</div>
+        <h3>Overview</h3>
+        <p>What Spring AI is, 8 core pillars, provider landscape</p>
+      </a>
+      <a href="spring-ai/chat-client.html" class="section-card">
+        <div class="section-card-icon">💬</div>
+        <h3>ChatClient API</h3>
+        <p>Fluent builder, streaming, memory, multimodal, testing</p>
+      </a>
+      <a href="spring-ai/rag.html" class="section-card">
+        <div class="section-card-icon">📚</div>
+        <h3>RAG &amp; VectorStore</h3>
+        <p>Document ETL, 15+ VectorStore backends, retrieval advisors</p>
+      </a>
+      <a href="spring-ai/tools-advisors.html" class="section-card">
+        <div class="section-card-icon">🔨</div>
+        <h3>Tools &amp; Advisors</h3>
+        <p>@Tool function calling, agentic loops, Advisor chain</p>
+      </a>
+      <a href="spring-ai/structured-output.html" class="section-card">
+        <div class="section-card-icon">📋</div>
+        <h3>Structured Output</h3>
+        <p>BeanOutputConverter, self-correcting, provider-native JSON</p>
+      </a>
+      <a href="spring-ai/version-comparison.html" class="section-card">
+        <div class="section-card-icon">📊</div>
+        <h3>Version Comparison</h3>
+        <p>Spring AI 1.x vs 2.x — API changes, MCP, agentic architecture</p>
+      </a>
+      <a href="spring-ai/providers.html" class="section-card">
+        <div class="section-card-icon">🔌</div>
+        <h3>Providers</h3>
+        <p>OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more</p>
+      </a>
+    </div>
+
   </div>
 </div>
-<!-- END PAGE TEMPLATE -->
 <script src="assets/js/prism.js"></script>
 <script src="assets/js/nav.js"></script>
 <script src="assets/js/search.js"></script>

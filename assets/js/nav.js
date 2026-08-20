@@ -58,13 +58,21 @@
   }
 
   function render() {
+    // Inject favicon once
+    if (!document.querySelector('link[rel="icon"]')) {
+      const fav = document.createElement('link');
+      fav.rel = 'icon'; fav.type = 'image/svg+xml';
+      fav.href = ROOT + 'assets/favicon.svg';
+      document.head.appendChild(fav);
+    }
+
     const sidebar = document.createElement('nav');
     sidebar.id = 'sidebar';
 
     const logo = document.createElement('a');
     logo.className = 'logo';
     logo.href = ROOT + 'index.html';
-    logo.textContent = '🌱 Spring Guide';
+    logo.innerHTML = `<svg class="logo-leaf" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C10 4 5 10 6 19c2-5 6-8 11-9-4 4-7 9-8 15 4 3 9 1 12-5 4-7 3-17-5-18z" fill="#3fb950"/><path d="M13 26C11 21 11 15 14 10" stroke="#1a5c30" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg><span class="logo-text">Spring Guide</span>`;
     sidebar.appendChild(logo);
 
     NAV.forEach(entry => {
