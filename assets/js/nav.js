@@ -26,6 +26,8 @@
         { label: 'Spring 7 Features',  href: ROOT + 'spring-core/spring7-features.html' },
         { label: 'Version Comparison', href: ROOT + 'spring-core/version-comparison.html' },
         { label: 'Bean Lifecycle',     href: ROOT + 'spring-core/lifecycle.html' },
+        { label: 'Proxy Internals',    href: ROOT + 'spring-core/proxies.html' },
+        { label: 'AOP Deep Dive',      href: ROOT + 'spring-core/aop.html' },
         { label: 'Tooling & Setup',    href: ROOT + 'spring-core/tooling.html' },
       ],
     },

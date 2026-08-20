@@ -515,7 +515,35 @@
     "href": "index.html",
     "section": "Bean Lifecycle",
     "anchor": "",
-    "text": "14-stage lifecycle diagram from instantiation to destroy 🔧"
+    "text": "14-stage lifecycle diagram from instantiation to destroy 🔀"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Proxy Internals",
+    "anchor": "",
+    "text": "Proxy Internals"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Proxy Internals",
+    "anchor": "",
+    "text": "JDK dynamic proxy vs CGLIB — how Spring wraps your beans 🎯"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "AOP Deep Dive",
+    "anchor": "",
+    "text": "AOP Deep Dive"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "AOP Deep Dive",
+    "anchor": "",
+    "text": "Aspects, advice types, pointcut expressions, ordering, real-world patterns 🔧"
   },
   {
     "page": "Spring Comprehensive Guide",
@@ -4760,6 +4788,384 @@
     "text": "What to Change Spring Boot 3.x Spring Boot 4.x Parent POM version spring-boot-starter-parent:3.5.7 spring-boot-starter-parent:4.0.0 Jackson groupId com.fasterxml.jackson.core tools.jackson.core Security path matcher new AntPathRequestMatcher(\"/api/**\") .requestMatchers(\"/api/**\") (string literal) As"
   },
   {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Spring AOP Deep Dive",
+    "anchor": "",
+    "text": "Spring AOP Deep Dive"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Spring AOP Deep Dive",
+    "anchor": "",
+    "text": "Spring 5/6/7 Aspect-Oriented Programming (AOP) separates cross-cutting concerns — logging, security, transactions, caching, metrics — from business logic. Instead of scattering the same boilerplate across dozens of classes, you write it once in an Aspect and declare where it should apply. Spring AOP"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Core Concepts",
+    "anchor": "aop-concepts",
+    "text": "Core Concepts"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Core Concepts",
+    "anchor": "aop-concepts",
+    "text": "Term Definition Example Aspect A module encapsulating a cross-cutting concern A @Aspect class for logging Advice Action taken at a join point — the \"what\" @Before , @Around , @After Pointcut Predicate that matches join points — the \"where\" execution(* com.example.service.*.*(..)) Join Point A point "
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Dependency",
+    "anchor": "aop-dependency",
+    "text": "Dependency"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Dependency",
+    "anchor": "aop-dependency",
+    "text": "Spring AOP is included in spring-context . In Spring Boot, just add the AOP starter — it also enables @EnableAspectJAutoProxy automatically (you don't need to add the annotation yourself in Boot). <!-- Maven -->\n<dependency>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-sta"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Your First Aspect",
+    "anchor": "aop-first-aspect",
+    "text": "Your First Aspect"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Your First Aspect",
+    "anchor": "aop-first-aspect",
+    "text": "An aspect is a Spring bean annotated with both @Aspect and @Component . @Aspect marks it as an AspectJ aspect; @Component registers it in the application context so Spring can detect it. import org.aspectj.lang.annotation.*;\nimport org.aspectj.lang.ProceedingJoinPoint;\nimport org.springframework.ste"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Spring AOP vs AspectJ",
+    "anchor": "aop-vs-aspectj",
+    "text": "Spring AOP vs AspectJ"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Spring AOP vs AspectJ",
+    "anchor": "aop-vs-aspectj",
+    "text": "Spring AOP is a proxy-based subset of AOP. Full AspectJ supports compile-time or load-time weaving and can intercept constructors, field access, and static methods. Spring AOP only intercepts method execution on Spring-managed beans — which covers 95% of real-world use cases. Spring AOP Full AspectJ"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@Before",
+    "anchor": "advice-before",
+    "text": "@Before"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@Before",
+    "anchor": "advice-before",
+    "text": "Runs before the method executes. Cannot prevent the method from running (use @Around for that). If @Before advice throws an exception, the target method is not called. @Before(\"execution(* com.example.service.*.*(..))\")\npublic void checkAuth(JoinPoint jp) {\n    // Runs before every service method\n  "
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@After, @AfterReturning, @AfterThrowing",
+    "anchor": "advice-after",
+    "text": "@After, @AfterReturning, @AfterThrowing"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@After, @AfterReturning, @AfterThrowing",
+    "anchor": "advice-after",
+    "text": "@After is a \"finally\" block — fires whether the method returned normally or threw. @AfterReturning fires only on normal return and can bind the return value. @AfterThrowing fires only on exception and can bind the exception. // @After — always fires (like finally)\n@After(\"execution(* com.example.ser"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@Around (Most Powerful)",
+    "anchor": "advice-around",
+    "text": "@Around (Most Powerful)"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@Around (Most Powerful)",
+    "anchor": "advice-around",
+    "text": "@Around wraps the entire method. You control whether and when to call proceed() — the real method. You can modify arguments, modify the return value, catch and swallow exceptions, add retry logic, or measure elapsed time. The ProceedingJoinPoint is only available in @Around . @Around(\"execution(* co"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Advice Execution Order Within One Aspect",
+    "anchor": "advice-execution-order",
+    "text": "Advice Execution Order Within One Aspect"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Advice Execution Order Within One Aspect",
+    "anchor": "advice-execution-order",
+    "text": "When multiple advice types apply to the same method from the same aspect, the execution order is well-defined. @Around is outermost — it wraps everything else. → @Around (before proceed)\n  → @Before\n    → target method executes\n  ← @AfterReturning (or @AfterThrowing)\n  ← @After\n← @Around (after proc"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "execution() — Method Signature Matching",
+    "anchor": "pc-execution",
+    "text": "execution() — Method Signature Matching"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "execution() — Method Signature Matching",
+    "anchor": "pc-execution",
+    "text": "The most common pointcut designator. Matches method executions by return type, class, method name, and parameters. // Pattern:\n// execution([modifiers] return-type [declaring-class].method-name(params) [throws])\n//   * = any single token    .. = any number of tokens (in params = any args)\n\n// All pu"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "within() — Type Matching",
+    "anchor": "pc-within",
+    "text": "within() — Type Matching"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "within() — Type Matching",
+    "anchor": "pc-within",
+    "text": "Matches all join points within a type or package. Simpler than execution() when you want to target an entire class or package without specifying method details. // All methods in UserService class\n@Pointcut(\"within(com.example.service.UserService)\")\n\n// All methods in any class in the service packag"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@annotation, @within, @args",
+    "anchor": "pc-annotation",
+    "text": "@annotation, @within, @args"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "@annotation, @within, @args",
+    "anchor": "pc-annotation",
+    "text": "Annotation-based pointcuts are very common in Spring — they let you create custom marker annotations and apply advice to anything carrying that annotation. This is how @Transactional and @Cacheable work. // @annotation: method carries this annotation\n@Pointcut(\"@annotation(org.springframework.transa"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "bean(), this(), target(), args()",
+    "anchor": "pc-bean",
+    "text": "bean(), this(), target(), args()"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "bean(), this(), target(), args()",
+    "anchor": "pc-bean",
+    "text": "// bean(): match by Spring bean name (Spring AOP only, not AspectJ)\n@Pointcut(\"bean(userService)\")\npublic void inUserServiceBean() {}\n\n@Pointcut(\"bean(*Service)\")         // wildcard — all beans ending in \"Service\"\npublic void inAnyServiceBean() {}\n\n// this(): the proxy type IS-A the given type\n@Poi"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Combining Pointcuts",
+    "anchor": "pc-combining",
+    "text": "Combining Pointcuts"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Combining Pointcuts",
+    "anchor": "pc-combining",
+    "text": "Pointcuts compose with && , || , and ! . Named pointcuts in @Pointcut methods can be referenced across aspects. @Aspect\n@Component\npublic class CommonPointcuts {\n\n    @Pointcut(\"within(com.example.service..*)\")\n    public void inServiceLayer() {}\n\n    @Pointcut(\"within(com.example.web..*)\")\n    publ"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Binding Parameters from Pointcuts",
+    "anchor": "pc-binding",
+    "text": "Binding Parameters from Pointcuts"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Binding Parameters from Pointcuts",
+    "anchor": "pc-binding",
+    "text": "Pointcut designators can bind method arguments, the annotation instance, and the target object into advice parameters — giving you the actual runtime values without reflection. // Bind annotation instance to advice parameter\n@Before(\"@annotation(auditable)\")            // 'auditable' matches param n"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "JoinPoint API",
+    "anchor": "jp-joinpoint",
+    "text": "JoinPoint API"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "JoinPoint API",
+    "anchor": "jp-joinpoint",
+    "text": "JoinPoint is available as the first parameter in @Before , @After , @AfterReturning , and @AfterThrowing . It gives you reflective access to the intercepted method call. @Before(\"execution(* com.example.service.*.*(..))\")\npublic void inspect(JoinPoint jp) {\n\n    // Method signature\n    Signature sig"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "ProceedingJoinPoint (@Around only)",
+    "anchor": "jp-proceeding",
+    "text": "ProceedingJoinPoint (@Around only)"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "ProceedingJoinPoint (@Around only)",
+    "anchor": "jp-proceeding",
+    "text": "ProceedingJoinPoint extends JoinPoint with the ability to call proceed() — which continues down the interceptor chain to the real method. You can also pass modified arguments via proceed(Object[]) . @Around(\"execution(* com.example.service.*.*(..))\")\npublic Object around(ProceedingJoinPoint pjp) thr"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Accessing Annotations Inside Advice",
+    "anchor": "jp-annotations",
+    "text": "Accessing Annotations Inside Advice"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Accessing Annotations Inside Advice",
+    "anchor": "jp-annotations",
+    "text": "Two ways to read annotation values inside advice — parameter binding (cleaner) and reflection (more flexible). // Method 1: parameter binding (no reflection needed)\n@Around(\"@annotation(cacheable)\")\npublic Object cacheAround(ProceedingJoinPoint pjp, Cacheable cacheable) throws Throwable {\n    String"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Ordering Multiple Aspects",
+    "anchor": "order-aspects",
+    "text": "Ordering Multiple Aspects"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Ordering Multiple Aspects",
+    "anchor": "order-aspects",
+    "text": "When multiple aspects apply to the same method, their order matters. Security should check before transactions start; logging should be outermost. Use @Order on the aspect class — lower number = higher priority = outer layer . @Aspect\n@Component\n@Order(1)          // outermost — wraps everything bel"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Advice Order Within One Aspect",
+    "anchor": "order-within-aspect",
+    "text": "Advice Order Within One Aspect"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Advice Order Within One Aspect",
+    "anchor": "order-within-aspect",
+    "text": "When the same aspect has multiple advice methods for the same pointcut, the order within a single aspect is undefined in Spring AOP (depends on JVM method ordering). If the sequence matters, merge them into a single @Around method. // ❌ Order between these is undefined (both @Before, same aspect)\n@B"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Scoped Beans and Proxies",
+    "anchor": "order-scoped-proxy",
+    "text": "Scoped Beans and Proxies"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Scoped Beans and Proxies",
+    "anchor": "order-scoped-proxy",
+    "text": "When a shorter-scoped bean (request, session) is injected into a longer-scoped bean (singleton), Spring creates a scoped proxy — a special proxy that looks up the real bean from the scope on each call. Enable with @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS) . // Request-scoped bean injected int"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Structured Method Logging",
+    "anchor": "pattern-logging",
+    "text": "Pattern: Structured Method Logging"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Structured Method Logging",
+    "anchor": "pattern-logging",
+    "text": "@Aspect\n@Component\n@Order(1)\npublic class MethodLoggingAspect {\n\n    private static final Logger log = LoggerFactory.getLogger(MethodLoggingAspect.class);\n\n    @Around(\"@within(org.springframework.stereotype.Service)\")\n    public Object logServiceCalls(ProceedingJoinPoint pjp) throws Throwable {\n   "
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Audit Trail with Custom Annotation",
+    "anchor": "pattern-audit",
+    "text": "Pattern: Audit Trail with Custom Annotation"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Audit Trail with Custom Annotation",
+    "anchor": "pattern-audit",
+    "text": "// 1. Define the annotation\n@Target(ElementType.METHOD)\n@Retention(RetentionPolicy.RUNTIME)\npublic @interface Audit {\n    String action();\n    String entity() default \"\";\n}\n\n// 2. Use it in business code\n@Service\npublic class AccountService {\n    @Audit(action = \"DEBIT\", entity = \"Account\")\n    publ"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Retry with Backoff",
+    "anchor": "pattern-retry",
+    "text": "Pattern: Retry with Backoff"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Retry with Backoff",
+    "anchor": "pattern-retry",
+    "text": "@Target(ElementType.METHOD)\n@Retention(RetentionPolicy.RUNTIME)\npublic @interface Retryable {\n    int attempts() default 3;\n    long delayMs() default 500;\n    Class<? extends Throwable>[] on() default {Exception.class};\n}\n\n@Aspect\n@Component\npublic class RetryAspect {\n\n    @Around(\"@annotation(retr"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Micrometer Metrics",
+    "anchor": "pattern-metrics",
+    "text": "Pattern: Micrometer Metrics"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Micrometer Metrics",
+    "anchor": "pattern-metrics",
+    "text": "@Aspect\n@Component\npublic class MetricsAspect {\n\n    @Autowired private MeterRegistry registry;\n\n    @Around(\"@annotation(io.micrometer.core.annotation.Timed)\")\n    public Object time(ProceedingJoinPoint pjp) throws Throwable {\n        // Let Micrometer's @Timed annotation handle itself —\n        //"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Solving Self-Invocation",
+    "anchor": "pattern-self-invoke",
+    "text": "Pattern: Solving Self-Invocation"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "Pattern: Solving Self-Invocation",
+    "anchor": "pattern-self-invoke",
+    "text": "When method A calls method B in the same class and B has @Transactional or @Cacheable , the advice on B is bypassed (proxy not in the call path). Three clean solutions: // ❌ Problem: inner call bypasses proxy\n@Service\npublic class OrderService {\n    public void processOrder(Order o) {\n        saveOr"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "AOP Quick Reference",
+    "anchor": "",
+    "text": "AOP Quick Reference"
+  },
+  {
+    "page": "Spring AOP Deep Dive",
+    "href": "spring-core/aop.html",
+    "section": "AOP Quick Reference",
+    "anchor": "",
+    "text": "Annotation / API Purpose Key Point @Aspect Mark class as an aspect Also needs @Component @Pointcut Named reusable pointcut expression Empty method body @Before Run before target method Cannot prevent execution @After Run after (finally semantics) Fires on success and exception @AfterReturning Run on"
+  },
+  {
     "page": "Spring Core Framework",
     "href": "spring-core/index.html",
     "section": "Spring Core Framework",
@@ -5171,6 +5577,230 @@
     "section": "⚡ Bean Lifecycle Cheatsheet",
     "anchor": "",
     "text": "# Stage Hook / Interface / Annotation Singleton Prototype 1 Instantiation Constructor call ✅ ✅ 2 Populate Properties @Autowired , @Value , setter injection ✅ ✅ 3 BeanNameAware BeanNameAware.setBeanName() ✅ ✅ 4 BeanClassLoaderAware BeanClassLoaderAware.setBeanClassLoader() ✅ ✅ 5 BeanFactoryAware Bean"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Spring Proxy Internals",
+    "anchor": "",
+    "text": "Spring Proxy Internals"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Spring Proxy Internals",
+    "anchor": "",
+    "text": "Spring 5/6/7 Spring's AOP, transaction management, security, and caching all work through proxies — wrapper objects that intercept method calls and inject cross-cutting behaviour before or after the real method executes. Understanding how proxies are created and their limitations is essential for de"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How a Proxy Works",
+    "anchor": "proxy-overview",
+    "text": "How a Proxy Works"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How a Proxy Works",
+    "anchor": "proxy-overview",
+    "text": "When a bean is eligible for proxying (it has an aspect, a @Transactional method, etc.), Spring replaces the bean in the application context with a proxy object . Callers receive the proxy, not the real object. Every method call goes through the proxy's interception chain before reaching the target. "
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How JDK Dynamic Proxy Works",
+    "anchor": "jdk-how-it-works",
+    "text": "How JDK Dynamic Proxy Works"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How JDK Dynamic Proxy Works",
+    "anchor": "jdk-how-it-works",
+    "text": "JDK Dynamic Proxies are part of the Java standard library ( java.lang.reflect.Proxy ). They work by creating a new class at runtime that implements one or more interfaces . Every method call on the proxy is routed to an InvocationHandler which decides what to do — run advice, delegate to the real ob"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Requirements",
+    "anchor": "jdk-requirements",
+    "text": "Requirements"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Requirements",
+    "anchor": "jdk-requirements",
+    "text": "For a JDK proxy to work, the bean must implement at least one interface . The proxy only exposes methods defined in those interfaces — methods on the concrete class that are not in any interface are invisible through the proxy. // ✅ Works with JDK proxy — has interface\npublic interface UserService {"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "What the Generated Class Looks Like",
+    "anchor": "jdk-generated-class",
+    "text": "What the Generated Class Looks Like"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "What the Generated Class Looks Like",
+    "anchor": "jdk-generated-class",
+    "text": "At runtime, the JVM generates bytecode for a class like $Proxy42 that implements your interface. You can dump it to inspect it — Spring Boot Actuator and -Dsun.misc.ProxyGenerator.saveGeneratedFiles=true let you see it on disk. // The generated proxy class (conceptually):\npublic final class $Proxy42"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How CGLIB Proxy Works",
+    "anchor": "cglib-how-it-works",
+    "text": "How CGLIB Proxy Works"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "How CGLIB Proxy Works",
+    "anchor": "cglib-how-it-works",
+    "text": "CGLIB (Code Generation Library) creates proxies by generating a subclass of the target class at runtime. The subclass overrides every non-final, non-private method and inserts interceptor chain calls. Because it subclasses rather than implementing an interface, CGLIB works even when the bean has no "
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Requirements & What Gets Subclassed",
+    "anchor": "cglib-requirements",
+    "text": "Requirements & What Gets Subclassed"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Requirements & What Gets Subclassed",
+    "anchor": "cglib-requirements",
+    "text": "CGLIB generates a class that extends your bean class. This means: The target class must not be final (can't subclass a final class) Intercepted methods must not be final or private (can't override them) The class needs a no-arg constructor (Spring instantiates the subclass) No interface required — w"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Performance: CGLIB vs JDK",
+    "anchor": "cglib-performance",
+    "text": "Performance: CGLIB vs JDK"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Performance: CGLIB vs JDK",
+    "anchor": "cglib-performance",
+    "text": "CGLIB uses MethodProxy.invokeSuper() which calls the parent method via generated bytecode — no reflection. JDK proxies use Method.invoke() (reflection). In practice, both are extremely fast for typical Spring usage, but CGLIB is measurably faster under high throughput since JDK reflection has been o"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Decision Rules",
+    "anchor": "choosing-rules",
+    "text": "Decision Rules"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Decision Rules",
+    "anchor": "choosing-rules",
+    "text": "Spring Boot 3.x defaults to CGLIB ( proxyTargetClass=true ) for all proxies. You can force JDK proxies back by setting spring.aop.proxy-target-class=false in application.properties . Bean has interface(s)?\n│\n├─ No  → CGLIB (only option)\n│\n└─ Yes → Default choice depends on config:\n         proxyTarg"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "ProxyFactory — Creating Proxies Programmatically",
+    "anchor": "choosing-programmatic",
+    "text": "ProxyFactory — Creating Proxies Programmatically"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "ProxyFactory — Creating Proxies Programmatically",
+    "anchor": "choosing-programmatic",
+    "text": "ProxyFactory is Spring's low-level API for creating proxies without the application context. Useful for understanding how Spring works internally, writing custom infrastructure, or testing advice in isolation. @Service\npublic class UserService {\n    public String greet(String name) {\n        return "
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Inspecting Proxies at Runtime",
+    "anchor": "choosing-inspect",
+    "text": "Inspecting Proxies at Runtime"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Inspecting Proxies at Runtime",
+    "anchor": "choosing-inspect",
+    "text": "You can inspect the proxy type and unwrap it at runtime using Spring's AopUtils and AopProxyUtils utilities — useful for debugging \"why isn't my advice firing?\" situations. @Autowired\nprivate UserService userService;   // this is actually a proxy\n\n// Check proxy type\nboolean isJdkProxy  = AopUtils.i"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Self-Invocation (The #1 Gotcha)",
+    "anchor": "limits-self-invocation",
+    "text": "Self-Invocation (The #1 Gotcha)"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Self-Invocation (The #1 Gotcha)",
+    "anchor": "limits-self-invocation",
+    "text": "When a method inside a bean calls another method on the same bean using this , the call bypasses the proxy entirely — it goes directly to the real object. This means advice does not fire on self-invoked methods , even if they're annotated with @Transactional , @Cacheable , etc. @Service\npublic class"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Final Classes and Methods",
+    "anchor": "limits-final",
+    "text": "Final Classes and Methods"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Final Classes and Methods",
+    "anchor": "limits-final",
+    "text": "CGLIB cannot subclass a final class, and neither CGLIB nor JDK proxies can intercept final , static , or private methods. Spring will either throw an exception at startup or silently ignore advice on those methods depending on the version and configuration. // ❌ Spring cannot create a CGLIB proxy fo"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Constructor Injection vs Field Injection in Proxied Beans",
+    "anchor": "limits-constructor",
+    "text": "Constructor Injection vs Field Injection in Proxied Beans"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Constructor Injection vs Field Injection in Proxied Beans",
+    "anchor": "limits-constructor",
+    "text": "CGLIB proxies require a no-arg constructor because the proxy subclass must be instantiated. When you use constructor injection (the recommended approach), Spring uses objenesis to bypass the constructor for the proxy and then calls the real constructor on the target object. This is handled automatic"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Casting and instanceof with Proxies",
+    "anchor": "limits-casting",
+    "text": "Casting and instanceof with Proxies"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Casting and instanceof with Proxies",
+    "anchor": "limits-casting",
+    "text": "With JDK proxies, the proxy object is not an instance of the concrete implementation class — only of the interface. Casting to the impl class will throw ClassCastException . With CGLIB proxies the subclass relationship means instanceof works for both the class and any interfaces. // JDK proxy exampl"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Proxy Quick Reference",
+    "anchor": "",
+    "text": "Proxy Quick Reference"
+  },
+  {
+    "page": "Spring Proxy Internals",
+    "href": "spring-core/proxies.html",
+    "section": "Proxy Quick Reference",
+    "anchor": "",
+    "text": "Topic JDK Dynamic Proxy CGLIB Requirement Bean must implement interface Class must not be final Mechanism Implements interface at runtime Subclasses at runtime Method dispatch Reflection ( Method.invoke ) Bytecode ( invokeSuper ) Final method Not intercepted Not intercepted Private method Not interc"
   },
   {
     "page": "Spring 5 Features",
