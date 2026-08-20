@@ -245,7 +245,28 @@ pre {
   margin: 0.75rem 0 1.25rem;
   font-size: 0.85rem;
   line-height: 1.55;
+  position: relative;   /* anchor for copy button */
 }
+/* Copy button */
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+pre:hover .copy-btn  { opacity: 1; }
+.copy-btn:hover      { color: var(--text); background: var(--surface); border-color: var(--accent); }
+.copy-btn.copied     { color: var(--success); border-color: var(--success); opacity: 1; }
 code { font-family: ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; }
 p code, li code {
   background: var(--code-bg);
