@@ -41,7 +41,33 @@
           <p><code>ChatClient</code> instances are created via <code>ChatClient.builder(chatModel)</code>. You typically call <code>.build()</code> once in a constructor or <code>@Bean</code> method and hold the resulting client as a field. The builder accepts default system text, default options, and default advisors — everything that should apply to every call made through that client. At runtime the builder delegates to the injected <code>ChatModel</code>, so the same <code>ChatClient</code> code works unchanged across providers.</p>
 
           <h4>Dependency (pom.xml)</h4>
-          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+          <div class="tab-container vtab-container">
+            <div class="tabs">
+              <button class="tab-btn" data-tab="vdep-1x">1.x</button>
+              <button class="tab-btn active" data-tab="vdep-2x">2.x</button>
+            </div>
+            <div class="tab-panel" id="vdep-1x">
+              <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+            </div>
+            <div class="tab-panel active" id="vdep-2x">
+              <pre><code class="language-xml">&lt;dependencyManagement&gt;
   &lt;dependencies&gt;
     &lt;dependency&gt;
       &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
@@ -59,6 +85,8 @@
     &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
   &lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
+            </div>
+          </div>
 
           <h4>Example</h4>
           <pre><code class="language-java">// Manual construction from a ChatModel bean
@@ -124,23 +152,43 @@ System.out.println(response);</code></pre>
           <h3 id="chatclient-response">Full ChatResponse with Metadata</h3>
           <p>Calling <code>.call().chatResponse()</code> returns the full <code>ChatResponse</code> object, which carries not just the model output but also token usage, finish reason, and any provider-specific metadata. This is useful when you need to track costs, enforce token budgets, or inspect why a generation ended (e.g. stop token vs. length limit).</p>
 
-          <h4>Example</h4>
-          <pre><code class="language-java">ChatResponse response = chatClient.prompt()
+          <div class="tab-container vtab-container">
+            <div class="tabs">
+              <button class="tab-btn" data-tab="vcr-1x">1.x</button>
+              <button class="tab-btn active" data-tab="vcr-2x">2.x</button>
+            </div>
+            <div class="tab-panel" id="vcr-1x">
+              <pre><code class="language-java">ChatResponse response = chatClient.prompt()
     .user("Explain reactive streams in two sentences.")
     .call()
     .chatResponse();
 
-// Extract text from the first generation
-String text = response.getResult().getOutput().getText();
+// 1.x: getContent() to extract text
+String text = response.getResult().getOutput().getContent();  // getContent() in 1.x
 
-// Inspect token usage
 Usage usage = response.getMetadata().getUsage();
-System.out.printf("Prompt tokens: %d%n", usage.getPromptTokens());
+System.out.printf("Prompt tokens: %d%n",     usage.getPromptTokens());
 System.out.printf("Completion tokens: %d%n", usage.getGenerationTokens());
-System.out.printf("Total tokens: %d%n", usage.getTotalTokens());
+System.out.printf("Total tokens: %d%n",      usage.getTotalTokens());</code></pre>
+            </div>
+            <div class="tab-panel active" id="vcr-2x">
+              <pre><code class="language-java">ChatResponse response = chatClient.prompt()
+    .user("Explain reactive streams in two sentences.")
+    .call()
+    .chatResponse();
 
-// Finish reason
+// 2.x: getText() replaces getContent()
+String text = response.getResult().getOutput().getText();      // getText() in 2.x
+
+Usage usage = response.getMetadata().getUsage();
+System.out.printf("Prompt tokens: %d%n",     usage.getPromptTokens());
+System.out.printf("Completion tokens: %d%n", usage.getGenerationTokens());
+System.out.printf("Total tokens: %d%n",      usage.getTotalTokens());
+
+// Finish reason (new in 2.x metadata API)
 String finishReason = response.getResult().getMetadata().getFinishReason();</code></pre>
+            </div>
+          </div>
         </div>
 
         <div class="feature-card">

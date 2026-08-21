@@ -349,6 +349,31 @@ tr:nth-child(even) { background: var(--surface); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* ── Version tabs (1.x / 2.x inline switcher) ───── */
+.vtab-container .tabs {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+}
+.vtab-container .tab-btn {
+  padding: 0.18rem 0.85rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  margin-bottom: 0;
+  letter-spacing: 0.02em;
+}
+.vtab-container .tab-btn:hover   { color: var(--text); border-color: var(--text-muted); }
+.vtab-container .tab-btn.active  { background: var(--accent); color: #fff; border-color: var(--accent); }
+.vtab-container .tab-panel       { padding: 0; }
+.vtab-container .tab-panel pre   { border-radius: 0; border: none; margin: 0; border-top: 1px solid var(--border); }
+
 /* ── Diff panels ─────────────────────────────────── */
 .diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0 1.5rem; }
 .diff-grid .diff-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }

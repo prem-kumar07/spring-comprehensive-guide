@@ -59,30 +59,79 @@
   &lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
 
-          <h4>Tool Definition</h4>
-          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+          <div class="tab-container vtab-container">
+            <div class="tabs">
+              <button class="tab-btn" data-tab="vtool-def-1x">1.x — FunctionCallback</button>
+              <button class="tab-btn active" data-tab="vtool-def-2x">2.x — @Tool</button>
+            </div>
+            <div class="tab-panel" id="vtool-def-1x">
+              <pre><code class="language-java">// 1.x: implement java.util.function.Function, wrap with FunctionCallbackWrapper
+import org.springframework.ai.model.function.FunctionCallbackWrapper;
+import java.util.function.Function;
+
+public class WeatherFunction implements Function&lt;WeatherFunction.Request, String&gt; {
+    public record Request(String city) {}
+
+    @Override
+    public String apply(Request req) {
+        return String.format("{\"city\":\"%s\",\"temp\":\"22°C\",\"condition\":\"Sunny\"}", req.city());
+    }
+}
+
+@Configuration
+public class WeatherConfig {
+    @Bean
+    public FunctionCallback getCurrentWeatherFn() {
+        return FunctionCallbackWrapper.builder(new WeatherFunction())
+            .withName("getCurrentWeather")
+            .withDescription("Get the current weather conditions for a city.")
+            .withResponseConverter(Object::toString)
+            .build();
+    }
+}
+
+// Registration: pass the function bean name via ChatOptions
+@RestController
+public class WeatherController {
+    private final ChatClient chatClient;
+
+    public WeatherController(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    @GetMapping("/weather-chat")
+    public String ask(@RequestParam String question) {
+        return chatClient.prompt()
+            .user(question)
+            .options(OpenAiChatOptions.builder()
+                .withFunction("getCurrentWeather")  // matches @Bean name
+                .build())
+            .call()
+            .content();
+    }
+}</code></pre>
+            </div>
+            <div class="tab-panel active" id="vtool-def-2x">
+              <pre><code class="language-java">// 2.x: annotate any service method with @Tool — no Function wrapper needed
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WeatherService {
-
     @Tool("Get the current weather conditions for a city. "
         + "Use this when the user asks about weather in a specific location.")
     public String getCurrentWeather(String city) {
-        // Real implementation would call a weather API
         return String.format("{\"city\":\"%s\",\"temp\":\"22°C\",\"condition\":\"Sunny\"}", city);
     }
-}</code></pre>
+}
 
-          <h4>Registering the Tool with ChatClient</h4>
-          <pre><code class="language-java">@RestController
+// Registration: pass the bean directly via .tools()
+@RestController
 public class WeatherController {
-
     private final ChatClient chatClient;
     private final WeatherService weatherService;
 
-    public WeatherController(ChatClient.Builder builder,
-                              WeatherService weatherService) {
+    public WeatherController(ChatClient.Builder builder, WeatherService weatherService) {
         this.chatClient = builder.build();
         this.weatherService = weatherService;
     }
@@ -91,11 +140,13 @@ public class WeatherController {
     public String ask(@RequestParam String question) {
         return chatClient.prompt()
             .user(question)
-            .tools(weatherService)       // register all @Tool methods on the bean
+            .tools(weatherService)       // all @Tool methods on the bean registered
             .call()
             .content();
     }
 }</code></pre>
+            </div>
+          </div>
         </div>
 
         <div class="feature-card">

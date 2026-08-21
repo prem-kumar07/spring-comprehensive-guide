@@ -570,11 +570,11 @@ List&lt;Document&gt; defaults = vectorStore.similaritySearch(
       <div class="tab-panel" id="tab-rag-retrieval">
 
         <h2>Retrieval Advisors and Query Pipeline</h2>
-        <p>Spring AI provides two retrieval advisors that plug into <code>ChatClient</code> via <code>.defaultAdvisors()</code>. <code>QuestionAnswerAdvisor</code> is the quick-start option: one line of code wires RAG into any chat call. <code>RetrievalAugmentationAdvisor</code> is the modular option: its builder accepts pluggable query transformers, document retrievers, and document rankers, enabling advanced patterns without changing advisor source code.</p>
+        <p>Spring AI provides two retrieval advisors. <span class="version-badge badge-ai1" style="font-size:0.7rem;vertical-align:middle">1.x</span> <code>QuestionAnswerAdvisor</code> — simple one-liner RAG. <span class="version-badge badge-ai2" style="font-size:0.7rem;vertical-align:middle">2.x</span> <code>RetrievalAugmentationAdvisor</code> — modular, composable pipeline, preferred for new projects.</p>
 
         <div class="feature-card">
-          <h3 id="question-answer-advisor">QuestionAnswerAdvisor</h3>
-          <p><code>QuestionAnswerAdvisor</code> is the primary RAG advisor in Spring AI 1.x and 2.x. It intercepts every <code>ChatClient</code> call, extracts the user's question, runs a <code>VectorStore.similaritySearch()</code> with the configured <code>SearchRequest</code>, formats the retrieved chunks as a context block, and prepends them to the system prompt. The default context template instructs the model to answer strictly from the provided context and to say "I don't know" when the context is insufficient.</p>
+          <h3 id="question-answer-advisor">QuestionAnswerAdvisor <span class="version-badge badge-ai1" style="font-size:0.7rem;vertical-align:middle">1.x primary</span></h3>
+          <p><code>QuestionAnswerAdvisor</code> is the original RAG advisor, introduced in Spring AI 1.x and still available in 2.x. It intercepts every <code>ChatClient</code> call, extracts the user's question, runs a <code>VectorStore.similaritySearch()</code> with the configured <code>SearchRequest</code>, formats the retrieved chunks as a context block, and prepends them to the system prompt. It's the simplest option — one constructor call wires RAG end-to-end. In Spring AI 2.x, <code>RetrievalAugmentationAdvisor</code> is the preferred replacement for new projects.</p>
 
           <h4>Example</h4>
           <pre><code class="language-java">import org.springframework.ai.rag.advisor.QuestionAnswerAdvisor;
@@ -614,8 +614,8 @@ public class RagChatService {
         </div>
 
         <div class="feature-card">
-          <h3 id="retrieval-augmentation-advisor">RetrievalAugmentationAdvisor — Modular RAG</h3>
-          <p><code>RetrievalAugmentationAdvisor</code> is the modular, composable RAG advisor introduced in Spring AI 1.x. Unlike <code>QuestionAnswerAdvisor</code>, which is a single monolithic component, <code>RetrievalAugmentationAdvisor</code> accepts pluggable <code>QueryTransformer</code>, <code>DocumentRetriever</code>, <code>DocumentRanker</code>, and <code>AugmentationAdvisor</code> components. This enables advanced RAG patterns such as query rewriting, hypothetical document embedding, and cross-encoder re-ranking without forking the advisor source.</p>
+          <h3 id="retrieval-augmentation-advisor">RetrievalAugmentationAdvisor — Modular RAG <span class="version-badge badge-ai2" style="font-size:0.7rem;vertical-align:middle">2.x preferred</span></h3>
+          <p><code>RetrievalAugmentationAdvisor</code> is the modular, composable RAG advisor that became the recommended approach in Spring AI 2.x. Unlike <code>QuestionAnswerAdvisor</code>, which is a monolithic component, <code>RetrievalAugmentationAdvisor</code> accepts pluggable <code>QueryTransformer</code>, <code>DocumentRetriever</code>, <code>DocumentRanker</code>, and <code>AugmentationAdvisor</code> components. This enables advanced RAG patterns such as query rewriting, hypothetical document embedding, and cross-encoder re-ranking without forking the advisor source.</p>
 
           <h4>Example</h4>
           <pre><code class="language-java">import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;

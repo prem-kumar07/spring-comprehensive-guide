@@ -1894,35 +1894,35 @@
     "href": "spring-ai/rag.html",
     "section": "Retrieval Advisors and Query Pipeline",
     "anchor": "",
-    "text": "Spring AI provides two retrieval advisors that plug into ChatClient via .defaultAdvisors() . QuestionAnswerAdvisor is the quick-start option: one line of code wires RAG into any chat call. RetrievalAugmentationAdvisor is the modular option: its builder accepts pluggable query transformers, document "
+    "text": "Spring AI provides two retrieval advisors. 1.x QuestionAnswerAdvisor — simple one-liner RAG. 2.x RetrievalAugmentationAdvisor — modular, composable pipeline, preferred for new projects."
   },
   {
     "page": "Spring AI RAG & VectorStore",
     "href": "spring-ai/rag.html",
-    "section": "QuestionAnswerAdvisor",
+    "section": "QuestionAnswerAdvisor 1.x primary",
     "anchor": "question-answer-advisor",
-    "text": "QuestionAnswerAdvisor"
+    "text": "QuestionAnswerAdvisor 1.x primary"
   },
   {
     "page": "Spring AI RAG & VectorStore",
     "href": "spring-ai/rag.html",
-    "section": "QuestionAnswerAdvisor",
+    "section": "QuestionAnswerAdvisor 1.x primary",
     "anchor": "question-answer-advisor",
-    "text": "QuestionAnswerAdvisor is the primary RAG advisor in Spring AI 1.x and 2.x. It intercepts every ChatClient call, extracts the user's question, runs a VectorStore.similaritySearch() with the configured SearchRequest , formats the retrieved chunks as a context block, and prepends them to the system pro"
+    "text": "QuestionAnswerAdvisor is the original RAG advisor, introduced in Spring AI 1.x and still available in 2.x. It intercepts every ChatClient call, extracts the user's question, runs a VectorStore.similaritySearch() with the configured SearchRequest , formats the retrieved chunks as a context block, and"
   },
   {
     "page": "Spring AI RAG & VectorStore",
     "href": "spring-ai/rag.html",
-    "section": "RetrievalAugmentationAdvisor — Modular RAG",
+    "section": "RetrievalAugmentationAdvisor — Modular RAG 2.x preferred",
     "anchor": "retrieval-augmentation-advisor",
-    "text": "RetrievalAugmentationAdvisor — Modular RAG"
+    "text": "RetrievalAugmentationAdvisor — Modular RAG 2.x preferred"
   },
   {
     "page": "Spring AI RAG & VectorStore",
     "href": "spring-ai/rag.html",
-    "section": "RetrievalAugmentationAdvisor — Modular RAG",
+    "section": "RetrievalAugmentationAdvisor — Modular RAG 2.x preferred",
     "anchor": "retrieval-augmentation-advisor",
-    "text": "RetrievalAugmentationAdvisor is the modular, composable RAG advisor introduced in Spring AI 1.x. Unlike QuestionAnswerAdvisor , which is a single monolithic component, RetrievalAugmentationAdvisor accepts pluggable QueryTransformer , DocumentRetriever , DocumentRanker , and AugmentationAdvisor compo"
+    "text": "RetrievalAugmentationAdvisor is the modular, composable RAG advisor that became the recommended approach in Spring AI 2.x. Unlike QuestionAnswerAdvisor , which is a monolithic component, RetrievalAugmentationAdvisor accepts pluggable QueryTransformer , DocumentRetriever , DocumentRanker , and Augmen"
   },
   {
     "page": "Spring AI RAG & VectorStore",
