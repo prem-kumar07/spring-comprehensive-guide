@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI Tools &amp; Advisors</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI Tools &amp; Advisors</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span>
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+    </div>
+    <p><strong>Tools</strong> (function calling) let an AI model invoke Java methods at runtime — the model decides when to call a tool, Spring AI dispatches it, and the result is fed back automatically so the model can produce a final answer. <strong>Advisors</strong> are the middleware layer around every <code>ChatClient</code> call: they can pre-process requests, post-process responses, inject RAG context, manage conversation memory, filter harmful content, or add observability — all without changing the call-site code.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-tool-basics">Tool Basics</button>
+        <button class="tab-btn" data-tab="tab-tool-context">Tool Context &amp; Loops</button>
+        <button class="tab-btn" data-tab="tab-tool-patterns">Agentic Patterns</button>
+        <button class="tab-btn" data-tab="tab-advisors">Advisors</button>
+      </div>
+
+      <!-- ── Tool Basics ──────────────────────────────── -->
+      <div class="tab-panel active" id="tab-tool-basics">
+
+        <div class="feature-card">
+          <h3 id="tool-annotation">@Tool — Declaring a Java Method as a Tool</h3>
+          <p>Annotate any Spring-managed bean method with <code>@Tool</code> to expose it to the model as a callable function. Spring AI reads the method signature at startup and auto-generates a JSON schema that describes the function name, description, and parameters. The description string is what the model reads to decide <em>when</em> to call the function, so write it in plain English explaining the purpose and when the tool should be used.</p>
+          <p>Register tools on a per-call basis via <code>.tools(weatherService)</code> on the <code>ChatClient</code> fluent call. You can pass individual method references or entire service beans — Spring AI introspects all <code>@Tool</code> methods on the bean.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>Tool Definition</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.stereotype.Service;
+
+@Service
+public class WeatherService {
+
+    @Tool("Get the current weather conditions for a city. "
+        + "Use this when the user asks about weather in a specific location.")
+    public String getCurrentWeather(String city) {
+        // Real implementation would call a weather API
+        return String.format("{\"city\":\"%s\",\"temp\":\"22°C\",\"condition\":\"Sunny\"}", city);
+    }
+}</code></pre>
+
+          <h4>Registering the Tool with ChatClient</h4>
+          <pre><code class="language-java">@RestController
+public class WeatherController {
+
+    private final ChatClient chatClient;
+    private final WeatherService weatherService;
+
+    public WeatherController(ChatClient.Builder builder,
+                              WeatherService weatherService) {
+        this.chatClient = builder.build();
+        this.weatherService = weatherService;
+    }
+
+    @GetMapping("/weather-chat")
+    public String ask(@RequestParam String question) {
+        return chatClient.prompt()
+            .user(question)
+            .tools(weatherService)       // register all @Tool methods on the bean
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-param">@ToolParam — Documenting Tool Parameters</h3>
+          <p><code>@ToolParam</code> annotates individual method parameters to provide the model with a human-readable description and optionally mark a parameter as not required. Without <code>@ToolParam</code>, Spring AI uses the Java parameter name and type only. Rich descriptions significantly improve tool selection accuracy, especially when a tool has multiple parameters with similar types.</p>
+          <p>Set <code>required = false</code> for optional parameters. The generated JSON schema will mark them as not required, allowing the model to omit them when they are not applicable.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
+
+@Service
+public class FlightService {
+
+    @Tool("Search for available flights between two airports on a given date. "
+        + "Returns a list of flight options with price and duration.")
+    public String searchFlights(
+        @ToolParam(description = "IATA airport code for departure, e.g. LHR")
+        String origin,
+
+        @ToolParam(description = "IATA airport code for destination, e.g. JFK")
+        String destination,
+
+        @ToolParam(description = "Departure date in YYYY-MM-DD format")
+        String date,
+
+        @ToolParam(description = "Seat class: ECONOMY, BUSINESS, or FIRST",
+                   required = false)
+        String seatClass
+    ) {
+        // Implementation calls flight search API
+        return "{\"flights\": [{\"airline\":\"BA\",\"price\":450,\"duration\":\"7h30m\"}]}";
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-response">Transparent Tool Invocation Loop</h3>
+          <p>When the model decides to invoke a tool, it returns a response containing a <code>tool_calls</code> array rather than a text answer. Spring AI detects this, dispatches the tool call to the registered Java method, serializes the result as a tool message, and automatically re-submits the conversation — including the tool result — back to the model. The model then generates its final text answer. All of this happens inside a single <code>.call().content()</code> invocation from the caller's perspective. No user code is needed to manage the loop.</p>
+          <p>The loop repeats if the model issues multiple tool calls. Parallel tool calls (multiple functions requested in a single model response) are also supported and dispatched concurrently by default in Spring AI 2.x.</p>
+
+          <h4>How the Loop Works</h4>
+          <pre><code class="language-java">// From the caller's perspective — just one blocking call
+String answer = chatClient.prompt()
+    .user("What is the weather in London and Berlin?")
+    .tools(weatherService)
+    .call()
+    .content();
+
+// Internally Spring AI handles:
+// 1. Sends user message to model
+// 2. Model responds with tool_calls: [getCurrentWeather("London"), getCurrentWeather("Berlin")]
+// 3. Spring AI dispatches both (potentially in parallel)
+// 4. Results injected as tool role messages
+// 5. Re-submitted to model
+// 6. Model generates final answer — returned as 'answer' above</code></pre>
+
+          <h4>Verifying Tool Calls Were Made</h4>
+          <pre><code class="language-java">// Use ChatResponse to inspect tool call metadata
+ChatResponse response = chatClient.prompt()
+    .user("What's the temperature in Tokyo?")
+    .tools(weatherService)
+    .call()
+    .chatResponse();
+
+// The final generation has the text answer
+String text = response.getResult().getOutput().getText();
+
+// Tool calls are recorded in the metadata / result list
+System.out.println("Answer: " + text);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-callback-provider">ToolCallbackProvider — Global Tool Registration</h3>
+          <p><code>ToolCallbackProvider</code> is a Spring bean interface that registers a set of tools globally so they are available to every <code>ChatClient</code> call without being passed explicitly via <code>.tools()</code>. Implement <code>ToolCallbackProvider</code> and return a list of <code>ToolCallback</code> instances, or use Spring AI's built-in <code>MethodToolCallbackProvider</code> to wrap service beans automatically.</p>
+          <p>This pattern is particularly useful in large applications where you want to centralize tool registration rather than scattering <code>.tools(weatherService, flightService, ...)</code> across many call sites.</p>
+
+          <h4>Defining a ToolCallbackProvider Bean</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ToolConfig {
+
+    @Bean
+    public ToolCallbackProvider applicationTools(WeatherService weatherService,
+                                                  FlightService flightService,
+                                                  CalendarService calendarService) {
+        // Wraps all @Tool methods on the given beans into ToolCallback instances
+        return MethodToolCallbackProvider.builder()
+            .toolObjects(weatherService, flightService, calendarService)
+            .build();
+    }
+}</code></pre>
+
+          <h4>ChatClient Uses All Registered Tools Automatically</h4>
+          <pre><code class="language-java">// No .tools() call needed — ToolCallbackProvider bean is auto-discovered
+String answer = chatClient.prompt()
+    .user("Book me a flight from Heathrow to JFK next Friday "
+        + "and check the weather forecast for New York that day.")
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-output-schema">Tool Return Types and Schema Generation</h3>
+          <p>Spring AI generates the tool's parameter schema from the Java method signature at startup. Supported parameter types include <code>String</code>, primitive wrappers (<code>Integer</code>, <code>Double</code>, <code>Boolean</code>), enums, and POJOs. Nested POJOs are recursively converted to nested JSON schema objects. Return types are not part of the schema — they are returned as a plain <code>String</code> tool result message.</p>
+          <p>For complex parameter types, annotate fields of the POJO with <code>@JsonProperty(required = true)</code> and <code>@JsonPropertyDescription("...")</code> (from Jackson) to enrich the schema. Spring AI uses Jackson for schema reflection.</p>
+
+          <h4>POJO Parameter with Jackson Annotations</h4>
+          <pre><code class="language-java">import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
+// Schema-enriched record for use as a tool parameter
+public record BookingRequest(
+    @JsonProperty(required = true)
+    @JsonPropertyDescription("Hotel name or ID to book")
+    String hotelId,
+
+    @JsonPropertyDescription("Check-in date in YYYY-MM-DD format")
+    String checkIn,
+
+    @JsonPropertyDescription("Check-out date in YYYY-MM-DD format")
+    String checkOut,
+
+    @JsonPropertyDescription("Number of guests (adults)")
+    int guests
+) {}
+
+@Service
+public class HotelService {
+
+    @Tool("Create a hotel booking for the specified hotel and dates.")
+    public String bookHotel(BookingRequest request) {
+        return String.format(
+            "{\"confirmationId\":\"HTL-%s\",\"hotel\":\"%s\",\"checkIn\":\"%s\"}",
+            java.util.UUID.randomUUID().toString().substring(0, 8),
+            request.hotelId(), request.checkIn());
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-return-direct">returnDirect — Bypassing the Model After Tool Execution</h3>
+          <p>By default, tool results are fed back to the model so it can generate a natural-language final answer. Setting <code>returnDirect = true</code> on <code>@Tool</code> makes Spring AI return the raw tool result string directly to the caller, skipping the second model call. This is useful for deterministic tools where the answer is already machine-readable (e.g. a JSON API response your frontend consumes directly) and a round-trip to the model would only add latency and cost.</p>
+
+          <h4>returnDirect Example</h4>
+          <pre><code class="language-java">@Service
+public class DataExportService {
+
+    // returnDirect=true: tool result is the final response — no second model call
+    @Tool(value = "Export user data as a structured JSON report for download.",
+          returnDirect = true)
+    public String exportUserData(
+        @ToolParam(description = "User ID to export") String userId,
+        @ToolParam(description = "Report format: FULL or SUMMARY", required = false)
+        String format
+    ) {
+        String reportFormat = (format != null) ? format : "FULL";
+        // This JSON is returned directly to the ChatClient caller
+        return String.format(
+            "{\"userId\":\"%s\",\"format\":\"%s\",\"records\":142,\"exportedAt\":\"%s\"}",
+            userId, reportFormat, java.time.Instant.now());
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-tool-basics -->
+
+      <!-- ── Tool Context & Loops ─────────────────────── -->
+      <div class="tab-panel" id="tab-tool-context">
+
+        <div class="feature-card">
+          <h3 id="tool-context">ToolContext — Injecting Runtime State into Tools</h3>
+          <p><code>ToolContext</code> provides a mechanism for passing runtime state — such as the authenticated user's ID, a tenant identifier, a security token, or a request-scoped value — into a tool method without polluting the model's prompt with that data. The context is set by the caller and is available to all tools invoked during that request.</p>
+          <p>To receive context, add a <code>ToolContext</code> parameter to the tool method. Spring AI injects it automatically at invocation time. The context map supports any <code>String</code>-keyed values and is separate from the chat messages.</p>
+
+          <div class="callout info"><strong>Spring AI 2.x</strong> — <code>ToolContext</code> is part of the redesigned composable tool-calling architecture in Spring AI 2.0. It allows secure, request-scoped state to flow into tools without being serialized into the prompt or exposed to the model.</div>
+
+          <h4>Tool Method Receiving Context</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.execution.ToolContext;
+
+@Service
+public class UserDataService {
+
+    @Tool("Retrieve the current user's profile data including name and preferences.")
+    public String getUserProfile(ToolContext context) {
+        // Read runtime state injected by the caller
+        String userId = (String) context.getContext().get("userId");
+        String tenantId = (String) context.getContext().get("tenantId");
+
+        // Use these values securely — they were never in the prompt
+        return fetchProfileFromDatabase(userId, tenantId);
+    }
+
+    private String fetchProfileFromDatabase(String userId, String tenantId) {
+        return String.format("{\"userId\":\"%s\",\"tenant\":\"%s\",\"name\":\"Alice\"}",
+            userId, tenantId);
+    }
+}</code></pre>
+
+          <h4>Passing Context at the Call Site</h4>
+          <pre><code class="language-java">// Inject runtime context via toolContext() — never expose this in the user message
+String answer = chatClient.prompt()
+    .user("What are my profile settings?")
+    .tools(userDataService)
+    .toolContext(Map.of(
+        "userId",   currentUser.getId(),
+        "tenantId", currentTenant.getId()
+    ))
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-agentic-loop">Tool Invocation Loop — Internals</h3>
+          <p>Understanding the internal flow helps debug tool-calling issues and design more reliable agentic pipelines. Spring AI's tool loop follows the standard function-calling protocol: the model signals intent via a structured <code>tool_calls</code> block in its response, Spring AI dispatches the calls, and the results are injected as <code>tool</code>-role messages before re-invoking the model. The loop continues until the model returns a response that contains no <code>tool_calls</code>.</p>
+
+          <h4>Sequence Diagram (ASCII)</h4>
+          <pre><code class="language-text">User prompt
+    │
+    ▼
+ChatClient.prompt().user(...).tools(...).call()
+    │
+    ▼
+[1] Send messages to ChatModel
+    │
+    ▼
+[2] Model response: tool_calls present?
+    │
+    ├─ YES ──▶ [3] Extract tool call list
+    │               │
+    │               ▼
+    │           [4] Dispatch each ToolCallback (parallel if multiple)
+    │               │
+    │               ▼
+    │           [5] Wrap results as ToolResponseMessage list
+    │               │
+    │               ▼
+    │           [6] Append to conversation, go to [1]
+    │
+    └─ NO ───▶ [7] Return AssistantMessage text to caller</code></pre>
+
+          <h4>Controlling Loop Depth</h4>
+          <pre><code class="language-java">// Spring AI 2.x — control max iterations via ToolCallingManager
+import org.springframework.ai.tool.execution.DefaultToolCallingManager;
+
+ToolCallingManager manager = DefaultToolCallingManager.builder()
+    .maxIterations(5)   // stop after 5 tool-call rounds
+    .build();
+
+ChatClient chatClient = ChatClient.builder(chatModel)
+    .defaultToolCallingManager(manager)
+    .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-2x-composable">Spring AI 2.x Composable Tool Architecture</h3>
+          <p>Spring AI 2.0 introduced a fully redesigned tool-calling architecture based on composable, explicit components. The <code>ToolCallingManager</code> interface encapsulates the dispatch-and-loop logic. You can provide a custom implementation to add retry, circuit-breaking, observability spans per tool call, or custom error recovery — without forking framework internals.</p>
+          <p>The new architecture also decouples tool execution from the advisor chain, making it easier to reason about ordering and to test tool-calling logic in isolation.</p>
+
+          <div class="callout info"><strong>Spring AI 2.x</strong> — The composable architecture replaces the implicit, internal function-call loop of 1.x. Key changes: <code>ToolCallingManager</code> is now a first-class bean; <code>ToolContext</code> is the standard way to pass request state; and <code>ToolCallbackProvider</code> beans are auto-discovered. Upgrade paths are documented in the Spring AI 2.0 migration guide.</div>
+
+          <h4>Custom ToolCallingManager</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.execution.ToolCallingManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ToolCallingConfig {
+
+    @Bean
+    public ToolCallingManager customToolCallingManager() {
+        return DefaultToolCallingManager.builder()
+            .maxIterations(10)
+            // Add custom error handling or observability here
+            .build();
+    }
+}</code></pre>
+
+          <h4>Explicit Tool Context Pipeline</h4>
+          <pre><code class="language-java">// Full 2.x style — explicit context, global tools via provider
+@Service
+public class AgentService {
+
+    private final ChatClient chatClient;
+
+    public AgentService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    public String runAgent(String task, String userId, String tenantId) {
+        return chatClient.prompt()
+            .user(task)
+            // ToolCallbackProvider bean supplies the tools automatically
+            .toolContext(Map.of("userId", userId, "tenantId", tenantId))
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-execution-exception">Handling Tool Execution Exceptions</h3>
+          <p>When a tool throws an unchecked exception, Spring AI's default behavior in 2.x is to convert it to a tool error result string and feed it back to the model rather than immediately propagating the exception to the caller. This gives the model a chance to recover or inform the user. You can customize this behavior by providing a <code>ToolExecutionExceptionProcessor</code> bean.</p>
+          <p>Configure the processor to rethrow certain exception types (e.g. <code>SecurityException</code>) while converting others to recoverable messages. This gives fine-grained control over which errors abort the loop and which the model can handle.</p>
+
+          <div class="callout info"><strong>Spring AI 2.x</strong> — The <code>ToolExecutionExceptionProcessor</code> interface is part of the 2.x composable architecture. In Spring AI 1.x, unchecked exceptions from tools propagated directly to the caller without the model seeing them.</div>
+
+          <h4>Custom Exception Processor</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.execution.ToolExecutionExceptionProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ToolExceptionConfig {
+
+    @Bean
+    public ToolExecutionExceptionProcessor toolExceptionProcessor() {
+        return (toolName, exception) -&gt; {
+            // Rethrow security violations immediately — do not let the model handle them
+            if (exception instanceof SecurityException) {
+                throw (SecurityException) exception;
+            }
+            // For everything else, return a structured error for the model
+            return String.format(
+                "{\"error\": \"Tool '%s' failed: %s. Please try a different approach.\"}",
+                toolName, exception.getMessage());
+        };
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-tool-context -->
+
+      <!-- ── Agentic Patterns ─────────────────────────── -->
+      <div class="tab-panel" id="tab-tool-patterns">
+
+        <div class="feature-card">
+          <h3 id="multi-tool-agent">Multi-Tool Orchestration</h3>
+          <p>A single agent can be equipped with multiple tools, enabling it to decompose a complex task into a sequence of tool calls. The model acts as the orchestrator — it selects which tool to call, in what order, and how to combine the results into a final answer. No explicit routing code is needed in the application. This pattern is sometimes called a <em>ReAct</em> (Reason + Act) agent.</p>
+          <p>Design principle: keep each tool small and focused on a single responsibility. The model is better at orchestration when tools have clear, non-overlapping descriptions.</p>
+
+          <h4>Tool Definitions</h4>
+          <pre><code class="language-java">@Service
+public class ResearchTools {
+
+    @Tool("Search the web for current information on a given topic. "
+        + "Returns a list of relevant snippets with source URLs.")
+    public String webSearch(
+        @ToolParam(description = "The search query string") String query
+    ) {
+        // Integration with a search API (e.g. Brave Search, Serper)
+        return "[{\"title\":\"Spring AI Overview\",\"snippet\":\"...\",\"url\":\"https://docs.spring.io\"}]";
+    }
+
+    @Tool("Perform arithmetic calculation. "
+        + "Accepts a mathematical expression as a string and returns the numeric result.")
+    public String calculate(
+        @ToolParam(description = "Mathematical expression, e.g. '(42 * 3.14) / 2'") String expression
+    ) {
+        // Use ScriptEngine or expression parser for safe evaluation
+        return "65.94";
+    }
+
+    @Tool("Summarize a block of text into bullet points. "
+        + "Use after retrieving raw web content to condense it.")
+    public String summarize(
+        @ToolParam(description = "The raw text content to summarize") String text,
+        @ToolParam(description = "Maximum number of bullet points", required = false)
+        Integer maxPoints
+    ) {
+        // Could recursively call a smaller/faster model
+        return "• Spring AI provides a portable API\n• Supports OpenAI, Anthropic, Gemini";
+    }
+}</code></pre>
+
+          <h4>Wiring the Multi-Tool Agent</h4>
+          <pre><code class="language-java">@Service
+public class PlannerAgent {
+
+    private final ChatClient chatClient;
+    private final ResearchTools researchTools;
+
+    public PlannerAgent(ChatClient.Builder builder, ResearchTools researchTools) {
+        this.chatClient = builder
+            .defaultSystem("""
+                You are a research assistant. Break down complex questions into steps.
+                Use the webSearch tool to find information, the calculate tool for math,
+                and the summarize tool to condense long results before answering.
+                """)
+            .build();
+        this.researchTools = researchTools;
+    }
+
+    public String research(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .tools(researchTools)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-error-handling">Error Handling in Tool Responses</h3>
+          <p>When a tool method encounters an error, the recommended approach is to return a structured error string (or JSON) rather than throwing an exception. The model receives the error message as the tool result and can decide how to proceed — retry with different arguments, use a fallback tool, or inform the user gracefully. Throwing unchecked exceptions propagates up through Spring AI and may abort the entire loop.</p>
+          <p>For predictable failures (network errors, not-found conditions), catch the exception inside the tool and return a meaningful error payload. Reserve exception propagation for truly unexpected failures that should halt the agent.</p>
+
+          <h4>Defensive Tool Implementation</h4>
+          <pre><code class="language-java">@Service
+public class DatabaseQueryTool {
+
+    private final DataSource dataSource;
+
+    public DatabaseQueryTool(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Tool("Execute a read-only SQL query against the application database. "
+        + "Returns results as JSON. Only SELECT statements are allowed.")
+    public String executeQuery(
+        @ToolParam(description = "A read-only SQL SELECT statement") String sql
+    ) {
+        // Validate — only allow SELECT
+        if (!sql.trim().toUpperCase().startsWith("SELECT")) {
+            return "{\"error\": \"Only SELECT statements are permitted\"}";
+        }
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            return resultSetToJson(rs);
+
+        } catch (SQLException e) {
+            // Return structured error — model can decide what to do
+            return String.format("{\"error\": \"Query failed: %s\"}", e.getMessage());
+        } catch (Exception e) {
+            return "{\"error\": \"Unexpected error during query execution\"}";
+        }
+    }
+
+    private String resultSetToJson(ResultSet rs) throws SQLException {
+        // Simplified — real implementation uses ObjectMapper
+        return "[{\"result\": \"data\"}]";
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-result-formatting">Tool Result Formatting — JSON vs Plain String</h3>
+          <p>Spring AI passes whatever your tool method returns (as a <code>String</code>) directly to the model as the tool result message. The model treats it as raw content. Choosing the right format affects how reliably the model can parse and use the result in its final answer.</p>
+          <p><strong>Prefer JSON</strong> for structured data (lists, objects with multiple fields) — the model handles JSON well and can extract specific fields. <strong>Prefer plain text</strong> for simple scalar answers (a temperature, a count, a yes/no) — it is less error-prone for the model and produces cleaner responses. Avoid returning binary data or very large payloads; truncate or paginate instead.</p>
+
+          <h4>JSON Result — Structured Data</h4>
+          <pre><code class="language-java">@Tool("List the top N open issues from a GitHub repository.")
+public String getOpenIssues(
+    @ToolParam(description = "GitHub repo in owner/repo format") String repo,
+    @ToolParam(description = "Max number of issues to return", required = false)
+    Integer limit
+) {
+    int max = (limit != null) ? limit : 5;
+    // Return compact JSON — model extracts fields cleanly
+    return """
+        {"issues": [
+          {"number": 42, "title": "NPE in ChatClient when model is null", "labels": ["bug"]},
+          {"number": 38, "title": "Add support for Gemini 2.0 Flash", "labels": ["enhancement"]}
+        ], "total_open": 17}
+        """;
+}</code></pre>
+
+          <h4>Plain String Result — Simple Scalars</h4>
+          <pre><code class="language-java">@Tool("Get the current UTC time as an ISO-8601 string.")
+public String getCurrentUtcTime() {
+    // Simple scalar — plain string is clearest
+    return java.time.Instant.now().toString();
+    // Returns: "2025-09-14T10:30:00Z"
+}
+
+@Tool("Check if a domain name is available for registration.")
+public String checkDomainAvailability(
+    @ToolParam(description = "Domain name with TLD, e.g. myapp.com") String domain
+) {
+    boolean available = domainRegistrar.checkAvailability(domain);
+    // Unambiguous boolean as string is fine for the model
+    return available ? "AVAILABLE" : "TAKEN";
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-parallel-calls">Parallel Tool Calls</h3>
+          <p>When the model requests multiple tools in a single response (parallel tool calling), Spring AI 2.x dispatches them concurrently by default using a <code>CompletableFuture</code>-based dispatcher. Parallel dispatch significantly reduces end-to-end latency when tools perform independent I/O (e.g. querying weather for London and Berlin simultaneously rather than sequentially). Tools that share mutable state must be thread-safe.</p>
+          <p>Parallel calling is controlled at the <code>ToolCallingManager</code> level. To force sequential dispatch (useful for tools with side effects that must run in order), configure the manager with a sequential executor.</p>
+
+          <h4>Verifying Parallelism (Test Example)</h4>
+          <pre><code class="language-java">// Tools that record invocation timestamps to verify parallel execution
+@Service
+public class TimestampedWeatherTool {
+
+    private final List&lt;Long&gt; invocationTimestamps =
+        Collections.synchronizedList(new ArrayList&lt;&gt;());
+
+    @Tool("Get weather for a city. Records timestamp of execution.")
+    public String getWeather(String city) {
+        invocationTimestamps.add(System.currentTimeMillis());
+        // Simulate I/O delay
+        try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        return "{\"city\":\"" + city + "\",\"temp\":\"20°C\"}";
+    }
+
+    public List&lt;Long&gt; getInvocationTimestamps() {
+        return Collections.unmodifiableList(invocationTimestamps);
+    }
+}
+
+// In a test: verify that two tool calls overlapped in time
+// (i.e. both started before either finished — parallel execution)</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tool-structured-output">Tools with Structured Output</h3>
+          <p>Combining Spring AI's <code>BeanOutputConverter</code> with tool calling lets you receive the model's final answer as a typed Java object rather than a raw string. The model uses the tools to gather data and then produces a structured JSON answer conforming to a schema generated from your target class. This pattern is effective for agentic workflows that need the final result in a format immediately usable by downstream code.</p>
+
+          <h4>Typed Response from a Tool-Augmented Call</h4>
+          <pre><code class="language-java">// Target record for structured output
+public record WeatherSummary(
+    String city,
+    String temperature,
+    String condition,
+    String recommendation
+) {}
+
+@Service
+public class WeatherAssistant {
+
+    private final ChatClient chatClient;
+    private final WeatherService weatherService;
+
+    public WeatherAssistant(ChatClient.Builder builder, WeatherService weatherService) {
+        this.chatClient = builder.build();
+        this.weatherService = weatherService;
+    }
+
+    public WeatherSummary getWeatherSummary(String city) {
+        return chatClient.prompt()
+            .system("Always respond with valid JSON matching the requested schema.")
+            .user("Get the current weather for " + city
+                + " and provide a packing recommendation.")
+            .tools(weatherService)
+            .call()
+            .entity(WeatherSummary.class);  // Spring AI deserializes JSON to the record
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-tool-patterns -->
+
+      <!-- ── Advisors ─────────────────────────────────── -->
+      <div class="tab-panel" id="tab-advisors">
+
+        <div class="feature-card">
+          <h3 id="advisor-interface">CallAdvisor and StreamAdvisor Interfaces</h3>
+          <p>Advisors in Spring AI are middleware that wrap the <code>ChatClient</code> call pipeline. <code>CallAdvisor</code> wraps blocking calls; <code>StreamAdvisor</code> wraps streaming calls. Both receive the request before it reaches the model and the response after the model replies, giving them the ability to modify, enrich, log, filter, or augment either side.</p>
+          <p>The <code>getOrder()</code> method returns an integer determining where in the advisor chain this advisor executes. Lower values run earlier on the way <em>in</em> (pre-processing) and later on the way <em>out</em> (post-processing). Use <code>Ordered.HIGHEST_PRECEDENCE</code> and <code>Ordered.LOWEST_PRECEDENCE</code> as anchors. The <code>AdvisorChain</code> (or <code>RequestResponseAdvisorChain</code>) is passed to <code>nextAroundCall()</code> — call it to continue the chain.</p>
+
+          <h4>CallAdvisor Interface</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
+import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
+
+public interface CallAdvisor {
+
+    // Intercept the call — pre-process request, post-process response
+    AdvisedResponse aroundCall(AdvisedRequest request, CallAroundAdvisorChain chain);
+
+    // Chain order: lower = runs earlier in pre-processing
+    default int getOrder() {
+        return 0;
+    }
+}</code></pre>
+
+          <h4>StreamAdvisor Interface</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.api.StreamAdvisor;
+import org.springframework.ai.chat.client.advisor.api.StreamAroundAdvisorChain;
+import reactor.core.publisher.Flux;
+
+public interface StreamAdvisor {
+
+    // Intercept streaming calls
+    Flux&lt;AdvisedResponse&gt; aroundStream(AdvisedRequest request,
+                                        StreamAroundAdvisorChain chain);
+
+    default int getOrder() {
+        return 0;
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="builtin-question-answer-advisor">QuestionAnswerAdvisor — RAG in One Line</h3>
+          <p><code>QuestionAnswerAdvisor</code> implements Retrieval-Augmented Generation (RAG) by intercepting the request, retrieving the most semantically similar documents from a <code>VectorStore</code>, and injecting them into the system prompt as context before the model sees the user's question. The default retrieval retrieves the top-K documents (K=4 by default) using similarity search. The advisor appends a context block to the system prompt containing the retrieved documents, enabling the model to ground its answer in your data.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-advisors-vector-store&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Wiring QuestionAnswerAdvisor</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
+
+@Service
+public class RagService {
+
+    private final ChatClient chatClient;
+
+    public RagService(ChatClient.Builder builder, VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(
+                new QuestionAnswerAdvisor(vectorStore))   // default top-4 retrieval
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+
+    // Custom retrieval: top-8, filter by metadata
+    public String askFiltered(String question, String category) {
+        return chatClient.prompt()
+            .user(question)
+            .advisors(spec -&gt; spec.param(
+                QuestionAnswerAdvisor.FILTER_EXPRESSION,
+                "category == '" + category + "'"))
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="builtin-memory-advisors">MessageChatMemoryAdvisor vs VectorStoreChatMemoryAdvisor</h3>
+          <p><code>MessageChatMemoryAdvisor</code> stores and retrieves the raw conversation messages in chronological order using a sliding window. It is simple, fast, and requires no embedding model — ideal for short-to-medium conversations where recency matters more than semantic relevance. The window size bounds token consumption.</p>
+          <p><code>VectorStoreChatMemoryAdvisor</code> embeds each message and stores it in a vector database. Retrieval is similarity-based: past messages most semantically similar to the current query are pulled in, regardless of when they occurred. This enables long-term, cross-session memory but requires an embedding model and a vector store. Choose this when conversations span many turns or sessions and exact recency is less important than topical relevance.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Advisor</th>
+                  <th>Storage</th>
+                  <th>Retrieval</th>
+                  <th>Best For</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>MessageChatMemoryAdvisor</code></td>
+                  <td>In-memory / Redis / JDBC</td>
+                  <td>Last-N messages (window)</td>
+                  <td>Short conversations, chatbots</td>
+                </tr>
+                <tr>
+                  <td><code>VectorStoreChatMemoryAdvisor</code></td>
+                  <td>PGVector / Pinecone / Chroma</td>
+                  <td>Similarity search</td>
+                  <td>Long-term memory, cross-session recall</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Choosing Window Size vs Semantic Memory</h4>
+          <pre><code class="language-java">// Message-window memory — last 10 turns, keyed by conversation ID
+ChatMemory windowMemory = new InMemoryChatMemory();
+ChatClient windowClient = ChatClient.builder(chatModel)
+    .defaultAdvisors(
+        MessageChatMemoryAdvisor.builder(windowMemory)
+            .conversationId("default")
+            .chatHistoryWindowSize(10)
+            .build())
+    .build();
+
+// Semantic memory — similarity search, 6 relevant past messages
+ChatClient semanticClient = ChatClient.builder(chatModel)
+    .defaultAdvisors(
+        VectorStoreChatMemoryAdvisor.builder(vectorStore)
+            .conversationId("default")
+            .order(Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER)
+            .build())
+    .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="builtin-safe-guard-advisor">SafeGuardAdvisor — Content Filtering</h3>
+          <p><code>SafeGuardAdvisor</code> is a pre-call advisor that inspects the user's message for blocked phrases before the request reaches the model. If any blocked phrase is found (case-insensitive substring match), the advisor short-circuits the chain and returns a configurable rejection message instead of calling the model. This provides a lightweight first-pass content filter for known toxic or disallowed terms, without requiring an external moderation API.</p>
+          <p>For production use, combine <code>SafeGuardAdvisor</code> with a more sophisticated moderation service (such as OpenAI's moderation endpoint) as a second layer.</p>
+
+          <h4>Wiring SafeGuardAdvisor</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
+
+@Service
+public class SafeChatService {
+
+    private final ChatClient chatClient;
+
+    public SafeChatService(ChatClient.Builder builder) {
+        List&lt;String&gt; blockedPhrases = List.of(
+            "drop table", "rm -rf", "ignore previous instructions",
+            "jailbreak", "disregard your guidelines"
+        );
+
+        this.chatClient = builder
+            .defaultAdvisors(
+                new SafeGuardAdvisor(
+                    blockedPhrases,
+                    "I'm sorry, but I cannot process that request."))
+            .build();
+    }
+
+    public String chat(String userMessage) {
+        return chatClient.prompt()
+            .user(userMessage)
+            .call()
+            .content();
+        // If userMessage contains a blocked phrase, returns the rejection message
+        // without calling the model
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="builtin-logger-advisor">SimpleLoggerAdvisor — Request/Response Logging</h3>
+          <p><code>SimpleLoggerAdvisor</code> logs the full <code>AdvisedRequest</code> and <code>AdvisedResponse</code> at <code>DEBUG</code> level using SLF4J. It is the recommended first advisor to add during development and debugging because it surfaces the exact prompt, model parameters, advisor parameters, and response that the framework sees — after all other advisors have transformed the request. Enable it via the standard Spring Boot logging configuration.</p>
+          <p>Set its order to <code>Ordered.LOWEST_PRECEDENCE</code> so it runs last in the pre-processing chain (closest to the model) and first in post-processing — logging what actually reaches the model rather than the raw user input.</p>
+
+          <h4>Adding SimpleLoggerAdvisor</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.core.Ordered;
+
+@Service
+public class DebugChatService {
+
+    private final ChatClient chatClient;
+
+    public DebugChatService(ChatClient.Builder builder, VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(
+                // RAG runs first, then memory, then logger (closest to model)
+                new QuestionAnswerAdvisor(vectorStore),
+                new MessageChatMemoryAdvisor(new InMemoryChatMemory()),
+                new SimpleLoggerAdvisor()   // logs the final assembled prompt
+            )
+            .build();
+    }
+}</code></pre>
+
+          <h4>Enabling DEBUG Logging (application.properties)</h4>
+          <pre><code class="language-properties"># Log everything Spring AI advisors produce
+logging.level.org.springframework.ai.chat.client.advisor=DEBUG</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="recursive-advisor">RecursiveAdvisor — Self-Refining Agentic Loops</h3>
+          <p><code>RecursiveAdvisor</code> (introduced in Spring AI 1.1) enables a self-refining agentic loop by re-invoking the chat pipeline from within an advisor. After the model produces a response, the advisor evaluates it (e.g. against a quality criterion, a format check, or a factuality constraint) and can resubmit the conversation with additional instructions if the response does not meet the bar. This loop continues up to a configurable <code>MAX_RECURSION_DEPTH</code>.</p>
+          <p>Use <code>RecursiveAdvisor</code> sparingly and always set a recursion limit — unbounded loops are costly and may time out. It is best suited for structured-output refinement (e.g. ensuring valid JSON) or factual self-checking tasks.</p>
+
+          <div class="callout info"><strong>Spring AI 2.x</strong> — <code>RecursiveAdvisor</code> was introduced in Spring AI 1.1 and continues in 2.x. Set <code>MAX_RECURSION_DEPTH</code> as an advisor parameter at the call site to override the default. Monitor token usage carefully when using recursive advisors in production.</div>
+
+          <h4>Custom Recursive Advisor Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
+import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
+
+/**
+ * Re-asks the model if the response is not valid JSON, up to MAX_TRIES times.
+ */
+public class JsonValidationAdvisor implements CallAdvisor {
+
+    private static final int MAX_TRIES = 3;
+    private int attempt = 0;
+
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest request,
+                                       CallAroundAdvisorChain chain) {
+        AdvisedResponse response = chain.nextAroundCall(request);
+        String content = response.response().getResult().getOutput().getText();
+
+        if (!isValidJson(content) &amp;&amp; attempt &lt; MAX_TRIES) {
+            attempt++;
+            // Augment the request with a correction instruction
+            AdvisedRequest retryRequest = AdvisedRequest.from(request)
+                .withUserText(request.userText()
+                    + "\n\nIMPORTANT: Your previous response was not valid JSON. "
+                    + "Respond ONLY with valid JSON, no markdown fences.")
+                .build();
+            return aroundCall(retryRequest, chain);   // recurse
+        }
+        attempt = 0;
+        return response;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE - 10;
+    }
+
+    private boolean isValidJson(String text) {
+        try {
+            new com.fasterxml.jackson.databind.ObjectMapper().readTree(text);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="custom-advisor">Writing a Custom CallAdvisor</h3>
+          <p>Implement <code>CallAdvisor</code> to insert custom logic into the <code>ChatClient</code> pipeline. Common use cases include: request enrichment (inject tenant metadata), response transformation (strip PII from output), latency measurement, audit logging, token-budget enforcement, and A/B testing different system prompts. The advisor receives the full <code>AdvisedRequest</code> (including all messages, options, and advisor parameters) and can modify it before calling the chain.</p>
+          <p>Best practice: keep each advisor focused on one concern. Chain multiple single-purpose advisors rather than building one monolithic advisor. Register them via <code>ChatClient.Builder.defaultAdvisors()</code> so they apply to every call, or pass them per-call for conditional behavior.</p>
+
+          <h4>Custom Latency-Tracking Advisor</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.api.*;
+import org.springframework.core.Ordered;
+
+import java.time.Instant;
+import java.util.Map;
+
+public class LatencyAdvisor implements CallAdvisor {
+
+    private final MeterRegistry meterRegistry;
+
+    public LatencyAdvisor(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest request,
+                                       CallAroundAdvisorChain chain) {
+        Instant start = Instant.now();
+        try {
+            // Delegate to next advisor (or model if last in chain)
+            AdvisedResponse response = chain.nextAroundCall(request);
+
+            long millis = java.time.Duration.between(start, Instant.now()).toMillis();
+
+            // Record latency metric
+            meterRegistry.timer("spring.ai.chatclient.latency")
+                .record(millis, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+            // Optionally add metadata to the response context
+            return AdvisedResponse.from(response)
+                .withAdvisedContext(Map.of("latencyMs", millis))
+                .build();
+
+        } catch (Exception ex) {
+            meterRegistry.counter("spring.ai.chatclient.errors").increment();
+            throw ex;
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        // Run first (outermost) to capture full round-trip latency
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+}</code></pre>
+
+          <h4>Registering Custom Advisors</h4>
+          <pre><code class="language-java">@Service
+public class ObservableChatService {
+
+    private final ChatClient chatClient;
+
+    public ObservableChatService(ChatClient.Builder builder,
+                                  MeterRegistry meterRegistry,
+                                  VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(
+                new LatencyAdvisor(meterRegistry),             // order=HIGHEST: outermost
+                new QuestionAnswerAdvisor(vectorStore),        // order=0: RAG
+                new MessageChatMemoryAdvisor(new InMemoryChatMemory()), // order=0
+                new SimpleLoggerAdvisor()                      // innermost: logs final prompt
+            )
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="advisor-chain-ordering">Advisor Chain Ordering — Design Rules</h3>
+          <p>The order in which advisors run matters because each advisor can transform both the request (going in) and the response (coming out). Think of the chain as a stack: the advisor with the <em>lowest</em> order number runs first on the way <em>in</em> (closest to the caller) and last on the way <em>out</em> (post-processing). The advisor with the <em>highest</em> order number (or <code>Ordered.LOWEST_PRECEDENCE</code>) runs last on the way in (closest to the model) and first on the way out.</p>
+          <p>Follow this recommended ordering: observability/security (highest precedence) → context enrichment (RAG, memory) → logging (lowest precedence). This ensures the logger sees the fully assembled prompt and the metrics advisor captures the full round-trip time.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Advisor</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>HIGHEST_PRECEDENCE</code></td><td><code>LatencyAdvisor</code></td><td>Outermost — measures full round-trip</td></tr>
+                <tr><td><code>0</code> (default)</td><td><code>SafeGuardAdvisor</code></td><td>Block disallowed input early</td></tr>
+                <tr><td><code>0</code> (default)</td><td><code>QuestionAnswerAdvisor</code></td><td>Inject RAG context before model</td></tr>
+                <tr><td><code>DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER</code></td><td><code>MessageChatMemoryAdvisor</code></td><td>Prepend history after RAG</td></tr>
+                <tr><td><code>LOWEST_PRECEDENCE</code></td><td><code>SimpleLoggerAdvisor</code></td><td>Innermost — logs final assembled prompt</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Configuring Order in Code</h4>
+          <pre><code class="language-java">import org.springframework.core.Ordered;
+
+// Explicit order constant
+public class MetricsAdvisor implements CallAdvisor {
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;   // runs first in, last out
+    }
+}
+
+public class AuditLogAdvisor implements CallAdvisor {
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;    // runs last in, first out
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="advisor-request-modification">Modifying Requests and Responses in an Advisor</h3>
+          <p>Advisors modify requests by creating a new <code>AdvisedRequest</code> via <code>AdvisedRequest.from(request).with...().build()</code> and passing the modified request to the chain. Response modification works the same way with <code>AdvisedResponse</code>. Common modifications include: appending instructions to the system message, injecting retrieved documents into the user message, stripping PII from the response text, or normalizing whitespace in the output.</p>
+
+          <h4>Request Enrichment Advisor</h4>
+          <pre><code class="language-java">public class TenantContextAdvisor implements CallAdvisor {
+
+    private final TenantResolver tenantResolver;
+
+    public TenantContextAdvisor(TenantResolver tenantResolver) {
+        this.tenantResolver = tenantResolver;
+    }
+
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest request,
+                                       CallAroundAdvisorChain chain) {
+        // Pre-process: inject tenant-specific system instructions
+        String tenantInstructions = tenantResolver.getSystemInstructions();
+        String enrichedSystem = request.systemText()
+            + "\n\n[Tenant context] " + tenantInstructions;
+
+        AdvisedRequest enriched = AdvisedRequest.from(request)
+            .withSystemText(enrichedSystem)
+            .build();
+
+        // Execute the chain with the enriched request
+        AdvisedResponse response = chain.nextAroundCall(enriched);
+
+        // Post-process: strip internal metadata comments from response
+        String cleanedText = response.response()
+            .getResult().getOutput().getText()
+            .replaceAll("\\[INTERNAL:[^\\]]+\\]", "").trim();
+
+        return response;
+    }
+
+    @Override
+    public int getOrder() {
+        return 10;  // after security, before RAG
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-advisors -->
+
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>Tools &amp; Advisors Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Annotation / Class</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>@Tool</code></td>
+              <td>Expose a Java method as a callable function to the model</td>
+              <td>String argument is the tool description read by the model</td>
+            </tr>
+            <tr>
+              <td><code>@ToolParam</code></td>
+              <td>Document a tool method parameter</td>
+              <td><code>description</code> required; <code>required=false</code> marks optional</td>
+            </tr>
+            <tr>
+              <td><code>.tools(bean)</code></td>
+              <td>Register all <code>@Tool</code> methods on a bean for a single call</td>
+              <td>Pass multiple beans; tools are unregistered after the call</td>
+            </tr>
+            <tr>
+              <td><code>ToolCallbackProvider</code></td>
+              <td>Global tool registration as a Spring bean</td>
+              <td>Auto-discovered; applies to all calls without explicit <code>.tools()</code></td>
+            </tr>
+            <tr>
+              <td><code>MethodToolCallbackProvider</code></td>
+              <td>Built-in provider that wraps service beans</td>
+              <td>Use <code>.toolObjects(...)</code> builder method</td>
+            </tr>
+            <tr>
+              <td><code>ToolContext</code></td>
+              <td>Runtime state passed into tool methods</td>
+              <td>Set via <code>.toolContext(Map)</code>; injected into methods with <code>ToolContext</code> param</td>
+            </tr>
+            <tr>
+              <td><code>ToolCallingManager</code></td>
+              <td>Controls the tool-call dispatch loop (Spring AI 2.x)</td>
+              <td>Customise via <code>DefaultToolCallingManager.builder()</code></td>
+            </tr>
+            <tr>
+              <td><code>CallAdvisor</code></td>
+              <td>Middleware for blocking <code>ChatClient</code> calls</td>
+              <td>Implement <code>aroundCall()</code> and <code>getOrder()</code></td>
+            </tr>
+            <tr>
+              <td><code>StreamAdvisor</code></td>
+              <td>Middleware for streaming <code>ChatClient</code> calls</td>
+              <td>Implement <code>aroundStream()</code> returning <code>Flux&lt;AdvisedResponse&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>getOrder()</code></td>
+              <td>Determines advisor chain position</td>
+              <td>Lower = earlier pre-processing; use <code>Ordered.HIGHEST_PRECEDENCE</code></td>
+            </tr>
+            <tr>
+              <td><code>chain.nextAroundCall()</code></td>
+              <td>Delegate to the next advisor in the chain</td>
+              <td>Must be called (unless short-circuiting, e.g. SafeGuardAdvisor)</td>
+            </tr>
+            <tr>
+              <td><code>QuestionAnswerAdvisor</code></td>
+              <td>RAG — retrieves documents from VectorStore and injects as context</td>
+              <td>Default top-K=4; filter via <code>FILTER_EXPRESSION</code> param</td>
+            </tr>
+            <tr>
+              <td><code>MessageChatMemoryAdvisor</code></td>
+              <td>Prepend conversation history as message window</td>
+              <td>Set window size; isolate per user with <code>CHAT_MEMORY_CONVERSATION_ID_KEY</code></td>
+            </tr>
+            <tr>
+              <td><code>VectorStoreChatMemoryAdvisor</code></td>
+              <td>Semantic long-term memory via vector similarity</td>
+              <td>Requires embedding model + vector store; cross-session capable</td>
+            </tr>
+            <tr>
+              <td><code>SafeGuardAdvisor</code></td>
+              <td>Short-circuit on blocked phrases — content filtering</td>
+              <td>Case-insensitive substring match; configure rejection message</td>
+            </tr>
+            <tr>
+              <td><code>SimpleLoggerAdvisor</code></td>
+              <td>Logs request and response at DEBUG level via SLF4J</td>
+              <td>Set order to <code>LOWEST_PRECEDENCE</code> to log final assembled prompt</td>
+            </tr>
+            <tr>
+              <td><code>RecursiveAdvisor</code></td>
+              <td>Re-invokes the pipeline for self-refining agentic loops</td>
+              <td>Spring AI 1.1+; always set <code>MAX_RECURSION_DEPTH</code> to cap iterations</td>
+            </tr>
+            <tr>
+              <td><code>.defaultAdvisors()</code></td>
+              <td>Register advisors on the <code>ChatClient.Builder</code> for every call</td>
+              <td>Advisors apply in <code>getOrder()</code> sequence</td>
+            </tr>
+            <tr>
+              <td><code>AdvisedRequest</code></td>
+              <td>Immutable request snapshot visible to advisors</td>
+              <td>Use <code>AdvisedRequest.from(request).withUserText(...).build()</code> to modify</td>
+            </tr>
+            <tr>
+              <td><code>AdvisedResponse</code></td>
+              <td>Immutable response snapshot visible to advisors</td>
+              <td>Access via <code>response.response().getResult().getOutput().getText()</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spring 5 vs 6 — Version Comparison</title>
+  <title>Spring 5 vs 6 vs 7 — Version Comparison</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body>
@@ -16,8 +16,8 @@
   </header>
   <div id="content">
 
-    <h1>Spring 5 vs Spring 6 — Feature Comparison</h1>
-    <p>This page compares Spring Framework 5 and Spring Framework 6 across the major areas of change. Use the filters to narrow by category or change type. Click any row to expand a side-by-side code diff.</p>
+    <h1>Spring 5 vs Spring 6 vs Spring 7 — Feature Comparison</h1>
+    <p>This page compares Spring Framework 5, Spring Framework 6, and Spring Framework 7 across the major areas of change. Use the filters to narrow by category, change type, or Spring version. Click any row to expand a side-by-side code diff.</p>
 
     <!-- Filter bar -->
     <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
@@ -38,6 +38,9 @@
         <option value="deprecated">Deprecated</option>
       </select>
       <span id="filter-count" style="color:var(--text-muted);font-size:0.875rem"></span>
+      <span style="color:var(--text-muted);font-size:0.875rem;margin-left:0.5rem">Version:</span>
+      <button class="filter-btn active" data-filter="all" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:0.35rem 0.75rem;border-radius:6px;font-size:0.875rem;cursor:pointer">All</button>
+      <button class="filter-btn" data-filter="v7" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:0.35rem 0.75rem;border-radius:6px;font-size:0.875rem;cursor:pointer">Spring 7 New</button>
     </div>
 
     <!-- Comparison table -->
@@ -45,23 +48,25 @@
     <table id="comparison-table">
       <thead>
         <tr>
-          <th>Feature</th>
-          <th><span class="version-badge badge-v5">Spring 5</span></th>
-          <th><span class="version-badge badge-v6">Spring 6</span></th>
-          <th>Change</th>
+          <th style="width:22%">Feature</th>
+          <th style="width:22%"><span class="version-badge badge-v5">Spring 5</span></th>
+          <th style="width:22%"><span class="version-badge badge-v6">Spring 6</span></th>
+          <th style="width:22%"><span class="version-badge badge-v7">Spring 7</span></th>
+          <th style="width:12%">Change</th>
         </tr>
       </thead>
       <tbody>
 
         <!-- Row 1: Java Namespace -->
-        <tr class="comparison-row" data-category="core" data-type="changed" data-id="1" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="1" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="java-namespace">Java Namespace (javax → jakarta)</h3></td>
           <td><code>javax.*</code></td>
           <td><code>jakarta.*</code></td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-1" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5</div>
@@ -96,14 +101,15 @@ public class UserController {
         </tr>
 
         <!-- Row 2: Java Baseline -->
-        <tr class="comparison-row" data-category="core" data-type="changed" data-id="2" style="cursor:pointer" title="Click to expand">
-          <td><h3 class="comparison-feature" id="java-baseline">Java Baseline (8 → 17)</h3></td>
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="2" data-versions="v5 v6 v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="java-baseline">Java Baseline (8 → 17 → 21 recommended)</h3></td>
           <td>Java 8+</td>
           <td>Java 17+</td>
+          <td>Java 17+ minimum; Java 21+ strongly recommended for CRaC and Project Loom improvements</td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-2" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 (Java 8+)</div>
@@ -124,18 +130,45 @@ public class UserController {
 &lt;!-- Record types, sealed classes, text blocks available --&gt;</code></pre>
               </div>
             </div>
+            <p style="margin-top:1.25rem;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Spring 6 → 7</p>
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 (Java 17 minimum)</div>
+                <pre><code class="language-xml">&lt;!-- Spring 6 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;java.version&gt;17&lt;/java.version&gt;
+  &lt;spring-framework.version&gt;6.2.9&lt;/spring-framework.version&gt;
+&lt;/properties&gt;
+&lt;!-- Java 17 is the minimum and typical choice --&gt;</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 (Java 17 min, 21+ recommended)</div>
+                <pre><code class="language-xml">&lt;!-- Spring 7 pom.xml --&gt;
+&lt;properties&gt;
+  &lt;!-- Minimum is still Java 17 --&gt;
+  &lt;java.version&gt;21&lt;/java.version&gt;
+  &lt;spring-framework.version&gt;7.0.3&lt;/spring-framework.version&gt;
+&lt;/properties&gt;
+&lt;!-- Java 21 (LTS) recommended for:
+     - CRaC checkpoint/restore
+     - Virtual thread improvements
+     - Sequenced collections
+     - Record patterns --&gt;</code></pre>
+              </div>
+            </div>
           </td>
         </tr>
 
         <!-- Row 3: HTTP Client -->
-        <tr class="comparison-row" data-category="web" data-type="changed" data-id="3" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="web" data-type="changed" data-id="3" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="http-client">HTTP Client (RestTemplate → WebClient / @HttpExchange)</h3></td>
           <td><code>RestTemplate</code></td>
           <td><code>RestClient</code> / <code>@HttpExchange</code></td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-3" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — RestTemplate</div>
@@ -197,14 +230,15 @@ public class UserService {
         </tr>
 
         <!-- Row 4: Error Response Format -->
-        <tr class="comparison-row" data-category="web" data-type="new" data-id="4" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="web" data-type="new" data-id="4" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="error-response-format">Error Response Format (custom → ProblemDetail RFC 7807)</h3></td>
           <td>Custom <code>@ExceptionHandler</code></td>
           <td><code>ProblemDetail</code> (RFC 7807)</td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
         </tr>
         <tr id="detail-4" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — Custom error body</div>
@@ -248,14 +282,15 @@ public class GlobalExceptionHandler {
         </tr>
 
         <!-- Row 5: Observability -->
-        <tr class="comparison-row" data-category="core" data-type="changed" data-id="5" style="cursor:pointer" title="Click to expand">
-          <td><h3 class="comparison-feature" id="observability">Observability (manual Micrometer → @Observed)</h3></td>
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="5" data-versions="v5 v6 v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="observability">Observability (manual Micrometer → @Observed → resilience annotations)</h3></td>
           <td>Micrometer (optional add-on)</td>
           <td>Micrometer core + <code>@Observed</code></td>
+          <td>Adds <code>@ConcurrencyLimit</code> annotation; enable via <code>@EnableResilientMethods</code></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-5" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — manual Micrometer</div>
@@ -302,18 +337,56 @@ public class OrderService {
 }</code></pre>
               </div>
             </div>
+            <p style="margin-top:1.25rem;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Spring 6 → 7</p>
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — @Observed only</div>
+                <pre><code class="language-java">// Spring 6 — observability only
+@Service
+@Observed(name = "order.service")
+public class OrderService {
+    // No built-in concurrency throttling
+    // For rate limiting, used external libs
+    public Order placeOrder(OrderRequest req) {
+        return processOrder(req);
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — @ConcurrencyLimit added</div>
+                <pre><code class="language-java">// Spring 7 — resilience annotations built-in
+// Enable with @EnableResilientMethods
+@Configuration
+@EnableResilientMethods
+public class AppConfig {}
+
+@Service
+public class OrderService {
+
+    // Limit to max 10 concurrent executions
+    @ConcurrencyLimit(10)
+    @Observed(name = "order.placed")
+    public Order placeOrder(OrderRequest req) {
+        return processOrder(req);
+    }
+    // @ConcurrencyLimit is in
+    // org.springframework.context.annotation
+}</code></pre>
+              </div>
+            </div>
           </td>
         </tr>
 
         <!-- Row 6: Native Image -->
-        <tr class="comparison-row" data-category="tooling" data-type="new" data-id="6" style="cursor:pointer" title="Click to expand">
-          <td><h3 class="comparison-feature" id="native-image">Native Image (experimental → Spring AOT + GraalVM)</h3></td>
+        <tr class="comparison-row" data-category="tooling" data-type="new" data-id="6" data-versions="v5 v6 v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="native-image">Native Image &amp; Startup (experimental → Spring AOT → CRaC)</h3></td>
           <td>No first-class support</td>
           <td>Spring AOT + GraalVM</td>
+          <td>CRaC (Coordinated Restore at Checkpoint) support added alongside GraalVM AOT for JVM-fast restore</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
         </tr>
         <tr id="detail-6" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — no native support</div>
@@ -339,18 +412,49 @@ mvn -Pnative native:compile
 # Custom hints via @ImportRuntimeHints</code></pre>
               </div>
             </div>
+            <p style="margin-top:1.25rem;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Spring 6 → 7</p>
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — GraalVM native only</div>
+                <pre><code class="language-java">// Spring 6 — fast startup via GraalVM native
+// Requires compile-time native build
+// No JVM warm-up path for instant restore
+
+// application.properties:
+// (no CRaC options in Spring 6)</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — CRaC checkpoint/restore added</div>
+                <pre><code class="language-java">// Spring 7 — CRaC support for JVM fast startup
+// Works on Liberica JDK or Azul Zulu with CRaC
+
+// 1. Take a checkpoint (warm JVM snapshot):
+//    java -XX:CRaCCheckpointTo=/opt/checkpoint \
+//         -jar app.jar
+//    After warmup: jcmd &lt;pid&gt; JDK.checkpoint
+
+// 2. Restore instantly from checkpoint:
+//    java -XX:CRaCRestoreFrom=/opt/checkpoint
+
+// Spring stops/restarts Lifecycle beans
+// automatically around the checkpoint.
+// Result: &lt;100ms restore on standard JVM —
+// no native compilation needed!</code></pre>
+              </div>
+            </div>
           </td>
         </tr>
 
         <!-- Row 7: Config Class Proxy -->
-        <tr class="comparison-row" data-category="core" data-type="changed" data-id="7" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="7" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="config-class-proxy">Config Class Proxy (CGLIB → proxyBeanMethods=false)</h3></td>
           <td><code>proxyBeanMethods=true</code> default</td>
           <td><code>proxyBeanMethods=false</code> (lite) available</td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-7" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — CGLIB proxy (default)</div>
@@ -402,14 +506,15 @@ public class AppConfig {
         </tr>
 
         <!-- Row 8: Declarative HTTP Client -->
-        <tr class="comparison-row" data-category="web" data-type="new" data-id="8" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="web" data-type="new" data-id="8" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="declarative-http-client">Declarative HTTP Client (@HttpExchange interface proxies)</h3></td>
           <td><code>RestTemplate</code> + manual <code>@Bean</code></td>
           <td><code>@HttpExchange</code> interface</td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
         </tr>
         <tr id="detail-8" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — manual RestTemplate bean</div>
@@ -470,14 +575,15 @@ GitHubClient gitHubClient(RestClient.Builder b) {
         </tr>
 
         <!-- Row 9: Virtual Threads -->
-        <tr class="comparison-row" data-category="core" data-type="new" data-id="9" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="core" data-type="new" data-id="9" data-versions="v5 v6 v7" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="virtual-threads">Virtual Threads (Spring 6 + Java 21 Project Loom)</h3></td>
           <td>Not supported</td>
           <td>Project Loom integration</td>
+          <td>Improved virtual thread scheduler; default-enabled in Spring Boot 4 (<code>spring.threads.virtual.enabled</code> defaults to <code>true</code>)</td>
           <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
         </tr>
         <tr id="detail-9" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — platform threads only</div>
@@ -516,18 +622,43 @@ public TomcatProtocolHandlerCustomizer&lt;?&gt;
 }</code></pre>
               </div>
             </div>
+            <p style="margin-top:1.25rem;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Spring 6 → 7</p>
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — opt-in virtual threads</div>
+                <pre><code class="language-properties"># Spring 6 — must explicitly enable
+# application.properties:
+spring.threads.virtual.enabled=true
+
+# Tomcat uses virtual thread per request
+# when this property is set</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 / Boot 4 — default-enabled</div>
+                <pre><code class="language-properties"># Spring Boot 4 — virtual threads ON by default
+# No configuration required for most apps.
+# To disable if needed:
+spring.threads.virtual.enabled=false
+
+# Also: improved scheduler pinning detection;
+# structured concurrency preview support;
+# @Async methods automatically use virtual
+# threads when executor is VirtualThreadTaskExecutor</code></pre>
+              </div>
+            </div>
           </td>
         </tr>
 
         <!-- Row 10: Constructor Injection -->
-        <tr class="comparison-row" data-category="core" data-type="changed" data-id="10" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="10" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="constructor-injection">Constructor Injection (implicit in Spring 6 single-constructor)</h3></td>
           <td>All styles equal</td>
           <td>Recommended as primary style</td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-10" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — field injection common</div>
@@ -581,14 +712,15 @@ public class UserService {
         </tr>
 
         <!-- Row 11: RestTemplate deprecated -->
-        <tr class="comparison-row" data-category="web" data-type="deprecated" data-id="11" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="web" data-type="deprecated" data-id="11" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="resttemplate-deprecation">RestTemplate (deprecated → prefer RestClient / WebClient)</h3></td>
           <td>Primary HTTP client</td>
           <td>Deprecated — use <code>RestClient</code></td>
+          <td>Still deprecated; maintained for backward compatibility but no new features</td>
           <td><span class="version-badge" style="background:rgba(139,148,158,0.15);color:#8b949e;border:1px solid #8b949e44">Deprecated</span></td>
         </tr>
         <tr id="detail-11" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — RestTemplate (primary)</div>
@@ -642,14 +774,15 @@ ResponseEntity&lt;User&gt; resp = restClient.post()
         </tr>
 
         <!-- Row 12: MockMvc Testing API -->
-        <tr class="comparison-row" data-category="testing" data-type="changed" data-id="12" style="cursor:pointer" title="Click to expand">
+        <tr class="comparison-row" data-category="testing" data-type="changed" data-id="12" data-versions="v5 v6" style="cursor:pointer" title="Click to expand">
           <td><h3 class="comparison-feature" id="mockmvc-testing">MockMvc Testing API (legacy → MockMvcTester fluent API)</h3></td>
           <td><code>MockMvc</code> + <code>ResultActions</code></td>
           <td><code>MockMvcTester</code> (Spring 6.2) fluent API</td>
+          <td><span style="color:var(--text-muted)">No change from Spring 6</span></td>
           <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
         </tr>
         <tr id="detail-12" style="display:none">
-          <td colspan="4">
+          <td colspan="5">
             <div class="diff-grid">
               <div class="diff-before">
                 <div class="diff-label">Spring 5 — MockMvc + ResultActions</div>
@@ -704,6 +837,311 @@ class UserControllerTest {
           </td>
         </tr>
 
+        <!-- Row 13: Built-in Resilience Module (Spring 7 new) -->
+        <tr class="comparison-row" data-category="core" data-type="new" data-id="13" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="built-in-resilience">Built-in Resilience Module (@Retryable + @ConcurrencyLimit)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>External <code>spring-retry</code> library required</td>
+          <td>Native <code>org.springframework.core.retry</code> package with <code>@Retryable</code>, <code>@ConcurrencyLimit</code>, <code>RetryTemplate</code></td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-13">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — external spring-retry</div>
+                <pre><code class="language-xml">&lt;!-- Spring 6: add spring-retry dependency --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.retry&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-retry&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                <pre><code class="language-java">// Spring 6 — @Retryable from spring-retry
+@EnableRetry
+@Configuration
+public class AppConfig {}
+
+@Service
+public class RemoteService {
+    @Retryable(maxAttempts = 3,
+               backoff = @Backoff(delay = 1000))
+    public Data fetchData() {
+        // retried on exception
+        return callExternalApi();
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — built-in core.retry</div>
+                <pre><code class="language-java">// Spring 7 — no extra dependency needed
+// org.springframework.core.retry is in spring-core
+
+@EnableResilientMethods
+@Configuration
+public class AppConfig {}
+
+@Service
+public class RemoteService {
+
+    // @Retryable from spring-context module
+    @Retryable(maxAttempts = 3)
+    public Data fetchData() {
+        return callExternalApi();
+    }
+
+    // Throttle concurrent calls to this method
+    @ConcurrencyLimit(5)
+    public Report generateReport() {
+        return buildExpensiveReport();
+    }
+}
+
+// Programmatic: org.springframework.core.retry
+RetryTemplate retry = RetryTemplate.builder()
+    .maxAttempts(3)
+    .fixedBackoff(Duration.ofSeconds(1))
+    .build();
+retry.execute(ctx -&gt; callExternalApi());</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 14: Jakarta EE 11 alignment (Spring 7 new) -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="14" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="jakarta-ee-11">Jakarta EE Alignment (EE 10 → EE 11)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>Jakarta EE 10 (Servlet 6.0, JPA 3.1, Bean Validation 3.0)</td>
+          <td>Jakarta EE 11 (Servlet 6.1, JPA 3.2, Bean Validation 3.1)</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-14">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — Jakarta EE 10</div>
+                <pre><code class="language-xml">&lt;!-- Spring 6 targets Jakarta EE 10 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;6.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- JPA 3.1 / Bean Validation 3.0 --&gt;</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — Jakarta EE 11</div>
+                <pre><code class="language-xml">&lt;!-- Spring 7 targets Jakarta EE 11 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
+  &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
+  &lt;version&gt;6.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- JPA 3.2: new query methods, @Find, @Delete --&gt;
+&lt;!-- Bean Validation 3.1: @NotBlank on records  --&gt;
+
+// JPA 3.2 example — @Find annotation
+@Repository
+public interface UserRepository
+        extends JpaRepository&lt;User, Long&gt; {
+
+    // JPA 3.2 named query via @Find
+    @Find
+    Optional&lt;User&gt; byEmail(String email);
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 15: Jackson 3 (Spring 7 changed) -->
+        <tr class="comparison-row" data-category="core" data-type="changed" data-id="15" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="jackson-3-support">Jackson Version (2.x → 3.x required)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>Jackson 2.x (2.14+)</td>
+          <td>Jackson 3.x default; Jackson 2.x retained but deprecated (removed in 7.2)</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-15">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — Jackson 2.x</div>
+                <pre><code class="language-xml">&lt;!-- Spring 6 — Jackson 2.x --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+  &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+  &lt;version&gt;2.17.x&lt;/version&gt;
+&lt;/dependency&gt;
+
+// @JsonProperty, @JsonAlias work as expected
+// No breaking changes to serialization model</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — Jackson 3.x</div>
+                <pre><code class="language-xml">&lt;!-- Spring 7 — Jackson 3.x (breaking change) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+  &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+  &lt;version&gt;3.0.x&lt;/version&gt;
+&lt;/dependency&gt;
+
+// Jackson 3 groupId changed:
+//   com.fasterxml.jackson → tools.jackson
+// Core API changes: ObjectMapper, ValueType
+// JsonNode traversal API updated
+// Spring 7 MappingJackson2HttpMessageConverter
+//   updated to Jackson 3 internally</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 16: JUnit 4 removal (Spring 7 removed) -->
+        <tr class="comparison-row" data-category="testing" data-type="removed" data-id="16" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="junit4-removal">JUnit 4 Support Removed</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>JUnit 4 + JUnit Jupiter (5) both supported</td>
+          <td>JUnit 4 support fully removed; JUnit Jupiter 5.x only</td>
+          <td><span class="version-badge" style="background:rgba(248,81,73,0.15);color:#f85149;border:1px solid #f8514944">Removed</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-16">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — JUnit 4 still works</div>
+                <pre><code class="language-java">// Spring 6 — JUnit 4 tests still run
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class UserServiceTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    public void testRegister() {
+        // JUnit 4 @Test with no parentheses
+        User user = userService.register("alice");
+        Assert.assertNotNull(user);
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — JUnit Jupiter (5) only</div>
+                <pre><code class="language-java">// Spring 7 — migrate to JUnit Jupiter
+// spring-test no longer pulls junit:junit
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+class UserServiceTest {
+
+    @Autowired
+    UserService userService;
+
+    @Test
+    void register() {
+        // JUnit 5: no public modifier needed
+        User user = userService.register("alice");
+        assertThat(user).isNotNull();
+        // Use Assertions from JUnit 5 or AssertJ
+    }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 17: CRaC Checkpoint Restore (Spring 7 new) -->
+        <tr class="comparison-row" data-category="tooling" data-type="new" data-id="17" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="crac-checkpoint-restore">CRaC — Coordinated Restore at Checkpoint</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>No CRaC support; GraalVM native only for fast startup</td>
+          <td>First-class CRaC integration via <code>Lifecycle</code> stop/start hooks; JVM-based sub-100ms restore</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-17">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — no CRaC, GraalVM native only</div>
+                <pre><code class="language-bash"># Spring 6 — fast startup via native image only
+# GraalVM compilation required (slow build):
+mvn -Pnative native:compile
+
+# Result: native binary, ~50ms startup
+# But: no JVM profiling, native image maintenance,
+#      platform-specific binaries</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — CRaC checkpoint + restore</div>
+                <pre><code class="language-bash"># Spring 7 — CRaC on standard JVM
+# Requires CRaC-enabled JDK (Liberica / Azul)
+
+# Step 1: Start app and take checkpoint
+java -XX:CRaCCheckpointTo=/checkpoint -jar app.jar
+# After warmup / HTTP warm request:
+jcmd $(pgrep java) JDK.checkpoint
+
+# Step 2: Restore from snapshot (instant)
+java -XX:CRaCRestoreFrom=/checkpoint
+# &lt;100ms restore time on standard JVM!
+
+# Spring auto-manages Lifecycle beans:
+# stop() before checkpoint, start() after restore
+# No code changes needed in most Spring apps</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 18: HttpHeaders API change (Spring 7 changed) -->
+        <tr class="comparison-row" data-category="web" data-type="changed" data-id="18" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="http-headers-api-change">HttpHeaders API (no longer extends MultiValueMap)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td><code>HttpHeaders</code> extends <code>MultiValueMap&lt;String, String&gt;</code></td>
+          <td><code>HttpHeaders</code> no longer extends <code>MultiValueMap</code>; use <code>asMultiValueMap()</code> (deprecated bridge)</td>
+          <td><span class="version-badge" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid #d2992244">Changed</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-18">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — HttpHeaders is a MultiValueMap</div>
+                <pre><code class="language-java">// Spring 6 — HttpHeaders extends MultiValueMap
+HttpHeaders headers = new HttpHeaders();
+headers.add("X-Request-ID", "abc123");
+
+// Works: HttpHeaders used as MultiValueMap
+MultiValueMap&lt;String, String&gt; map = headers;
+map.set("Content-Type",
+    MediaType.APPLICATION_JSON_VALUE);
+
+// Passed directly where MultiValueMap expected:
+restTemplate.exchange(uri, HttpMethod.GET,
+    new HttpEntity&lt;&gt;(headers), String.class);</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — use asMultiValueMap() bridge</div>
+                <pre><code class="language-java">// Spring 7 — HttpHeaders no longer extends
+//            MultiValueMap (breaking change!)
+HttpHeaders headers = new HttpHeaders();
+headers.add("X-Request-ID", "abc123");
+
+// Compile error if assigned to MultiValueMap:
+// MultiValueMap&lt;String, String&gt; map = headers; // ❌
+
+// Use the bridge method (marked @Deprecated):
+MultiValueMap&lt;String, String&gt; map =
+    headers.asMultiValueMap(); // deprecated bridge
+
+// Preferred: use HttpHeaders API directly:
+headers.set("Content-Type",
+    MediaType.APPLICATION_JSON_VALUE);
+restClient.get().uri("/api")
+    .headers(h -&gt; h.addAll(headers))
+    .retrieve().body(String.class);</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
       </tbody>
     </table>
     </div>
@@ -712,21 +1150,23 @@ class UserControllerTest {
     <h2>Version Comparison Cheatsheet</h2>
     <table class="cheat-table">
       <thead>
-        <tr><th>Topic</th><th>Spring 5 (javax.*)</th><th>Spring 6 (jakarta.*)</th><th>Type</th></tr>
+        <tr><th>Topic</th><th>Spring 5 (javax.*)</th><th>Spring 6 (jakarta.*)</th><th>Spring 7</th><th>Type</th></tr>
       </thead>
       <tbody>
-        <tr><td>Namespace</td><td>javax.servlet, javax.persistence</td><td>jakarta.servlet, jakarta.persistence</td><td>Changed</td></tr>
-        <tr><td>Java baseline</td><td>Java 8+</td><td>Java 17+ (LTS required)</td><td>Changed</td></tr>
-        <tr><td>Servlet API</td><td>Servlet 4 (javax)</td><td>Servlet 6 (jakarta)</td><td>Changed</td></tr>
-        <tr><td>HTTP clients</td><td>RestTemplate (imperative)</td><td>@HttpExchange (declarative, native HTTP)</td><td>New</td></tr>
-        <tr><td>Observability</td><td>Actuator metrics only</td><td>Micrometer Observation API (@Observed)</td><td>New</td></tr>
-        <tr><td>Native images</td><td>Experimental (Spring Native project)</td><td>First-class GraalVM + Spring AOT built-in</td><td>Changed</td></tr>
-        <tr><td>Error responses</td><td>Custom error body (no standard)</td><td>ProblemDetail (RFC 7807 / RFC 9457)</td><td>New</td></tr>
-        <tr><td>RestTemplate</td><td>Primary REST client</td><td>Deprecated — prefer WebClient / HTTP interfaces</td><td>Deprecated</td></tr>
-        <tr><td>WebFlux Kotlin</td><td>Coroutines support (limited)</td><td>Full coroutines + Flow integration</td><td>Changed</td></tr>
-        <tr><td>Testing AOT</td><td>n/a</td><td>@SpringBootTest with native/AOT mode support</td><td>New</td></tr>
-        <tr><td>Records support</td><td>Workarounds needed</td><td>First-class Java 17 records in beans</td><td>Changed</td></tr>
-        <tr><td>Security co-evolution</td><td>Spring Security 5 (WebSecurityConfigurerAdapter)</td><td>Spring Security 6 (component-based SecurityFilterChain)</td><td>Changed</td></tr>
+        <tr><td>Namespace</td><td>javax.servlet, javax.persistence</td><td>jakarta.servlet, jakarta.persistence</td><td>No change</td><td>Changed</td></tr>
+        <tr><td>Java baseline</td><td>Java 8+</td><td>Java 17+ (LTS required)</td><td>Java 17+ min; Java 21+ recommended</td><td>Changed</td></tr>
+        <tr><td>Jakarta EE level</td><td>EE 8 (javax)</td><td>EE 10 (Servlet 6.0, JPA 3.1)</td><td>EE 11 (Servlet 6.1, JPA 3.2, BV 3.1)</td><td>Changed</td></tr>
+        <tr><td>HTTP clients</td><td>RestTemplate (imperative)</td><td>@HttpExchange (declarative, native HTTP)</td><td>No change</td><td>New</td></tr>
+        <tr><td>Observability</td><td>Actuator metrics only</td><td>Micrometer Observation API (@Observed)</td><td>@ConcurrencyLimit added via @EnableResilientMethods</td><td>Changed</td></tr>
+        <tr><td>Native images</td><td>Experimental (Spring Native project)</td><td>First-class GraalVM + Spring AOT built-in</td><td>CRaC (checkpoint/restore) added alongside AOT</td><td>Changed</td></tr>
+        <tr><td>Error responses</td><td>Custom error body (no standard)</td><td>ProblemDetail (RFC 7807 / RFC 9457)</td><td>No change</td><td>New</td></tr>
+        <tr><td>RestTemplate</td><td>Primary REST client</td><td>Deprecated — prefer WebClient / HTTP interfaces</td><td>Still deprecated, maintained for compatibility</td><td>Deprecated</td></tr>
+        <tr><td>Resilience</td><td>External spring-retry library</td><td>External spring-retry library</td><td>Built-in org.springframework.core.retry; @Retryable</td><td>New</td></tr>
+        <tr><td>Jackson version</td><td>Jackson 2.x</td><td>Jackson 2.x (2.14+)</td><td>Jackson 3.x default; 2.x deprecated (groupId: tools.jackson)</td><td>Changed</td></tr>
+        <tr><td>JUnit support</td><td>JUnit 4 + 5</td><td>JUnit 4 + JUnit Jupiter 5</td><td>JUnit 4 removed; JUnit Jupiter 5 only</td><td>Removed</td></tr>
+        <tr><td>Virtual threads</td><td>Not supported</td><td>Opt-in via spring.threads.virtual.enabled=true</td><td>Default-enabled in Spring Boot 4</td><td>Changed</td></tr>
+        <tr><td>HttpHeaders API</td><td>Extends MultiValueMap</td><td>Extends MultiValueMap&lt;String,String&gt;</td><td>No longer extends MultiValueMap; use asMultiValueMap()</td><td>Changed</td></tr>
+        <tr><td>Security co-evolution</td><td>Spring Security 5 (WebSecurityConfigurerAdapter)</td><td>Spring Security 6 (component-based SecurityFilterChain)</td><td>Spring Security 7; AntPathRequestMatcher removed</td><td>Changed</td></tr>
       </tbody>
     </table>
   </section>
@@ -739,6 +1179,7 @@ class UserControllerTest {
 <script>
 (function(){
   const rows = document.querySelectorAll('tr.comparison-row');
+  let activeVersionFilter = 'all';
 
   function updateCount() {
     const visible = document.querySelectorAll('tr.comparison-row:not([style*="display: none"]):not([style*="display:none"])').length;
@@ -750,8 +1191,11 @@ class UserControllerTest {
     const cat = document.getElementById('filter-category').value;
     const type = document.getElementById('filter-type').value;
     rows.forEach(row => {
+      const versions = (row.dataset.versions || '').split(' ');
+      const versionMatch = activeVersionFilter === 'all' || versions.includes(activeVersionFilter);
       const show = (cat === 'all' || row.dataset.category === cat) &&
-                   (type === 'all' || row.dataset.type === type);
+                   (type === 'all' || row.dataset.type === type) &&
+                   versionMatch;
       row.style.display = show ? '' : 'none';
       const detail = document.getElementById('detail-' + row.dataset.id);
       if(detail && !show) detail.style.display = 'none';
@@ -761,6 +1205,22 @@ class UserControllerTest {
 
   document.getElementById('filter-category').addEventListener('change', applyFilters);
   document.getElementById('filter-type').addEventListener('change', applyFilters);
+
+  // Version filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.style.background = 'var(--surface)';
+        b.style.color = 'var(--text)';
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      btn.style.background = 'var(--accent, #58a6ff)';
+      btn.style.color = '#fff';
+      activeVersionFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
 
   rows.forEach(row => {
     row.addEventListener('click', () => {

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Boot</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Boot</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-boot3">Spring Boot 3.x</span>
+      <span class="version-badge badge-boot4">Spring Boot 4.x</span>
+    </div>
+
+    <p>Spring Boot removes the boilerplate configuration tax of plain Spring Framework by adding three complementary layers on top: <strong>auto-configuration</strong> that detects what is on the classpath and wires sensible beans automatically, <strong>embedded server support</strong> (Tomcat, Jetty, or Undertow packaged inside the jar), and <strong>opinionated starter dependencies</strong> that pull in a curated, tested set of libraries for each feature area. Together these let a team go from zero to a running production application in minutes, without ever touching an XML context file or writing their own <code>DispatcherServlet</code> registration.</p>
+
+    <p>Spring Boot also ships with <strong>production-ready defaults</strong> — health endpoints, metrics via Micrometer, structured logging, and graceful shutdown — all enabled or tunable through a single <code>application.properties</code> (or YAML) file. The framework follows a <em>convention-over-configuration</em> philosophy: the defaults are chosen to work for the majority of applications, but every default can be overridden when your requirements differ.</p>
+
+    <div class="callout info">
+      <strong>Spring Boot vs Spring Framework</strong>
+      Spring Boot is an opinionated layer that sits on top of Spring Framework, providing auto-configuration and embedded server support to eliminate boilerplate setup — it uses Spring internally and does not replace it; any Spring bean, annotation, or module you already know continues to work exactly the same way.
+    </div>
+
+    <h2 id="version-timeline">Version Timeline</h2>
+    <p>Spring Boot has followed a roughly four-year major-version cadence since its first GA release in April 2014, with each major version tracking a new Spring Framework generation and raising the Java baseline.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 130" xmlns="http://www.w3.org/2000/svg" aria-label="Spring Boot version timeline" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <!-- Horizontal baseline -->
+        <line x1="60" y1="50" x2="740" y2="50" stroke="var(--border)" stroke-width="2"/>
+
+        <!-- Boot 1.0 - Apr 2014 -->
+        <circle cx="100" cy="50" r="7" fill="var(--text-muted)"/>
+        <text x="100" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">1.0</text>
+        <text x="100" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Apr 2014</text>
+        <text x="100" y="90" text-anchor="middle" font-size="10" fill="var(--text-muted)">Spring 4 · Java 6</text>
+
+        <!-- Boot 2.0 - Mar 2018 -->
+        <circle cx="280" cy="50" r="7" fill="var(--accent)"/>
+        <text x="280" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">2.0</text>
+        <text x="280" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Mar 2018</text>
+        <text x="280" y="90" text-anchor="middle" font-size="10" fill="var(--text-muted)">Spring 5 · Java 8</text>
+
+        <!-- Boot 3.0 - Nov 2022 -->
+        <circle cx="520" cy="50" r="9" fill="var(--success)"/>
+        <text x="520" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">3.0</text>
+        <text x="520" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2022</text>
+        <text x="520" y="90" text-anchor="middle" font-size="10" fill="var(--text-muted)">Spring 6 · Java 17</text>
+
+        <!-- Boot 4.0 - Nov 2025 -->
+        <circle cx="700" cy="50" r="9" fill="var(--warning)"/>
+        <text x="700" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">4.0</text>
+        <text x="700" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2025</text>
+        <text x="700" y="90" text-anchor="middle" font-size="10" fill="var(--text-muted)">Spring 7 · Java 17</text>
+
+        <!-- Legend -->
+        <circle cx="150" cy="115" r="5" fill="var(--success)"/>
+        <text x="162" y="119" font-size="11" fill="var(--text-muted)">Spring Boot 3.x (Spring 6, Java 17+, Jakarta EE 9)</text>
+        <circle cx="490" cy="115" r="5" fill="var(--warning)"/>
+        <text x="502" y="119" font-size="11" fill="var(--text-muted)">Spring Boot 4.x (Spring 7, Java 17+, Jakarta EE 11)</text>
+      </svg>
+    </div>
+
+    <h2 id="architecture-overview">Architecture Overview</h2>
+    <p>Spring Boot layers opinionated defaults on top of Spring Framework. The diagram below shows the dependency stack from your application code down to the core IoC container.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" aria-label="Spring Boot architecture layers" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--border)"/>
+          </marker>
+        </defs>
+
+        <!-- Layer 3: Your Application (top) -->
+        <rect x="60" y="20" width="380" height="50" rx="8" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="250" y="42" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent)">Your Application</text>
+        <text x="250" y="60" text-anchor="middle" font-size="12" fill="var(--text-muted)">@SpringBootApplication</text>
+
+        <!-- Arrow: App → Boot -->
+        <line x1="250" y1="70" x2="250" y2="88" stroke="var(--border)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Layer 2: Spring Boot (middle) -->
+        <rect x="60" y="90" width="380" height="55" rx="8" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="250" y="113" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Spring Boot</text>
+        <text x="250" y="132" text-anchor="middle" font-size="11" fill="var(--text-muted)">Auto-Configuration · Starters · Embedded Server</text>
+
+        <!-- Arrow: Boot → Framework -->
+        <line x1="250" y1="145" x2="250" y2="163" stroke="var(--border)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- Layer 1: Spring Framework (bottom) -->
+        <rect x="60" y="165" width="380" height="45" rx="8" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="250" y="185" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Spring Framework</text>
+        <text x="250" y="202" text-anchor="middle" font-size="11" fill="var(--text-muted)">IoC · DI · AOP · Web · Data</text>
+      </svg>
+    </div>
+
+    <h2 id="explore-the-guide">Explore the Guide</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0">
+      <a href="boot3-features.html" class="feature-card" style="text-decoration:none">
+        <h3 id="spring-boot-3-features">Spring Boot 3 Features</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Auto-configuration, native image, observability, security — Spring 6 / Java 17 baseline</p>
+      </a>
+      <a href="boot4-features.html" class="feature-card" style="text-decoration:none">
+        <h3 id="spring-boot-4-features">Spring Boot 4 Features</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Modularized jars, first-class Java 25 support, API versioning, HTTP service clients — Spring 7 baseline</p>
+      </a>
+      <a href="version-comparison.html" class="feature-card" style="text-decoration:none">
+        <h3 id="version-comparison">Version Comparison</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Side-by-side diff of Spring Boot 3.x vs 4.x — API changes, migration guide</p>
+      </a>
+      <a href="auto-configuration.html" class="feature-card" style="text-decoration:none">
+        <h3 id="auto-configuration">Auto-Configuration</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">How @EnableAutoConfiguration works, @Conditional annotations, building custom starters</p>
+      </a>
+      <a href="production.html" class="feature-card" style="text-decoration:none">
+        <h3 id="production-tooling">Production &amp; Tooling</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Actuator health groups, Micrometer metrics, containerization, Testcontainers, graceful shutdown</p>
+      </a>
+    </div>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

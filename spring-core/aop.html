@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AOP Deep Dive</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AOP Deep Dive</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v7">Spring 5/6/7</span>
+    </div>
+    <p>Aspect-Oriented Programming (AOP) separates <em>cross-cutting concerns</em> — logging, security, transactions, caching, metrics — from business logic. Instead of scattering the same boilerplate across dozens of classes, you write it once in an <strong>Aspect</strong> and declare where it should apply. Spring AOP uses proxies to weave this behaviour at runtime.</p>
+
+    <!-- Core concepts -->
+    <div class="feature-card">
+      <h3 id="aop-concepts">Core Concepts</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Term</th><th>Definition</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Aspect</strong></td><td>A module encapsulating a cross-cutting concern</td><td>A <code>@Aspect</code> class for logging</td></tr>
+            <tr><td><strong>Advice</strong></td><td>Action taken at a join point — the "what"</td><td><code>@Before</code>, <code>@Around</code>, <code>@After</code></td></tr>
+            <tr><td><strong>Pointcut</strong></td><td>Predicate that matches join points — the "where"</td><td><code>execution(* com.example.service.*.*(..))</code></td></tr>
+            <tr><td><strong>Join Point</strong></td><td>A point in execution where advice <em>could</em> be applied</td><td>Method execution (only type in Spring AOP)</td></tr>
+            <tr><td><strong>Target</strong></td><td>The real object being advised</td><td>Your <code>@Service</code> bean</td></tr>
+            <tr><td><strong>Proxy</strong></td><td>The wrapper object Spring creates to apply advice</td><td>CGLIB or JDK proxy of your bean</td></tr>
+            <tr><td><strong>Weaving</strong></td><td>Process of linking aspects to target objects</td><td>Spring does this at context creation (runtime)</td></tr>
+            <tr><td><strong>Introduction</strong></td><td>Adding new interfaces/methods to a target class</td><td><code>@DeclareParents</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-setup">Setup &amp; First Aspect</button>
+        <button class="tab-btn" data-tab="tab-advice">Advice Types</button>
+        <button class="tab-btn" data-tab="tab-pointcut">Pointcut Expressions</button>
+        <button class="tab-btn" data-tab="tab-joinpoint">JoinPoint &amp; ProceedingJoinPoint</button>
+        <button class="tab-btn" data-tab="tab-ordering">Ordering &amp; Scope</button>
+        <button class="tab-btn" data-tab="tab-patterns">Real-World Patterns</button>
+      </div>
+
+      <!-- ═══ TAB: SETUP ═══ -->
+      <div class="tab-panel active" id="tab-setup">
+
+        <div class="feature-card">
+          <h3 id="aop-dependency">Dependency</h3>
+          <p>Spring AOP is included in <code>spring-context</code>. In Spring Boot, just add the AOP starter — it also enables <code>@EnableAspectJAutoProxy</code> automatically (you don't need to add the annotation yourself in Boot).</p>
+          <pre><code class="language-xml">&lt;!-- Maven --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+          <pre><code class="language-kotlin">// Gradle
+implementation("org.springframework.boot:spring-boot-starter-aop")</code></pre>
+          <pre><code class="language-java">// Without Spring Boot — enable manually:
+@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig { }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="aop-first-aspect">Your First Aspect</h3>
+          <p>An aspect is a Spring bean annotated with both <code>@Aspect</code> and <code>@Component</code>. <code>@Aspect</code> marks it as an AspectJ aspect; <code>@Component</code> registers it in the application context so Spring can detect it.</p>
+          <pre><code class="language-java">import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    // Pointcut: any public method in any class under com.example.service
+    @Pointcut("execution(public * com.example.service.*.*(..))")
+    public void serviceLayer() {}    // empty method — just a named pointcut
+
+    @Before("serviceLayer()")
+    public void logBefore(JoinPoint jp) {
+        System.out.printf("[BEFORE] %s.%s%n",
+            jp.getTarget().getClass().getSimpleName(),
+            jp.getSignature().getName());
+    }
+
+    @AfterReturning(pointcut = "serviceLayer()", returning = "result")
+    public void logAfterReturning(JoinPoint jp, Object result) {
+        System.out.printf("[RETURNED] %s → %s%n",
+            jp.getSignature().getName(), result);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="aop-vs-aspectj">Spring AOP vs AspectJ</h3>
+          <p>Spring AOP is a <em>proxy-based</em> subset of AOP. Full AspectJ supports compile-time or load-time weaving and can intercept constructors, field access, and static methods. Spring AOP only intercepts <strong>method execution on Spring-managed beans</strong> — which covers 95% of real-world use cases.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th></th><th>Spring AOP</th><th>Full AspectJ</th></tr></thead>
+              <tbody>
+                <tr><td>Weaving time</td><td>Runtime (proxy creation)</td><td>Compile-time or load-time</td></tr>
+                <tr><td>Join point types</td><td>Method execution only</td><td>Method, constructor, field, static init, …</td></tr>
+                <tr><td>Self-invocation</td><td>❌ Not intercepted</td><td>✅ Intercepted</td></tr>
+                <tr><td>Non-Spring objects</td><td>❌ Only Spring beans</td><td>✅ Any object</td></tr>
+                <tr><td>Setup complexity</td><td>Low (starter + annotation)</td><td>High (compiler plugin or agent)</td></tr>
+                <tr><td>Performance</td><td>Good (proxy overhead)</td><td>Best (bytecode woven in)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-setup -->
+
+      <!-- ═══ TAB: ADVICE ═══ -->
+      <div class="tab-panel" id="tab-advice">
+
+        <div class="feature-card">
+          <h3 id="advice-before">@Before</h3>
+          <p>Runs before the method executes. Cannot prevent the method from running (use <code>@Around</code> for that). If <code>@Before</code> advice throws an exception, the target method is not called.</p>
+          <pre><code class="language-java">@Before("execution(* com.example.service.*.*(..))")
+public void checkAuth(JoinPoint jp) {
+    // Runs before every service method
+    // Throwing here prevents the target method from executing
+    if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+        throw new AccessDeniedException("Not authenticated");
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="advice-after">@After, @AfterReturning, @AfterThrowing</h3>
+          <p><code>@After</code> is a "finally" block — fires whether the method returned normally or threw. <code>@AfterReturning</code> fires only on normal return and can bind the return value. <code>@AfterThrowing</code> fires only on exception and can bind the exception.</p>
+          <pre><code class="language-java">// @After — always fires (like finally)
+@After("execution(* com.example.service.*.*(..))")
+public void auditAlways(JoinPoint jp) {
+    log.info("Method completed: {}", jp.getSignature().toShortString());
+}
+
+// @AfterReturning — only on success; 'returning' binds the return value
+@AfterReturning(
+    pointcut  = "execution(* com.example.service.UserService.find*(..))",
+    returning = "result"          // must match parameter name below
+)
+public void cacheResult(JoinPoint jp, Object result) {
+    if (result != null) {
+        cache.put(cacheKey(jp), result);
+    }
+}
+
+// @AfterThrowing — only on exception; 'throwing' binds the exception
+@AfterThrowing(
+    pointcut  = "execution(* com.example.service.*.*(..))",
+    throwing  = "ex"
+)
+public void logError(JoinPoint jp, Exception ex) {
+    log.error("Exception in {}: {}", jp.getSignature().getName(), ex.getMessage());
+    // Note: you cannot suppress the exception here — use @Around for that
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="advice-around">@Around (Most Powerful)</h3>
+          <p><code>@Around</code> wraps the entire method. You control whether and when to call <code>proceed()</code> — the real method. You can modify arguments, modify the return value, catch and swallow exceptions, add retry logic, or measure elapsed time. The <code>ProceedingJoinPoint</code> is only available in <code>@Around</code>.</p>
+          <pre><code class="language-java">@Around("execution(* com.example.service.*.*(..))")
+public Object measureTime(ProceedingJoinPoint pjp) throws Throwable {
+    long start = System.currentTimeMillis();
+    try {
+        Object result = pjp.proceed();          // call the real method
+        long elapsed = System.currentTimeMillis() - start;
+        log.info("{} took {}ms", pjp.getSignature().getName(), elapsed);
+        return result;                          // return its result (or modify it)
+    } catch (Throwable t) {
+        log.error("Failed: {}", pjp.getSignature().getName(), t);
+        throw t;                               // re-throw (or return a fallback)
+    }
+}
+
+// Modify arguments before proceeding
+@Around("execution(* com.example.service.UserService.save(..))")
+public Object trimArgs(ProceedingJoinPoint pjp) throws Throwable {
+    Object[] args = pjp.getArgs();
+    if (args[0] instanceof User u) {
+        u.setName(u.getName().trim());         // modify in-place
+    }
+    return pjp.proceed(args);                 // pass modified args
+}
+
+// Retry logic
+@Around("@annotation(com.example.Retryable)")
+public Object retry(ProceedingJoinPoint pjp) throws Throwable {
+    int attempts = 3;
+    while (attempts-- > 0) {
+        try {
+            return pjp.proceed();
+        } catch (TransientException e) {
+            if (attempts == 0) throw e;
+            Thread.sleep(200);
+        }
+    }
+    throw new IllegalStateException("unreachable");
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="advice-execution-order">Advice Execution Order Within One Aspect</h3>
+          <p>When multiple advice types apply to the same method from the same aspect, the execution order is well-defined. <code>@Around</code> is outermost — it wraps everything else.</p>
+          <pre><code class="language-text">→ @Around (before proceed)
+  → @Before
+    → target method executes
+  ← @AfterReturning (or @AfterThrowing)
+  ← @After
+← @Around (after proceed / return result)</code></pre>
+        </div>
+
+      </div><!-- /tab-advice -->
+
+      <!-- ═══ TAB: POINTCUT ═══ -->
+      <div class="tab-panel" id="tab-pointcut">
+
+        <div class="feature-card">
+          <h3 id="pc-execution">execution() — Method Signature Matching</h3>
+          <p>The most common pointcut designator. Matches method executions by return type, class, method name, and parameters.</p>
+          <pre><code class="language-java">// Pattern:
+// execution([modifiers] return-type [declaring-class].method-name(params) [throws])
+//   * = any single token    .. = any number of tokens (in params = any args)
+
+// All public methods in any class
+@Pointcut("execution(public * *(..))")
+
+// All methods in UserService (any return type, any params)
+@Pointcut("execution(* com.example.service.UserService.*(..))")
+
+// All methods in any class under com.example.service and its sub-packages
+@Pointcut("execution(* com.example.service..*.*(..))")
+
+// Methods starting with "get" returning String
+@Pointcut("execution(String com.example..*.get*())")
+
+// Methods with exactly one String parameter
+@Pointcut("execution(* *.*(String))")
+
+// Methods with a long first param and any remaining params
+@Pointcut("execution(* *.*(long, ..))")
+
+// Only void methods
+@Pointcut("execution(void com.example.service.*.*(..))")</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pc-within">within() — Type Matching</h3>
+          <p>Matches all join points <em>within</em> a type or package. Simpler than <code>execution()</code> when you want to target an entire class or package without specifying method details.</p>
+          <pre><code class="language-java">// All methods in UserService class
+@Pointcut("within(com.example.service.UserService)")
+
+// All methods in any class in the service package (not sub-packages)
+@Pointcut("within(com.example.service.*)")
+
+// All methods in any class in service package AND sub-packages
+@Pointcut("within(com.example.service..*)")
+
+// All methods in classes annotated with @Service
+@Pointcut("within(@org.springframework.stereotype.Service *)")</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pc-annotation">@annotation, @within, @args</h3>
+          <p>Annotation-based pointcuts are very common in Spring — they let you create custom marker annotations and apply advice to anything carrying that annotation. This is how <code>@Transactional</code> and <code>@Cacheable</code> work.</p>
+          <pre><code class="language-java">// @annotation: method carries this annotation
+@Pointcut("@annotation(org.springframework.transaction.annotation.Transactional)")
+public void transactional() {}
+
+// Custom annotation example — create once, use everywhere
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Auditable { String action() default ""; }
+
+@Pointcut("@annotation(com.example.Auditable)")
+public void auditable() {}
+
+@Before("auditable()")
+public void audit(JoinPoint jp) {
+    Auditable ann = ((MethodSignature) jp.getSignature())
+                        .getMethod().getAnnotation(Auditable.class);
+    log.info("AUDIT: action={}", ann.action());
+}
+
+// @within: class carries the annotation (applies to all methods in class)
+@Pointcut("@within(org.springframework.stereotype.Service)")
+public void anyServiceBean() {}
+
+// @args: runtime type of the argument carries the annotation
+@Pointcut("@args(com.example.Sensitive)")
+public void methodWithSensitiveArg() {}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pc-bean">bean(), this(), target(), args()</h3>
+          <pre><code class="language-java">// bean(): match by Spring bean name (Spring AOP only, not AspectJ)
+@Pointcut("bean(userService)")
+public void inUserServiceBean() {}
+
+@Pointcut("bean(*Service)")         // wildcard — all beans ending in "Service"
+public void inAnyServiceBean() {}
+
+// this(): the proxy type IS-A the given type
+@Pointcut("this(com.example.service.UserService)")
+
+// target(): the real object (not proxy) IS-A the given type
+@Pointcut("target(com.example.service.UserService)")
+
+// args(): matches by runtime argument types (also used to bind args)
+@Pointcut("args(long, ..)")          // first arg is long</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pc-combining">Combining Pointcuts</h3>
+          <p>Pointcuts compose with <code>&&</code>, <code>||</code>, and <code>!</code>. Named pointcuts in <code>@Pointcut</code> methods can be referenced across aspects.</p>
+          <pre><code class="language-java">@Aspect
+@Component
+public class CommonPointcuts {
+
+    @Pointcut("within(com.example.service..*)")
+    public void inServiceLayer() {}
+
+    @Pointcut("within(com.example.web..*)")
+    public void inWebLayer() {}
+
+    @Pointcut("inServiceLayer() || inWebLayer()")
+    public void inApplicationLayer() {}
+
+    @Pointcut("@annotation(com.example.Auditable) && inServiceLayer()")
+    public void auditableServiceMethods() {}
+
+    // Exclude a package
+    @Pointcut("inApplicationLayer() && !within(com.example.internal..*)")
+    public void externalFacing() {}
+}
+
+// Reference from another aspect using fully-qualified method name:
+@Before("com.example.aspect.CommonPointcuts.inServiceLayer()")
+public void log(JoinPoint jp) { ... }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pc-binding">Binding Parameters from Pointcuts</h3>
+          <p>Pointcut designators can bind method arguments, the annotation instance, and the target object into advice parameters — giving you the actual runtime values without reflection.</p>
+          <pre><code class="language-java">// Bind annotation instance to advice parameter
+@Before("@annotation(auditable)")            // 'auditable' matches param name
+public void audit(JoinPoint jp, Auditable auditable) {
+    log.info("action={}", auditable.action());    // access annotation attributes
+}
+
+// Bind method argument by type (first matching type wins)
+@Before("execution(* *(..)) && args(userId, ..)")
+public void trackUser(long userId) {
+    log.info("Called with userId={}", userId);
+}
+
+// Bind target bean (the real object, not the proxy)
+@Before("execution(* *(..)) && target(service)")
+public void identifyService(UserService service) {
+    log.info("service class: {}", service.getClass().getSimpleName());
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-pointcut -->
+
+      <!-- ═══ TAB: JOINPOINT ═══ -->
+      <div class="tab-panel" id="tab-joinpoint">
+
+        <div class="feature-card">
+          <h3 id="jp-joinpoint">JoinPoint API</h3>
+          <p><code>JoinPoint</code> is available as the first parameter in <code>@Before</code>, <code>@After</code>, <code>@AfterReturning</code>, and <code>@AfterThrowing</code>. It gives you reflective access to the intercepted method call.</p>
+          <pre><code class="language-java">@Before("execution(* com.example.service.*.*(..))")
+public void inspect(JoinPoint jp) {
+
+    // Method signature
+    Signature sig = jp.getSignature();
+    String methodName = sig.getName();                   // "createOrder"
+    String className  = sig.getDeclaringTypeName();      // "com.example.service.OrderService"
+
+    // Cast to MethodSignature for full method info
+    MethodSignature ms = (MethodSignature) jp.getSignature();
+    Method method       = ms.getMethod();
+    String[] paramNames = ms.getParameterNames();        // ["order", "customerId"]
+    Class<?> returnType = ms.getReturnType();            // Order.class
+
+    // Runtime arguments
+    Object[] args = jp.getArgs();                        // actual argument values
+
+    // The proxy object (Spring proxy, not the real bean)
+    Object proxy  = jp.getThis();
+
+    // The real target object
+    Object target = jp.getTarget();
+
+    // Full string representation
+    String full = jp.toLongString();
+    // "execution(public Order com.example.service.OrderService.createOrder(Order))"
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="jp-proceeding">ProceedingJoinPoint (@Around only)</h3>
+          <p><code>ProceedingJoinPoint</code> extends <code>JoinPoint</code> with the ability to call <code>proceed()</code> — which continues down the interceptor chain to the real method. You can also pass modified arguments via <code>proceed(Object[])</code>.</p>
+          <pre><code class="language-java">@Around("execution(* com.example.service.*.*(..))")
+public Object around(ProceedingJoinPoint pjp) throws Throwable {
+
+    // All JoinPoint methods are available
+    log.info("About to call: {}", pjp.getSignature().getName());
+
+    // Get arguments (immutable view)
+    Object[] args = pjp.getArgs();
+
+    // Proceed with original args
+    Object result = pjp.proceed();
+
+    // -- OR -- proceed with modified args
+    args[0] = modify(args[0]);
+    Object result2 = pjp.proceed(args);
+
+    return result;   // must return — @Around controls what the caller receives
+}
+
+// Swallow exception (use carefully)
+@Around("@annotation(com.example.Swallow)")
+public Object swallowExceptions(ProceedingJoinPoint pjp) throws Throwable {
+    try {
+        return pjp.proceed();
+    } catch (Exception e) {
+        log.warn("Swallowed exception in {}", pjp.getSignature().getName(), e);
+        return null;   // return null / default for void methods too
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="jp-annotations">Accessing Annotations Inside Advice</h3>
+          <p>Two ways to read annotation values inside advice — parameter binding (cleaner) and reflection (more flexible).</p>
+          <pre><code class="language-java">// Method 1: parameter binding (no reflection needed)
+@Around("@annotation(cacheable)")
+public Object cacheAround(ProceedingJoinPoint pjp, Cacheable cacheable) throws Throwable {
+    String key = cacheable.cacheNames()[0] + ":" + Arrays.toString(pjp.getArgs());
+    Object cached = cacheManager.getCache(cacheable.cacheNames()[0]).get(key);
+    if (cached != null) return cached;
+    Object result = pjp.proceed();
+    cacheManager.getCache(cacheable.cacheNames()[0]).put(key, result);
+    return result;
+}
+
+// Method 2: reflection via MethodSignature
+@Before("@annotation(com.example.RateLimit)")
+public void rateLimit(JoinPoint jp) {
+    Method method = ((MethodSignature) jp.getSignature()).getMethod();
+    RateLimit rl  = method.getAnnotation(RateLimit.class);
+    rateLimiter.acquire(rl.value());
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-joinpoint -->
+
+      <!-- ═══ TAB: ORDERING ═══ -->
+      <div class="tab-panel" id="tab-ordering">
+
+        <div class="feature-card">
+          <h3 id="order-aspects">Ordering Multiple Aspects</h3>
+          <p>When multiple aspects apply to the same method, their order matters. Security should check before transactions start; logging should be outermost. Use <code>@Order</code> on the aspect class — <strong>lower number = higher priority = outer layer</strong>.</p>
+          <pre><code class="language-java">@Aspect
+@Component
+@Order(1)          // outermost — wraps everything below
+public class LoggingAspect {
+    @Around("com.example.CommonPointcuts.inServiceLayer()")
+    public Object log(ProceedingJoinPoint pjp) throws Throwable {
+        log.info("→ {}", pjp.getSignature().getName());
+        try {
+            return pjp.proceed();
+        } finally {
+            log.info("← {}", pjp.getSignature().getName());
+        }
+    }
+}
+
+@Aspect
+@Component
+@Order(2)          // inside Logging, outside Security and Transaction
+public class MetricsAspect {
+    @Around("com.example.CommonPointcuts.inServiceLayer()")
+    public Object measure(ProceedingJoinPoint pjp) throws Throwable {
+        long t = System.nanoTime();
+        try { return pjp.proceed(); }
+        finally { metrics.record(System.nanoTime() - t); }
+    }
+}
+
+@Aspect
+@Component
+@Order(3)          // innermost (closest to real method)
+public class SecurityAspect {
+    @Before("com.example.CommonPointcuts.inServiceLayer()")
+    public void checkSecurity(JoinPoint jp) {
+        // Security check runs last (innermost), just before real method
+    }
+}</code></pre>
+          <pre><code class="language-text">Execution order for a method call:
+→ LoggingAspect.@Around (before proceed)     [Order=1, outermost]
+  → MetricsAspect.@Around (before proceed)   [Order=2]
+    → SecurityAspect.@Before                 [Order=3]
+      → real method executes
+    ← SecurityAspect.@After (if any)
+  ← MetricsAspect.@Around (after proceed)
+← LoggingAspect.@Around (after proceed)      [outermost returns]</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="order-within-aspect">Advice Order Within One Aspect</h3>
+          <p>When the same aspect has multiple advice methods for the same pointcut, the order within a single aspect is <em>undefined</em> in Spring AOP (depends on JVM method ordering). If the sequence matters, merge them into a single <code>@Around</code> method.</p>
+          <pre><code class="language-java">// ❌ Order between these is undefined (both @Before, same aspect)
+@Before("inServiceLayer()")
+public void log(JoinPoint jp) { ... }
+
+@Before("inServiceLayer()")
+public void audit(JoinPoint jp) { ... }
+
+// ✅ Use @Around to guarantee sequence in one aspect
+@Around("inServiceLayer()")
+public Object logThenAudit(ProceedingJoinPoint pjp) throws Throwable {
+    log(pjp);    // always first
+    audit(pjp);  // always second
+    return pjp.proceed();
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="order-scoped-proxy">Scoped Beans and Proxies</h3>
+          <p>When a shorter-scoped bean (request, session) is injected into a longer-scoped bean (singleton), Spring creates a <em>scoped proxy</em> — a special proxy that looks up the real bean from the scope on each call. Enable with <code>@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)</code>.</p>
+          <pre><code class="language-java">// Request-scoped bean injected into singleton
+@Component
+@Scope(value = WebApplicationContext.SCOPE_REQUEST,
+       proxyMode = ScopedProxyMode.TARGET_CLASS)  // creates a CGLIB scoped proxy
+public class RequestContext {
+    private String correlationId = UUID.randomUUID().toString();
+    public String getCorrelationId() { return correlationId; }
+}
+
+@Service
+public class OrderService {
+    @Autowired
+    private RequestContext ctx;   // injected once — but ctx is a scoped proxy
+
+    public void process() {
+        // Each call: proxy looks up the real RequestContext for THIS request
+        String id = ctx.getCorrelationId();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-ordering -->
+
+      <!-- ═══ TAB: PATTERNS ═══ -->
+      <div class="tab-panel" id="tab-patterns">
+
+        <div class="feature-card">
+          <h3 id="pattern-logging">Pattern: Structured Method Logging</h3>
+          <pre><code class="language-java">@Aspect
+@Component
+@Order(1)
+public class MethodLoggingAspect {
+
+    private static final Logger log = LoggerFactory.getLogger(MethodLoggingAspect.class);
+
+    @Around("@within(org.springframework.stereotype.Service)")
+    public Object logServiceCalls(ProceedingJoinPoint pjp) throws Throwable {
+        String method = pjp.getSignature().toShortString();
+        log.debug("→ {}, args={}", method, Arrays.toString(pjp.getArgs()));
+        long start = System.currentTimeMillis();
+        try {
+            Object result = pjp.proceed();
+            log.debug("← {} [{}ms]", method, System.currentTimeMillis() - start);
+            return result;
+        } catch (Throwable t) {
+            log.error("✗ {} threw {} [{}ms]",
+                method, t.getClass().getSimpleName(),
+                System.currentTimeMillis() - start);
+            throw t;
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pattern-audit">Pattern: Audit Trail with Custom Annotation</h3>
+          <pre><code class="language-java">// 1. Define the annotation
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Audit {
+    String action();
+    String entity() default "";
+}
+
+// 2. Use it in business code
+@Service
+public class AccountService {
+    @Audit(action = "DEBIT", entity = "Account")
+    public void debit(long accountId, BigDecimal amount) { ... }
+}
+
+// 3. Aspect picks it up
+@Aspect
+@Component
+public class AuditAspect {
+
+    @Autowired private AuditLogRepository auditRepo;
+
+    @AfterReturning("@annotation(audit)")
+    public void recordAudit(JoinPoint jp, Audit audit) {
+        String user = SecurityContextHolder.getContext()
+                          .getAuthentication().getName();
+        auditRepo.save(AuditLog.builder()
+            .user(user)
+            .action(audit.action())
+            .entity(audit.entity())
+            .args(Arrays.toString(jp.getArgs()))
+            .timestamp(Instant.now())
+            .build());
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pattern-retry">Pattern: Retry with Backoff</h3>
+          <pre><code class="language-java">@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Retryable {
+    int attempts() default 3;
+    long delayMs() default 500;
+    Class&lt;? extends Throwable&gt;[] on() default {Exception.class};
+}
+
+@Aspect
+@Component
+public class RetryAspect {
+
+    @Around("@annotation(retryable)")
+    public Object retry(ProceedingJoinPoint pjp, Retryable retryable) throws Throwable {
+        int attempts = retryable.attempts();
+        long delay   = retryable.delayMs();
+        Throwable lastException = null;
+
+        for (int i = 0; i < attempts; i++) {
+            try {
+                return pjp.proceed();
+            } catch (Throwable t) {
+                if (!isRetryable(t, retryable.on())) throw t;
+                lastException = t;
+                log.warn("Retry {}/{} for {} due to {}",
+                    i + 1, attempts, pjp.getSignature().getName(),
+                    t.getClass().getSimpleName());
+                if (i < attempts - 1) Thread.sleep(delay * (i + 1)); // exponential
+            }
+        }
+        throw lastException;
+    }
+
+    private boolean isRetryable(Throwable t, Class&lt;? extends Throwable&gt;[] types) {
+        return Arrays.stream(types).anyMatch(c -> c.isInstance(t));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pattern-metrics">Pattern: Micrometer Metrics</h3>
+          <pre><code class="language-java">@Aspect
+@Component
+public class MetricsAspect {
+
+    @Autowired private MeterRegistry registry;
+
+    @Around("@annotation(io.micrometer.core.annotation.Timed)")
+    public Object time(ProceedingJoinPoint pjp) throws Throwable {
+        // Let Micrometer's @Timed annotation handle itself —
+        // but here's how you'd do it manually:
+        String name = "method.execution";
+        String method = pjp.getSignature().toShortString();
+        Timer.Sample sample = Timer.start(registry);
+        String status = "success";
+        try {
+            return pjp.proceed();
+        } catch (Throwable t) {
+            status = "error";
+            throw t;
+        } finally {
+            sample.stop(Timer.builder(name)
+                .tag("method", method)
+                .tag("status", status)
+                .register(registry));
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pattern-self-invoke">Pattern: Solving Self-Invocation</h3>
+          <p>When method A calls method B in the same class and B has <code>@Transactional</code> or <code>@Cacheable</code>, the advice on B is bypassed (proxy not in the call path). Three clean solutions:</p>
+          <pre><code class="language-java">// ❌ Problem: inner call bypasses proxy
+@Service
+public class OrderService {
+    public void processOrder(Order o) {
+        saveOrder(o);          // self-call — @Transactional on saveOrder IGNORED
+    }
+
+    @Transactional(propagation = REQUIRES_NEW)
+    public void saveOrder(Order o) { repo.save(o); }
+}
+
+// ✅ Solution 1: Extract to separate bean
+@Service
+public class OrderPersistenceService {
+    @Transactional(propagation = REQUIRES_NEW)
+    public void saveOrder(Order o) { repo.save(o); }
+}
+
+@Service
+public class OrderService {
+    @Autowired OrderPersistenceService persistence;
+    public void processOrder(Order o) {
+        persistence.saveOrder(o);   // goes through proxy ✅
+    }
+}
+
+// ✅ Solution 2: Self-inject (acceptable for small classes)
+@Service
+public class OrderService {
+    @Lazy @Autowired private OrderService self;  // @Lazy breaks circular dep
+
+    public void processOrder(Order o) {
+        self.saveOrder(o);    // self is the proxy ✅
+    }
+
+    @Transactional(propagation = REQUIRES_NEW)
+    public void saveOrder(Order o) { repo.save(o); }
+}
+
+// ✅ Solution 3: ApplicationContext.getBean (least favourite — framework coupling)
+@Autowired private ApplicationContext ctx;
+public void processOrder(Order o) {
+    ctx.getBean(OrderService.class).saveOrder(o);
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-patterns -->
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>AOP Quick Reference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Annotation / API</th><th>Purpose</th><th>Key Point</th></tr></thead>
+          <tbody>
+            <tr><td><code>@Aspect</code></td><td>Mark class as an aspect</td><td>Also needs <code>@Component</code></td></tr>
+            <tr><td><code>@Pointcut</code></td><td>Named reusable pointcut expression</td><td>Empty method body</td></tr>
+            <tr><td><code>@Before</code></td><td>Run before target method</td><td>Cannot prevent execution</td></tr>
+            <tr><td><code>@After</code></td><td>Run after (finally semantics)</td><td>Fires on success and exception</td></tr>
+            <tr><td><code>@AfterReturning</code></td><td>Run on successful return</td><td>Can bind return value via <code>returning</code></td></tr>
+            <tr><td><code>@AfterThrowing</code></td><td>Run on exception</td><td>Can bind exception via <code>throwing</code>; cannot swallow</td></tr>
+            <tr><td><code>@Around</code></td><td>Wrap entire method</td><td>Must call <code>proceed()</code>; most powerful</td></tr>
+            <tr><td><code>JoinPoint</code></td><td>Access method metadata</td><td>Available in Before/After/AfterReturning/AfterThrowing</td></tr>
+            <tr><td><code>ProceedingJoinPoint</code></td><td>Extend JoinPoint with proceed()</td><td>Only in <code>@Around</code></td></tr>
+            <tr><td><code>execution()</code></td><td>Match by method signature</td><td>Most precise; <code>*</code>=any token, <code>..</code>=any args</td></tr>
+            <tr><td><code>within()</code></td><td>Match by declaring type/package</td><td>Simpler than execution for package-level</td></tr>
+            <tr><td><code>@annotation()</code></td><td>Match methods with annotation</td><td>Can bind annotation instance to param</td></tr>
+            <tr><td><code>@within()</code></td><td>Match all methods on annotated class</td><td>Class-level annotation</td></tr>
+            <tr><td><code>bean()</code></td><td>Match by Spring bean name</td><td>Spring AOP only; supports wildcards</td></tr>
+            <tr><td><code>args()</code></td><td>Match/bind by runtime arg type</td><td>Runtime check (not compile-time)</td></tr>
+            <tr><td><code>@Order(n)</code></td><td>Aspect priority</td><td>Lower = outermost = highest priority</td></tr>
+            <tr><td><code>&&</code> / <code>||</code> / <code>!</code></td><td>Combine pointcuts</td><td>Compose named <code>@Pointcut</code> methods</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

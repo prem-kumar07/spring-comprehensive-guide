@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI Providers</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI Providers</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span>
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+    </div>
+    <p>Spring AI abstracts AI provider differences behind a uniform <code>ChatModel</code> / <code>ChatClient</code> API. Swapping providers requires only a different starter dependency and a set of <code>spring.ai.&lt;provider&gt;.*</code> properties — no application code changes. This page covers setup, available model IDs, and provider-specific features for OpenAI, Anthropic, Ollama, major cloud providers, and popular third-party APIs.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-openai">OpenAI</button>
+        <button class="tab-btn" data-tab="tab-anthropic">Anthropic</button>
+        <button class="tab-btn" data-tab="tab-local">Local (Ollama)</button>
+        <button class="tab-btn" data-tab="tab-cloud">Cloud Providers</button>
+        <button class="tab-btn" data-tab="tab-others">Other Providers</button>
+      </div>
+
+      <!-- ── OpenAI ──────────────────────────────────── -->
+      <div class="tab-panel active" id="tab-openai">
+
+        <div class="feature-card">
+          <h3 id="openai-setup">OpenAI Setup</h3>
+          <p>Add <code>spring-ai-openai-spring-boot-starter</code> to your project. Set your API key via <code>spring.ai.openai.api-key</code>. Spring AI's auto-configuration registers a <code>ChatModel</code> bean backed by the OpenAI API, which is then available to <code>ChatClient.Builder</code>. The default model is <code>gpt-4o</code>; override with <code>spring.ai.openai.chat.options.model</code>.</p>
+
+          <h4>pom.xml (BOM + Starter)</h4>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o
+spring.ai.openai.chat.options.temperature=0.7</code></pre>
+
+          <h4>Basic ChatClient Call</h4>
+          <pre><code class="language-java">@Service
+public class AiService {
+    private final ChatClient chatClient;
+
+    public AiService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a helpful assistant.")
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="openai-model-ids">OpenAI Model IDs</h3>
+          <p>OpenAI provides a range of GPT-4o family and o-series reasoning models. The <code>gpt-4o</code> and <code>gpt-4o-mini</code> models are multimodal (text + vision). The <code>o1</code>, <code>o1-mini</code>, and <code>o3-mini</code> models are reasoning-optimised and support the <code>reasoningEffort</code> option (Spring AI 2.0+). Set the model globally in properties or per-request via <code>OpenAiChatOptions</code>.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># Default model for all calls
+spring.ai.openai.chat.options.model=gpt-4o
+
+# Override per environment
+# spring.ai.openai.chat.options.model=gpt-4o-mini</code></pre>
+
+          <h4>Available Model IDs</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Model ID</th><th>Type</th><th>Context Window</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>gpt-4o</code></td><td>Chat + Vision</td><td>128k tokens</td><td>Recommended general-purpose model</td></tr>
+                <tr><td><code>gpt-4o-mini</code></td><td>Chat + Vision</td><td>128k tokens</td><td>Faster and cheaper than gpt-4o</td></tr>
+                <tr><td><code>o1</code></td><td>Reasoning</td><td>200k tokens</td><td>Extended reasoning, slower</td></tr>
+                <tr><td><code>o1-mini</code></td><td>Reasoning</td><td>128k tokens</td><td>Reasoning model, lower cost</td></tr>
+                <tr><td><code>o3-mini</code></td><td>Reasoning</td><td>200k tokens</td><td>Latest mini reasoning model</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Per-Request Model Override</h4>
+          <pre><code class="language-java">String result = chatClient.prompt()
+    .user("Analyze this complex architecture.")
+    .options(OpenAiChatOptions.builder()
+        .model("gpt-4o")
+        .temperature(0.2)
+        .maxTokens(1024)
+        .build())
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="openai-vision">OpenAI Vision (GPT-4o)</h3>
+          <p><code>gpt-4o</code> and <code>gpt-4o-mini</code> support image input. Attach images to a <code>UserMessage</code> as <code>Media</code> objects. Images can be provided as public URLs (the model fetches them) or as base64-encoded local resources (<code>ClassPathResource</code>, <code>FileSystemResource</code>). Multiple images may be included in a single message. The model returns a text description or answer about the image content.</p>
+
+          <h4>Vision with Image URL</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.Media;
+import org.springframework.util.MimeTypeUtils;
+
+UserMessage message = new UserMessage(
+    "What objects are visible in this image?",
+    List.of(new Media(MimeTypeUtils.IMAGE_JPEG,
+        URI.create("https://example.com/photo.jpg"))));
+
+String answer = chatClient.prompt()
+    .options(OpenAiChatOptions.builder().model("gpt-4o").build())
+    .messages(message)
+    .call()
+    .content();</code></pre>
+
+          <h4>Vision with Local Image File</h4>
+          <pre><code class="language-java">// Base64-encode a local PNG from classpath
+Resource diagram = new ClassPathResource("images/architecture.png");
+
+UserMessage visionMsg = new UserMessage(
+    "Explain the architecture shown in this diagram.",
+    List.of(new Media(MimeTypeUtils.IMAGE_PNG, diagram)));
+
+String explanation = chatClient.prompt()
+    .options(OpenAiChatOptions.builder().model("gpt-4o").build())
+    .messages(visionMsg)
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="openai-reasoning">OpenAI Reasoning Models (o1 / o3)</h3>
+          <p>The <code>o1</code>, <code>o1-mini</code>, and <code>o3-mini</code> models perform internal chain-of-thought reasoning before producing a response. In Spring AI 2.0+ you can control reasoning depth with the <code>reasoningEffort</code> option (<code>low</code>, <code>medium</code>, <code>high</code>). These models do not support <code>temperature</code> — omit it. Reasoning models are slower and more expensive but significantly more accurate on multi-step math, logic, and coding tasks.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.chat.options.model=o3-mini
+spring.ai.openai.chat.options.reasoning-effort=medium</code></pre>
+
+          <h4>Per-Request Reasoning Options</h4>
+          <pre><code class="language-java">import org.springframework.ai.openai.api.OpenAiApi;
+
+String solution = chatClient.prompt()
+    .user("Prove that sqrt(2) is irrational.")
+    .options(OpenAiChatOptions.builder()
+        .model("o3-mini")
+        .reasoningEffort(OpenAiApi.ReasoningEffort.HIGH)
+        .maxCompletionTokens(4096)
+        // Note: temperature is NOT supported for o-series models
+        .build())
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="openai-function-calling">OpenAI Function Calling / Tool Use</h3>
+          <p>OpenAI models support function calling (tool use). In Spring AI, annotate a Spring bean method with <code>@Tool</code> (Spring AI 2.0+) or use <code>FunctionCallback</code> to expose it as a callable tool. The model decides when to invoke the function, Spring AI dispatches the call and feeds the result back automatically. Tool use enables retrieval, computation, and side-effects without manual orchestration.</p>
+
+          <h4>Defining a Tool</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+
+@Component
+public class WeatherService {
+
+    @Tool(description = "Get the current weather for a city")
+    public String getWeather(String city) {
+        // Call a real weather API here
+        return "Sunny, 22°C in " + city;
+    }
+}
+
+// Wire the tool into ChatClient
+@Service
+public class AssistantService {
+    private final ChatClient chatClient;
+
+    public AssistantService(ChatClient.Builder builder,
+                            WeatherService weatherService) {
+        this.chatClient = builder
+            .defaultTools(weatherService)  // register tool bean
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-openai -->
+
+      <!-- ── Anthropic ───────────────────────────────── -->
+      <div class="tab-panel" id="tab-anthropic">
+
+        <div class="feature-card">
+          <h3 id="anthropic-setup">Anthropic Setup</h3>
+          <p>Add <code>spring-ai-anthropic-spring-boot-starter</code> to your project and set <code>spring.ai.anthropic.api-key</code>. Spring AI auto-configures an Anthropic <code>ChatModel</code> using the Claude API. The default model is <code>claude-3-5-sonnet-20241022</code>. The same <code>ChatClient</code> API works unchanged — only the starter and properties differ from OpenAI.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-anthropic-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
+spring.ai.anthropic.chat.options.model=claude-3-5-sonnet-20241022
+spring.ai.anthropic.chat.options.max-tokens=2048</code></pre>
+
+          <h4>Basic Claude Call</h4>
+          <pre><code class="language-java">@Service
+public class ClaudeService {
+    private final ChatClient chatClient;
+
+    public ClaudeService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a helpful assistant.")
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="anthropic-model-ids">Anthropic Model IDs</h3>
+          <p>Anthropic's Claude 3 family covers three tiers: Haiku (fastest, cheapest), Sonnet (balanced), and Opus (most capable). Claude 3.5 Sonnet and the 2025 Claude 3.7 Sonnet add extended thinking. Use the full version string as the model ID. Set globally in properties or per-request via <code>AnthropicChatOptions</code>.</p>
+
+          <h4>Available Models (2025)</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Model ID</th><th>Tier</th><th>Context</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>claude-3-5-sonnet-20241022</code></td><td>Sonnet</td><td>200k tokens</td><td>Best overall Claude 3.5</td></tr>
+                <tr><td><code>claude-3-7-sonnet-20250219</code></td><td>Sonnet</td><td>200k tokens</td><td>Extended thinking support</td></tr>
+                <tr><td><code>claude-3-haiku-20240307</code></td><td>Haiku</td><td>200k tokens</td><td>Fastest, lowest cost</td></tr>
+                <tr><td><code>claude-3-opus-20240229</code></td><td>Opus</td><td>200k tokens</td><td>Most capable Claude 3</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Per-Request Model Override</h4>
+          <pre><code class="language-java">import org.springframework.ai.anthropic.AnthropicChatOptions;
+
+String fastReply = chatClient.prompt()
+    .user("Summarise this in one sentence.")
+    .options(AnthropicChatOptions.builder()
+        .model("claude-3-haiku-20240307")
+        .maxTokens(256)
+        .build())
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="anthropic-streaming-thinking">Anthropic Extended Thinking / Streaming Thinking</h3>
+          <p>Claude 3.7 Sonnet and later models support <em>extended thinking</em>: the model generates internal reasoning tokens before the final answer. In Spring AI 1.1+ / 2.0+, enable this via <code>AnthropicChatOptions.thinkingEnabled(true)</code>. When streaming, the <code>Flux&lt;ChatResponse&gt;</code> emits thinking delta chunks (type <code>THINKING</code>) followed by final answer chunks. Extended thinking increases latency and cost but significantly improves accuracy on hard problems.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.anthropic.chat.options.model=claude-3-7-sonnet-20250219
+spring.ai.anthropic.chat.options.thinking.enabled=true
+spring.ai.anthropic.chat.options.thinking.budget-tokens=5000</code></pre>
+
+          <h4>Streaming with Thinking Deltas</h4>
+          <pre><code class="language-java">import org.springframework.ai.anthropic.AnthropicChatOptions;
+
+Flux&lt;ChatResponse&gt; stream = chatClient.prompt()
+    .user("Solve this step by step: What is 47 * 83?")
+    .options(AnthropicChatOptions.builder()
+        .model("claude-3-7-sonnet-20250219")
+        .thinkingEnabled(true)
+        .budgetTokens(4096)
+        .build())
+    .stream()
+    .chatResponse();
+
+stream.subscribe(response -&gt; {
+    String text = response.getResult().getOutput().getText();
+    // Thinking chunks arrive first; final answer chunks follow
+    if (text != null &amp;&amp; !text.isEmpty()) {
+        System.out.print(text);
+    }
+});</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="anthropic-image-input">Anthropic Image Input (Claude 3+)</h3>
+          <p>Claude 3 and later models (Haiku, Sonnet, Opus) support image input. Spring AI handles base64 encoding automatically when you provide a <code>Resource</code>. Images may be PNG, JPEG, GIF, or WebP. Provide the image alongside a text prompt in a <code>UserMessage</code>. Claude is particularly strong at reading charts, diagrams, and document images.</p>
+
+          <h4>Image Input Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.Media;
+import org.springframework.util.MimeTypeUtils;
+
+// Image from classpath
+Resource chartImage = new ClassPathResource("images/sales-chart.png");
+
+UserMessage msg = new UserMessage(
+    "Describe the trend shown in this chart and identify any anomalies.",
+    List.of(new Media(MimeTypeUtils.IMAGE_PNG, chartImage)));
+
+String analysis = chatClient.prompt()
+    .options(AnthropicChatOptions.builder()
+        .model("claude-3-5-sonnet-20241022")
+        .build())
+    .messages(msg)
+    .call()
+    .content();</code></pre>
+
+          <h4>Multiple Images</h4>
+          <pre><code class="language-java">// Two images in a single message
+Resource before = new ClassPathResource("images/before.png");
+Resource after  = new ClassPathResource("images/after.png");
+
+UserMessage compareMsg = new UserMessage(
+    "What changed between these two screenshots?",
+    List.of(
+        new Media(MimeTypeUtils.IMAGE_PNG, before),
+        new Media(MimeTypeUtils.IMAGE_PNG, after)
+    ));
+
+String diff = chatClient.prompt()
+    .messages(compareMsg)
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="anthropic-tools">Anthropic Tool Use</h3>
+          <p>Claude 3 models support tool use (function calling). Register tools the same way as with OpenAI — Spring AI's abstraction handles the provider-specific wire format automatically. Claude may call the tool zero or more times per turn. Spring AI manages the round-trip: it sends tool results back to Claude and returns the final text response to the caller.</p>
+
+          <h4>Tool Registration (Same API as OpenAI)</h4>
+          <pre><code class="language-java">@Component
+public class DatabaseLookupTool {
+
+    @Tool(description = "Look up a customer record by customer ID")
+    public String lookupCustomer(String customerId) {
+        // Query your database
+        return "{\"name\":\"Alice\", \"plan\":\"pro\", \"since\":\"2023-01\"}";
+    }
+}
+
+@Service
+public class SupportService {
+    private final ChatClient chatClient;
+
+    public SupportService(ChatClient.Builder builder,
+                          DatabaseLookupTool dbTool) {
+        this.chatClient = builder
+            .defaultTools(dbTool)
+            .build();
+    }
+
+    public String handleQuery(String customerId, String question) {
+        return chatClient.prompt()
+            .system("Use tools to look up customer data before answering.")
+            .user("For customer " + customerId + ": " + question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-anthropic -->
+
+      <!-- ── Local (Ollama) ──────────────────────────── -->
+      <div class="tab-panel" id="tab-local">
+
+        <div class="feature-card">
+          <h3 id="ollama-setup">Ollama Local Setup</h3>
+          <p>Ollama runs open-source LLMs locally with zero cloud dependencies. Install the Ollama CLI, pull a model, then add <code>spring-ai-ollama-spring-boot-starter</code>. Set <code>spring.ai.ollama.base-url</code> to the local Ollama server address (default <code>http://localhost:11434</code>). Ollama is ideal for development, air-gapped deployments, and privacy-sensitive workloads.</p>
+
+          <h4>Install and Start</h4>
+          <pre><code class="language-bash"># macOS / Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull a model
+ollama pull llama3.2
+
+# Verify it is running
+ollama list</code></pre>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-ollama-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.ollama.base-url=http://localhost:11434
+spring.ai.ollama.chat.options.model=llama3.2
+spring.ai.ollama.chat.options.temperature=0.7</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="ollama-model-pull">Ollama Model Pull Commands</h3>
+          <p>Use <code>ollama pull &lt;model&gt;</code> to download a model before Spring AI can use it. Ollama stores models locally and serves them from the same daemon process. Pull the specific variant you need: general chat, embeddings, or vision. Models are identified by name; append a tag for specific sizes (e.g. <code>llama3.2:3b</code>, <code>llama3.2:70b</code>).</p>
+
+          <h4>Common Pull Commands</h4>
+          <pre><code class="language-bash"># General-purpose chat models
+ollama pull llama3.2          # Meta Llama 3.2 (3B default)
+ollama pull llama3.2:70b      # 70B parameter variant
+ollama pull mistral           # Mistral 7B
+ollama pull phi4              # Microsoft Phi-4
+
+# Embedding models
+ollama pull nomic-embed-text  # Recommended for RAG pipelines
+ollama pull mxbai-embed-large # High-quality embeddings
+
+# Vision / multimodal models
+ollama pull llava             # LLaVA (image + text)
+ollama pull llava-phi3        # Phi3 + vision
+ollama pull moondream         # Small, fast vision model
+
+# List installed models
+ollama list
+
+# Remove a model
+ollama rm llama3.2</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="ollama-embedding">Ollama Embedding for Local RAG</h3>
+          <p>Ollama also serves embedding models via <code>spring.ai.ollama.embedding.options.model</code>. The <code>nomic-embed-text</code> model produces high-quality 768-dimension embeddings suitable for a local RAG pipeline. Spring AI's <code>OllamaEmbeddingModel</code> implements <code>EmbeddingModel</code>, making it a drop-in replacement for cloud embedding models in a <code>VectorStore</code> configuration.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.ollama.base-url=http://localhost:11434
+spring.ai.ollama.embedding.options.model=nomic-embed-text</code></pre>
+
+          <h4>Local RAG with Ollama Embeddings</h4>
+          <pre><code class="language-java">// EmbeddingModel is auto-configured from Ollama starter
+@Service
+public class LocalRagService {
+    private final ChatClient chatClient;
+    private final VectorStore vectorStore;
+
+    public LocalRagService(ChatClient.Builder builder,
+                           VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(
+                QuestionAnswerAdvisor.builder(vectorStore).build())
+            .build();
+        this.vectorStore = vectorStore;
+    }
+
+    public void ingest(List&lt;Document&gt; docs) {
+        vectorStore.add(docs);  // embedded with nomic-embed-text
+    }
+
+    public String query(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="ollama-multimodal">Ollama Multimodal with LLaVA</h3>
+          <p>Vision-capable models like <code>llava</code>, <code>llava-phi3</code>, and <code>moondream</code> accept image input via the same <code>UserMessage.media()</code> API used for cloud providers. Pull the vision model with <code>ollama pull llava</code>, set it as the active model, and pass a local image resource. LLaVA performs image captioning, visual QA, and OCR-style text extraction entirely on-device.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.ollama.base-url=http://localhost:11434
+spring.ai.ollama.chat.options.model=llava</code></pre>
+
+          <h4>Vision with LLaVA</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.Media;
+import org.springframework.util.MimeTypeUtils;
+
+// Image from local filesystem
+Resource photo = new FileSystemResource("/home/user/photo.jpg");
+
+UserMessage visionMsg = new UserMessage(
+    "Describe what you see in this image.",
+    List.of(new Media(MimeTypeUtils.IMAGE_JPEG, photo)));
+
+String description = chatClient.prompt()
+    .messages(visionMsg)
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="ollama-docker">Running Ollama in Docker</h3>
+          <p>Ollama publishes an official Docker image for containerised environments. Mount a host directory for the model cache so models persist across container restarts. In a Docker Compose setup, Spring Boot can reference the Ollama container by service name. Set <code>spring.ai.ollama.base-url</code> to <code>http://ollama:11434</code> when both services are on the same Docker network. GPU support requires the NVIDIA Container Toolkit.</p>
+
+          <h4>docker-compose.yml</h4>
+          <pre><code class="language-yaml">services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    # GPU support (requires NVIDIA Container Toolkit)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  spring-app:
+    build: .
+    environment:
+      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL: llama3.2
+    depends_on:
+      - ollama
+
+volumes:
+  ollama-data:</code></pre>
+        </div>
+
+      </div><!-- /tab-local -->
+
+      <!-- ── Cloud Providers ────────────────────────── -->
+      <div class="tab-panel" id="tab-cloud">
+
+        <div class="feature-card">
+          <h3 id="bedrock-setup">Amazon Bedrock Setup</h3>
+          <p>Amazon Bedrock provides managed access to models from Anthropic (Claude), Amazon (Titan), Meta (Llama), and others. Use <code>spring-ai-bedrock-converse-spring-boot-starter</code> (Spring AI 2.0), which uses the unified Bedrock Converse API. Authenticate via the standard AWS credential chain — environment variables, instance profile, or an explicit key pair. Enable model access in the AWS Bedrock console before first use.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-bedrock-converse-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># AWS credentials (or use instance profile / env vars)
+spring.ai.bedrock.aws.region=us-east-1
+spring.ai.bedrock.aws.access-key=${AWS_ACCESS_KEY_ID}
+spring.ai.bedrock.aws.secret-key=${AWS_SECRET_ACCESS_KEY}
+
+# Model to use via Bedrock Converse API
+spring.ai.bedrock.converse.chat.options.model=anthropic.claude-3-5-sonnet-20241022-v2:0</code></pre>
+
+          <h4>Using Bedrock Claude via ChatClient</h4>
+          <pre><code class="language-java">// ChatClient.Builder is auto-configured with BedrockConverse model
+@Service
+public class BedrockService {
+    private final ChatClient chatClient;
+
+    public BedrockService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    public String ask(String prompt) {
+        return chatClient.prompt()
+            .user(prompt)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="bedrock-model-ids">Bedrock Model IDs</h3>
+          <p>Bedrock model IDs use a namespaced format: <code>provider.model-version</code>. You must enable model access in the AWS Console for each model before use. The Converse API supports Claude, Llama, Titan, Cohere, and Mistral models. Use <code>BedrockConverseApi</code> model identifiers, not the native provider IDs.</p>
+
+          <h4>Common Bedrock Model IDs</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Model ID</th><th>Provider</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>anthropic.claude-3-5-sonnet-20241022-v2:0</code></td><td>Anthropic</td><td>Claude 3.5 Sonnet via Bedrock</td></tr>
+                <tr><td><code>anthropic.claude-3-haiku-20240307-v1:0</code></td><td>Anthropic</td><td>Fast, low-cost Claude 3 Haiku</td></tr>
+                <tr><td><code>meta.llama3-70b-instruct-v1:0</code></td><td>Meta</td><td>Llama 3 70B</td></tr>
+                <tr><td><code>amazon.titan-text-express-v1</code></td><td>Amazon</td><td>Amazon Titan</td></tr>
+                <tr><td><code>mistral.mistral-large-2402-v1:0</code></td><td>Mistral</td><td>Mistral Large via Bedrock</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gemini-setup">Google Gemini / Vertex AI Setup</h3>
+          <p>Spring AI connects to Google Gemini via the Vertex AI API using <code>spring-ai-vertex-ai-gemini-spring-boot-starter</code>. Authenticate with Application Default Credentials (ADC) using <code>gcloud auth application-default login</code>, or set a service-account key path. Specify your GCP project ID and region. The <code>gemini-2.0-flash</code> model offers fast, cost-effective inference; <code>gemini-1.5-pro</code> has a 1M token context window.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-vertex-ai-gemini-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.vertex.ai.gemini.project-id=${GCP_PROJECT_ID}
+spring.ai.vertex.ai.gemini.location=us-central1
+spring.ai.vertex.ai.gemini.chat.options.model=gemini-2.0-flash
+
+# Or use Gemini Developer API (non-Vertex)
+# spring.ai.google.api-key=${GEMINI_API_KEY}
+# spring.ai.google.gemini.chat.options.model=gemini-2.0-flash</code></pre>
+
+          <h4>Gemini Chat Call</h4>
+          <pre><code class="language-java">@Service
+public class GeminiService {
+    private final ChatClient chatClient;
+
+    public GeminiService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a helpful Google Cloud expert.")
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="azure-openai-setup">Azure OpenAI Setup</h3>
+          <p>Azure OpenAI hosts OpenAI models within Microsoft's cloud infrastructure. Use <code>spring-ai-azure-openai-spring-boot-starter</code>. Unlike the OpenAI starter, you specify an Azure <em>deployment name</em> (not a raw model ID) and your Azure endpoint. API key authentication and Azure Active Directory token authentication are both supported. Azure OpenAI is useful for organisations that require data residency within Azure regions.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-azure-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.azure.openai.endpoint=https://&lt;your-resource&gt;.openai.azure.com/
+spring.ai.azure.openai.api-key=${AZURE_OPENAI_API_KEY}
+
+# Azure uses deployment names, not raw model IDs
+spring.ai.azure.openai.chat.options.deployment-name=gpt-4o-deployment</code></pre>
+
+          <h4>Azure ChatClient Usage</h4>
+          <pre><code class="language-java">// No application code changes — ChatClient.Builder is auto-configured
+@Service
+public class AzureAiService {
+    private final ChatClient chatClient;
+
+    public AzureAiService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    public String complete(String prompt) {
+        return chatClient.prompt()
+            .user(prompt)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gemini-multimodal">Gemini Multimodal (Images, Video, Audio)</h3>
+          <p>Gemini 1.5 Pro and Gemini 2.0 Flash support images, video clips, audio files, and PDFs as input alongside text — all via the same <code>UserMessage.media()</code> pattern. The <code>gemini-1.5-pro</code> model has a 1-million token context window and can reason across very long documents or lengthy video transcripts. Pass the appropriate MIME type with your resource.</p>
+
+          <h4>Image Input with Gemini</h4>
+          <pre><code class="language-java">import org.springframework.util.MimeTypeUtils;
+
+Resource screenshot = new ClassPathResource("images/ui-screenshot.png");
+
+UserMessage msg = new UserMessage(
+    "What UI components are visible and what improvements would you suggest?",
+    List.of(new Media(MimeTypeUtils.IMAGE_PNG, screenshot)));
+
+String review = chatClient.prompt()
+    .options(VertexAiGeminiChatOptions.builder()
+        .model("gemini-2.0-flash")
+        .build())
+    .messages(msg)
+    .call()
+    .content();</code></pre>
+
+          <h4>PDF Document Input</h4>
+          <pre><code class="language-java">MimeType pdfType = MimeTypeUtils.parseMimeType("application/pdf");
+Resource report = new ClassPathResource("docs/annual-report.pdf");
+
+UserMessage docMsg = new UserMessage(
+    "Summarise the key financial highlights from this report.",
+    List.of(new Media(pdfType, report)));
+
+String summary = chatClient.prompt()
+    .options(VertexAiGeminiChatOptions.builder()
+        .model("gemini-1.5-pro")
+        .build())
+    .messages(docMsg)
+    .call()
+    .content();</code></pre>
+        </div>
+
+      </div><!-- /tab-cloud -->
+
+      <!-- ── Other Providers ────────────────────────── -->
+      <div class="tab-panel" id="tab-others">
+
+        <div class="feature-card">
+          <h3 id="mistral-setup">Mistral AI Setup</h3>
+          <p>Mistral AI offers open and proprietary models via its cloud API. Add <code>spring-ai-mistral-ai-spring-boot-starter</code> and set <code>spring.ai.mistralai.api-key</code>. The <code>mistral-large-latest</code> model is Mistral's most capable offering; <code>mistral-small-latest</code> is cost-optimised. Mistral models are strong at code generation, multilingual tasks, and agentic reasoning.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-mistral-ai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.mistralai.api-key=${MISTRAL_API_KEY}
+spring.ai.mistralai.chat.options.model=mistral-large-latest
+spring.ai.mistralai.chat.options.temperature=0.7
+spring.ai.mistralai.chat.options.safe-prompt=false</code></pre>
+
+          <h4>Mistral Chat Call</h4>
+          <pre><code class="language-java">@Service
+public class MistralService {
+    private final ChatClient chatClient;
+
+    public MistralService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    public String generate(String prompt) {
+        return chatClient.prompt()
+            .user(prompt)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="groq-setup">Groq Setup</h3>
+          <p>Groq provides ultra-fast LLM inference via its proprietary LPU hardware. Spring AI supports Groq through <code>spring-ai-groq-spring-boot-starter</code>. Groq serves popular open-source models (Llama 3, Mistral, Gemma) at very high token throughput — ideal for low-latency applications and streaming. Set <code>spring.ai.groq.api-key</code> to your Groq API key from <code>console.groq.com</code>.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-groq-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.groq.api-key=${GROQ_API_KEY}
+spring.ai.groq.chat.options.model=llama-3.3-70b-versatile
+spring.ai.groq.chat.options.temperature=0.6</code></pre>
+
+          <h4>Fast Streaming with Groq</h4>
+          <pre><code class="language-java">// Groq's LPU delivers tokens extremely fast — ideal for streaming
+@GetMapping(value = "/groq/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+public Flux&lt;String&gt; streamFast(@RequestParam String question) {
+    return chatClient.prompt()
+        .user(question)
+        .stream()
+        .content();
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="deepseek-setup">DeepSeek Setup</h3>
+          <p>DeepSeek provides powerful reasoning and chat models at competitive pricing. The <code>deepseek-chat</code> model is a strong general-purpose chat model. <code>deepseek-reasoner</code> (DeepSeek-R1) performs multi-step chain-of-thought reasoning similar to OpenAI o1. Add <code>spring-ai-deepseek-spring-boot-starter</code> and set your API key from <code>platform.deepseek.com</code>.</p>
+
+          <h4>pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-deepseek-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.deepseek.api-key=${DEEPSEEK_API_KEY}
+spring.ai.deepseek.chat.options.model=deepseek-chat
+spring.ai.deepseek.chat.options.temperature=1.0</code></pre>
+
+          <h4>DeepSeek Reasoner</h4>
+          <pre><code class="language-java">// Use deepseek-reasoner for complex multi-step reasoning
+String solution = chatClient.prompt()
+    .user("Design a thread-safe LRU cache in Java with O(1) get and put.")
+    .options(DeepSeekChatOptions.builder()
+        .model("deepseek-reasoner")
+        .maxTokens(8192)
+        .build())
+    .call()
+    .content();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="other-provider-switching">Provider Switching Pattern</h3>
+          <p>The key benefit of Spring AI's abstraction layer is that swapping providers requires <strong>zero application code changes</strong>. The same <code>ChatClient</code> bean works identically regardless of the underlying provider. To switch providers: remove the current starter dependency, add the new one, update the API key property, and change the model name. Everything else — service classes, advisors, memory, structured output — stays the same.</p>
+
+          <h4>The Same ChatClient Works with Every Provider</h4>
+          <pre><code class="language-java">// This service code works with OpenAI, Anthropic, Ollama, or any provider
+@Service
+public class UniversalAiService {
+    private final ChatClient chatClient;
+    private final ChatMemory memory = new InMemoryChatMemory();
+
+    public UniversalAiService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a helpful assistant.")
+            .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
+            .build();
+    }
+
+    public String chat(String sessionId, String message) {
+        return chatClient.prompt()
+            .user(message)
+            .advisors(spec -&gt; spec.param(
+                MessageChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,
+                sessionId))
+            .call()
+            .content();
+    }
+}</code></pre>
+
+          <h4>Switching from OpenAI to Anthropic</h4>
+          <pre><code class="language-xml">&lt;!-- Remove: spring-ai-openai-spring-boot-starter --&gt;
+&lt;!-- Add: --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-anthropic-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <pre><code class="language-properties"># Replace in application.properties:
+# spring.ai.openai.api-key=...
+# spring.ai.openai.chat.options.model=gpt-4o
+
+spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
+spring.ai.anthropic.chat.options.model=claude-3-5-sonnet-20241022
+# No Java code changes required!</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="nvidia-nim-setup">NVIDIA NIM Setup</h3>
+          <p>NVIDIA NIM (NVIDIA Inference Microservices) provides OpenAI-compatible endpoints for a wide range of optimised models including Llama 3, Mistral, and NVIDIA-proprietary models. Because NIM exposes an OpenAI-compatible REST API, use <code>spring-ai-openai-spring-boot-starter</code> with a custom base URL pointing to your NIM instance (cloud or self-hosted). No special NIM starter is needed.</p>
+
+          <h4>application.properties (NIM Cloud)</h4>
+          <pre><code class="language-properties"># NVIDIA NIM via OpenAI-compatible API
+spring.ai.openai.api-key=${NVIDIA_API_KEY}
+spring.ai.openai.base-url=https://integrate.api.nvidia.com/v1
+spring.ai.openai.chat.options.model=meta/llama-3.1-70b-instruct</code></pre>
+
+          <h4>application.properties (Self-Hosted NIM)</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=not-used
+spring.ai.openai.base-url=http://nim-server:8000/v1
+spring.ai.openai.chat.options.model=meta/llama3-8b-instruct</code></pre>
+
+          <h4>Self-Hosted NIM Chat Call</h4>
+          <pre><code class="language-java">// ChatClient uses the standard OpenAI starter — only config changes
+@Service
+public class NimService {
+    private final ChatClient chatClient;
+
+    public NimService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    public String generate(String prompt) {
+        return chatClient.prompt()
+            .user(prompt)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-others -->
+
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>Providers Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Starter Artifact</th>
+              <th>Key Config Property</th>
+              <th>Key Model IDs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>OpenAI</td>
+              <td><code>spring-ai-openai-spring-boot-starter</code></td>
+              <td><code>spring.ai.openai.api-key</code></td>
+              <td><code>gpt-4o</code>, <code>gpt-4o-mini</code>, <code>o3-mini</code></td>
+            </tr>
+            <tr>
+              <td>Anthropic</td>
+              <td><code>spring-ai-anthropic-spring-boot-starter</code></td>
+              <td><code>spring.ai.anthropic.api-key</code></td>
+              <td><code>claude-3-5-sonnet-20241022</code>, <code>claude-3-7-sonnet-20250219</code></td>
+            </tr>
+            <tr>
+              <td>Ollama (Local)</td>
+              <td><code>spring-ai-ollama-spring-boot-starter</code></td>
+              <td><code>spring.ai.ollama.base-url</code></td>
+              <td><code>llama3.2</code>, <code>llava</code>, <code>nomic-embed-text</code></td>
+            </tr>
+            <tr>
+              <td>Amazon Bedrock</td>
+              <td><code>spring-ai-bedrock-converse-spring-boot-starter</code></td>
+              <td><code>spring.ai.bedrock.aws.region</code></td>
+              <td><code>anthropic.claude-3-5-sonnet-20241022-v2:0</code></td>
+            </tr>
+            <tr>
+              <td>Google Gemini</td>
+              <td><code>spring-ai-vertex-ai-gemini-spring-boot-starter</code></td>
+              <td><code>spring.ai.vertex.ai.gemini.project-id</code></td>
+              <td><code>gemini-2.0-flash</code>, <code>gemini-1.5-pro</code></td>
+            </tr>
+            <tr>
+              <td>Azure OpenAI</td>
+              <td><code>spring-ai-azure-openai-spring-boot-starter</code></td>
+              <td><code>spring.ai.azure.openai.endpoint</code></td>
+              <td>Azure deployment name (not raw model ID)</td>
+            </tr>
+            <tr>
+              <td>Mistral AI</td>
+              <td><code>spring-ai-mistral-ai-spring-boot-starter</code></td>
+              <td><code>spring.ai.mistralai.api-key</code></td>
+              <td><code>mistral-large-latest</code>, <code>mistral-small-latest</code></td>
+            </tr>
+            <tr>
+              <td>Groq</td>
+              <td><code>spring-ai-groq-spring-boot-starter</code></td>
+              <td><code>spring.ai.groq.api-key</code></td>
+              <td><code>llama-3.3-70b-versatile</code>, <code>mixtral-8x7b-32768</code></td>
+            </tr>
+            <tr>
+              <td>DeepSeek</td>
+              <td><code>spring-ai-deepseek-spring-boot-starter</code></td>
+              <td><code>spring.ai.deepseek.api-key</code></td>
+              <td><code>deepseek-chat</code>, <code>deepseek-reasoner</code></td>
+            </tr>
+            <tr>
+              <td>NVIDIA NIM</td>
+              <td><code>spring-ai-openai-spring-boot-starter</code></td>
+              <td><code>spring.ai.openai.base-url</code></td>
+              <td><code>meta/llama-3.1-70b-instruct</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

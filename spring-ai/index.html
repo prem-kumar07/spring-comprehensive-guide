@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span>
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+    </div>
+
+    <p>Spring AI is an application framework for AI engineering that provides a <strong>portable, unified API</strong> across AI model providers — covering chat, text-to-image, audio transcription, text-to-speech, and embedding models. Rather than shipping a model of its own, Spring AI acts as the integration layer between your Spring Boot application and the underlying provider, so you can swap from OpenAI to Anthropic to a local Ollama instance by changing a single property with no changes to application code. It embraces the Spring ecosystem idioms — auto-configuration, starter dependencies, and the familiar annotation-driven programming model — to make adding AI capabilities as straightforward as adding a database integration.</p>
+
+    <div class="callout info">
+      <strong>8 Core Pillars</strong>
+      ChatClient · EmbeddingModel · VectorStore · RAG · Tool Calling · Advisors · Structured Output · Document ETL
+    </div>
+
+    <h2>Architecture</h2>
+    <p>Spring AI inserts a vendor-neutral abstraction layer between your application and the chosen model provider, translating Spring idioms (auto-configuration, dependency injection, <code>@Tool</code> annotations) into each provider's native API format at runtime.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" aria-label="Spring AI architecture layers" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <!-- Layer 3: Your Spring Boot App (top) -->
+        <rect x="60" y="10" width="380" height="48" rx="8" fill="var(--bg)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="250" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">Your Spring Boot Application</text>
+        <text x="250" y="48" text-anchor="middle" font-size="11" fill="var(--text-muted)">ChatClient · VectorStore · EmbeddingModel</text>
+        <!-- Arrow -->
+        <line x1="250" y1="58" x2="250" y2="76" stroke="var(--border)" stroke-width="1.5" marker-end="url(#arr-ai)"/>
+        <!-- Layer 2: Spring AI (middle) -->
+        <rect x="60" y="76" width="380" height="48" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="250" y="96" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Spring AI Abstraction Layer</text>
+        <text x="250" y="114" text-anchor="middle" font-size="11" fill="var(--text-muted)">Advisors · Tools · RAG · Structured Output</text>
+        <!-- Arrow -->
+        <line x1="250" y1="124" x2="250" y2="142" stroke="var(--border)" stroke-width="1.5" marker-end="url(#arr-ai)"/>
+        <!-- Layer 1: Model Provider (bottom) -->
+        <rect x="60" y="142" width="380" height="48" rx="8" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="250" y="162" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">Model Provider</text>
+        <text x="250" y="180" text-anchor="middle" font-size="11" fill="var(--text-muted)">OpenAI · Anthropic · Ollama · Gemini · Bedrock · …</text>
+        <defs>
+          <marker id="arr-ai" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="var(--border)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h2>Provider Landscape</h2>
+    <p>Spring AI 2.0 ships first-class support for 20+ providers organized into three tiers: commercial frontier APIs with the deepest feature coverage, additional cloud APIs for specialized workloads, and local runtimes for air-gapped or cost-sensitive deployments.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" aria-label="Spring AI supported model providers" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+        <!-- Tier 1: Commercial -->
+        <rect x="10" y="10" width="200" height="175" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="110" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)">Tier 1 — Commercial</text>
+        <text x="110" y="55" text-anchor="middle" font-size="11" fill="var(--text)">OpenAI (GPT-4o, o-series)</text>
+        <text x="110" y="75" text-anchor="middle" font-size="11" fill="var(--text)">Anthropic (Claude 3/3.5/3.7)</text>
+        <text x="110" y="95" text-anchor="middle" font-size="11" fill="var(--text)">Google Gemini / Vertex AI</text>
+        <text x="110" y="115" text-anchor="middle" font-size="11" fill="var(--text)">Azure OpenAI</text>
+        <text x="110" y="135" text-anchor="middle" font-size="11" fill="var(--text)">Amazon Bedrock</text>
+        <!-- Tier 2: Cloud -->
+        <rect x="250" y="10" width="200" height="175" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="350" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Tier 2 — Cloud</text>
+        <text x="350" y="55" text-anchor="middle" font-size="11" fill="var(--text)">Mistral AI</text>
+        <text x="350" y="75" text-anchor="middle" font-size="11" fill="var(--text)">Groq</text>
+        <text x="350" y="95" text-anchor="middle" font-size="11" fill="var(--text)">DeepSeek</text>
+        <text x="350" y="115" text-anchor="middle" font-size="11" fill="var(--text)">NVIDIA NIM</text>
+        <text x="350" y="135" text-anchor="middle" font-size="11" fill="var(--text)">Hugging Face</text>
+        <!-- Tier 3: Local -->
+        <rect x="490" y="10" width="200" height="175" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="590" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Tier 3 — Local</text>
+        <text x="590" y="55" text-anchor="middle" font-size="11" fill="var(--text)">Ollama (LLaMA, LLaVA…)</text>
+        <text x="590" y="75" text-anchor="middle" font-size="11" fill="var(--text)">Transformers.js-compat</text>
+      </svg>
+    </div>
+
+    <h2>Explore the Guide</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0">
+      <a href="chat-client.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-chat-client">ChatClient API</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Fluent API for chat, streaming, conversation memory, multimodal input</p>
+      </a>
+      <a href="rag.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-rag">RAG &amp; VectorStore</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Document ingestion pipeline, VectorStore implementations, retrieval advisors</p>
+      </a>
+      <a href="tools-advisors.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-tools-advisors">Tools &amp; Advisors</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">@Tool function calling, agentic loops, Advisor interceptor chain</p>
+      </a>
+      <a href="structured-output.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-structured-output">Structured Output</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">BeanOutputConverter, self-correcting output, provider-native JSON mode</p>
+      </a>
+      <a href="version-comparison.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-version-comparison">Version Comparison</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Spring AI 1.x vs 2.x — API changes, new features, migration guide</p>
+      </a>
+      <a href="providers.html" class="feature-card" style="text-decoration:none">
+        <h3 id="nav-providers">Providers</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini and more</p>
+      </a>
+    </div>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

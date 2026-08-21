@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring Proxy Internals</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring Proxy Internals</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-v7">Spring 5/6/7</span>
+    </div>
+    <p>Spring's AOP, transaction management, security, and caching all work through <strong>proxies</strong> — wrapper objects that intercept method calls and inject cross-cutting behaviour before or after the real method executes. Understanding how proxies are created and their limitations is essential for debugging Spring applications.</p>
+
+    <!-- Overview diagram -->
+    <div class="feature-card">
+      <h3 id="proxy-overview">How a Proxy Works</h3>
+      <p>When a bean is eligible for proxying (it has an aspect, a <code>@Transactional</code> method, etc.), Spring replaces the bean in the application context with a <em>proxy object</em>. Callers receive the proxy, not the real object. Every method call goes through the proxy's interception chain before reaching the target.</p>
+      <div style="overflow-x:auto;margin:1rem 0">
+        <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;display:block;font-family:inherit">
+          <!-- Caller -->
+          <rect x="10" y="75" width="110" height="60" rx="8" fill="#21262d" stroke="#30363d"/>
+          <text x="65" y="100" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="600">Caller</text>
+          <text x="65" y="118" text-anchor="middle" fill="#8b949e" font-size="11">@Autowired</text>
+          <!-- Arrow caller → proxy -->
+          <line x1="120" y1="105" x2="195" y2="105" stroke="#58a6ff" stroke-width="2" marker-end="url(#arr)"/>
+          <text x="157" y="97" text-anchor="middle" fill="#8b949e" font-size="10">method call</text>
+          <!-- Proxy box -->
+          <rect x="195" y="55" width="160" height="100" rx="8" fill="#0d419d" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="275" y="82" text-anchor="middle" fill="#79c0ff" font-size="13" font-weight="700">Proxy</text>
+          <text x="275" y="100" text-anchor="middle" fill="#cae8ff" font-size="11">① Before advice</text>
+          <text x="275" y="116" text-anchor="middle" fill="#cae8ff" font-size="11">② delegate call</text>
+          <text x="275" y="132" text-anchor="middle" fill="#cae8ff" font-size="11">③ After advice</text>
+          <!-- Arrow proxy → target -->
+          <line x1="355" y1="105" x2="430" y2="105" stroke="#3fb950" stroke-width="2" marker-end="url(#arr2)"/>
+          <text x="392" y="97" text-anchor="middle" fill="#8b949e" font-size="10">delegate</text>
+          <!-- Target box -->
+          <rect x="430" y="75" width="130" height="60" rx="8" fill="#0f2d1a" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="495" y="100" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="600">Real Bean</text>
+          <text x="495" y="118" text-anchor="middle" fill="#8b949e" font-size="11">actual logic</text>
+          <!-- Return arrow -->
+          <path d="M430 120 Q390 165 355 120" fill="none" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr3)"/>
+          <text x="390" y="175" text-anchor="middle" fill="#8b949e" font-size="10">return value</text>
+          <!-- Arrow defs -->
+          <defs>
+            <marker id="arr"  markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#58a6ff"/></marker>
+            <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3fb950"/></marker>
+            <marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8b949e"/></marker>
+          </defs>
+          <!-- Labels -->
+          <text x="65"  y="160" text-anchor="middle" fill="#8b949e" font-size="10">gets proxy</text>
+          <text x="65"  y="172" text-anchor="middle" fill="#8b949e" font-size="10">from context</text>
+        </svg>
+      </div>
+      <p>The key insight: <strong>the caller never knows it's talking to a proxy</strong>. The proxy implements the same interface or extends the same class as the real bean, so it's type-compatible and can be injected anywhere the real type is expected.</p>
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-jdk">JDK Dynamic Proxy</button>
+        <button class="tab-btn" data-tab="tab-cglib">CGLIB Proxy</button>
+        <button class="tab-btn" data-tab="tab-choosing">Which Gets Used?</button>
+        <button class="tab-btn" data-tab="tab-limits">Limitations &amp; Gotchas</button>
+      </div>
+
+      <!-- ═══ TAB: JDK ═══ -->
+      <div class="tab-panel active" id="tab-jdk">
+
+        <div class="feature-card">
+          <h3 id="jdk-how-it-works">How JDK Dynamic Proxy Works</h3>
+          <p>JDK Dynamic Proxies are part of the Java standard library (<code>java.lang.reflect.Proxy</code>). They work by creating a new class <em>at runtime</em> that <strong>implements one or more interfaces</strong>. Every method call on the proxy is routed to an <code>InvocationHandler</code> which decides what to do — run advice, delegate to the real object, or both.</p>
+          <pre><code class="language-java">// What Spring does internally (simplified)
+UserService proxy = (UserService) Proxy.newProxyInstance(
+    UserService.class.getClassLoader(),
+    new Class[]{UserService.class},       // interfaces to implement
+    new InvocationHandler() {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            // ① run Before advice
+            System.out.println("Before: " + method.getName());
+            try {
+                // ② delegate to real bean
+                Object result = method.invoke(realUserService, args);
+                // ③ run AfterReturning advice
+                System.out.println("After: " + method.getName());
+                return result;
+            } catch (Throwable t) {
+                // ④ run AfterThrowing advice
+                throw t;
+            }
+        }
+    }
+);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="jdk-requirements">Requirements</h3>
+          <p>For a JDK proxy to work, the bean <strong>must implement at least one interface</strong>. The proxy only exposes methods defined in those interfaces — methods on the concrete class that are not in any interface are invisible through the proxy.</p>
+          <pre><code class="language-java">// ✅ Works with JDK proxy — has interface
+public interface UserService {
+    User findById(long id);
+    void save(User user);
+}
+
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
+    @Override public User findById(long id) { ... }
+    @Override public void save(User user) { ... }
+
+    // ❌ Not accessible through proxy — not in interface
+    public void internalHelper() { ... }
+}
+
+// ✅ Caller injects interface — proxy is transparent
+@Autowired
+private UserService userService;  // receives JDK proxy, not UserServiceImpl</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="jdk-generated-class">What the Generated Class Looks Like</h3>
+          <p>At runtime, the JVM generates bytecode for a class like <code>$Proxy42</code> that implements your interface. You can dump it to inspect it — Spring Boot Actuator and <code>-Dsun.misc.ProxyGenerator.saveGeneratedFiles=true</code> let you see it on disk.</p>
+          <pre><code class="language-java">// The generated proxy class (conceptually):
+public final class $Proxy42 extends Proxy implements UserService {
+    // One static Method field per interface method
+    private static Method m1; // findById
+    private static Method m2; // save
+
+    static {
+        m1 = UserService.class.getMethod("findById", long.class);
+        m2 = UserService.class.getMethod("save", User.class);
+    }
+
+    public $Proxy42(InvocationHandler h) { super(h); }
+
+    @Override
+    public User findById(long id) {
+        // Calls h.invoke(this, m1, new Object[]{id})
+        return (User) h.invoke(this, m1, new Object[]{id});
+    }
+
+    @Override
+    public void save(User user) {
+        h.invoke(this, m2, new Object[]{user});
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-jdk -->
+
+      <!-- ═══ TAB: CGLIB ═══ -->
+      <div class="tab-panel" id="tab-cglib">
+
+        <div class="feature-card">
+          <h3 id="cglib-how-it-works">How CGLIB Proxy Works</h3>
+          <p>CGLIB (Code Generation Library) creates proxies by <strong>generating a subclass</strong> of the target class at runtime. The subclass overrides every non-final, non-private method and inserts interceptor chain calls. Because it subclasses rather than implementing an interface, CGLIB works even when the bean has no interfaces.</p>
+          <p>Spring has bundled CGLIB since Spring 3.2 (<code>org.springframework.cglib</code> package) — no extra dependency needed.</p>
+          <pre><code class="language-java">// What CGLIB does internally (simplified)
+Enhancer enhancer = new Enhancer();
+enhancer.setSuperclass(UserServiceImpl.class);  // subclass target
+enhancer.setCallback(new MethodInterceptor() {
+    @Override
+    public Object intercept(Object proxy, Method method,
+                            Object[] args, MethodProxy methodProxy) throws Throwable {
+        // ① run Before advice
+        System.out.println("Before: " + method.getName());
+        // ② invoke super (real class method — NO reflection overhead)
+        Object result = methodProxy.invokeSuper(proxy, args);
+        // ③ run AfterReturning advice
+        System.out.println("After: " + method.getName());
+        return result;
+    }
+});
+UserServiceImpl proxy = (UserServiceImpl) enhancer.create();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="cglib-requirements">Requirements &amp; What Gets Subclassed</h3>
+          <p>CGLIB generates a class that extends your bean class. This means:</p>
+          <ul style="margin:0.5rem 0 1rem 1.5rem;line-height:1.8">
+            <li>The target class must <strong>not be final</strong> (can't subclass a final class)</li>
+            <li>Intercepted methods must <strong>not be final or private</strong> (can't override them)</li>
+            <li>The class needs a <strong>no-arg constructor</strong> (Spring instantiates the subclass)</li>
+            <li>No interface required — works on plain classes</li>
+          </ul>
+          <pre><code class="language-java">@Service
+@Transactional
+public class OrderService {          // no interface — CGLIB is used
+    public Order createOrder(...) { ... }    // ✅ intercepted (overridden)
+    public final void audit() { ... }        // ❌ NOT intercepted (final)
+    private void helper() { ... }            // ❌ NOT intercepted (private)
+}
+
+// CGLIB generates (conceptually):
+public class OrderService$$SpringCGLIB$$0 extends OrderService {
+    @Override
+    public Order createOrder(...) {
+        // run interceptor chain, then call super.createOrder(...)
+    }
+    // audit() and helper() are NOT overridden
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="cglib-performance">Performance: CGLIB vs JDK</h3>
+          <p>CGLIB uses <code>MethodProxy.invokeSuper()</code> which calls the parent method via <em>generated bytecode</em> — no reflection. JDK proxies use <code>Method.invoke()</code> (reflection). In practice, both are extremely fast for typical Spring usage, but CGLIB is measurably faster under high throughput since JDK reflection has been optimised over the years. The creation cost (class generation) is one-time per class and cached.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th></th><th>JDK Dynamic Proxy</th><th>CGLIB</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Mechanism</strong></td><td>Implements interface</td><td>Subclasses concrete class</td></tr>
+                <tr><td><strong>Method dispatch</strong></td><td>Reflection (<code>Method.invoke</code>)</td><td>Generated bytecode (<code>invokeSuper</code>)</td></tr>
+                <tr><td><strong>Requires interface?</strong></td><td>Yes</td><td>No</td></tr>
+                <tr><td><strong>Final class?</strong></td><td>N/A (only needs interface)</td><td>❌ Fails</td></tr>
+                <tr><td><strong>Final methods?</strong></td><td>Not intercepted</td><td>Not intercepted</td></tr>
+                <tr><td><strong>Creation speed</strong></td><td>Fast</td><td>Slightly slower (first time)</td></tr>
+                <tr><td><strong>Invocation speed</strong></td><td>Good (JDK 21+ fast)</td><td>Slightly faster</td></tr>
+                <tr><td><strong>Default in Boot 3.x</strong></td><td>No</td><td>Yes (proxyTargetClass=true)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-cglib -->
+
+      <!-- ═══ TAB: CHOOSING ═══ -->
+      <div class="tab-panel" id="tab-choosing">
+
+        <div class="feature-card">
+          <h3 id="choosing-rules">Decision Rules</h3>
+          <p>Spring Boot 3.x defaults to CGLIB (<code>proxyTargetClass=true</code>) for all proxies. You can force JDK proxies back by setting <code>spring.aop.proxy-target-class=false</code> in <code>application.properties</code>.</p>
+          <pre><code class="language-text">Bean has interface(s)?
+│
+├─ No  → CGLIB (only option)
+│
+└─ Yes → Default choice depends on config:
+         proxyTargetClass=false (old default) → JDK proxy
+         proxyTargetClass=true  (Boot 3.x default) → CGLIB
+                                (subclasses even when interface exists)</code></pre>
+          <pre><code class="language-java">// @EnableAspectJAutoProxy — controls AOP proxy type
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = false)  // JDK proxies when possible
+public class AppConfig {}
+
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)   // Always CGLIB (Spring Boot default)
+public class AppConfig {}
+
+// @EnableTransactionManagement — same flag
+@EnableTransactionManagement(proxyTargetClass = false)</code></pre>
+          <pre><code class="language-properties"># application.properties — Boot 3.x global override
+spring.aop.proxy-target-class=false   # prefer JDK proxies when interface available
+spring.aop.auto=true                  # enable auto-proxy (default: true)</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="choosing-programmatic">ProxyFactory — Creating Proxies Programmatically</h3>
+          <p><code>ProxyFactory</code> is Spring's low-level API for creating proxies without the application context. Useful for understanding how Spring works internally, writing custom infrastructure, or testing advice in isolation.</p>
+          <pre><code class="language-java">@Service
+public class UserService {
+    public String greet(String name) {
+        return "Hello, " + name;
+    }
+}
+
+// Create proxy manually
+UserService real = new UserService();
+
+ProxyFactory factory = new ProxyFactory(real);
+factory.setProxyTargetClass(true);   // true=CGLIB, false=JDK (needs interface)
+
+// Add advice directly
+factory.addAdvice((MethodInterceptor) invocation -> {
+    System.out.println("Before: " + invocation.getMethod().getName());
+    Object result = invocation.proceed();
+    System.out.println("After: "  + invocation.getMethod().getName());
+    return result;
+});
+
+UserService proxy = (UserService) factory.getProxy();
+proxy.greet("World");
+// Output:
+// Before: greet
+// After:  greet</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="choosing-inspect">Inspecting Proxies at Runtime</h3>
+          <p>You can inspect the proxy type and unwrap it at runtime using Spring's <code>AopUtils</code> and <code>AopProxyUtils</code> utilities — useful for debugging "why isn't my advice firing?" situations.</p>
+          <pre><code class="language-java">@Autowired
+private UserService userService;   // this is actually a proxy
+
+// Check proxy type
+boolean isJdkProxy  = AopUtils.isJdkDynamicProxy(userService);    // true/false
+boolean isCglib     = AopUtils.isCglibProxy(userService);          // true/false
+boolean isAnyProxy  = AopUtils.isAopProxy(userService);            // true/false
+
+// Get the real target class (not the proxy class)
+Class&lt;?&gt; targetClass = AopUtils.getTargetClass(userService);       // UserServiceImpl.class
+
+// Unwrap to access target object
+Object target = ((Advised) userService).getTargetSource().getTarget();
+
+// Print proxy class name — CGLIB looks like:
+// com.example.UserService$$SpringCGLIB$$0
+// JDK looks like:
+// com.sun.proxy.$Proxy42
+System.out.println(userService.getClass().getName());</code></pre>
+        </div>
+
+      </div><!-- /tab-choosing -->
+
+      <!-- ═══ TAB: LIMITS ═══ -->
+      <div class="tab-panel" id="tab-limits">
+
+        <div class="feature-card">
+          <h3 id="limits-self-invocation">Self-Invocation (The #1 Gotcha)</h3>
+          <p>When a method inside a bean calls another method on <em>the same bean</em> using <code>this</code>, the call bypasses the proxy entirely — it goes directly to the real object. This means <strong>advice does not fire on self-invoked methods</strong>, even if they're annotated with <code>@Transactional</code>, <code>@Cacheable</code>, etc.</p>
+          <pre><code class="language-java">@Service
+public class OrderService {
+
+    @Transactional
+    public void placeOrder(Order order) {
+        saveOrder(order);    // ❌ self-invocation — @Transactional on saveOrder is IGNORED
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveOrder(Order order) {
+        // This REQUIRES_NEW does nothing when called from placeOrder() above
+        repo.save(order);
+    }
+}</code></pre>
+          <p><strong>Fix options:</strong></p>
+          <pre><code class="language-java">// Option 1: Inject self (ugly but works)
+@Service
+public class OrderService {
+    @Autowired
+    private OrderService self;   // Spring injects the proxy, not 'this'
+
+    public void placeOrder(Order order) {
+        self.saveOrder(order);   // ✅ goes through proxy → advice fires
+    }
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveOrder(Order order) { ... }
+}
+
+// Option 2: Extract to a separate bean (cleaner)
+@Service
+public class OrderService {
+    @Autowired private OrderPersistenceService persistence;
+
+    public void placeOrder(Order order) {
+        persistence.saveOrder(order);   // ✅ different bean → goes through proxy
+    }
+}
+
+// Option 3: Use AspectJ weaving instead of proxy-based AOP
+// (compile-time or load-time weaving — advice fires even on self-invocation)</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="limits-final">Final Classes and Methods</h3>
+          <p>CGLIB cannot subclass a <code>final</code> class, and neither CGLIB nor JDK proxies can intercept <code>final</code>, <code>static</code>, or <code>private</code> methods. Spring will either throw an exception at startup or silently ignore advice on those methods depending on the version and configuration.</p>
+          <pre><code class="language-java">// ❌ Spring cannot create a CGLIB proxy for this
+@Service
+@Transactional
+public final class PaymentService {         // final class — CGLIB fails
+    public void charge() { ... }
+}
+// Startup error: Cannot subclass final class com.example.PaymentService
+
+// ❌ Final method — advice silently not applied
+@Service
+public class InvoiceService {
+    @Transactional
+    public final void generateInvoice() {   // final method — @Transactional ignored
+        ...
+    }
+}
+
+// ✅ Fix: remove final (or use AspectJ weaving if you must keep final)
+@Service
+public class InvoiceService {
+    @Transactional
+    public void generateInvoice() { ... }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="limits-constructor">Constructor Injection vs Field Injection in Proxied Beans</h3>
+          <p>CGLIB proxies require a no-arg constructor because the proxy subclass must be instantiated. When you use constructor injection (the recommended approach), Spring uses <em>objenesis</em> to bypass the constructor for the proxy and then calls the real constructor on the target object. This is handled automatically since Spring 4.0.</p>
+          <pre><code class="language-java">// ✅ Constructor injection works fine — objenesis handles proxy instantiation
+@Service
+@Transactional
+public class UserService {
+    private final UserRepository repo;
+
+    public UserService(UserRepository repo) {  // no no-arg constructor needed
+        this.repo = repo;
+    }
+}
+
+// ✅ Field injection also works
+@Service
+@Transactional
+public class UserService {
+    @Autowired
+    private UserRepository repo;
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="limits-casting">Casting and instanceof with Proxies</h3>
+          <p>With JDK proxies, the proxy object is <em>not</em> an instance of the concrete implementation class — only of the interface. Casting to the impl class will throw <code>ClassCastException</code>. With CGLIB proxies the subclass relationship means <code>instanceof</code> works for both the class and any interfaces.</p>
+          <pre><code class="language-java">// JDK proxy example (proxyTargetClass=false)
+@Autowired
+private UserService userService;  // JDK proxy
+
+userService instanceof UserService       // ✅ true  (implements interface)
+userService instanceof UserServiceImpl   // ❌ false (not a subclass)
+(UserServiceImpl) userService            // ❌ ClassCastException
+
+// CGLIB proxy example (proxyTargetClass=true, the Boot default)
+userService instanceof UserService       // ✅ true
+userService instanceof UserServiceImpl   // ✅ true  (proxy IS-A UserServiceImpl subclass)
+(UserServiceImpl) userService            // ✅ works (but avoid — use interface)</code></pre>
+        </div>
+
+      </div><!-- /tab-limits -->
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>Proxy Quick Reference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Topic</th><th>JDK Dynamic Proxy</th><th>CGLIB</th></tr></thead>
+          <tbody>
+            <tr><td>Requirement</td><td>Bean must implement interface</td><td>Class must not be final</td></tr>
+            <tr><td>Mechanism</td><td>Implements interface at runtime</td><td>Subclasses at runtime</td></tr>
+            <tr><td>Method dispatch</td><td>Reflection (<code>Method.invoke</code>)</td><td>Bytecode (<code>invokeSuper</code>)</td></tr>
+            <tr><td>Final method</td><td>Not intercepted</td><td>Not intercepted</td></tr>
+            <tr><td>Private method</td><td>Not intercepted</td><td>Not intercepted</td></tr>
+            <tr><td>Self-invocation</td><td>Bypasses proxy</td><td>Bypasses proxy</td></tr>
+            <tr><td>Boot 3.x default</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Enable</td><td><code>proxy-target-class=false</code></td><td><code>proxy-target-class=true</code></td></tr>
+            <tr><td>instanceof impl class</td><td>❌ false</td><td>✅ true</td></tr>
+            <tr><td>Proxy class name</td><td><code>$Proxy42</code></td><td><code>Service$$SpringCGLIB$$0</code></td></tr>
+            <tr><td>Detect type</td><td><code>AopUtils.isJdkDynamicProxy()</code></td><td><code>AopUtils.isCglibProxy()</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

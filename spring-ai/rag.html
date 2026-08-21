@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI RAG &amp; VectorStore</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI RAG &amp; VectorStore</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span>
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+    </div>
+    <p>Retrieval-Augmented Generation (RAG) is a pattern that grounds an LLM's responses in your own documents and data. Spring AI provides a complete pipeline — from ingesting source documents into a vector store, to wiring retrieval advisors that inject relevant context into every chat prompt. The result is accurate, citable answers from models that have never been trained on your private knowledge.</p>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-rag-overview">How RAG Works</button>
+        <button class="tab-btn" data-tab="tab-rag-etl">Document ETL</button>
+        <button class="tab-btn" data-tab="tab-rag-vectorstore">VectorStore</button>
+        <button class="tab-btn" data-tab="tab-rag-retrieval">Retrieval</button>
+        <button class="tab-btn" data-tab="tab-rag-advanced">Advanced</button>
+      </div>
+
+      <!-- ── How RAG Works ──────────────────────────────── -->
+      <div class="tab-panel active" id="tab-rag-overview">
+
+        <h2>RAG — Retrieval-Augmented Generation</h2>
+        <p>RAG addresses a fundamental limitation of LLMs: their knowledge is frozen at training time. By pairing any chat model with a vector store, you extend its knowledge base with your own documents — with no fine-tuning required. The pipeline runs in two distinct phases: an offline ingestion phase that indexes your documents, and an online retrieval phase that fetches the most relevant context at query time.</p>
+
+        <!-- Ingestion pipeline SVG diagram -->
+        <svg viewBox="0 0 720 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:1.5rem auto 2rem" role="img" aria-label="RAG ingestion pipeline: DocumentReader to TextSplitter to EmbeddingModel to VectorStore">
+          <!-- Box 1: DocumentReader -->
+          <rect x="15" y="25" width="155" height="50" rx="6" ry="6" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="92" y="47" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)" font-family="inherit">DocumentReader</text>
+          <text x="92" y="63" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="inherit">read()</text>
+          <text x="92" y="98" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="inherit">1. Read</text>
+          <!-- Arrow 1→2 -->
+          <line x1="170" y1="50" x2="192" y2="50" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow)"/>
+          <!-- Box 2: TextSplitter -->
+          <rect x="195" y="25" width="155" height="50" rx="6" ry="6" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="272" y="47" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)" font-family="inherit">TextSplitter</text>
+          <text x="272" y="63" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="inherit">split(docs)</text>
+          <text x="272" y="98" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="inherit">2. Chunk</text>
+          <!-- Arrow 2→3 -->
+          <line x1="350" y1="50" x2="372" y2="50" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow)"/>
+          <!-- Box 3: EmbeddingModel -->
+          <rect x="375" y="25" width="155" height="50" rx="6" ry="6" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="452" y="47" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)" font-family="inherit">EmbeddingModel</text>
+          <text x="452" y="63" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="inherit">embed(text)</text>
+          <text x="452" y="98" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="inherit">3. Embed</text>
+          <!-- Arrow 3→4 -->
+          <line x1="530" y1="50" x2="552" y2="50" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow)"/>
+          <!-- Box 4: VectorStore -->
+          <rect x="555" y="25" width="155" height="50" rx="6" ry="6" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="632" y="47" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)" font-family="inherit">VectorStore</text>
+          <text x="632" y="63" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="inherit">add(docs)</text>
+          <text x="632" y="98" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="inherit">4. Store</text>
+          <!-- Arrowhead marker -->
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="var(--border)"/>
+            </marker>
+          </defs>
+        </svg>
+
+        <div class="feature-card">
+          <h3 id="rag-overview">What is RAG and Why Use It</h3>
+          <p>Large Language Models are trained on a fixed corpus with a knowledge cutoff date. They cannot answer questions about your internal documentation, recent events, or private data without being retrained — an expensive and slow process. Retrieval-Augmented Generation solves this by breaking the problem into two phases: <strong>ingestion</strong> (storing your documents as vector embeddings) and <strong>retrieval</strong> (finding the most relevant chunks at query time and injecting them into the model prompt as context).</p>
+          <p>The LLM is then instructed to answer only based on the provided context, which dramatically reduces hallucination and makes answers citable. Spring AI's RAG support covers both phases end-to-end, integrating with 15+ vector store backends and every major embedding provider.</p>
+
+          <h4>Key RAG concepts</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Concept</th><th>Role</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Embedding</td><td>A dense numeric vector representing the semantic meaning of a text chunk</td></tr>
+                <tr><td>VectorStore</td><td>A database that stores and indexes embeddings for fast similarity search</td></tr>
+                <tr><td>Cosine similarity</td><td>Metric used to rank retrieved chunks by relevance to the query embedding</td></tr>
+                <tr><td>Top-K</td><td>The K most similar documents returned from a similarity search</td></tr>
+                <tr><td>Advisor</td><td>Spring AI component that intercepts ChatClient calls to inject retrieved context</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="rag-ingestion-phase">Ingestion Phase — Indexing Your Documents</h3>
+          <p>The ingestion pipeline runs once (or on a schedule as your documents change). It reads source documents with a <code>DocumentReader</code>, splits them into overlapping chunks with a <code>TextSplitter</code>, converts each chunk to an embedding vector via <code>EmbeddingModel</code>, and stores both the vector and the original text in a <code>VectorStore</code>. The split step is critical: chunks must be small enough to fit inside the context window but large enough to carry complete concepts.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;!-- OpenAI for chat + embeddings --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- PGVector store starter --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-pgvector-store-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>Example — Full Ingestion Pipeline</h4>
+          <pre><code class="language-java">import org.springframework.ai.document.Document;
+import org.springframework.ai.reader.TextReader;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.core.io.ClassPathResource;
+
+@Service
+public class IngestionService {
+
+    private final VectorStore vectorStore;
+
+    public IngestionService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void ingest(String resourcePath) {
+        // Step 1: Read
+        TextReader reader = new TextReader(new ClassPathResource(resourcePath));
+        List&lt;Document&gt; docs = reader.read();
+
+        // Step 2: Split
+        TokenTextSplitter splitter = new TokenTextSplitter();
+        List&lt;Document&gt; chunks = splitter.apply(docs);
+
+        // Step 3 + 4: Embed and store (VectorStore handles embedding internally)
+        vectorStore.add(chunks);
+        System.out.printf("Ingested %d chunks from %s%n", chunks.size(), resourcePath);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="rag-retrieval-phase">Retrieval Phase — Answering Questions with Context</h3>
+          <p>At query time, the user's question is converted to an embedding using the same <code>EmbeddingModel</code> used during ingestion. A cosine similarity search finds the K most semantically relevant document chunks. Those chunks are formatted as a context block and injected into the model prompt alongside the original question. The model is instructed to derive its answer only from the provided context, reducing hallucination and enabling it to cite sources.</p>
+          <p>Spring AI's <code>QuestionAnswerAdvisor</code> and <code>RetrievalAugmentationAdvisor</code> automate this retrieval-and-injection step, so you wire the advisor once and every <code>ChatClient</code> call gets RAG automatically.</p>
+
+          <h4>Example — Query-Time Retrieval Flow</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.rag.advisor.QuestionAnswerAdvisor;
+
+@Service
+public class RagService {
+
+    private final ChatClient chatClient;
+
+    public RagService(ChatClient.Builder builder, VectorStore vectorStore) {
+        this.chatClient = builder
+            .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
+                SearchRequest.defaults().withTopK(4)))
+            .build();
+    }
+
+    public String answer(String question) {
+        // The advisor automatically:
+        // 1. Embeds the question
+        // 2. Runs similarity search (top-4 chunks)
+        // 3. Injects chunks as context into the prompt
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-rag-overview -->
+
+      <!-- ── Document ETL ──────────────────────────────── -->
+      <div class="tab-panel" id="tab-rag-etl">
+
+        <h2>Document Readers and Transformers</h2>
+        <p>Spring AI's ETL pipeline follows the Extract-Transform-Load (ETL) pattern. <strong>Extract</strong> with a <code>DocumentReader</code> that understands the source format; <strong>Transform</strong> with one or more <code>DocumentTransformer</code> implementations that split, enrich, or reformat documents; <strong>Load</strong> by calling <code>VectorStore.add()</code> which embeds and persists the final document list. Each step returns <code>List&lt;Document&gt;</code>, making the stages composable and independently testable.</p>
+
+        <div class="feature-card">
+          <h3 id="text-reader">TextReader — Plain Text Files</h3>
+          <p><code>TextReader</code> is the simplest <code>DocumentReader</code>: it reads a Spring <code>Resource</code> (classpath file, file-system path, URL, or any <code>Resource</code> implementation) and returns a <code>List&lt;Document&gt;</code> containing a single <code>Document</code> with all the file's text as its content. Use <code>TextReader</code> for Markdown, plain text, CSV, YAML, or any human-readable format that doesn't require format-specific parsing. The document's metadata automatically includes the resource description.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-core&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.reader.TextReader;
+import org.springframework.ai.document.Document;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+
+// Read from classpath
+TextReader cpReader = new TextReader(new ClassPathResource("docs/faq.txt"));
+List&lt;Document&gt; docs = cpReader.read();
+// docs.get(0).getText() contains all file content
+// docs.get(0).getMetadata() contains {"source": "class path resource [docs/faq.txt]"}
+
+// Read from filesystem
+TextReader fsReader = new TextReader(new FileSystemResource("/data/knowledge-base.md"));
+List&lt;Document&gt; mdDocs = fsReader.read();
+
+// Typically followed by splitting for large files
+TokenTextSplitter splitter = new TokenTextSplitter();
+List&lt;Document&gt; chunks = splitter.apply(docs);
+vectorStore.add(chunks);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pdf-document-reader">PdfDocumentReader — PDF Files</h3>
+          <p><code>PdfDocumentReader</code> parses PDF files using the Apache PDFBox library. It produces one <code>Document</code> per page by default, which keeps chunks naturally sized and preserves page number metadata. The <code>PdfDocumentReaderConfig</code> lets you control page splitting, whether to extract images, and how to handle multi-column layouts. PDF metadata (author, title, creation date) is captured in each document's metadata map.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-pdf-document-reader&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.reader.pdf.PdfDocumentReader;
+import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
+import org.springframework.core.io.ClassPathResource;
+
+// Default: one Document per page
+PdfDocumentReader reader = new PdfDocumentReader(
+    new ClassPathResource("docs/spring-reference.pdf"));
+List&lt;Document&gt; pages = reader.read();
+
+// Custom config — split on paragraphs, not pages
+PdfDocumentReaderConfig config = PdfDocumentReaderConfig.builder()
+    .withPagesPerDocument(1)
+    .withPageExtractedTextFormatter(ExtractedTextFormatter.defaults())
+    .build();
+
+PdfDocumentReader configuredReader = new PdfDocumentReader(
+    new ClassPathResource("docs/annual-report.pdf"), config);
+List&lt;Document&gt; docs = configuredReader.read();
+
+// Each document carries page metadata
+docs.forEach(doc -> {
+    System.out.printf("Page %s: %d chars%n",
+        doc.getMetadata().get("page_number"),
+        doc.getText().length());
+});</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="tika-document-reader">TikaDocumentReader — Word, HTML, CSV, and More</h3>
+          <p><code>TikaDocumentReader</code> uses Apache Tika to extract text from almost any file format: Microsoft Word (.docx), Excel (.xlsx), PowerPoint (.pptx), HTML, RTF, EPUB, CSV, and dozens more. This makes it the Swiss-army reader for heterogeneous document collections. Tika auto-detects the content type from the file bytes, so you don't need to specify the format. The dependency pulls in Tika's full set of parsers.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-tika-document-reader&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+
+// Read a Word document
+TikaDocumentReader wordReader = new TikaDocumentReader(
+    new ClassPathResource("reports/quarterly-review.docx"));
+List&lt;Document&gt; wordDocs = wordReader.read();
+
+// Read an HTML file — Tika strips tags, returns clean text
+TikaDocumentReader htmlReader = new TikaDocumentReader(
+    new ClassPathResource("content/article.html"));
+List&lt;Document&gt; htmlDocs = htmlReader.read();
+
+// Read an Excel spreadsheet
+TikaDocumentReader xlsxReader = new TikaDocumentReader(
+    new FileSystemResource("/uploads/data-export.xlsx"));
+List&lt;Document&gt; xlsxDocs = xlsxReader.read();
+
+// All readers return List&lt;Document&gt; — uniform downstream processing
+List&lt;Document&gt; allDocs = new ArrayList&lt;&gt;();
+allDocs.addAll(wordDocs);
+allDocs.addAll(htmlDocs);
+allDocs.addAll(xlsxDocs);
+
+TokenTextSplitter splitter = new TokenTextSplitter();
+vectorStore.add(splitter.apply(allDocs));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="token-text-splitter">TokenTextSplitter — Chunking Documents</h3>
+          <p><code>TokenTextSplitter</code> divides large documents into overlapping chunks measured in tokens (using a CL100K tokenizer compatible with OpenAI models). The default chunk size is 800 tokens with a minimum chunk size of 350 characters. Overlapping chunks ensure that sentences spanning a chunk boundary appear in both adjacent chunks, preserving semantic continuity. <code>TokenTextSplitter</code> implements <code>DocumentTransformer</code>, so it can be applied as a function: <code>splitter.apply(docs)</code> or used in a transformer chain.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+
+// Default configuration: 800 tokens, 350 min chars, overlap enabled
+TokenTextSplitter defaultSplitter = new TokenTextSplitter();
+List&lt;Document&gt; chunks = defaultSplitter.apply(docs);
+
+// Custom configuration
+TokenTextSplitter customSplitter = new TokenTextSplitter(
+    500,   // defaultChunkSize — tokens per chunk
+    100,   // minChunkSizeChars — minimum characters to keep a chunk
+    5,     // minChunkLengthToEmbed — minimum characters to embed at all
+    10000, // maxNumChunks — safety cap
+    true   // keepSeparator — preserve sentence-ending punctuation
+);
+
+List&lt;Document&gt; smallChunks = customSplitter.apply(docs);
+System.out.printf("Split %d docs into %d chunks%n", docs.size(), smallChunks.size());
+
+// Chunks inherit metadata from parent document
+smallChunks.forEach(chunk -> {
+    // chunk.getMetadata() contains parent doc metadata + chunk index
+    System.out.println(chunk.getMetadata());
+});</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="keyword-metadata-enricher">KeywordMetadataEnricher — Tagging Documents</h3>
+          <p><code>KeywordMetadataEnricher</code> is a <code>DocumentTransformer</code> that calls an AI model to extract keywords from each document chunk and stores them in the document's metadata under the <code>"excerpt_keywords"</code> key. This enriches chunks with extractive keyword metadata that can later be used for hybrid search (keyword + vector) or metadata filtering. The enricher makes one LLM call per document, so use it selectively on important collections where keyword precision matters.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.transformer.KeywordMetadataEnricher;
+import org.springframework.ai.chat.model.ChatModel;
+
+// KeywordMetadataEnricher calls the ChatModel to extract keywords
+KeywordMetadataEnricher enricher = new KeywordMetadataEnricher(chatModel, 5);
+
+// Apply as a DocumentTransformer
+List&lt;Document&gt; enrichedDocs = enricher.apply(chunks);
+
+// Each document now has keyword metadata
+enrichedDocs.forEach(doc -> {
+    String keywords = (String) doc.getMetadata().get("excerpt_keywords");
+    System.out.println("Keywords: " + keywords);
+    // e.g. "Keywords: Spring AI, embeddings, vector store, RAG, retrieval"
+});
+
+// Chain reader → splitter → enricher → store
+List&lt;Document&gt; pipeline = new TextReader(resource).read();
+pipeline = new TokenTextSplitter().apply(pipeline);
+pipeline = enricher.apply(pipeline);
+vectorStore.add(pipeline);</code></pre>
+        </div>
+
+      </div><!-- /tab-rag-etl -->
+
+      <!-- ── VectorStore ───────────────────────────────── -->
+      <div class="tab-panel" id="tab-rag-vectorstore">
+
+        <h2>Vector Store Backends and Search API</h2>
+        <p>A <code>VectorStore</code> stores document embeddings and answers cosine similarity queries. Spring AI defines a uniform <code>VectorStore</code> interface with two primary operations: <code>add(List&lt;Document&gt;)</code> for ingestion and <code>similaritySearch(SearchRequest)</code> for retrieval. Switching vector store backends requires only a Maven dependency swap and updated connection properties — no application code changes.</p>
+
+        <div class="feature-card">
+          <h3 id="simple-vector-store">SimpleVectorStore — In-Memory / Development</h3>
+          <p><code>SimpleVectorStore</code> is a pure-Java in-memory vector store backed by a <code>ConcurrentHashMap</code>. It computes cosine similarity in memory on every search. No external infrastructure is required, making it ideal for local development, integration tests, and prototyping RAG pipelines before choosing a production store. The store can optionally be persisted to a JSON file on disk and reloaded on startup to avoid re-ingesting documents every run.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-core&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!-- EmbeddingModel required — e.g. OpenAI --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.embedding.EmbeddingModel;
+
+@Configuration
+public class VectorStoreConfig {
+
+    @Bean
+    VectorStore vectorStore(EmbeddingModel embeddingModel) {
+        return SimpleVectorStore.builder(embeddingModel).build();
+    }
+}
+
+// Usage in a service
+@Service
+public class SimpleRagService {
+
+    private final VectorStore vectorStore;
+
+    public SimpleRagService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void ingest(List&lt;Document&gt; docs) {
+        vectorStore.add(docs); // embeds and stores in memory
+    }
+
+    public List&lt;Document&gt; search(String query) {
+        return vectorStore.similaritySearch(
+            SearchRequest.query(query).withTopK(4));
+    }
+}
+
+// Persist to disk and reload
+SimpleVectorStore store = SimpleVectorStore.builder(embeddingModel).build();
+store.add(docs);
+store.save(new FileSystemResource("/tmp/vector-store.json"));
+
+// Next startup — reload without re-ingesting
+SimpleVectorStore reloaded = SimpleVectorStore.builder(embeddingModel).build();
+reloaded.load(new FileSystemResource("/tmp/vector-store.json"));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="pgvector-setup">PGVector — Production PostgreSQL Vector Store</h3>
+          <p><code>PgVectorStore</code> stores embeddings in a PostgreSQL database with the <code>pgvector</code> extension installed. It supports HNSW and IVFFlat indexes for fast approximate nearest-neighbor search and scales to millions of documents. Spring Boot auto-configuration creates the required <code>vector_store</code> table and registers the bean automatically when the starter is on the classpath and the datasource is configured. Use Docker to run a local pgvector instance during development.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-pgvector-store-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+  &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.datasource.url=jdbc:postgresql://localhost:5432/ragdb
+spring.datasource.username=pguser
+spring.datasource.password=secret
+
+# PGVector configuration
+spring.ai.vectorstore.pgvector.index-type=HNSW
+spring.ai.vectorstore.pgvector.distance-type=COSINE_DISTANCE
+spring.ai.vectorstore.pgvector.dimensions=1536
+spring.ai.vectorstore.pgvector.initialize-schema=true</code></pre>
+
+          <h4>Docker Compose for local development</h4>
+          <pre><code class="language-yaml">services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ragdb
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:</code></pre>
+
+          <h4>Example — Auto-configured VectorStore bean</h4>
+          <pre><code class="language-java">// With spring-ai-pgvector-store-spring-boot-starter, VectorStore is auto-configured
+@Service
+public class DocumentIngestionService {
+
+    private final VectorStore vectorStore; // injected PgVectorStore
+
+    public DocumentIngestionService(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    public void ingestPdf(String path) {
+        List&lt;Document&gt; pages = new PdfDocumentReader(
+            new FileSystemResource(path)).read();
+        List&lt;Document&gt; chunks = new TokenTextSplitter().apply(pages);
+        vectorStore.add(chunks); // stored in PostgreSQL with pgvector
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="vector-search-request">SearchRequest — Controlling Similarity Search</h3>
+          <p><code>SearchRequest</code> is the query object passed to <code>VectorStore.similaritySearch()</code>. It encapsulates the query text, the maximum number of results (<code>topK</code>), a minimum similarity score threshold, and an optional metadata filter expression. Raising the similarity threshold improves precision at the cost of recall. The threshold is expressed as a cosine similarity score between 0.0 and 1.0; 0.75 is a common starting point.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+
+// Minimal request — top-4, no threshold
+List&lt;Document&gt; results = vectorStore.similaritySearch(
+    SearchRequest.query("How does Spring AI handle embeddings?")
+        .withTopK(4));
+
+// With similarity threshold — only high-confidence matches
+List&lt;Document&gt; highConf = vectorStore.similaritySearch(
+    SearchRequest.query("What is the default chunk size?")
+        .withTopK(5)
+        .withSimilarityThreshold(0.75));
+
+// With metadata filter — limit to one category
+FilterExpressionBuilder b = new FilterExpressionBuilder();
+List&lt;Document&gt; filtered = vectorStore.similaritySearch(
+    SearchRequest.query("deployment configuration")
+        .withTopK(3)
+        .withSimilarityThreshold(0.70)
+        .withFilterExpression(b.eq("category", "devops").build()));
+
+// SearchRequest.defaults() — uses topK=4, no threshold
+List&lt;Document&gt; defaults = vectorStore.similaritySearch(
+    SearchRequest.defaults().withQuery("Spring AI configuration"));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="vectorstore-implementations">VectorStore Implementations Reference</h3>
+          <p>Spring AI provides starters for 15 vector store backends. Each starter auto-configures a <code>VectorStore</code> bean when it is on the classpath and the required connection properties are present. The <code>VectorStore</code> interface is uniform across all implementations, so migrating between stores requires only a pom.xml change and updated connection properties.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>VectorStore</th>
+                  <th>Starter Artifact</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>PGVector</td><td><code>spring-ai-pgvector-store-spring-boot-starter</code></td><td>PostgreSQL + pgvector extension; HNSW / IVFFlat indexes</td></tr>
+                <tr><td>SimpleVectorStore</td><td><code>spring-ai-core</code></td><td>In-memory only; dev/test; optional JSON persistence</td></tr>
+                <tr><td>Chroma</td><td><code>spring-ai-chroma-store-spring-boot-starter</code></td><td>Open-source; REST API; local Docker or cloud</td></tr>
+                <tr><td>Pinecone</td><td><code>spring-ai-pinecone-store-spring-boot-starter</code></td><td>Managed cloud; serverless and pod-based indexes</td></tr>
+                <tr><td>Weaviate</td><td><code>spring-ai-weaviate-store-spring-boot-starter</code></td><td>Open-source; GraphQL API; cloud or self-hosted</td></tr>
+                <tr><td>MongoDB Atlas</td><td><code>spring-ai-mongodb-atlas-store-spring-boot-starter</code></td><td>Atlas Vector Search; integrates with existing MongoDB</td></tr>
+                <tr><td>Redis</td><td><code>spring-ai-redis-store-spring-boot-starter</code></td><td>Redis Stack with RediSearch / VSS module</td></tr>
+                <tr><td>Milvus</td><td><code>spring-ai-milvus-store-spring-boot-starter</code></td><td>High-performance; billions of vectors; HNSW support</td></tr>
+                <tr><td>Neo4j</td><td><code>spring-ai-neo4j-store-spring-boot-starter</code></td><td>Graph + vector; link documents by relationship</td></tr>
+                <tr><td>Qdrant</td><td><code>spring-ai-qdrant-store-spring-boot-starter</code></td><td>Rust-based; fast; filtering on payload fields</td></tr>
+                <tr><td>Oracle</td><td><code>spring-ai-oracle-store-spring-boot-starter</code></td><td>Oracle Database 23ai with AI Vector Search</td></tr>
+                <tr><td>MariaDB</td><td><code>spring-ai-mariadb-store-spring-boot-starter</code></td><td>MariaDB Vector via MHNSW index</td></tr>
+                <tr><td>Azure AI Search</td><td><code>spring-ai-azure-store-spring-boot-starter</code></td><td>Azure Cognitive Search with vector profiles</td></tr>
+                <tr><td>Apache Cassandra</td><td><code>spring-ai-cassandra-store-spring-boot-starter</code></td><td>Cassandra 5.0+ with SAI vector indexes</td></tr>
+                <tr><td>OpenSearch</td><td><code>spring-ai-opensearch-store-spring-boot-starter</code></td><td>OpenSearch k-NN plugin; AWS or self-hosted</td></tr>
+                <tr><td>Elasticsearch</td><td><code>spring-ai-elasticsearch-store-spring-boot-starter</code></td><td>Elasticsearch dense_vector field; HNSW support</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-rag-vectorstore -->
+
+      <!-- ── Retrieval ──────────────────────────────────── -->
+      <div class="tab-panel" id="tab-rag-retrieval">
+
+        <h2>Retrieval Advisors and Query Pipeline</h2>
+        <p>Spring AI provides two retrieval advisors that plug into <code>ChatClient</code> via <code>.defaultAdvisors()</code>. <code>QuestionAnswerAdvisor</code> is the quick-start option: one line of code wires RAG into any chat call. <code>RetrievalAugmentationAdvisor</code> is the modular option: its builder accepts pluggable query transformers, document retrievers, and document rankers, enabling advanced patterns without changing advisor source code.</p>
+
+        <div class="feature-card">
+          <h3 id="question-answer-advisor">QuestionAnswerAdvisor</h3>
+          <p><code>QuestionAnswerAdvisor</code> is the primary RAG advisor in Spring AI 1.x and 2.x. It intercepts every <code>ChatClient</code> call, extracts the user's question, runs a <code>VectorStore.similaritySearch()</code> with the configured <code>SearchRequest</code>, formats the retrieved chunks as a context block, and prepends them to the system prompt. The default context template instructs the model to answer strictly from the provided context and to say "I don't know" when the context is insufficient.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.rag.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.vectorstore.SearchRequest;
+
+@Service
+public class RagChatService {
+
+    private final ChatClient chatClient;
+
+    public RagChatService(ChatClient.Builder builder, VectorStore vectorStore) {
+        // Wire once at construction — applies to every call on this client
+        this.chatClient = builder
+            .defaultAdvisors(
+                new QuestionAnswerAdvisor(vectorStore,
+                    SearchRequest.defaults().withTopK(4)))
+            .build();
+    }
+
+    public String answer(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+
+    // Override SearchRequest per-call via advisor param
+    public String answerPrecise(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .advisors(spec -&gt; spec.param(
+                QuestionAnswerAdvisor.RETRIEVAL_QUERY_PARAM, question))
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="retrieval-augmentation-advisor">RetrievalAugmentationAdvisor — Modular RAG</h3>
+          <p><code>RetrievalAugmentationAdvisor</code> is the modular, composable RAG advisor introduced in Spring AI 1.x. Unlike <code>QuestionAnswerAdvisor</code>, which is a single monolithic component, <code>RetrievalAugmentationAdvisor</code> accepts pluggable <code>QueryTransformer</code>, <code>DocumentRetriever</code>, <code>DocumentRanker</code>, and <code>AugmentationAdvisor</code> components. This enables advanced RAG patterns such as query rewriting, hypothetical document embedding, and cross-encoder re-ranking without forking the advisor source.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.source.VectorStoreDocumentRetriever;
+
+@Service
+public class ModularRagService {
+
+    private final ChatClient chatClient;
+
+    public ModularRagService(ChatClient.Builder builder, VectorStore vectorStore) {
+        VectorStoreDocumentRetriever retriever =
+            VectorStoreDocumentRetriever.builder()
+                .vectorStore(vectorStore)
+                .similarityThreshold(0.70)
+                .topK(5)
+                .build();
+
+        RetrievalAugmentationAdvisor ragAdvisor =
+            RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(retriever)
+                .build();
+
+        this.chatClient = builder
+            .defaultAdvisors(ragAdvisor)
+            .build();
+    }
+
+    public String answer(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="retrieval-query-rewriting">Query Rewriting with RewriteQueryTransformer</h3>
+          <p>A user's raw query is often too short or ambiguous for high-quality vector search. Query rewriting transforms the query before similarity search to improve recall. <code>RewriteQueryTransformer</code> uses a ChatModel to rewrite the query into a more explicit form optimized for semantic matching. A variant, <code>MultiQueryExpander</code>, generates several different phrasings of the question and merges the results from all variants, boosting coverage at the cost of additional model calls.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.rag.query.transformer.RewriteQueryTransformer;
+import org.springframework.ai.rag.query.expander.MultiQueryExpander;
+
+// Simple rewrite — one improved query
+RewriteQueryTransformer rewriter = RewriteQueryTransformer.builder()
+    .chatClientBuilder(builder)
+    .build();
+
+VectorStoreDocumentRetriever retriever =
+    VectorStoreDocumentRetriever.builder()
+        .vectorStore(vectorStore)
+        .topK(5)
+        .build();
+
+RetrievalAugmentationAdvisor ragAdvisor =
+    RetrievalAugmentationAdvisor.builder()
+        .queryTransformers(List.of(rewriter))
+        .documentRetriever(retriever)
+        .build();
+
+// Multi-query expansion — generates N variants, merges results
+MultiQueryExpander expander = MultiQueryExpander.builder()
+    .chatClientBuilder(builder)
+    .numberOfQueries(3)
+    .build();
+
+RetrievalAugmentationAdvisor expandingAdvisor =
+    RetrievalAugmentationAdvisor.builder()
+        .queryTransformers(List.of(expander))
+        .documentRetriever(retriever)
+        .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="retrieval-re-ranking">Re-Ranking with DocumentRanker</h3>
+          <p>Initial vector similarity retrieval is fast but approximate. Re-ranking applies a more accurate (but slower) scoring model to the top-K candidates to reorder them before injection into the prompt. Spring AI supports re-ranking via the <code>DocumentRanker</code> interface. <code>CohereReranker</code> is the built-in implementation backed by the Cohere Rerank API; custom implementations can wrap any cross-encoder model or scoring function. Re-ranking typically fetches a larger candidate set (e.g. top-20) then re-scores to top-5 for injection.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-cohere-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.rag.postretrieval.ranking.cohere.CohereReranker;
+
+// application.properties: spring.ai.cohere.api-key=...
+
+@Service
+public class ReRankedRagService {
+
+    private final ChatClient chatClient;
+
+    public ReRankedRagService(ChatClient.Builder builder,
+                               VectorStore vectorStore,
+                               CohereReranker reranker) {
+        VectorStoreDocumentRetriever retriever =
+            VectorStoreDocumentRetriever.builder()
+                .vectorStore(vectorStore)
+                .topK(20)  // fetch broader candidate set
+                .build();
+
+        RetrievalAugmentationAdvisor ragAdvisor =
+            RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(retriever)
+                .documentRanker(reranker)   // re-rank top-20 to top-5
+                .build();
+
+        this.chatClient = builder
+            .defaultAdvisors(ragAdvisor)
+            .build();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-rag-retrieval -->
+
+      <!-- ── Advanced ───────────────────────────────────── -->
+      <div class="tab-panel" id="tab-rag-advanced">
+
+        <h2>Advanced RAG Patterns</h2>
+        <p>Basic vector similarity search is sufficient for many use cases, but demanding applications need higher precision and recall. Advanced patterns include hybrid keyword-plus-vector search, metadata pre-filtering to scope retrieval to relevant document subsets, and chained transformer pipelines that enrich documents with keywords and summaries before indexing. These patterns are composable — you can combine re-ranking, metadata filtering, and query rewriting in a single <code>RetrievalAugmentationAdvisor</code>.</p>
+
+        <div class="feature-card">
+          <h3 id="hybrid-search">Hybrid Search — Keyword + Vector Combined</h3>
+          <p>Pure vector search excels at semantic matching but can miss exact keywords (product codes, version numbers, proper nouns). Hybrid search combines BM25 keyword scoring with vector cosine similarity, then fuses the ranked lists using reciprocal rank fusion (RRF) or a weighted linear combination. Some vector stores (PGVector with full-text search, Elasticsearch, OpenSearch, Weaviate) support hybrid natively. Spring AI exposes hybrid search through store-specific configuration and the standard <code>SearchRequest</code> API extended with keyword parameters.</p>
+
+          <h4>Example — PGVector hybrid search</h4>
+          <pre><code class="language-java">import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
+
+// PgVectorStore supports hybrid via keyword filter on tsvector column
+// Configure in application.properties:
+// spring.ai.vectorstore.pgvector.index-type=HNSW
+
+// Hybrid search request with metadata keyword prefilter
+FilterExpressionBuilder b = new FilterExpressionBuilder();
+List&lt;Document&gt; results = vectorStore.similaritySearch(
+    SearchRequest.query("spring security oauth2 configuration")
+        .withTopK(10)
+        .withSimilarityThreshold(0.60)
+        .withFilterExpression(
+            b.and(
+                b.eq("type", "documentation"),
+                b.gte("version", "6.0")
+            ).build()));
+
+// Elasticsearch store — native hybrid search via knn + query DSL
+// Configure via spring.ai.vectorstore.elasticsearch.knn-num-candidates=100
+List&lt;Document&gt; esResults = vectorStore.similaritySearch(
+    SearchRequest.query("reactive programming patterns")
+        .withTopK(5));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="metadata-filtering">Metadata Filtering with FilterExpressionBuilder</h3>
+          <p>Every <code>Document</code> carries a <code>metadata</code> map of arbitrary key-value pairs. At search time, <code>SearchRequest.withFilterExpression()</code> applies a predicate over metadata to limit the search scope before or during similarity scoring. The <code>FilterExpressionBuilder</code> provides a fluent Java DSL for constructing filter expressions that are translated to the native query syntax of each vector store (SQL WHERE clause for PGVector, Weaviate's GraphQL where filter, Pinecone's metadata filter, etc.).</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+
+FilterExpressionBuilder b = new FilterExpressionBuilder();
+
+// Simple equality filter
+List&lt;Document&gt; docs = vectorStore.similaritySearch(
+    SearchRequest.query("connection pooling")
+        .withTopK(5)
+        .withFilterExpression(b.eq("source", "spring-data-reference").build()));
+
+// Range filter — only recent documents
+List&lt;Document&gt; recent = vectorStore.similaritySearch(
+    SearchRequest.query("auto-configuration changes")
+        .withTopK(5)
+        .withFilterExpression(b.gte("year", 2024).build()));
+
+// Compound AND filter
+List&lt;Document&gt; compound = vectorStore.similaritySearch(
+    SearchRequest.query("batch processing")
+        .withTopK(8)
+        .withFilterExpression(
+            b.and(
+                b.eq("category", "spring-batch"),
+                b.in("version", List.of("5.0", "5.1", "5.2"))
+            ).build()));
+
+// Compound OR filter
+List&lt;Document&gt; either = vectorStore.similaritySearch(
+    SearchRequest.query("security authentication")
+        .withTopK(6)
+        .withFilterExpression(
+            b.or(
+                b.eq("category", "spring-security"),
+                b.eq("category", "oauth2")
+            ).build()));
+
+// Ingest with metadata to enable filtering
+Document doc = new Document(
+    "Spring Security 6 requires Java 17 and Spring 6.x.",
+    Map.of("category", "spring-security", "version", "6.0", "year", 2023));
+vectorStore.add(List.of(doc));</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="document-transformer-chain">DocumentTransformer Chain — Composable ETL</h3>
+          <p><code>DocumentTransformer</code> is a functional interface (<code>Function&lt;List&lt;Document&gt;, List&lt;Document&gt;&gt;</code>) that transforms a list of documents. Spring AI ships with several implementations: <code>TokenTextSplitter</code>, <code>KeywordMetadataEnricher</code>, <code>SummaryMetadataEnricher</code>, and <code>ContentFormatTransformer</code>. You can chain multiple transformers using standard Java function composition (<code>andThen</code>) or by applying them sequentially. This creates a clean, testable ETL pipeline where each step is independently replaceable.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.transformer.KeywordMetadataEnricher;
+import org.springframework.ai.transformer.SummaryMetadataEnricher;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.document.DocumentTransformer;
+
+@Service
+public class EnrichedIngestionService {
+
+    private final VectorStore vectorStore;
+    private final DocumentTransformer pipeline;
+
+    public EnrichedIngestionService(VectorStore vectorStore,
+                                     ChatModel chatModel) {
+        this.vectorStore = vectorStore;
+
+        // Build a composable transformer chain
+        DocumentTransformer splitter = new TokenTextSplitter(500, 100, 5, 10000, true);
+        DocumentTransformer keywordEnricher = new KeywordMetadataEnricher(chatModel, 5);
+        DocumentTransformer summaryEnricher = new SummaryMetadataEnricher(chatModel,
+            List.of(SummaryMetadataEnricher.SummaryType.PREVIOUS,
+                     SummaryMetadataEnricher.SummaryType.CURRENT,
+                     SummaryMetadataEnricher.SummaryType.NEXT));
+
+        // Chain: split → enrich keywords → enrich summaries
+        this.pipeline = splitter
+            .andThen(keywordEnricher)
+            .andThen(summaryEnricher);
+    }
+
+    public void ingest(Resource resource) {
+        List&lt;Document&gt; raw = new TextReader(resource).read();
+        List&lt;Document&gt; enriched = pipeline.apply(raw);
+        vectorStore.add(enriched);
+        System.out.printf("Ingested %d enriched chunks%n", enriched.size());
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-rag-advanced -->
+
+    </div><!-- /tab-container -->
+
+    <section class="cheatsheet">
+      <h2>RAG &amp; VectorStore Cheatsheet</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Class / Method</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>TextReader(resource)</code></td>
+              <td>Read plain text, Markdown, CSV as Document</td>
+              <td>Returns single Document; pass to TokenTextSplitter</td>
+            </tr>
+            <tr>
+              <td><code>PdfDocumentReader(resource)</code></td>
+              <td>Parse PDF to List&lt;Document&gt; — one per page</td>
+              <td>Requires <code>spring-ai-pdf-document-reader</code></td>
+            </tr>
+            <tr>
+              <td><code>TikaDocumentReader(resource)</code></td>
+              <td>Parse Word, Excel, HTML, RTF with Apache Tika</td>
+              <td>Requires <code>spring-ai-tika-document-reader</code></td>
+            </tr>
+            <tr>
+              <td><code>TokenTextSplitter()</code></td>
+              <td>Chunk documents into token-sized pieces</td>
+              <td>Default: 800 tokens, 350 min chars, overlap enabled</td>
+            </tr>
+            <tr>
+              <td><code>KeywordMetadataEnricher(model, n)</code></td>
+              <td>Add LLM-extracted keywords to document metadata</td>
+              <td>1 model call per document; stores under "excerpt_keywords"</td>
+            </tr>
+            <tr>
+              <td><code>SummaryMetadataEnricher</code></td>
+              <td>Add prev/current/next chunk summaries to metadata</td>
+              <td>Improves context window quality for chunk-boundary queries</td>
+            </tr>
+            <tr>
+              <td><code>DocumentTransformer</code></td>
+              <td>Functional interface for ETL transforms</td>
+              <td>Chain with <code>.andThen()</code></td>
+            </tr>
+            <tr>
+              <td><code>VectorStore.add(docs)</code></td>
+              <td>Embed and store documents</td>
+              <td>EmbeddingModel called internally</td>
+            </tr>
+            <tr>
+              <td><code>VectorStore.similaritySearch(req)</code></td>
+              <td>Run cosine similarity search</td>
+              <td>Returns <code>List&lt;Document&gt;</code> ordered by score</td>
+            </tr>
+            <tr>
+              <td><code>VectorStore.delete(ids)</code></td>
+              <td>Remove documents by ID</td>
+              <td>Useful for document update workflows</td>
+            </tr>
+            <tr>
+              <td><code>SimpleVectorStore</code></td>
+              <td>In-memory vector store for dev/test</td>
+              <td>Optional JSON persistence via <code>save(resource)</code></td>
+            </tr>
+            <tr>
+              <td><code>PgVectorStore</code></td>
+              <td>Production PostgreSQL vector store</td>
+              <td>Requires pgvector extension; HNSW/IVFFlat index</td>
+            </tr>
+            <tr>
+              <td><code>SearchRequest.query(text)</code></td>
+              <td>Build a similarity search request</td>
+              <td>Chain <code>.withTopK()</code>, <code>.withSimilarityThreshold()</code></td>
+            </tr>
+            <tr>
+              <td><code>.withTopK(int k)</code></td>
+              <td>Maximum results to return</td>
+              <td>Default 4; higher values increase recall</td>
+            </tr>
+            <tr>
+              <td><code>.withSimilarityThreshold(double t)</code></td>
+              <td>Minimum cosine similarity score</td>
+              <td>0.0–1.0; 0.75 is a common starting point</td>
+            </tr>
+            <tr>
+              <td><code>.withFilterExpression(expr)</code></td>
+              <td>Pre-filter by document metadata</td>
+              <td>Use <code>FilterExpressionBuilder</code> to build expressions</td>
+            </tr>
+            <tr>
+              <td><code>FilterExpressionBuilder</code></td>
+              <td>Fluent DSL for metadata filter predicates</td>
+              <td>Supports: eq, ne, gt, gte, lt, lte, in, and, or, not</td>
+            </tr>
+            <tr>
+              <td><code>QuestionAnswerAdvisor</code></td>
+              <td>Primary RAG advisor — retrieves &amp; injects context</td>
+              <td>Wire via <code>.defaultAdvisors()</code> on ChatClient.Builder</td>
+            </tr>
+            <tr>
+              <td><code>RetrievalAugmentationAdvisor</code></td>
+              <td>Modular RAG advisor with pluggable components</td>
+              <td>Supports query transformers, rankers, augmentors</td>
+            </tr>
+            <tr>
+              <td><code>VectorStoreDocumentRetriever</code></td>
+              <td>DocumentRetriever backed by a VectorStore</td>
+              <td>Use inside RetrievalAugmentationAdvisor</td>
+            </tr>
+            <tr>
+              <td><code>RewriteQueryTransformer</code></td>
+              <td>LLM-powered query rewriting before similarity search</td>
+              <td>Improves recall for short/ambiguous user queries</td>
+            </tr>
+            <tr>
+              <td><code>MultiQueryExpander</code></td>
+              <td>Generate N query variants, merge results</td>
+              <td>Higher recall; costs N model calls per query</td>
+            </tr>
+            <tr>
+              <td><code>CohereReranker</code></td>
+              <td>Cross-encoder re-ranking via Cohere Rerank API</td>
+              <td>Requires <code>spring-ai-cohere-spring-boot-starter</code></td>
+            </tr>
+            <tr>
+              <td><code>spring.ai.vectorstore.pgvector.dimensions</code></td>
+              <td>Set embedding dimensions for PGVector table schema</td>
+              <td>Must match EmbeddingModel output size (e.g. 1536 for ada-002)</td>
+            </tr>
+            <tr>
+              <td><code>spring.ai.vectorstore.pgvector.index-type</code></td>
+              <td>HNSW (default) or IVFFlat</td>
+              <td>HNSW: better accuracy; IVFFlat: lower memory</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>
