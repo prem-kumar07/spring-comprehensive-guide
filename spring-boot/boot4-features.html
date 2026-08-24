@@ -168,48 +168,358 @@ management.endpoints.web.exposure.include=conditions,health,info</code></pre>
       <!-- ── Web ───────────────────────────────────── -->
       <div class="tab-panel" id="b4-tab-web">
 
+        <!-- API VERSIONING — COMPREHENSIVE -->
         <div class="feature-card">
           <h3 id="b4-api-versioning">API Versioning — First-Class Request Mapping</h3>
-          <p>Spring Framework 7 (the foundation of Spring Boot 4) makes <strong>API versioning a first-class feature</strong> of request mapping. The <code>version</code> attribute is now available on <code>@GetMapping</code>, <code>@PostMapping</code>, <code>@PutMapping</code>, <code>@DeleteMapping</code>, <code>@PatchMapping</code>, and <code>@RequestMapping</code>. Spring resolves the version from the request using a pluggable <code>ApiVersionResolver</code> strategy — by default via a request header or URL path segment. Multiple versioned handlers can coexist, and Spring routes to the most specific version that satisfies the request, enabling backward-compatible evolution of REST APIs without path duplication.</p>
+          <p>Spring Framework 7 (the foundation of Spring Boot 4) makes <strong>API versioning a first-class feature</strong> of request mapping via the <code>version</code> attribute on all <code>@*Mapping</code> annotations. Spring auto-configures versioning for both Spring MVC (<code>spring.mvc.apiversion.*</code>) and WebFlux (<code>spring.webflux.apiversion.*</code>). Four resolution strategies are supported — <strong>request header</strong>, <strong>path segment</strong>, <strong>query parameter</strong>, and <strong>media type</strong> — each configurable via properties or the <code>WebMvcConfigurer</code> / <code>WebFluxConfigurer</code> Java API. Spring routes each request to the most specific matching version handler, enabling backward-compatible API evolution without path duplication.</p>
 
           <h4>Dependency (pom.xml)</h4>
           <pre><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
+        </div>
 
-          <h4>Example</h4>
-          <pre><code class="language-java">// Configure the API version resolver (header-based in this example)
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
+        <!-- Strategy 1: Header -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-header">Strategy 1 — Request Header</h3>
+          <p>The client sends an API version in a custom request header. URLs stay clean and are not affected by version changes. This is the most common approach for internal APIs.</p>
 
-    @Override
-    public void configureApiVersioning(ApiVersioningConfigurer configurer) {
-        configurer.useRequestHeader("X-API-Version");
-    }
-}
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.mvc.apiversion.use.header=X-API-Version
+spring.mvc.apiversion.supported=1.0,2.0
+spring.mvc.apiversion.default=1.0</code></pre>
 
-// Handlers for different API versions on the same path
-@RestController
+          <h4>Controller</h4>
+          <pre><code class="language-java">@RestController
 @RequestMapping("/orders")
 public class OrderController {
 
-    // Handles X-API-Version: 1 and X-API-Version: 2
-    @GetMapping(value = "/{id}", version = "1")
+    // Handles: GET /orders/{id}  with header X-API-Version: 1.0
+    @GetMapping("/{id}")
+    @ApiVersion("1.0")
     public OrderV1 getOrderV1(@PathVariable Long id) {
         return orderService.findV1(id);
     }
 
-    // Handles X-API-Version: 2 only (more specific)
-    @GetMapping(value = "/{id}", version = "2")
+    // Handles: GET /orders/{id}  with header X-API-Version: 2.0
+    @GetMapping("/{id}")
+    @ApiVersion("2.0")
     public OrderV2 getOrderV2(@PathVariable Long id) {
         return orderService.findV2(id);
     }
 }</code></pre>
 
+          <h4>Client request</h4>
+          <pre><code class="language-bash">curl -H "X-API-Version: 2.0" http://localhost:8080/orders/42</code></pre>
+        </div>
+
+        <!-- Strategy 2: Path Segment -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-path">Strategy 2 — Path Segment</h3>
+          <p>The version is embedded in the URL path at a configurable segment index. This is the most visible and bookmark-friendly strategy. <strong>Note:</strong> path segment versioning cannot be mixed with other strategies in the same application — enabling it overrides all other resolvers.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># The version is expected at path segment index 1 (0-based)
+# e.g. /v1/orders → segment 0 = "v1"
+spring.mvc.apiversion.use.path-segment=0
+spring.mvc.apiversion.supported=v1,v2
+spring.mvc.apiversion.default=v1</code></pre>
+
+          <h4>Controller</h4>
+          <pre><code class="language-java">@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    // Handles: GET /v1/orders/{id}
+    @GetMapping("/{id}")
+    @ApiVersion("v1")
+    public OrderV1 getOrderV1(@PathVariable Long id) {
+        return orderService.findV1(id);
+    }
+
+    // Handles: GET /v2/orders/{id}
+    @GetMapping("/{id}")
+    @ApiVersion("v2")
+    public OrderV2 getOrderV2(@PathVariable Long id) {
+        return orderService.findV2(id);
+    }
+}</code></pre>
+
+          <h4>Client request</h4>
+          <pre><code class="language-bash">curl http://localhost:8080/v2/orders/42</code></pre>
+        </div>
+
+        <!-- Strategy 3: Query Parameter -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-query">Strategy 3 — Query Parameter</h3>
+          <p>The version is passed as a URL query parameter. Simple to use and great for debugging and manual testing in a browser, but pollutes URLs and is not recommended for production APIs.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.mvc.apiversion.use.query-parameter=api-version
+spring.mvc.apiversion.supported=1.0,2.0
+spring.mvc.apiversion.default=1.0</code></pre>
+
+          <h4>Controller</h4>
+          <pre><code class="language-java">@RestController
+@RequestMapping("/products")
+public class ProductController {
+
+    // Handles: GET /products?api-version=1.0
+    @GetMapping
+    @ApiVersion("1.0")
+    public List&lt;ProductV1&gt; listV1() {
+        return productService.listV1();
+    }
+
+    // Handles: GET /products?api-version=2.0
+    @GetMapping
+    @ApiVersion("2.0")
+    public List&lt;ProductV2&gt; listV2() {
+        return productService.listV2();
+    }
+}</code></pre>
+
+          <h4>Client request</h4>
+          <pre><code class="language-bash">curl "http://localhost:8080/products?api-version=2.0"</code></pre>
+        </div>
+
+        <!-- Strategy 4: Media Type -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-mediatype">Strategy 4 — Media Type (Content Negotiation)</h3>
+          <p>The version is embedded in the <code>Accept</code> header as a media-type parameter. This is the most HTTP-pure approach — versioning through content negotiation — but adds complexity for clients that don't control their HTTP headers easily.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># For media type  application/json;version=2.0
+spring.mvc.apiversion.use.media-type-parameter[application/json]=version</code></pre>
+
+          <h4>Controller</h4>
+          <pre><code class="language-java">@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    // Handles: Accept: application/json;version=1.0
+    @GetMapping(produces = "application/json")
+    @ApiVersion("1.0")
+    public List&lt;UserV1&gt; getUsersV1() {
+        return userService.listV1();
+    }
+
+    // Handles: Accept: application/json;version=2.0
+    @GetMapping(produces = "application/json")
+    @ApiVersion("2.0")
+    public List&lt;UserV2&gt; getUsersV2() {
+        return userService.listV2();
+    }
+}</code></pre>
+
+          <h4>Client request</h4>
+          <pre><code class="language-bash">curl -H "Accept: application/json;version=2.0" http://localhost:8080/users</code></pre>
+        </div>
+
+        <!-- Java config / WebMvcConfigurer -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-javaconfig">Java Configuration (WebMvcConfigurer)</h3>
+          <p>All strategies can be configured programmatically as an alternative to properties — useful when you need dynamic configuration or want to combine the version resolver with other MVC customisation in one place.</p>
+
+          <pre><code class="language-java">@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureApiVersioning(ApiVersionConfigurer configurer) {
+        configurer
+            .useRequestHeader("X-API-Version")   // or .usePathSegment(0)
+            .addSupportedVersions("1.0", "2.0")  //   or .useQueryParameter("ver")
+            .setDefaultVersion("1.0")
+            .setVersionRequired(false);           // allow versionless requests
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>WebFlux equivalent</strong>
+            For reactive applications use <code>spring.webflux.apiversion.*</code> properties or implement <code>WebFluxConfigurer.configureApiVersioning()</code> — the API is identical to the MVC variant.
+          </div>
+        </div>
+
+        <!-- Version range syntax -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-range">Version Range Notation (<code>+</code> suffix)</h3>
+          <p>The <code>+</code> suffix on a version string means "this version and all higher versions". This avoids duplicating the same handler for every version — the latest handler catches all future versions automatically until a more specific one is added.</p>
+
+          <pre><code class="language-java">@RestController
+@RequestMapping("/invoices")
+public class InvoiceController {
+
+    // v1.0 only — original shape
+    @GetMapping("/{id}")
+    @ApiVersion("1.0")
+    public InvoiceV1 getV1(@PathVariable Long id) {
+        return invoiceService.findV1(id);
+    }
+
+    // v1.1 and all higher versions (v2.0, v3.0, …) until overridden
+    @GetMapping("/{id}")
+    @ApiVersion("1.1+")
+    public InvoiceV2 getV1Plus(@PathVariable Long id) {
+        return invoiceService.findV2(id);
+    }
+}</code></pre>
+
+          <h4>Request routing</h4>
+          <pre><code class="language-bash">curl -H "X-API-Version: 1.0" .../invoices/1   # → getV1
+curl -H "X-API-Version: 1.1" .../invoices/1   # → getV1Plus
+curl -H "X-API-Version: 2.5" .../invoices/1   # → getV1Plus (catch-all)</code></pre>
+        </div>
+
+        <!-- Custom ApiVersionParser -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-parser">Custom <code>ApiVersionParser</code></h3>
+          <p>By default Spring parses versions as strings. Implement <code>ApiVersionParser</code> to normalise formats — for example, stripping a leading <code>v</code> prefix or converting an integer to a <code>Major.Minor</code> string — so clients can send <code>v1</code>, <code>1</code>, or <code>1.0</code> interchangeably.</p>
+
+          <pre><code class="language-java">@Component
+public class FlexibleVersionParser implements ApiVersionParser&lt;String&gt; {
+
+    @Override
+    public String parse(String version) {
+        if (version == null) return null;
+        // Strip leading 'v' or 'V'
+        if (version.startsWith("v") || version.startsWith("V")) {
+            version = version.substring(1);
+        }
+        // Normalise integer shorthand: "2" → "2.0"
+        if (!version.contains(".")) {
+            version = version + ".0";
+        }
+        return version;
+    }
+}
+
+// Registered automatically because it's a @Component;
+// or wire it explicitly in WebMvcConfigurer.configureApiVersioning().</code></pre>
+
+          <h4>Effect</h4>
+          <pre><code class="language-bash">X-API-Version: v2    →  parsed as "2.0"  →  matches @ApiVersion("2.0")
+X-API-Version: 2     →  parsed as "2.0"  →  matches @ApiVersion("2.0")
+X-API-Version: 2.0   →  parsed as "2.0"  →  matches @ApiVersion("2.0")</code></pre>
+        </div>
+
+        <!-- Deprecation handler -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-deprecation">Deprecation &amp; Sunset Handling</h3>
+          <p>Register an <code>ApiVersionDeprecationHandler</code> bean to add <code>Deprecation</code> and <code>Sunset</code> HTTP headers to responses for versions that are approaching or past end-of-life. Spring automatically calls the handler for each request resolved to a deprecated version.</p>
+
+          <pre><code class="language-java">@Configuration
+public class ApiVersionDeprecationConfig {
+
+    @Bean
+    public ApiVersionDeprecationHandler deprecationHandler() {
+        // Map each version to its deprecation date and sunset date
+        return new DefaultApiVersionDeprecationHandler(Map.of(
+            "1.0", new DeprecationInfo(
+                LocalDate.of(2025, 6, 1),   // Deprecation date
+                LocalDate.of(2026, 1, 1)    // Sunset (shutdown) date
+            )
+        ));
+    }
+}</code></pre>
+
+          <h4>Response headers added automatically</h4>
+          <pre><code class="language-bash"># Client calling version 1.0 receives:
+Deprecation: @1748736000    # RFC 9745: Unix timestamp of deprecation date
+Sunset: Thu, 01 Jan 2026 00:00:00 GMT
+Link: &lt;https://api.example.com/v2/orders&gt;; rel="successor-version"</code></pre>
+        </div>
+
+        <!-- Testing with RestTestClient -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-testing">Testing with <code>RestTestClient</code></h3>
+          <p><code>RestTestClient</code> (new in Spring Boot 4) is a test-focused HTTP client that understands API versioning natively. Use <code>ApiVersionInserter</code> to configure how the version is injected (header, path segment, or query param) so tests remain independent of the chosen strategy.</p>
+
+          <pre><code class="language-java">@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderControllerTest {
+
+    @Autowired
+    private RestTestClient restTestClient;
+
+    @Test
+    void getOrderV2() {
+        restTestClient
+            .mutate()
+            .apiVersionInserter(ApiVersionInserter.useHeader("X-API-Version"))
+            .build()
+            .get()
+            .uri("/orders/{id}", 42)
+            .apiVersion("2.0")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(OrderV2.class)
+            .value(order -> assertThat(order.id()).isEqualTo(42));
+    }
+
+    @Test
+    void getOrderPathSegment() {
+        restTestClient
+            .mutate()
+            .apiVersionInserter(ApiVersionInserter.usePathSegment(0))
+            .build()
+            .get()
+            .uri("/orders/{id}", 42)
+            .apiVersion("v2")
+            .exchange()
+            .expectStatus().isOk();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Constraint callout -->
+        <div class="feature-card">
+          <h3 id="b4-versioning-summary">Strategy Comparison &amp; Constraints</h3>
+
+          <table style="width:100%;border-collapse:collapse;font-size:0.875rem;margin-bottom:1rem">
+            <thead>
+              <tr style="background:var(--surface-2)">
+                <th style="padding:0.5rem 0.75rem;border:1px solid var(--border);text-align:left">Strategy</th>
+                <th style="padding:0.5rem 0.75rem;border:1px solid var(--border);text-align:left">Property key</th>
+                <th style="padding:0.5rem 0.75rem;border:1px solid var(--border);text-align:left">Example request</th>
+                <th style="padding:0.5rem 0.75rem;border:1px solid var(--border);text-align:left">Best for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Request Header</td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>use.header=X-API-Version</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>X-API-Version: 2.0</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Internal / microservice APIs</td>
+              </tr>
+              <tr style="background:var(--surface)">
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Path Segment</td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>use.path-segment=0</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>GET /v2/orders/42</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Public APIs, bookmarkable</td>
+              </tr>
+              <tr>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Query Parameter</td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>use.query-parameter=ver</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>GET /orders/42?ver=2.0</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Debugging, browser testing</td>
+              </tr>
+              <tr style="background:var(--surface)">
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Media Type</td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>use.media-type-parameter[application/json]=version</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>Accept: application/json;version=2.0</code></td>
+                <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Purist REST, content negotiation</td>
+              </tr>
+            </tbody>
+          </table>
+
           <div class="callout warn">
+            <strong>Path segment cannot be combined with other strategies</strong>
+            Enabling <code>use.path-segment</code> overrides all other resolvers. All other strategies (header, query parameter, media type) can coexist freely — Spring evaluates them in order and uses the first match.
+          </div>
+
+          <div class="callout info">
             <strong>Migration from Boot 3</strong>
-            Boot 3 had no built-in versioning — teams typically duplicated controller paths (<code>/v1/orders</code>, <code>/v2/orders</code>) or used content negotiation manually. Boot 4's built-in versioning is additive; existing path-based versioning continues to work, but migrating to <code>version</code> attributes enables cleaner routing and less boilerplate.
+            Boot 3 had no built-in versioning. Teams used manual path duplication (<code>/v1/orders</code>, <code>/v2/orders</code>) or custom interceptors. Boot 4's built-in versioning is additive — existing path-based routes continue to work — but migrating to <code>@ApiVersion</code> attributes removes the boilerplate and enables deprecation headers and typed test support.
           </div>
         </div>
 
