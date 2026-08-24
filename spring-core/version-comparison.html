@@ -1142,6 +1142,146 @@ restClient.get().uri("/api")
           </td>
         </tr>
 
+        <!-- Row 19: @MockitoBean / @MockitoSpyBean moved to core Spring -->
+        <tr class="comparison-row" data-category="testing" data-type="new" data-id="19" data-versions="v6 v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="mockitobean-core">@MockitoBean / @MockitoSpyBean / @TestBean (Bean Overrides in spring-test)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>Spring Boot only: <code>@MockBean</code> and <code>@SpyBean</code> in <code>spring-boot-test</code>; not available without Boot</td>
+          <td>Spring 6.2+: <code>@MockitoBean</code>, <code>@MockitoSpyBean</code>, <code>@TestBean</code> in core <code>spring-test</code>; works without Spring Boot</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-19">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6.1 — Boot required for @MockBean</div>
+                <pre><code class="language-java">// Spring Boot Test (spring-boot-test dependency)
+@SpringBootTest
+class OrderServiceTest {
+
+    @MockBean                    // Boot only
+    PaymentGateway paymentGateway;
+
+    @SpyBean                     // Boot only
+    AuditLog auditLog;
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6.2+ — Bean overrides in core spring-test</div>
+                <pre><code class="language-java">// spring-test (no Boot required)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = OrderService.class)
+class OrderServiceTest {
+
+    @MockitoBean               // spring-test 6.2+
+    PaymentGateway paymentGateway;
+
+    @MockitoSpyBean            // wraps real bean; AOP proxy retained
+    AuditLog auditLog;
+
+    @TestBean                  // factory-method override; no Mockito needed
+    MailSender mailSender;
+    static MailSender mailSender() { return new NoOpMailSender(); }
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 20: @Fallback qualifier -->
+        <tr class="comparison-row" data-category="core" data-type="new" data-id="20" data-versions="v6" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="fallback-qualifier-vc">@Fallback — Lower-Priority Bean Qualifier (Spring 6.2)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td>No built-in mechanism; auto-configuration used <code>@ConditionalOnMissingBean</code> to avoid overriding user beans</td>
+          <td>Spring 6.2: <code>@Fallback</code> marks a bean as lowest priority — chosen only when no other non-fallback candidate exists at the injection point</td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-20">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 5 — ConditionalOnMissingBean (Boot only)</div>
+                <pre><code class="language-java">// Spring Boot auto-configuration pattern
+@AutoConfiguration
+public class CacheAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean   // Boot only
+    public CacheManager defaultCacheManager() {
+        return new ConcurrentMapCacheManager();
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 6.2 — @Fallback (pure Spring, no Boot needed)</div>
+                <pre><code class="language-java">// Pure Spring Framework — no Boot required
+@Component
+@Fallback   // only injected if no other CacheManager bean exists
+public class DefaultCacheManager implements CacheManager {
+    private final Map&lt;String, Object&gt; store = new ConcurrentHashMap&lt;&gt;();
+    @Override public Cache getCache(String name) {
+        return store.computeIfAbsent(name, ConcurrentMapCache::new);
+    }
+}
+
+// User provides RedisCacheManager — DefaultCacheManager is ignored
+@Bean
+public CacheManager redisCacheManager(RedisConnectionFactory f) {
+    return RedisCacheManager.create(f);
+}</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 21: BeanRegistrar (Spring 7) -->
+        <tr class="comparison-row" data-category="core" data-type="new" data-id="21" data-versions="v7" style="cursor:pointer" title="Click to expand">
+          <td><h3 class="comparison-feature" id="bean-registrar-vc">BeanRegistrar — AOT-Compatible Programmatic Bean Registration (Spring 7)</h3></td>
+          <td><span style="color:var(--text-muted)">N/A</span></td>
+          <td><code>BeanDefinitionRegistryPostProcessor</code> and <code>@ImportBeanDefinitionRegistrar</code> for programmatic registration — neither processed at AOT build time</td>
+          <td>Spring 7: <code>BeanRegistrar</code> interface; participates in AOT; <code>BeanRegistry.registerBean(name, type, spec)</code> fluent API; receives <code>Environment</code></td>
+          <td><span class="version-badge" style="background:rgba(63,185,80,0.15);color:#3fb950;border:1px solid #3fb95044">New</span></td>
+        </tr>
+        <tr class="diff-row" style="display:none" id="detail-21">
+          <td colspan="5">
+            <div class="diff-grid">
+              <div class="diff-before">
+                <div class="diff-label">Spring 6 — BeanDefinitionRegistryPostProcessor (not AOT-aware)</div>
+                <pre><code class="language-java">// Spring 6 — requires @RuntimeHints for native images
+@Component
+public class DynamicRegistrar
+        implements BeanDefinitionRegistryPostProcessor {
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(
+            BeanDefinitionRegistry registry) {
+        registry.registerBeanDefinition("myService",
+            new RootBeanDefinition(MyService.class));
+    }
+}</code></pre>
+              </div>
+              <div class="diff-after">
+                <div class="diff-label">Spring 7 — BeanRegistrar (AOT-aware, no extra hints)</div>
+                <pre><code class="language-java">// Spring 7 — processed at build time; native-image-ready automatically
+public class FeatureRegistrar implements BeanRegistrar {
+
+    @Override
+    public void register(BeanRegistry registry, Environment env) {
+        if (env.matchesProfiles("analytics")) {
+            registry.registerBean("tracker", AnalyticsTracker.class,
+                spec -> spec.constructor(AnalyticsConfig.class));
+        }
+    }
+}
+
+@Configuration
+@Import(FeatureRegistrar.class)
+public class FeatureConfig { }</code></pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+
       </tbody>
     </table>
     </div>

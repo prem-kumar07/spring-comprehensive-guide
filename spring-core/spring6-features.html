@@ -1019,10 +1019,10 @@ class NativeAotIntegrationTest {
 
         <!-- Basic: ProblemDetail -->
         <div class="feature-card">
-          <h3 id="problemdetail-rfc-7807-standardized-error-responses-new-in-spring-6-basic">ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6)
+          <h3 id="problemdetail-rfc-7807-standardized-error-responses-new-in-spring-6-basic">ProblemDetail — RFC 9457 / RFC 7807 Standardized Error Responses (NEW in Spring 6)
             <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
           </h3>
-          <p>Spring 6 ships <code>ProblemDetail</code> — an implementation of <a href="https://www.rfc-editor.org/rfc/rfc7807">RFC 7807 (Problem Details for HTTP APIs)</a>. Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields (<code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>) that API consumers can programmatically interpret.</p>
+          <p>Spring 6 ships <code>ProblemDetail</code> — an implementation of <a href="https://www.rfc-editor.org/rfc/rfc9457">RFC 9457</a> (which superseded RFC 7807 in 2023; the JSON structure is identical). Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields (<code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>) that API consumers can programmatically interpret.</p>
 
           <pre><code class="language-java">import org.springframework.http.ProblemDetail;
 import org.springframework.http.HttpStatus;
@@ -1254,6 +1254,117 @@ public class TomcatVirtualThreadConfig {
           </div>
         </div>
 
+        <div class="feature-card">
+          <h3 id="record-request-binding">Record-Based Request Parameter and Model Binding (Spring 6.1)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6.1 extends data binding to fully support <strong>Java records</strong> as <code>@RequestParam</code>, <code>@ModelAttribute</code>, and <code>@RequestBody</code> targets. Records are immutable and constructed via a canonical constructor, which Spring's data binder now resolves automatically. This removes the boilerplate of mutable DTOs with setter methods — a record with the right field names works as a first-class binding target. Spring's <code>BindingResult</code> validation pipeline also applies, so <code>@Valid</code> on records works as expected.</p>
+
+          <h4>Example — record as @ModelAttribute (form binding)</h4>
+          <pre><code class="language-java">import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.web.bind.annotation.*;
+
+// ── Java record as form / query-param binding target ──
+public record CreateProductRequest(
+        @NotBlank String name,
+        @Size(max = 500) String description,
+        double price
+) {}
+
+// Spring 6.1: @ModelAttribute binds query params or form fields to the record
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+    @PostMapping
+    public Product create(
+            @Valid @ModelAttribute CreateProductRequest req,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException(result);
+        }
+        return productService.create(req.name(), req.description(), req.price());
+    }
+}
+
+// HTTP: POST /api/products
+//       Content-Type: application/x-www-form-urlencoded
+//       name=Widget&amp;description=A+small+widget&amp;price=9.99</code></pre>
+
+          <h4>Example — record as @RequestParam group (query string)</h4>
+          <pre><code class="language-java">// Record with Spring 6.1 — group related query params into one record
+public record ProductFilter(
+        String category,
+        Double minPrice,
+        Double maxPrice,
+        int page,
+        int size
+) {}
+
+@GetMapping
+public Page&lt;Product&gt; list(@ModelAttribute ProductFilter filter) {
+    // GET /api/products?category=electronics&amp;minPrice=10&amp;maxPrice=500&amp;page=0&amp;size=20
+    return productService.findAll(filter);
+}</code></pre>
+
+          <div class="callout tip">
+            <strong>Spring 5 difference</strong>
+            In Spring 5, only mutable JavaBeans (classes with no-arg constructors and setters) could be used as <code>@ModelAttribute</code> targets. Spring 6.1 recognises the canonical constructor of a record and binds fields directly, making records a natural choice for parameter groups.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="bind-param">@BindParam — Constructor Parameter Name Mapping (Spring 6.1)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>When Spring binds request parameters to a constructor-based target (a Java record or an immutable class), it matches parameter names by convention. <strong><code>@BindParam</code></strong> overrides this name resolution for a specific constructor parameter — useful when the HTTP query string uses a naming convention (e.g. kebab-case <code>first-name</code>) that differs from the Java parameter name (<code>firstName</code>). It is the constructor-binding equivalent of Jackson's <code>@JsonProperty</code>.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.web.bind.annotation.BindParam;
+
+// Record with @BindParam on parameters that have different HTTP names
+public record SearchRequest(
+        @BindParam("first-name") String firstName,
+        @BindParam("last-name")  String lastName,
+        @BindParam("page-size")  int pageSize,
+        int page   // "page" matches by convention — no @BindParam needed
+) {}
+
+// Controller — Spring maps kebab-case query params to the record
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @GetMapping("/search")
+    public Page&lt;User&gt; search(@ModelAttribute SearchRequest req) {
+        // GET /api/users/search?first-name=John&amp;last-name=Doe&amp;page-size=20&amp;page=0
+        return userService.search(req.firstName(), req.lastName(),
+            PageRequest.of(req.page(), req.pageSize()));
+    }
+}
+
+// @BindParam also works on immutable class constructors (not just records):
+public class ProductFilter {
+
+    private final String categoryCode;
+    private final double maxPrice;
+
+    public ProductFilter(
+            @BindParam("category") String categoryCode,
+            @BindParam("max-price") double maxPrice) {
+        this.categoryCode = categoryCode;
+        this.maxPrice     = maxPrice;
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Custom name resolver</strong>
+            The name resolution strategy is extensible via <code>DataBinder.NameResolver</code>. You can register a global resolver (e.g. always convert camelCase ↔ kebab-case) so that <code>@BindParam</code> is only needed for exceptions to the global rule.
+          </div>
+        </div>
+
       </div><!-- /tab-web -->
 
       <!-- ══════════════ TESTING ══════════════ -->
@@ -1449,6 +1560,114 @@ class CacheAutoConfigurationTest {
           </div>
         </div>
 
+        <div class="feature-card">
+          <h3 id="mockitobean-mockitospybean">@MockitoBean, @MockitoSpyBean, @TestBean — Bean Override in Tests (Spring 6.2)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6.2 adds first-class <strong>bean override</strong> support directly in the Spring TestContext Framework — no longer requiring Spring Boot to get mock injection in integration tests. <code>@MockitoBean</code> replaces the real Spring bean with a Mockito mock. <code>@MockitoSpyBean</code> wraps the real bean with a Mockito spy so you can verify interactions while keeping real behaviour. <code>@TestBean</code> (lower-level) lets you provide a completely custom replacement bean via a factory method. Previously, <code>@MockBean</code> and <code>@SpyBean</code> were only available in <code>spring-boot-test</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-test&lt;/artifactId&gt;
+  &lt;version&gt;6.2.0&lt;/version&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;!-- Mockito required for @MockitoBean / @MockitoSpyBean --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.mockito&lt;/groupId&gt;
+  &lt;artifactId&gt;mockito-core&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>@MockitoBean — replace a bean with a Mockito mock</h4>
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.*;
+
+// Spring 6.2 — @MockitoBean works without Spring Boot
+@ExtendWith(SpringExtension.class)
+@Import({OrderService.class})
+class OrderServiceTest {
+
+    // Replaces the real PaymentGateway bean in the test context
+    @MockitoBean
+    PaymentGateway paymentGateway;
+
+    @Autowired
+    OrderService orderService;
+
+    @Test
+    void processOrder_chargesCorrectAmount() {
+        given(paymentGateway.charge(42L, new BigDecimal("99.99")))
+                .willReturn(ChargeResult.SUCCESS);
+
+        orderService.process(new Order(42L, new BigDecimal("99.99")));
+
+        then(paymentGateway).should().charge(42L, new BigDecimal("99.99"));
+    }
+}</code></pre>
+
+          <h4>@MockitoSpyBean — wrap real bean, verify interactions</h4>
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+
+@ExtendWith(SpringExtension.class)
+@Import({AuditService.class, InMemoryAuditRepository.class})
+class AuditServiceSpyTest {
+
+    // Wraps the real InMemoryAuditRepository with a spy
+    @MockitoSpyBean
+    InMemoryAuditRepository auditRepository;
+
+    @Autowired
+    AuditService auditService;
+
+    @Test
+    void createOrder_auditsTheEvent() {
+        auditService.recordOrderCreated(new Order(1L));
+
+        // Verify the real bean was called — real method still ran
+        then(auditRepository).should().save(any(AuditEntry.class));
+    }
+}</code></pre>
+
+          <h4>@TestBean — completely custom replacement via factory method</h4>
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.convention.TestBean;
+
+@ExtendWith(SpringExtension.class)
+@Import(EmailService.class)
+class EmailServiceTest {
+
+    // @TestBean uses a static factory method to provide the replacement
+    @TestBean
+    MailSender mailSender;
+
+    // Factory method: must be static, return the correct type
+    static MailSender mailSender() {
+        return new NoOpMailSender();  // test double — no real email sent
+    }
+
+    @Autowired
+    EmailService emailService;
+
+    @Test
+    void sendWelcome_doesNotThrow() {
+        assertThatCode(() -> emailService.sendWelcome("user@example.com"))
+                .doesNotThrowAnyException();
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>Spring Boot users</strong>
+            If you are using Spring Boot Test, <code>@MockBean</code> / <code>@SpyBean</code> (Boot-specific) still work. The new Spring Framework 6.2 <code>@MockitoBean</code> / <code>@MockitoSpyBean</code> live in <code>spring-test</code> (not Boot) and require Mockito on the classpath. They are intended for pure Spring Framework integration tests or gradual migration.
+          </div>
+        </div>
+
       </div><!-- /tab-testing -->
 
       <!-- ══════════════ CORE CHANGES ══════════════ -->
@@ -1627,6 +1846,56 @@ public class CustomBeanDefinitionParser
           <div class="callout info">
             <strong>Framework authors</strong>
             <code>BeanDefinitionRegistry</code> and <code>BeanDefinitionParserDelegate</code> are primarily for framework and library authors. Application code should prefer <code>@Configuration</code> + <code>@Bean</code> for readability and AOT compatibility.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="fallback-qualifier">@Fallback — Qualifier Fallback for Auto-Configuration (Spring 6.2)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 6.2 introduces the <code>@Fallback</code> meta-annotation (a specialisation of <code>@Qualifier</code>). A bean annotated with <code>@Fallback</code> is treated as a lower-priority candidate — it is chosen only when no other non-fallback beans match the injection point. This is primarily designed for auto-configuration code that wants to provide a sensible default implementation without preventing a user from supplying their own bean of the same type. Before <code>@Fallback</code>, the only option was <code>@ConditionalOnMissingBean</code>, which requires a full condition evaluation pass.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.context.annotation.Fallback;
+import org.springframework.stereotype.Component;
+
+// ── Auto-configuration default — used only when no user-defined bean exists ──
+@Component
+@Fallback   // Spring 6.1: lower priority than any non-@Fallback bean
+public class DefaultCacheManager implements CacheManager {
+    // Provides an in-memory cache as a safe default
+    private final ConcurrentHashMap&lt;String, Object&gt; store = new ConcurrentHashMap&lt;&gt;();
+
+    @Override
+    public Cache getCache(String name) {
+        return store.computeIfAbsent(name, ConcurrentMapCache::new);
+    }
+}
+
+// ── User provides their own CacheManager — Spring picks it, ignoring @Fallback bean ──
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public CacheManager redisCacheManager(RedisConnectionFactory factory) {
+        return RedisCacheManager.create(factory); // Chosen over the @Fallback default
+    }
+}
+
+// ── If no user bean is declared, DefaultCacheManager is injected ──
+@Service
+public class ProductService {
+
+    private final CacheManager cacheManager;   // receives DefaultCacheManager if no user bean
+
+    public ProductService(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>@Fallback vs @Primary vs @ConditionalOnMissingBean</strong>
+            <code>@Primary</code> marks the <em>preferred</em> bean when multiple candidates exist — the opposite of <code>@Fallback</code>. <code>@ConditionalOnMissingBean</code> skips registration entirely when another bean is present (Boot-specific). <code>@Fallback</code> registers the bean unconditionally but places it at the bottom of the priority stack — making it the right choice for framework defaults that should be overridable.
           </div>
         </div>
 

@@ -6981,16 +6981,16 @@
   {
     "page": "Spring 6 Features",
     "href": "spring-core/spring6-features.html",
-    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
+    "section": "ProblemDetail — RFC 9457 / RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
     "anchor": "problemdetail-rfc-7807-standardized-error-responses-new-in-spring-6-basic",
-    "text": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]"
+    "text": "ProblemDetail — RFC 9457 / RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]"
   },
   {
     "page": "Spring 6 Features",
     "href": "spring-core/spring6-features.html",
-    "section": "ProblemDetail — RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
+    "section": "ProblemDetail — RFC 9457 / RFC 7807 Standardized Error Responses (NEW in Spring 6) [Basic]",
     "anchor": "problemdetail-rfc-7807-standardized-error-responses-new-in-spring-6-basic",
-    "text": "Spring 6 ships ProblemDetail — an implementation of RFC 7807 (Problem Details for HTTP APIs) . Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields ( type , title , status , detail , instance ) that API consumers can programmatically interpret. import or"
+    "text": "Spring 6 ships ProblemDetail — an implementation of RFC 9457 (which superseded RFC 7807 in 2023; the JSON structure is identical). Instead of ad-hoc error JSON shapes, your API returns a standardised object with well-known fields ( type , title , status , detail , instance ) that API consumers can p"
   },
   {
     "page": "Spring 6 Features",
@@ -7037,6 +7037,34 @@
   {
     "page": "Spring 6 Features",
     "href": "spring-core/spring6-features.html",
+    "section": "Record-Based Request Parameter and Model Binding (Spring 6.1) [Intermediate]",
+    "anchor": "record-request-binding",
+    "text": "Record-Based Request Parameter and Model Binding (Spring 6.1) [Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "Record-Based Request Parameter and Model Binding (Spring 6.1) [Intermediate]",
+    "anchor": "record-request-binding",
+    "text": "Spring 6.1 extends data binding to fully support Java records as @RequestParam , @ModelAttribute , and @RequestBody targets. Records are immutable and constructed via a canonical constructor, which Spring's data binder now resolves automatically. This removes the boilerplate of mutable DTOs with set"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "@BindParam — Constructor Parameter Name Mapping (Spring 6.1) [Intermediate]",
+    "anchor": "bind-param",
+    "text": "@BindParam — Constructor Parameter Name Mapping (Spring 6.1) [Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "@BindParam — Constructor Parameter Name Mapping (Spring 6.1) [Intermediate]",
+    "anchor": "bind-param",
+    "text": "When Spring binds request parameters to a constructor-based target (a Java record or an immutable class), it matches parameter names by convention. @BindParam overrides this name resolution for a specific constructor parameter — useful when the HTTP query string uses a naming convention (e.g. kebab-"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
     "section": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2) [Basic]",
     "anchor": "mockmvctester-fluent-assertj-api-for-mockmvc-new-in-spring-6-2-basic",
     "text": "MockMvcTester — Fluent AssertJ API for MockMvc (NEW in Spring 6.2) [Basic]"
@@ -7079,6 +7107,20 @@
   {
     "page": "Spring 6 Features",
     "href": "spring-core/spring6-features.html",
+    "section": "@MockitoBean, @MockitoSpyBean, @TestBean — Bean Override in Tests (Spring 6.2) [Intermediate]",
+    "anchor": "mockitobean-mockitospybean",
+    "text": "@MockitoBean, @MockitoSpyBean, @TestBean — Bean Override in Tests (Spring 6.2) [Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "@MockitoBean, @MockitoSpyBean, @TestBean — Bean Override in Tests (Spring 6.2) [Intermediate]",
+    "anchor": "mockitobean-mockitospybean",
+    "text": "Spring 6.2 adds first-class bean override support directly in the Spring TestContext Framework — no longer requiring Spring Boot to get mock injection in integration tests. @MockitoBean replaces the real Spring bean with a Mockito mock. @MockitoSpyBean wraps the real bean with a Mockito spy so you c"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
     "section": "Constructor Injection — The Official Canonical Style in Spring 6 [Basic]",
     "anchor": "constructor-injection-the-official-canonical-style-in-spring-6-basic",
     "text": "Constructor Injection — The Official Canonical Style in Spring 6 [Basic]"
@@ -7117,6 +7159,20 @@
     "section": "BeanDefinitionRegistry & Programmatic Container Configuration [Advanced]",
     "anchor": "beandefinitionregistry-and-programmatic-container-configuration-advanced",
     "text": "Spring 6 improves the programmatic container API. BeanDefinitionRegistry allows registering, removing, and querying bean definitions at any point before the context is refreshed. Combined with BeanDefinitionParserDelegate improvements, this is the foundation that framework authors use to support cus"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "@Fallback — Qualifier Fallback for Auto-Configuration (Spring 6.2) [Intermediate]",
+    "anchor": "fallback-qualifier",
+    "text": "@Fallback — Qualifier Fallback for Auto-Configuration (Spring 6.2) [Intermediate]"
+  },
+  {
+    "page": "Spring 6 Features",
+    "href": "spring-core/spring6-features.html",
+    "section": "@Fallback — Qualifier Fallback for Auto-Configuration (Spring 6.2) [Intermediate]",
+    "anchor": "fallback-qualifier",
+    "text": "Spring 6.2 introduces the @Fallback meta-annotation (a specialisation of @Qualifier ). A bean annotated with @Fallback is treated as a lower-priority candidate — it is chosen only when no other non-fallback beans match the injection point. This is primarily designed for auto-configuration code that "
   },
   {
     "page": "Spring 6 Features",
@@ -7205,6 +7261,34 @@
   {
     "page": "Spring 7 Features",
     "href": "spring-core/spring7-features.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration [Advanced]",
+    "anchor": "bean-registrar-spring7",
+    "text": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration [Advanced]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration [Advanced]",
+    "anchor": "bean-registrar-spring7",
+    "text": "Spring Framework 7 introduces BeanRegistrar , a new interface for programmatic bean registration that participates fully in the AOT (Ahead-of-Time) processing pipeline. Unlike BeanDefinitionRegistryPostProcessor or @ImportBeanDefinitionRegistrar , a BeanRegistrar is processed at build time during AO"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@Async with Virtual Threads (Spring 7 Enhancements) [Intermediate]",
+    "anchor": "async-virtual-threads-spring7",
+    "text": "@Async with Virtual Threads (Spring 7 Enhancements) [Intermediate]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@Async with Virtual Threads (Spring 7 Enhancements) [Intermediate]",
+    "anchor": "async-virtual-threads-spring7",
+    "text": "Spring 7 deepens virtual thread integration for @Async methods and scheduled tasks. The SimpleAsyncTaskExecutor bean, when configured with setVirtualThreads(true) , now integrates with Spring's structured concurrency support and respects ObservationScope propagation so traces flow correctly across v"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
     "section": "REST API Versioning — Server Side [Basic]",
     "anchor": "rest-api-versioning-server",
     "text": "REST API Versioning — Server Side [Basic]"
@@ -7257,6 +7341,20 @@
     "section": "HTTP Interface Clients with Automatic OTel Trace Propagation [Advanced]",
     "anchor": "http-interfaces-opentelemetry-propagation",
     "text": "Declarative @HttpExchange interface clients in Spring 7 automatically propagate OpenTelemetry trace context (W3C TraceContext headers: traceparent / tracestate ) to downstream services without any manual instrumentation. The integration is driven by Spring's native OTel support — when an OpenTelemet"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "MethodValidationException — Structured Constraint Violations (Spring 7) [Intermediate]",
+    "anchor": "method-validation-exception",
+    "text": "MethodValidationException — Structured Constraint Violations (Spring 7) [Intermediate]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "MethodValidationException — Structured Constraint Violations (Spring 7) [Intermediate]",
+    "anchor": "method-validation-exception",
+    "text": "Spring 7 enhances the MethodValidationPostProcessor to produce structured MethodValidationException instances that group constraint violations by parameter, using ParameterValidationResult . Previously, a method validation failure surfaced as a flat set of ConstraintViolation objects, making it hard"
   },
   {
     "page": "Spring 7 Features",
@@ -7387,6 +7485,20 @@
   {
     "page": "Spring 7 Features",
     "href": "spring-core/spring7-features.html",
+    "section": "CRaC — Coordinated Restore at Checkpoint (Spring 7) [Advanced]",
+    "anchor": "crac-checkpoint-restore",
+    "text": "CRaC — Coordinated Restore at Checkpoint (Spring 7) [Advanced]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "CRaC — Coordinated Restore at Checkpoint (Spring 7) [Advanced]",
+    "anchor": "crac-checkpoint-restore",
+    "text": "CRaC (Coordinated Restore at Checkpoint) is a JVM feature (OpenJDK project) that takes a snapshot of a running JVM process — including its warmed-up JIT-compiled code, initialized caches, and open connections — and restores it later in under 100ms. This delivers startup times competitive with GraalV"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
     "section": "Jakarta Servlet 6.1 [Basic]",
     "anchor": "jakarta-servlet-6-1",
     "text": "Jakarta Servlet 6.1 [Basic]"
@@ -7439,6 +7551,48 @@
     "section": "Enhanced Virtual Thread Support [Advanced]",
     "anchor": "virtual-threads-enhanced",
     "text": "Spring 7 deepens its Project Loom virtual thread support beyond the initial integration in Spring 6.1. The scheduler integration for @Scheduled tasks now uses virtual threads by default when running on Java 21+. The new @ConcurrencyLimit annotation is specifically designed to guard virtual-thread-ba"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@MockitoBean and @MockitoSpyBean in Spring Framework (Spring 7 / 6.2) [Basic]",
+    "anchor": "s7-mockitobean",
+    "text": "@MockitoBean and @MockitoSpyBean in Spring Framework (Spring 7 / 6.2) [Basic]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@MockitoBean and @MockitoSpyBean in Spring Framework (Spring 7 / 6.2) [Basic]",
+    "anchor": "s7-mockitobean",
+    "text": "Spring Framework 6.2 moved bean override support from Spring Boot into the core spring-test module. Spring 7 continues this — @MockitoBean and @MockitoSpyBean are full first-class Spring Framework citizens, not a Boot add-on. The key difference from Spring Boot's @MockBean / @SpyBean : the strategy "
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@TestBean — Factory-Method Bean Override [Intermediate]",
+    "anchor": "s7-testbean",
+    "text": "@TestBean — Factory-Method Bean Override [Intermediate]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@TestBean — Factory-Method Bean Override [Intermediate]",
+    "anchor": "s7-testbean",
+    "text": "@TestBean overrides a specific Spring bean in the test context with a replacement provided by a static factory method in the test class. No Mockito dependency required — use it when you want a hand-written test double (stub, fake, or in-memory implementation) instead of a generated mock. The factory"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@DisabledInAotMode — Skipping Tests in Native/AOT Builds [Intermediate]",
+    "anchor": "s7-disabled-in-aot",
+    "text": "@DisabledInAotMode — Skipping Tests in Native/AOT Builds [Intermediate]"
+  },
+  {
+    "page": "Spring 7 Features",
+    "href": "spring-core/spring7-features.html",
+    "section": "@DisabledInAotMode — Skipping Tests in Native/AOT Builds [Intermediate]",
+    "anchor": "s7-disabled-in-aot",
+    "text": "Spring 7 adds @DisabledInAotMode — a JUnit 5 annotation that skips a test class or method when the test suite is running against the AOT-processed application context (i.e. in native-image test mode). Use it for tests that exercise reflection-based behavior that cannot be expressed in native images,"
   },
   {
     "page": "Spring 7 Features",
@@ -8083,6 +8237,48 @@
     "section": "HttpHeaders API (no longer extends MultiValueMap)",
     "anchor": "http-headers-api-change",
     "text": "N/A HttpHeaders extends MultiValueMap<String, String> HttpHeaders no longer extends MultiValueMap ; use asMultiValueMap() (deprecated bridge) Changed Spring 6 — HttpHeaders is a MultiValueMap // Spring 6 — HttpHeaders extends MultiValueMap\nHttpHeaders headers = new HttpHeaders();\nheaders.add(\"X-Requ"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "@MockitoBean / @MockitoSpyBean / @TestBean (Bean Overrides in spring-test)",
+    "anchor": "mockitobean-core",
+    "text": "@MockitoBean / @MockitoSpyBean / @TestBean (Bean Overrides in spring-test)"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "@MockitoBean / @MockitoSpyBean / @TestBean (Bean Overrides in spring-test)",
+    "anchor": "mockitobean-core",
+    "text": "N/A Spring Boot only: @MockBean and @SpyBean in spring-boot-test ; not available without Boot Spring 6.2+: @MockitoBean , @MockitoSpyBean , @TestBean in core spring-test ; works without Spring Boot New Spring 6.1 — Boot required for @MockBean // Spring Boot Test (spring-boot-test dependency)\n@Spring"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "@Fallback — Lower-Priority Bean Qualifier (Spring 6.2)",
+    "anchor": "fallback-qualifier-vc",
+    "text": "@Fallback — Lower-Priority Bean Qualifier (Spring 6.2)"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "@Fallback — Lower-Priority Bean Qualifier (Spring 6.2)",
+    "anchor": "fallback-qualifier-vc",
+    "text": "N/A No built-in mechanism; auto-configuration used @ConditionalOnMissingBean to avoid overriding user beans Spring 6.2: @Fallback marks a bean as lowest priority — chosen only when no other non-fallback candidate exists at the injection point New Spring 5 — ConditionalOnMissingBean (Boot only) // Sp"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration (Spring 7)",
+    "anchor": "bean-registrar-vc",
+    "text": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration (Spring 7)"
+  },
+  {
+    "page": "Spring 5 vs 6 vs 7 — Version Comparison",
+    "href": "spring-core/version-comparison.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration (Spring 7)",
+    "anchor": "bean-registrar-vc",
+    "text": "N/A BeanDefinitionRegistryPostProcessor and @ImportBeanDefinitionRegistrar for programmatic registration — neither processed at AOT build time Spring 7: BeanRegistrar interface; participates in AOT; BeanRegistry.registerBean(name, type, spec) fluent API; receives Environment New Spring 6 — BeanDefin"
   },
   {
     "page": "Spring 5 vs 6 vs 7 — Version Comparison",

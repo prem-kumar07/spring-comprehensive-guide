@@ -37,6 +37,7 @@
         <button class="tab-btn" data-tab="tab-observability">Observability</button>
         <button class="tab-btn" data-tab="tab-aot">Native / AOT</button>
         <button class="tab-btn" data-tab="tab-jakarta">Jakarta EE 11</button>
+        <button class="tab-btn" data-tab="tab-testing">Testing</button>
       </div>
 
       <!-- ══════════════ CORE CONTAINER ══════════════ -->
@@ -223,6 +224,107 @@ public class MvcConfig implements WebMvcConfigurer {
             <strong>Migration note</strong>
             If your <code>WebMvcConfigurer</code> explicitly calls <code>configurer.setPathMatcher(new AntPathMatcher())</code>, remove that call. The default <code>PathPatternParser</code> handles all standard Ant-style patterns and is a drop-in replacement for most use cases.
           </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="bean-registrar-spring7">BeanRegistrar — AOT-Compatible Programmatic Bean Registration
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p>Spring Framework 7 introduces <code>BeanRegistrar</code>, a new interface for programmatic bean registration that participates fully in the AOT (Ahead-of-Time) processing pipeline. Unlike <code>BeanDefinitionRegistryPostProcessor</code> or <code>@ImportBeanDefinitionRegistrar</code>, a <code>BeanRegistrar</code> is processed at build time during AOT — so GraalVM native images understand the beans it registers without any extra <code>@RuntimeHints</code> or <code>reflect-config.json</code> entries. The registration logic has access to the <code>Environment</code>, so profile- or property-conditional registration is supported.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.9&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example — implementing BeanRegistrar</h4>
+          <pre><code class="language-java">import org.springframework.beans.factory.BeanRegistrar;
+import org.springframework.beans.factory.BeanRegistry;
+import org.springframework.core.env.Environment;
+
+// Implement BeanRegistrar — invoked by Spring at both build time (AOT) and runtime
+public class FeatureBeanRegistrar implements BeanRegistrar {
+
+    @Override
+    public void register(BeanRegistry registry, Environment env) {
+
+        // Conditional registration based on profile
+        if (env.matchesProfiles("analytics")) {
+            registry.registerBean("analyticsTracker", AnalyticsTracker.class,
+                spec -> spec.constructor(AnalyticsConfig.class)
+                            .lazyInit(false));
+        }
+
+        // Always register this bean
+        registry.registerBean("featureToggleService", FeatureToggleService.class);
+    }
+}
+
+// Wire via @Import or auto-configuration
+@Configuration
+@Import(FeatureBeanRegistrar.class)
+public class FeatureConfig { }
+
+// Or via META-INF/spring/org.springframework.beans.factory.BeanRegistrar.imports</code></pre>
+
+          <h4>BeanRegistry specification API</h4>
+          <pre><code class="language-java">// BeanRegistry provides a fluent spec API for fine-grained control
+registry.registerBean("orderEventBus", ApplicationEventPublisher.class,
+    spec -> spec
+        .scope("singleton")
+        .lazyInit(true)
+        .primary(true)
+        .description("Application-scoped event bus for order domain"));
+
+// Register with a supplier (factory method)
+registry.registerBean("priceCalculator", PriceCalculator.class,
+    spec -> spec.instanceSupplier(ctx ->
+        new PriceCalculator(ctx.getBean(TaxService.class), Locale.getDefault())));</code></pre>
+
+          <div class="callout info">
+            <strong>When to use BeanRegistrar vs @Bean</strong>
+            Prefer <code>@Bean</code> for straightforward static beans — it is simpler and AOT-compatible. Use <code>BeanRegistrar</code> when you need conditional or dynamic registration driven by <code>Environment</code> state at build time, or when authoring reusable library/framework code that must work in native images without extra hints.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="async-virtual-threads-spring7">@Async with Virtual Threads (Spring 7 Enhancements)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 deepens virtual thread integration for <code>@Async</code> methods and scheduled tasks. The <code>SimpleAsyncTaskExecutor</code> bean, when configured with <code>setVirtualThreads(true)</code>, now integrates with Spring's structured concurrency support and respects <code>ObservationScope</code> propagation so traces flow correctly across virtual thread boundaries. Spring 7 also makes <code>spring.threads.virtual.enabled=true</code> (in Spring Boot 4) configure <em>all</em> Spring-managed executors — task executor, task scheduler, and the web server's request dispatcher — as virtual-thread executors.</p>
+
+          <h4>Example — structured task execution with observation scope</h4>
+          <pre><code class="language-java">import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskExecutor;
+
+@Configuration
+@EnableAsync
+public class AsyncConfig {
+
+    @Bean(name = "applicationTaskExecutor")
+    public SimpleAsyncTaskExecutor virtualThreadExecutor() {
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("vt-");
+        executor.setVirtualThreads(true);
+        // Spring 7: observation scope propagates automatically to virtual threads
+        return executor;
+    }
+}
+
+@Service
+public class ReportService {
+
+    private final ObservationRegistry observationRegistry;
+
+    @Async  // runs on a virtual thread; parent observation scope preserved
+    public CompletableFuture&lt;Report&gt; generateReport(Long id) {
+        // Micrometer observation is automatically propagated into this virtual thread
+        return CompletableFuture.completedFuture(buildReport(id));
+    }
+}</code></pre>
         </div>
 
       </div><!-- /tab-core -->
@@ -461,6 +563,75 @@ public class OrderService {
             <strong>Zero manual instrumentation</strong>
             As long as an <code>OpenTelemetry</code> or <code>ObservationRegistry</code> bean is present (auto-configured by Spring Boot 4), <code>@HttpExchange</code> clients propagate traces automatically — no custom interceptors or filters needed.
           </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="method-validation-exception">MethodValidationException — Structured Constraint Violations (Spring 7)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 enhances the <code>MethodValidationPostProcessor</code> to produce structured <code>MethodValidationException</code> instances that group constraint violations by parameter, using <code>ParameterValidationResult</code>. Previously, a method validation failure surfaced as a flat set of <code>ConstraintViolation</code> objects, making it hard to correlate which parameter failed. With <code>adaptConstraintViolations=true</code>, each failed parameter gets its own <code>ParameterErrors</code> object (which implements the Spring <code>Errors</code> interface), enabling MessageSource resolution of constraint messages and cleaner error mapping in <code>@ExceptionHandler</code> methods.</p>
+
+          <h4>Enable adaptation (application config)</h4>
+          <pre><code class="language-java">@Configuration
+@EnableMethodValidation   // Spring 7 recommended alternative to @Validated
+public class ValidationConfig {
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor(
+            Validator validator) {
+        MethodValidationPostProcessor processor =
+            new MethodValidationPostProcessor();
+        processor.setValidator(validator);
+        // Spring 7: group violations by parameter into ParameterValidationResult
+        processor.setAdaptConstraintViolations(true);
+        return processor;
+    }
+}</code></pre>
+
+          <h4>Service with parameter-level constraints</h4>
+          <pre><code class="language-java">import jakarta.validation.constraints.*;
+import org.springframework.validation.annotation.Validated;
+
+@Service
+@Validated
+public class OrderService {
+
+    public Order create(
+            @NotBlank @Size(max = 50) String sku,
+            @Min(1) @Max(1000) int quantity,
+            @NotNull @Valid Address shippingAddress) {
+        // ...
+        return buildOrder(sku, quantity, shippingAddress);
+    }
+}</code></pre>
+
+          <h4>Handling MethodValidationException in a @ControllerAdvice</h4>
+          <pre><code class="language-java">import org.springframework.web.method.annotation.MethodValidationException;
+
+@ControllerAdvice
+public class ValidationExceptionHandler {
+
+    @ExceptionHandler(MethodValidationException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; handleValidation(
+            MethodValidationException ex) {
+
+        ProblemDetail problem = ProblemDetail
+            .forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY,
+                "Request validation failed");
+
+        // Spring 7: per-parameter results with MessageSource-resolved messages
+        Map&lt;String, List&lt;String&gt;&gt; fieldErrors = new LinkedHashMap&lt;&gt;();
+        for (ParameterValidationResult result : ex.getParameterValidationResults()) {
+            String param = result.getMethodParameter().getParameterName();
+            List&lt;String&gt; messages = result.getResolvableErrors().stream()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .toList();
+            fieldErrors.put(param, messages);
+        }
+        problem.setProperty("fieldErrors", fieldErrors);
+        return ResponseEntity.unprocessableEntity().body(problem);
+    }
+}</code></pre>
         </div>
 
       </div><!-- /tab-web -->
@@ -974,6 +1145,99 @@ class CsvLibraryHints implements RuntimeHintsRegistrar {
           </div>
         </div>
 
+        <div class="feature-card">
+          <h3 id="crac-checkpoint-restore">CRaC — Coordinated Restore at Checkpoint (Spring 7)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Advanced]</span>
+          </h3>
+          <p><strong>CRaC (Coordinated Restore at Checkpoint)</strong> is a JVM feature (OpenJDK project) that takes a snapshot of a running JVM process — including its warmed-up JIT-compiled code, initialized caches, and open connections — and restores it later in under 100ms. This delivers startup times competitive with GraalVM native images while keeping the full JVM runtime (JIT profiling, dynamic class loading, standard debugging). Spring 7 adds first-class CRaC lifecycle integration: all <code>Lifecycle</code> beans are stopped cleanly before the checkpoint is taken and restarted after the restore, so long-lived resources (database pools, message consumers, network connections) are re-established correctly.</p>
+
+          <div class="callout info">
+            <strong>CRaC vs GraalVM native</strong>
+            CRaC runs on a standard JVM (requires a CRaC-enabled JDK such as Liberica NIK or Azul Zulu CRaC); no code changes required; preserves JIT-optimized performance post-restore. GraalVM native compiles to a platform binary with ~50ms cold start but requires extra native hints and loses JIT. Use CRaC when JVM compatibility and JIT throughput matter; native when container density and cold-start speed are the priority.
+          </div>
+
+          <h4>Requirements</h4>
+          <pre><code class="language-xml">&lt;!-- Spring 7 — CRaC support is built into spring-context --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+  &lt;version&gt;7.0.9&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- CRaC-enabled JDK required: Liberica NIK, Azul Zulu CRaC, or
+     standard OpenJDK CRaC builds for Linux x64 --&gt;</code></pre>
+
+          <h4>Standard Spring apps — checkpoint on startup</h4>
+          <pre><code class="language-bash"># Spring 7 property: take the checkpoint automatically on context refresh
+# (onRefresh = immediately after the ApplicationContext.refresh() completes)
+java -XX:CRaCCheckpointTo=/opt/checkpoint \
+     -Dspring.context.checkpoint=onRefresh \
+     -jar my-app.jar
+
+# The JVM takes the checkpoint and exits — /opt/checkpoint/ is now written.
+# For production: send warm-up requests first (JIT-compile hot paths),
+# then trigger the checkpoint:
+curl http://localhost:8080/actuator/health       # warm up
+jcmd $(pgrep -f my-app.jar) JDK.checkpoint       # snapshot
+
+# Restore from snapshot — instant resume
+java -XX:CRaCRestoreFrom=/opt/checkpoint
+# Spring calls Lifecycle.start() on all beans — connections re-established
+# App is ready in &lt;100ms (vs several seconds for a cold start)
+
+# Test mode (exit after checkpoint, no restore — for CI verification):
+java -Dspring.context.exit=onRefresh \
+     -XX:CRaCCheckpointTo=/tmp/crac-test \
+     -jar my-app.jar</code></pre>
+
+          <div class="callout warn">
+            <strong>Security warning</strong>
+            The CRaC checkpoint directory contains a full JVM memory dump, including secrets (passwords, tokens, keys) that were in memory at checkpoint time. Store checkpoint files with appropriate filesystem permissions and never commit them to version control or container images alongside application secrets.
+          </div>
+
+          <h4>Custom CRaC hooks (for stateful resources)</h4>
+          <pre><code class="language-java">import org.crac.Context;
+import org.crac.Core;
+import org.crac.Resource;
+import org.springframework.stereotype.Component;
+
+// Implement org.crac.Resource to coordinate your own state during checkpoint/restore
+@Component
+public class RedisConnectionCracResource implements Resource {
+
+    private final RedisConnectionFactory connectionFactory;
+
+    public RedisConnectionCracResource(RedisConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+        Core.getGlobalContext().register(this);  // register with CRaC runtime
+    }
+
+    @Override
+    public void beforeCheckpoint(Context&lt;? extends Resource&gt; context) {
+        // Called just before the JVM snapshot is taken
+        connectionFactory.destroy();             // close connections cleanly
+    }
+
+    @Override
+    public void afterRestore(Context&lt;? extends Resource&gt; context) {
+        // Called just after the JVM is restored
+        connectionFactory.afterPropertiesSet();  // re-open connections
+    }
+}
+
+// In most Spring apps the built-in SmartLifecycle hooks are enough —
+// implement Resource only for custom resources Spring does not manage.</code></pre>
+
+          <h4>Spring Boot 4 convenience</h4>
+          <pre><code class="language-properties"># Spring Boot 4: enable CRaC checkpoint on startup and expose via Actuator
+management.endpoint.checkpoint.enabled=true
+management.endpoint.restore.enabled=true
+management.endpoints.web.exposure.include=checkpoint,restore,health</code></pre>
+
+          <pre><code class="language-bash"># Trigger checkpoint via Actuator (no jcmd required):
+curl -X POST http://localhost:8080/actuator/checkpoint</code></pre>
+        </div>
+
       </div><!-- /tab-aot -->
 
       <!-- ══════════════ JAKARTA EE 11 ══════════════ -->
@@ -1242,6 +1506,149 @@ public class BatchProcessor {
         </div>
 
       </div><!-- /tab-jakarta -->
+
+      <!-- ══════════════ TESTING ══════════════ -->
+      <div class="tab-panel" id="tab-testing">
+
+        <div class="feature-card">
+          <h3 id="s7-mockitobean">@MockitoBean and @MockitoSpyBean in Spring Framework (Spring 7 / 6.2)
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Basic]</span>
+          </h3>
+          <p>Spring Framework 6.2 moved bean override support from Spring Boot into the core <code>spring-test</code> module. Spring 7 continues this — <code>@MockitoBean</code> and <code>@MockitoSpyBean</code> are full first-class Spring Framework citizens, not a Boot add-on. The key difference from Spring Boot's <code>@MockBean</code> / <code>@SpyBean</code>: the strategy attribute controls whether the existing context bean is replaced (<code>REPLACE_OR_CREATE</code>) or wrapped (<code>WRAP</code>), giving finer control over AOP proxy behaviour.</p>
+
+          <h4>Strategy comparison</h4>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-bottom:1rem">
+            <thead><tr style="background:var(--surface-2)">
+              <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Annotation</th>
+              <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Default strategy</th>
+              <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">AOP proxy</th>
+              <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Real method called?</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>@MockitoBean</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>REPLACE_OR_CREATE</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Removed</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">No — all calls stubbed</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>@MockitoSpyBean</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>WRAP</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Retained</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Yes — unless stubbed</td></tr>
+            </tbody>
+          </table>
+
+          <h4>@MockitoBean — full mock (no real code)</h4>
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = OrderService.class)
+class OrderServiceTest {
+
+    @MockitoBean
+    PaymentGateway paymentGateway;   // real bean replaced by a Mockito mock
+
+    @Autowired
+    OrderService orderService;
+
+    @Test
+    void chargeFails_orderIsRejected() {
+        given(paymentGateway.charge(anyLong(), any())).willThrow(PaymentException.class);
+
+        assertThatThrownBy(() -> orderService.place(new Order(1L, new BigDecimal("50"))))
+            .isInstanceOf(PaymentException.class);
+    }
+}</code></pre>
+
+          <h4>@MockitoSpyBean — real bean + verification</h4>
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {AuditService.class, InMemoryAuditLog.class})
+class AuditIntegrationTest {
+
+    // Wraps the real InMemoryAuditLog with a spy — transactions still work
+    @MockitoSpyBean
+    InMemoryAuditLog auditLog;
+
+    @Autowired
+    AuditService auditService;
+
+    @Test
+    void placeOrder_createsAuditEntry() {
+        auditService.logOrder(new Order(42L));
+        then(auditLog).should().append(argThat(e -> e.getOrderId().equals(42L)));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="s7-testbean">@TestBean — Factory-Method Bean Override
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p><code>@TestBean</code> overrides a specific Spring bean in the test context with a replacement provided by a <em>static factory method</em> in the test class. No Mockito dependency required — use it when you want a hand-written test double (stub, fake, or in-memory implementation) instead of a generated mock. The factory method name must match the field name (or be configured via <code>methodName</code>).</p>
+
+          <pre><code class="language-java">import org.springframework.test.context.bean.override.convention.TestBean;
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {EmailService.class, TemplateRenderer.class})
+class EmailServiceTest {
+
+    // Spring replaces the MailSender bean with the result of mailSender()
+    @TestBean
+    MailSender mailSender;
+
+    // Static factory method — must match field name (mailSender)
+    static MailSender mailSender() {
+        return new RecordingMailSender();   // custom in-memory test double
+    }
+
+    @Autowired
+    EmailService emailService;
+
+    @Test
+    void sendWelcome_storesEmailInRecorder() {
+        emailService.sendWelcome("user@example.com");
+        RecordingMailSender recorder = (RecordingMailSender) mailSender;
+        assertThat(recorder.getSent()).hasSize(1);
+        assertThat(recorder.getSent().get(0).to()).isEqualTo("user@example.com");
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="s7-disabled-in-aot">@DisabledInAotMode — Skipping Tests in Native/AOT Builds
+            <span style="font-size:0.75rem;color:var(--text-muted)"> [Intermediate]</span>
+          </h3>
+          <p>Spring 7 adds <code>@DisabledInAotMode</code> — a JUnit 5 annotation that skips a test class or method when the test suite is running against the AOT-processed application context (i.e. in native-image test mode). Use it for tests that exercise reflection-based behavior that cannot be expressed in native images, or tests that deliberately probe runtime class-loading paths that AOT replaces with generated code.</p>
+
+          <pre><code class="language-java">import org.springframework.test.context.aot.DisabledInAotMode;
+import org.junit.jupiter.api.Test;
+
+@SpringBootTest
+@DisabledInAotMode   // entire class skipped in native image test runs
+class DynamicProxyTest {
+
+    @Test
+    void cglib_proxy_is_created_for_configuration_class() {
+        // This test checks CGLIB proxy behavior — not valid in native mode
+        // because Spring AOT replaces CGLIB proxies with generated subclasses
+        assertThat(appConfig).isInstanceOf(AppConfig$$SpringCGLIB$$0.class);
+    }
+}
+
+// Or on a single method:
+@SpringBootTest
+class MixedAotTest {
+
+    @Test
+    @DisabledInAotMode
+    void reflectionBasedFeature_worksInJvmOnly() {
+        // skipped during native test run
+    }
+
+    @Test
+    void nativeCompatibleFeature_alwaysRuns() {
+        // always runs — AOT mode or not
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-testing -->
 
     </div><!-- /tab-container -->
 
