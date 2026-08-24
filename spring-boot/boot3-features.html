@@ -421,6 +421,44 @@ while (!page.isEmpty()) {
 }</code></pre>
         </div>
 
+        <div class="feature-card">
+          <h3 id="docker-compose-integration">Docker Compose Integration (Boot 3.1)</h3>
+          <p>Spring Boot 3.1 introduced <strong>built-in Docker Compose support</strong>. If a <code>compose.yaml</code> (or <code>docker-compose.yml</code>) file is present at the project root and <code>spring-boot-docker-compose</code> is on the classpath, Spring Boot automatically starts the compose file's services before the application context starts, and stops them when the context closes. Each service is detected by its image name and automatically mapped to <code>@ServiceConnection</code> beans — no manual property configuration needed. This replaces ad-hoc shell scripts or TestApplication tricks for dev-time infrastructure.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-docker-compose&lt;/artifactId&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>compose.yaml</h4>
+          <pre><code class="language-yaml">services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shopdb
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"</code></pre>
+
+          <h4>application.properties — lifecycle control</h4>
+          <pre><code class="language-properties"># Default: START_AND_STOP (start on app start, stop on app shutdown)
+spring.docker.compose.lifecycle-management=start-and-stop
+
+# Skip Docker Compose in CI or production
+spring.docker.compose.enabled=false
+
+# Point to a non-default compose file
+spring.docker.compose.file=infrastructure/local.yaml</code></pre>
+        </div>
+
       </div><!-- /tab-data -->
 
       <!-- ── Security ───────────────────────────────── -->
@@ -542,6 +580,52 @@ spring.security.oauth2.authorizationserver.client.my-client.registration.redirec
 spring.security.oauth2.authorizationserver.client.my-client.registration.scopes=openid,profile,read</code></pre>
         </div>
 
+        <div class="feature-card">
+          <h3 id="ssl-bundles">SSL Bundles (Boot 3.1)</h3>
+          <p>Spring Boot 3.1 introduced <strong>SSL Bundles</strong> — a unified, named way to configure TLS keystores and truststores that can be referenced by any component: embedded servers, <code>RestClient</code>, <code>WebClient</code>, JDBC data sources, and Actuator management endpoints. Instead of duplicating keystore paths and passwords across each component, you define a bundle once under <code>spring.ssl.bundle.*</code> and reference it by name. Bundles support both JKS and PEM formats and can be <strong>hot-reloaded</strong> without restarting the application.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties — define a bundle</h4>
+          <pre><code class="language-properties"># PEM bundle (certificate + private key files)
+spring.ssl.bundle.pem.myservice.truststore.certificate=classpath:certs/ca.crt
+spring.ssl.bundle.pem.myservice.keystore.certificate=classpath:certs/server.crt
+spring.ssl.bundle.pem.myservice.keystore.private-key=classpath:certs/server.key
+
+# JKS bundle
+spring.ssl.bundle.jks.mystore.keystore.location=classpath:keystore.jks
+spring.ssl.bundle.jks.mystore.keystore.password=changeit
+spring.ssl.bundle.jks.mystore.key.alias=myapp
+
+# Apply bundle to the embedded server
+server.ssl.bundle=mystore
+
+# Apply to Actuator management server
+management.server.ssl.bundle=mystore</code></pre>
+
+          <h4>Use a bundle in RestClient</h4>
+          <pre><code class="language-java">@Configuration
+public class HttpClientConfig {
+
+    @Bean
+    public RestClient secureRestClient(RestClient.Builder builder,
+                                       SslBundles sslBundles) {
+        return builder
+            .baseUrl("https://partner-api.example.com")
+            .apply(ssl -> ssl.sslBundle(sslBundles.getBundle("myservice")))
+            .build();
+    }
+}</code></pre>
+
+          <h4>Hot-reload (rotate certs without restart)</h4>
+          <pre><code class="language-properties"># Watch bundle files for changes and reload automatically
+spring.ssl.bundle.pem.myservice.reload-on-update=true</code></pre>
+        </div>
+
       </div><!-- /tab-security -->
 
       <!-- ── Observability ──────────────────────────── -->
@@ -657,6 +741,87 @@ logging.file.name=logs/application.log</code></pre>
   "trace.id": "4bf92f3577b34da6a3ce929d0e0e4736",
   "span.id": "00f067aa0ba902b7"
 }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="sbom-actuator">SBOM Actuator Endpoint (Boot 3.3)</h3>
+          <p>Spring Boot 3.3 added a <strong>Software Bill of Materials (SBOM) actuator endpoint</strong> at <code>/actuator/sbom</code>. When a CycloneDX or SPDX SBOM file is present in the application's classpath (generated by the Maven/Gradle build), the endpoint exposes it over HTTP, enabling vulnerability scanners and supply-chain tools to retrieve the dependency inventory programmatically. The Spring Boot Maven and Gradle plugins generate the SBOM automatically when native compilation is used; for JVM applications, add the CycloneDX plugin separately.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- CycloneDX plugin generates META-INF/sbom/application.cdx.json --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.cyclonedx&lt;/groupId&gt;
+  &lt;artifactId&gt;cyclonedx-maven-plugin&lt;/artifactId&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;phase&gt;package&lt;/phase&gt;
+      &lt;goals&gt;&lt;goal&gt;makeAggregateBom&lt;/goal&gt;&lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">management.endpoints.web.exposure.include=health,info,sbom</code></pre>
+
+          <h4>GET /actuator/sbom response (CycloneDX)</h4>
+          <pre><code class="language-json">{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    { "type": "library", "name": "spring-boot", "version": "3.3.0" },
+    { "type": "library", "name": "jackson-databind", "version": "2.16.1" }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="kubernetes-probes">Kubernetes Liveness &amp; Readiness Probes (Actuator)</h3>
+          <p>Spring Boot 3 exposes <strong>Kubernetes-native health probes</strong> via Actuator: <code>/actuator/health/liveness</code> (is the application alive and not in a broken state?) and <code>/actuator/health/readiness</code> (is the application ready to accept traffic?). These are automatically enabled when the application detects it is running inside Kubernetes, or can be forced on with a property. Application components can signal liveness/readiness transitions by injecting <code>ApplicationAvailability</code>.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># Force probes on (auto-enabled in Kubernetes)
+management.endpoint.health.probes.enabled=true
+management.endpoints.web.exposure.include=health
+management.health.livenessstate.enabled=true
+management.health.readinessstate.enabled=true</code></pre>
+
+          <h4>Programmatically change readiness state</h4>
+          <pre><code class="language-java">@Service
+public class WarmupService implements ApplicationListener&lt;ApplicationReadyEvent&gt; {
+
+    private final ApplicationEventPublisher publisher;
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        // Signal "not ready" while doing initial cache warming
+        publisher.publishEvent(
+            new AvailabilityChangeEvent&lt;&gt;(this, ReadinessState.REFUSING_TRAFFIC));
+        warmUpCaches();
+        // Signal "ready" when done
+        publisher.publishEvent(
+            new AvailabilityChangeEvent&lt;&gt;(this, ReadinessState.ACCEPTING_TRAFFIC));
+    }
+}</code></pre>
+
+          <h4>Kubernetes deployment.yaml</h4>
+          <pre><code class="language-yaml">livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5</code></pre>
         </div>
 
       </div><!-- /tab-observability -->
@@ -795,6 +960,37 @@ class OrderControllerNativeTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="class-data-sharing">Class Data Sharing — CDS (Boot 3.3)</h3>
+          <p>Spring Boot 3.3 introduced built-in support for <strong>Class Data Sharing (CDS)</strong> — a JVM feature that pre-processes class metadata into a shared archive, enabling subsequent JVM instances to memory-map the archive rather than loading classes from scratch. This is significantly faster to set up than full GraalVM native compilation but provides meaningful startup-time (15–30%) and heap-reduction improvements for JVM applications. Spring Boot auto-generates a CDS archive via a training run during the Docker image build.</p>
+
+          <h4>Create CDS archive (Maven)</h4>
+          <pre><code class="language-bash"># Step 1: build the fat jar
+./mvnw package -DskipTests
+
+# Step 2: training run — JVM processes classes and writes the archive
+java -Dspring.context.exit=onRefresh -XX:ArchiveClassesAtExit=application.jsa \
+     -jar target/my-app.jar
+
+# Step 3: production run — load from the archive
+java -XX:SharedArchiveFile=application.jsa -jar target/my-app.jar</code></pre>
+
+          <h4>With Paketo Buildpacks (Docker)</h4>
+          <pre><code class="language-bash"># Boot 3.3 buildpack automatically creates a CDS archive layer
+./mvnw spring-boot:build-image</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># CDS is transparent — no Spring property needed.
+# The JVM flag -XX:SharedArchiveFile points to the archive.
+# Verify CDS is active at startup:
+# java -verbose:class -XX:SharedArchiveFile=application.jsa -jar app.jar | grep "source: shared"</code></pre>
+
+          <div class="callout info">
+            <strong>CDS vs GraalVM native</strong>
+            CDS runs on a standard JVM and requires no code changes — easy to adopt. GraalVM native provides ~10× faster startup and ~3× lower memory but requires AOT compilation and extra native-image configuration. Use CDS for quick wins on existing apps; native for serverless or tightly resource-constrained environments.
+          </div>
         </div>
 
       </div><!-- /tab-native -->

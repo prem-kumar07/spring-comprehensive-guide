@@ -163,6 +163,123 @@ debug=true
 management.endpoints.web.exposure.include=conditions,health,info</code></pre>
         </div>
 
+        <div class="feature-card">
+          <h3 id="b4-bean-registrar">BeanRegistrar — AOT-Compatible Programmatic Bean Registration</h3>
+          <p>Spring Boot 4 / Spring Framework 7 introduces <code>BeanRegistrar</code>, a new interface for programmatic bean registration that is fully compatible with the <strong>AOT (Ahead-Of-Time) compilation</strong> pipeline. Unlike <code>BeanDefinitionRegistryPostProcessor</code> or <code>@ImportBeanDefinitionRegistrar</code>, <code>BeanRegistrar</code> participates in AOT processing so GraalVM native images understand the beans it registers without requiring extra native hints. This is the recommended approach for library authors who need conditional or dynamic bean registration in a native-image–friendly way.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.beans.factory.BeanRegistrar;
+import org.springframework.beans.factory.BeanRegistry;
+import org.springframework.core.env.Environment;
+
+// Implement BeanRegistrar — registered via @Import or auto-configuration
+public class MyFeatureBeanRegistrar implements BeanRegistrar {
+
+    @Override
+    public void register(BeanRegistry registry, Environment env) {
+        if (env.matchesProfiles("premium")) {
+            registry.registerBean("premiumAnalytics", PremiumAnalyticsService.class,
+                spec -> spec.constructor(AnalyticsConfig.class));
+        }
+    }
+}
+
+// Reference from auto-configuration
+@AutoConfiguration
+@Import(MyFeatureBeanRegistrar.class)
+public class MyFeatureAutoConfiguration { }</code></pre>
+
+          <div class="callout info">
+            <strong>When to use BeanRegistrar vs @Bean</strong>
+            Use <code>BeanRegistrar</code> when registration logic depends on runtime conditions (profiles, properties) that are also known at AOT time. For straightforward static beans, <code>@Bean</code> methods remain the right choice.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-import-http-services">@ImportHttpServices — Simplified HTTP Service Client Wiring</h3>
+          <p>Spring Boot 4 adds <code>@ImportHttpServices</code> — a class-level annotation that auto-discovers and registers all <code>@HttpExchange</code>-annotated interface proxies in a given package. Previously you had to declare each HTTP service client as a <code>@Bean</code> via <code>HttpServiceProxyFactory</code>. <code>@ImportHttpServices</code> eliminates that boilerplate while remaining AOT-compatible and supporting the full <code>RestClient</code> / <code>WebClient</code> backend options.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Uses RestClient by default (or WebClient if spring-webflux is on classpath) --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">// 1. Declare the HTTP service interface
+@HttpExchange("https://api.example.com")
+public interface ProductClient {
+
+    @GetExchange("/products/{id}")
+    Product findById(@PathVariable Long id);
+
+    @PostExchange("/products")
+    Product create(@RequestBody Product product);
+}
+
+// 2. Import all @HttpExchange interfaces from a package in one annotation
+@Configuration
+@ImportHttpServices(basePackages = "com.example.clients")
+public class HttpServicesConfig { }
+
+// 3. Inject and use — no manual HttpServiceProxyFactory needed
+@Service
+public class OrderService {
+
+    private final ProductClient productClient;
+
+    public OrderService(ProductClient productClient) {
+        this.productClient = productClient;
+    }
+
+    public Product getProduct(Long id) {
+        return productClient.findById(id);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-task-decoration">Task Decoration — Multiple Ordered TaskDecorators</h3>
+          <p>Spring Boot 4 extends the <code>TaskDecorator</code> support in <code>ThreadPoolTaskExecutor</code> / <code>ThreadPoolTaskScheduler</code> to allow <strong>multiple <code>TaskDecorator</code> beans</strong> ordered via <code>@Order</code>. In Boot 3, auto-configuration picked at most one <code>TaskDecorator</code> bean from the context. In Boot 4 all matching <code>TaskDecorator</code> beans are composed in order, enabling combinations such as MDC context propagation + Micrometer observation + custom tenant propagation without manual composition code.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.core.annotation.Order;
+import org.springframework.core.task.TaskDecorator;
+
+// Decorator 1 — propagates MDC (logging context) into the pooled thread
+@Bean
+@Order(1)
+public TaskDecorator mdcDecorator() {
+    return runnable -> {
+        Map&lt;String, String&gt; mdcCopy = MDC.getCopyOfContextMap();
+        return () -> {
+            try {
+                if (mdcCopy != null) MDC.setContextMap(mdcCopy);
+                runnable.run();
+            } finally {
+                MDC.clear();
+            }
+        };
+    };
+}
+
+// Decorator 2 — propagates security context into the pooled thread
+@Bean
+@Order(2)
+public TaskDecorator securityContextDecorator() {
+    return new DelegatingSecurityContextTaskDecorator();
+}
+
+// Boot auto-configuration wires BOTH into ThreadPoolTaskExecutor in order</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># Configure the default task executor used by @Async
+spring.task.execution.pool.core-size=4
+spring.task.execution.pool.max-size=16
+spring.task.execution.pool.queue-capacity=100</code></pre>
+        </div>
+
       </div><!-- /b4-tab-autoconfig -->
 
       <!-- ── Web ───────────────────────────────────── -->
@@ -792,6 +909,165 @@ class OrderRepositoryTest {
         assertThat(repository.findById(order.getId())).isPresent();
     }
 }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-jms-client">JmsClient — Fluent JMS Messaging API</h3>
+          <p>Spring Boot 4 introduces <strong><code>JmsClient</code></strong> — a new fluent, template-free API for sending and receiving JMS messages. It is the JMS equivalent of <code>RestClient</code> and <code>JdbcClient</code>: a modern, composable alternative to the older <code>JmsTemplate</code>. <code>JmsClient</code> is auto-configured when <code>spring-boot-starter-activemq</code> or <code>spring-boot-starter-artemis</code> is on the classpath alongside a configured <code>ConnectionFactory</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-artemis&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">@Service
+public class OrderEventPublisher {
+
+    private final JmsClient jmsClient;
+
+    public OrderEventPublisher(JmsClient jmsClient) {
+        this.jmsClient = jmsClient;
+    }
+
+    public void publish(OrderCreatedEvent event) {
+        // Fluent send — convertAndSend without JmsTemplate boilerplate
+        jmsClient.send()
+            .destination("orders.created")
+            .body(event)
+            .send();
+    }
+
+    public OrderConfirmation receiveConfirmation(String correlationId) {
+        // Synchronous receive with a selector
+        return jmsClient.receive()
+            .destination("orders.confirmation")
+            .selector("correlationId = '" + correlationId + "'")
+            .receive(OrderConfirmation.class);
+    }
+}
+
+// Listener — unchanged from Boot 3
+@Component
+public class OrderListener {
+
+    @JmsListener(destination = "orders.created")
+    public void onOrderCreated(OrderCreatedEvent event) {
+        // process…
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-spring-data-aot">Spring Data AOT — Compile-Time Query Generation</h3>
+          <p>Spring Data in the Boot 4 BOM (aligned with Spring Framework 7's AOT pipeline) supports <strong>compile-time (AOT) query generation</strong> for Spring Data JPA and Spring Data MongoDB repositories. At build time the AOT processor inspects repository interfaces, resolves derived-query method names, and pre-generates <code>NamedQuery</code> registrations and query strings — eliminating the reflection-heavy runtime processing that happens on first use. The result is significantly reduced startup time (typically 50-70% less repository bootstrap time) and smaller GraalVM native images because query parsing code can be omitted.</p>
+
+          <h4>Enable AOT (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Boot 4 AOT runs automatically during spring-boot:build-image or native compilation --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;goals&gt;&lt;goal&gt;process-aot&lt;/goal&gt;&lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+
+          <h4>Repository (no changes needed)</h4>
+          <pre><code class="language-java">// Standard repository — AOT pre-generates the query at build time
+public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+
+    // Derived query: AOT resolves "findByCategory" to SQL at compile time
+    List&lt;Product&gt; findByCategoryAndActiveTrue(String category);
+
+    // JPQL / @Query — also pre-validated at AOT time
+    @Query("SELECT p FROM Product p WHERE p.price &lt; :max ORDER BY p.price")
+    List&lt;Product&gt; findCheaperThan(@Param("max") BigDecimal max);
+}</code></pre>
+
+          <div class="callout info">
+            <strong>What changes at runtime</strong>
+            If the AOT processor ran, Spring Data skips the dynamic query-derivation step entirely. The generated code is in <code>target/spring-aot/main/sources</code> — inspect it to understand what was pre-generated.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-redis-improvements">Redis Improvements — Static Topology &amp; @RedisListener (Boot 4 / 4.1)</h3>
+          <p>Spring Boot 4 and 4.1 ship two significant Redis enhancements. <strong>Static master/replica topology</strong> (Boot 4.0): configure a fixed master and one or more replicas for read-scale without the overhead of Sentinel or Cluster mode — useful in Kubernetes where service DNS is stable. <strong><code>@RedisListener</code></strong> (Boot 4.1): a new annotation for Pub/Sub message listeners, analogous to <code>@JmsListener</code> and <code>@KafkaListener</code>, eliminating the need to manually configure a <code>RedisMessageListenerContainer</code>.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Static master/replica (application.properties)</h4>
+          <pre><code class="language-properties"># Boot 4: static replica topology — reads from replicas, writes to master
+spring.data.redis.host=redis-master.svc
+spring.data.redis.port=6379
+
+spring.data.redis.replicas[0].host=redis-replica-0.svc
+spring.data.redis.replicas[0].port=6379
+
+spring.data.redis.replicas[1].host=redis-replica-1.svc
+spring.data.redis.replicas[1].port=6379</code></pre>
+
+          <h4>@RedisListener (Boot 4.1)</h4>
+          <pre><code class="language-java">// Annotate a method to subscribe to a Redis Pub/Sub channel
+@Component
+public class NotificationListener {
+
+    // Boot 4.1: auto-configures the listener container, no manual wiring needed
+    @RedisListener(channels = "notifications")
+    public void onNotification(String message) {
+        // process the incoming Pub/Sub message
+        System.out.println("Received: " + message);
+    }
+
+    @RedisListener(pattern = "orders.*")
+    public void onOrderEvent(String message, @Header("channel") String channel) {
+        // pattern subscription — channel header tells you which channel fired
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="b4-lazy-jdbc">Lazy JDBC Connections (Boot 4.1)</h3>
+          <p>Spring Boot 4.1 adds support for <strong>lazy JDBC connections</strong>: the application's <code>DataSource</code> (and by extension JPA / JDBC clients) does not acquire an actual database connection until the first query is executed. In standard Boot apps the <code>DataSource</code> validates connectivity at startup — a connection is obtained and returned immediately. With lazy connections enabled, the application context starts even if the database is temporarily unavailable, which is useful in environments where the database and the app container start concurrently (Docker Compose, Kubernetes init containers). The lazy wrapper is auto-configured; it wraps the real <code>DataSource</code> transparently.</p>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties"># Boot 4.1: defer the first real database connection until it is needed
+spring.datasource.lazy-connection=true
+
+# Combine with liveness / readiness probes so traffic only hits the app
+# once the first connection has succeeded (readiness probe includes db)
+management.endpoint.health.probes.enabled=true
+management.health.readinessstate.enabled=true</code></pre>
+
+          <h4>Example — standard DataSource injection (unchanged)</h4>
+          <pre><code class="language-java">// No code changes needed — LazyConnectionDataSourceProxy wraps transparently
+@Repository
+public class UserRepository {
+
+    private final JdbcClient jdbc;
+
+    public UserRepository(JdbcClient jdbc) { this.jdbc = jdbc; }
+
+    // This is the first call that actually acquires a DB connection
+    public Optional&lt;User&gt; findById(Long id) {
+        return jdbc.sql("SELECT * FROM users WHERE id = :id")
+            .param("id", id)
+            .query(User.class)
+            .optional();
+    }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Readiness probe</strong>
+            When lazy connections are enabled, the liveness probe passes before a real connection is established. Make sure the <em>readiness</em> probe includes a database health indicator so Kubernetes holds traffic until the first connection succeeds: <code>management.health.db.enabled=true</code>.
+          </div>
         </div>
 
       </div><!-- /b4-tab-data -->

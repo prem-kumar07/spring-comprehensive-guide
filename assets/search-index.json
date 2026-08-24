@@ -1164,6 +1164,34 @@
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
+    "section": "Version Timeline",
+    "anchor": "",
+    "text": "Version Timeline"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Version Timeline",
+    "anchor": "",
+    "text": "Spring AI moved from milestone builds in 2023 to its first GA in May 2024. The 1.x line added MCP client/server support and RetrievalAugmentationAdvisor . Spring AI 2.0 went GA on June 12, 2026 , lifting the tool-calling loop into the advisor chain via ToolCallingAdvisor and adding annotation-driven"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "1.x vs 2.x at a Glance",
+    "anchor": "",
+    "text": "1.x vs 2.x at a Glance"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "1.x vs 2.x at a Glance",
+    "anchor": "",
+    "text": "Concern 1.x 2.x BOM artifact spring-ai-bom:1.0.0 spring-ai-bom:2.0.0 Tool calling @Tool on methods; loop embedded inside ChatModel ToolCallingAdvisor auto-registered; composable in advisor chain RAG advisor QuestionAnswerAdvisor RetrievalAugmentationAdvisor Result text response.getContent() response"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
     "section": "Architecture",
     "anchor": "",
     "text": "Architecture"
@@ -1187,7 +1215,7 @@
     "href": "spring-ai/index.html",
     "section": "Provider Landscape",
     "anchor": "",
-    "text": "Spring AI 2.0 ships first-class support for 20+ providers organized into three tiers: commercial frontier APIs with the deepest feature coverage, additional cloud APIs for specialized workloads, and local runtimes for air-gapped or cost-sensitive deployments. Tier 1 — Commercial OpenAI (GPT-4o, o-se"
+    "text": "Spring AI ships first-class support for 20+ providers organized into three tiers: commercial frontier APIs with the deepest feature coverage, additional cloud APIs for specialized workloads, and local runtimes for air-gapped or cost-sensitive deployments. Tier 1 — Commercial OpenAI (GPT-4o, o-series"
   },
   {
     "page": "Spring AI",
@@ -3523,6 +3551,20 @@
   {
     "page": "Spring Boot 3 Features",
     "href": "spring-boot/boot3-features.html",
+    "section": "Docker Compose Integration (Boot 3.1)",
+    "anchor": "docker-compose-integration",
+    "text": "Docker Compose Integration (Boot 3.1)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Docker Compose Integration (Boot 3.1)",
+    "anchor": "docker-compose-integration",
+    "text": "Spring Boot 3.1 introduced built-in Docker Compose support . If a compose.yaml (or docker-compose.yml ) file is present at the project root and spring-boot-docker-compose is on the classpath, Spring Boot automatically starts the compose file's services before the application context starts, and stop"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
     "section": "SecurityFilterChain — Configuration-Only Approach",
     "anchor": "security-filter-chain-configuration",
     "text": "SecurityFilterChain — Configuration-Only Approach"
@@ -3575,6 +3617,20 @@
     "section": "OAuth2 Authorization Server",
     "anchor": "oauth2-authorization-server",
     "text": "Spring Boot 3 includes auto-configuration for the Spring Authorization Server — a production-grade OAuth2 / OpenID Connect authorization server that was promoted to a first-class Spring project. Adding spring-boot-starter-oauth2-authorization-server auto-configures an in-memory or JPA-backed authori"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "SSL Bundles (Boot 3.1)",
+    "anchor": "ssl-bundles",
+    "text": "SSL Bundles (Boot 3.1)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "SSL Bundles (Boot 3.1)",
+    "anchor": "ssl-bundles",
+    "text": "Spring Boot 3.1 introduced SSL Bundles — a unified, named way to configure TLS keystores and truststores that can be referenced by any component: embedded servers, RestClient , WebClient , JDBC data sources, and Actuator management endpoints. Instead of duplicating keystore paths and passwords acros"
   },
   {
     "page": "Spring Boot 3 Features",
@@ -3635,6 +3691,34 @@
   {
     "page": "Spring Boot 3 Features",
     "href": "spring-boot/boot3-features.html",
+    "section": "SBOM Actuator Endpoint (Boot 3.3)",
+    "anchor": "sbom-actuator",
+    "text": "SBOM Actuator Endpoint (Boot 3.3)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "SBOM Actuator Endpoint (Boot 3.3)",
+    "anchor": "sbom-actuator",
+    "text": "Spring Boot 3.3 added a Software Bill of Materials (SBOM) actuator endpoint at /actuator/sbom . When a CycloneDX or SPDX SBOM file is present in the application's classpath (generated by the Maven/Gradle build), the endpoint exposes it over HTTP, enabling vulnerability scanners and supply-chain tool"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Kubernetes Liveness & Readiness Probes (Actuator)",
+    "anchor": "kubernetes-probes",
+    "text": "Kubernetes Liveness & Readiness Probes (Actuator)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Kubernetes Liveness & Readiness Probes (Actuator)",
+    "anchor": "kubernetes-probes",
+    "text": "Spring Boot 3 exposes Kubernetes-native health probes via Actuator: /actuator/health/liveness (is the application alive and not in a broken state?) and /actuator/health/readiness (is the application ready to accept traffic?). These are automatically enabled when the application detects it is running"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
     "section": "GraalVM Native Image",
     "anchor": "graalvm-native-image",
     "text": "GraalVM Native Image"
@@ -3687,6 +3771,20 @@
     "section": "Native Testing with @NativeTest",
     "anchor": "native-testing",
     "text": "Spring Boot 3 supports running your test suite against the native executable via @SpringBootTest combined with the native-maven-plugin 's test goal. The process-test-aot Maven goal (analogous to process-aot ) runs AOT processing over your test classes, generating the corresponding native hints, so i"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Class Data Sharing — CDS (Boot 3.3)",
+    "anchor": "class-data-sharing",
+    "text": "Class Data Sharing — CDS (Boot 3.3)"
+  },
+  {
+    "page": "Spring Boot 3 Features",
+    "href": "spring-boot/boot3-features.html",
+    "section": "Class Data Sharing — CDS (Boot 3.3)",
+    "anchor": "class-data-sharing",
+    "text": "Spring Boot 3.3 introduced built-in support for Class Data Sharing (CDS) — a JVM feature that pre-processes class metadata into a shared archive, enabling subsequent JVM instances to memory-map the archive rather than loading classes from scratch. This is significantly faster to set up than full Gra"
   },
   {
     "page": "Spring Boot 3 Features",
@@ -3775,6 +3873,48 @@
   {
     "page": "Spring Boot 4 Features",
     "href": "spring-boot/boot4-features.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration",
+    "anchor": "b4-bean-registrar",
+    "text": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "BeanRegistrar — AOT-Compatible Programmatic Bean Registration",
+    "anchor": "b4-bean-registrar",
+    "text": "Spring Boot 4 / Spring Framework 7 introduces BeanRegistrar , a new interface for programmatic bean registration that is fully compatible with the AOT (Ahead-Of-Time) compilation pipeline. Unlike BeanDefinitionRegistryPostProcessor or @ImportBeanDefinitionRegistrar , BeanRegistrar participates in AO"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@ImportHttpServices — Simplified HTTP Service Client Wiring",
+    "anchor": "b4-import-http-services",
+    "text": "@ImportHttpServices — Simplified HTTP Service Client Wiring"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "@ImportHttpServices — Simplified HTTP Service Client Wiring",
+    "anchor": "b4-import-http-services",
+    "text": "Spring Boot 4 adds @ImportHttpServices — a class-level annotation that auto-discovers and registers all @HttpExchange -annotated interface proxies in a given package. Previously you had to declare each HTTP service client as a @Bean via HttpServiceProxyFactory . @ImportHttpServices eliminates that b"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Task Decoration — Multiple Ordered TaskDecorators",
+    "anchor": "b4-task-decoration",
+    "text": "Task Decoration — Multiple Ordered TaskDecorators"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Task Decoration — Multiple Ordered TaskDecorators",
+    "anchor": "b4-task-decoration",
+    "text": "Spring Boot 4 extends the TaskDecorator support in ThreadPoolTaskExecutor / ThreadPoolTaskScheduler to allow multiple TaskDecorator beans ordered via @Order . In Boot 3, auto-configuration picked at most one TaskDecorator bean from the context. In Boot 4 all matching TaskDecorator beans are composed"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
     "section": "API Versioning — First-Class Request Mapping",
     "anchor": "b4-api-versioning",
     "text": "API Versioning — First-Class Request Mapping"
@@ -3784,7 +3924,147 @@
     "href": "spring-boot/boot4-features.html",
     "section": "API Versioning — First-Class Request Mapping",
     "anchor": "b4-api-versioning",
-    "text": "Spring Framework 7 (the foundation of Spring Boot 4) makes API versioning a first-class feature of request mapping. The version attribute is now available on @GetMapping , @PostMapping , @PutMapping , @DeleteMapping , @PatchMapping , and @RequestMapping . Spring resolves the version from the request"
+    "text": "Spring Framework 7 (the foundation of Spring Boot 4) makes API versioning a first-class feature of request mapping via the version attribute on all @*Mapping annotations. Spring auto-configures versioning for both Spring MVC ( spring.mvc.apiversion.* ) and WebFlux ( spring.webflux.apiversion.* ). Fo"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 1 — Request Header",
+    "anchor": "b4-versioning-header",
+    "text": "Strategy 1 — Request Header"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 1 — Request Header",
+    "anchor": "b4-versioning-header",
+    "text": "The client sends an API version in a custom request header. URLs stay clean and are not affected by version changes. This is the most common approach for internal APIs. application.properties spring.mvc.apiversion.use.header=X-API-Version\nspring.mvc.apiversion.supported=1.0,2.0\nspring.mvc.apiversion"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 2 — Path Segment",
+    "anchor": "b4-versioning-path",
+    "text": "Strategy 2 — Path Segment"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 2 — Path Segment",
+    "anchor": "b4-versioning-path",
+    "text": "The version is embedded in the URL path at a configurable segment index. This is the most visible and bookmark-friendly strategy. Note: path segment versioning cannot be mixed with other strategies in the same application — enabling it overrides all other resolvers. application.properties # The vers"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 3 — Query Parameter",
+    "anchor": "b4-versioning-query",
+    "text": "Strategy 3 — Query Parameter"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 3 — Query Parameter",
+    "anchor": "b4-versioning-query",
+    "text": "The version is passed as a URL query parameter. Simple to use and great for debugging and manual testing in a browser, but pollutes URLs and is not recommended for production APIs. application.properties spring.mvc.apiversion.use.query-parameter=api-version\nspring.mvc.apiversion.supported=1.0,2.0\nsp"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 4 — Media Type (Content Negotiation)",
+    "anchor": "b4-versioning-mediatype",
+    "text": "Strategy 4 — Media Type (Content Negotiation)"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy 4 — Media Type (Content Negotiation)",
+    "anchor": "b4-versioning-mediatype",
+    "text": "The version is embedded in the Accept header as a media-type parameter. This is the most HTTP-pure approach — versioning through content negotiation — but adds complexity for clients that don't control their HTTP headers easily. application.properties # For media type  application/json;version=2.0\ns"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Java Configuration (WebMvcConfigurer)",
+    "anchor": "b4-versioning-javaconfig",
+    "text": "Java Configuration (WebMvcConfigurer)"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Java Configuration (WebMvcConfigurer)",
+    "anchor": "b4-versioning-javaconfig",
+    "text": "All strategies can be configured programmatically as an alternative to properties — useful when you need dynamic configuration or want to combine the version resolver with other MVC customisation in one place. @Configuration\npublic class WebConfig implements WebMvcConfigurer {\n\n    @Override\n    pub"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Version Range Notation ( + suffix)",
+    "anchor": "b4-versioning-range",
+    "text": "Version Range Notation ( + suffix)"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Version Range Notation ( + suffix)",
+    "anchor": "b4-versioning-range",
+    "text": "The + suffix on a version string means \"this version and all higher versions\". This avoids duplicating the same handler for every version — the latest handler catches all future versions automatically until a more specific one is added. @RestController\n@RequestMapping(\"/invoices\")\npublic class Invoi"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Custom ApiVersionParser",
+    "anchor": "b4-versioning-parser",
+    "text": "Custom ApiVersionParser"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Custom ApiVersionParser",
+    "anchor": "b4-versioning-parser",
+    "text": "By default Spring parses versions as strings. Implement ApiVersionParser to normalise formats — for example, stripping a leading v prefix or converting an integer to a Major.Minor string — so clients can send v1 , 1 , or 1.0 interchangeably. @Component\npublic class FlexibleVersionParser implements A"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Deprecation & Sunset Handling",
+    "anchor": "b4-versioning-deprecation",
+    "text": "Deprecation & Sunset Handling"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Deprecation & Sunset Handling",
+    "anchor": "b4-versioning-deprecation",
+    "text": "Register an ApiVersionDeprecationHandler bean to add Deprecation and Sunset HTTP headers to responses for versions that are approaching or past end-of-life. Spring automatically calls the handler for each request resolved to a deprecated version. @Configuration\npublic class ApiVersionDeprecationConf"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Testing with RestTestClient",
+    "anchor": "b4-versioning-testing",
+    "text": "Testing with RestTestClient"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Testing with RestTestClient",
+    "anchor": "b4-versioning-testing",
+    "text": "RestTestClient (new in Spring Boot 4) is a test-focused HTTP client that understands API versioning natively. Use ApiVersionInserter to configure how the version is injected (header, path segment, or query param) so tests remain independent of the chosen strategy. @SpringBootTest(webEnvironment = Sp"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy Comparison & Constraints",
+    "anchor": "b4-versioning-summary",
+    "text": "Strategy Comparison & Constraints"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Strategy Comparison & Constraints",
+    "anchor": "b4-versioning-summary",
+    "text": "Strategy Property key Example request Best for Request Header use.header=X-API-Version X-API-Version: 2.0 Internal / microservice APIs Path Segment use.path-segment=0 GET /v2/orders/42 Public APIs, bookmarkable Query Parameter use.query-parameter=ver GET /orders/42?ver=2.0 Debugging, browser testing"
   },
   {
     "page": "Spring Boot 4 Features",
@@ -3883,6 +4163,62 @@
     "section": "Testcontainers @ServiceConnection",
     "anchor": "b4-testcontainers-service-connection",
     "text": "Spring Boot 4 continues and extends the @ServiceConnection support introduced in Boot 3.1. Annotating a Testcontainers @Container field with @ServiceConnection automatically derives all connection properties (URL, username, password, port) from the running container and registers a ConnectionDetails"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "JmsClient — Fluent JMS Messaging API",
+    "anchor": "b4-jms-client",
+    "text": "JmsClient — Fluent JMS Messaging API"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "JmsClient — Fluent JMS Messaging API",
+    "anchor": "b4-jms-client",
+    "text": "Spring Boot 4 introduces JmsClient — a new fluent, template-free API for sending and receiving JMS messages. It is the JMS equivalent of RestClient and JdbcClient : a modern, composable alternative to the older JmsTemplate . JmsClient is auto-configured when spring-boot-starter-activemq or spring-bo"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Data AOT — Compile-Time Query Generation",
+    "anchor": "b4-spring-data-aot",
+    "text": "Spring Data AOT — Compile-Time Query Generation"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Spring Data AOT — Compile-Time Query Generation",
+    "anchor": "b4-spring-data-aot",
+    "text": "Spring Data in the Boot 4 BOM (aligned with Spring Framework 7's AOT pipeline) supports compile-time (AOT) query generation for Spring Data JPA and Spring Data MongoDB repositories. At build time the AOT processor inspects repository interfaces, resolves derived-query method names, and pre-generates"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Redis Improvements — Static Topology & @RedisListener (Boot 4 / 4.1)",
+    "anchor": "b4-redis-improvements",
+    "text": "Redis Improvements — Static Topology & @RedisListener (Boot 4 / 4.1)"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Redis Improvements — Static Topology & @RedisListener (Boot 4 / 4.1)",
+    "anchor": "b4-redis-improvements",
+    "text": "Spring Boot 4 and 4.1 ship two significant Redis enhancements. Static master/replica topology (Boot 4.0): configure a fixed master and one or more replicas for read-scale without the overhead of Sentinel or Cluster mode — useful in Kubernetes where service DNS is stable. @RedisListener (Boot 4.1): a"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Lazy JDBC Connections (Boot 4.1)",
+    "anchor": "b4-lazy-jdbc",
+    "text": "Lazy JDBC Connections (Boot 4.1)"
+  },
+  {
+    "page": "Spring Boot 4 Features",
+    "href": "spring-boot/boot4-features.html",
+    "section": "Lazy JDBC Connections (Boot 4.1)",
+    "anchor": "b4-lazy-jdbc",
+    "text": "Spring Boot 4.1 adds support for lazy JDBC connections : the application's DataSource (and by extension JPA / JDBC clients) does not acquire an actual database connection until the first query is executed. In standard Boot apps the DataSource validates connectivity at startup — a connection is obtai"
   },
   {
     "page": "Spring Boot 4 Features",
@@ -5177,7 +5513,7 @@
     "href": "spring-core/index.html",
     "section": "Spring Core Framework",
     "anchor": "",
-    "text": "Spring 5.3.x LTS Spring 6.2.x Current Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an Inversion of Control (IoC) container that manages object creation and wiring through Dependency Injection (DI) , letting you"
+    "text": "Spring 5.3.x EOL Spring 6.2.x Final Branch Spring 7.0.x Current ✓ Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an Inversion of Control (IoC) container that manages object creation and wiring through Dependency "
   },
   {
     "page": "Spring Core Framework",
@@ -5205,7 +5541,7 @@
     "href": "spring-core/index.html",
     "section": "Version Timeline",
     "anchor": "",
-    "text": "Spring 5.x targets Java 8+ with javax.* namespaces (Jakarta EE 8). Spring 6.x requires Java 17+ and migrates to jakarta.* namespaces (Jakarta EE 9+). Spring 5.3.x is the LTS release receiving maintenance until 2024; Spring 6.x is the active development line. 5.0 Sep 2017 5.1 Sep 2018 5.2 Sep 2019 5."
+    "text": "Spring 5.3.x open-source support ended August 2024 ( javax.* , Jakarta EE 8). Spring 6.2.x (final 6th-gen branch, open-source support ended June 2026) requires Java 17+ and uses jakarta.* namespaces. Spring 7.0.x is the current recommended production line — GA since November 2025, also Java 17+, tar"
   },
   {
     "page": "Spring Core Framework",
@@ -5247,7 +5583,21 @@
     "href": "spring-core/index.html",
     "section": "Spring 6 Features",
     "anchor": "spring-6-features",
-    "text": "Jakarta EE 10, AOT compilation, virtual threads, HTTP client — Java 17+ required"
+    "text": "Jakarta EE 9+, AOT compilation, HTTP interface clients, Micrometer — Java 17+ required"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
+    "section": "Spring 7 Features",
+    "anchor": "spring-7-features",
+    "text": "Spring 7 Features"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
+    "section": "Spring 7 Features",
+    "anchor": "spring-7-features",
+    "text": "Jakarta EE 11, JSpecify null safety, @Retryable, API versioning, Jackson 3 — Java 17+ (21+ for virtual threads)"
   },
   {
     "page": "Spring Core Framework",
@@ -5261,7 +5611,7 @@
     "href": "spring-core/index.html",
     "section": "Version Comparison",
     "anchor": "version-comparison",
-    "text": "Side-by-side diff of Spring 5 vs 6 — namespace changes, removed APIs, migration guide"
+    "text": "Side-by-side diff of Spring 5 → 6 → 7 — namespace changes, removed APIs, migration guide"
   },
   {
     "page": "Spring Core Framework",
@@ -5280,6 +5630,34 @@
   {
     "page": "Spring Core Framework",
     "href": "spring-core/index.html",
+    "section": "Proxy Internals",
+    "anchor": "proxy-internals",
+    "text": "Proxy Internals"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
+    "section": "Proxy Internals",
+    "anchor": "proxy-internals",
+    "text": "JDK dynamic proxy vs CGLIB — how Spring wraps beans, limitations, and gotchas"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
+    "section": "AOP Deep Dive",
+    "anchor": "aop-deep-dive",
+    "text": "AOP Deep Dive"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
+    "section": "AOP Deep Dive",
+    "anchor": "aop-deep-dive",
+    "text": "Advice types, pointcut expressions, ordering, real-world patterns with @Aspect"
+  },
+  {
+    "page": "Spring Core Framework",
+    "href": "spring-core/index.html",
     "section": "Tooling & Setup",
     "anchor": "tooling-and-setup",
     "text": "Tooling & Setup"
@@ -5289,7 +5667,7 @@
     "href": "spring-core/index.html",
     "section": "Tooling & Setup",
     "anchor": "tooling-and-setup",
-    "text": "Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices Java baseline reminder Spring 5.3.x requires Java 8 or higher and uses javax.* package names.\n      Spring 6.x requires Java 17 or higher and migrates all imports to jakarta.* .\n      Choose your branch based on y"
+    "text": "Spring Initializr, IntelliJ IDEA, Maven/Gradle setup, project structure best practices Java baseline quick reference Spring 7.0.x is the current production line (GA Nov 2025) — Java 17+, Jakarta EE 11. This is what Spring recommends for new projects. Spring 6.2.x (Final Branch) — Java 17+, Jakarta E"
   },
   {
     "page": "Spring Bean Lifecycle",
@@ -5814,7 +6192,7 @@
     "href": "spring-core/spring5-features.html",
     "section": "Spring Framework 5 Features",
     "anchor": "",
-    "text": "Spring 5.3.x LTS Java 8+ baseline • GA: Sep 2017 • LTS: Oct 2020 Spring Framework 5 represents a major generational leap — it moved to a Java 8+ baseline, introduced the fully reactive WebFlux stack built on Project Reactor, adopted JUnit 5 as a first-class testing citizen, added null-safety annotat"
+    "text": "Spring 5.3.x EOL Java 8+ baseline • GA: Sep 2017 • LTS: Oct 2020 Spring Framework 5 represents a major generational leap — it moved to a Java 8+ baseline, introduced the fully reactive WebFlux stack built on Project Reactor, adopted JUnit 5 as a first-class testing citizen, added null-safety annotat"
   },
   {
     "page": "Spring 5 Features",
@@ -6612,7 +6990,7 @@
     "href": "spring-core/spring7-features.html",
     "section": "Spring 7 Features",
     "anchor": "",
-    "text": "Spring 7.x — GA: Nov 13, 2025 Java 17+ baseline • Latest: 7.0.3 (Jan 2026) • Jakarta EE 11 Spring Framework 7.0, released on November 13, 2025 , is the beginning of a new framework generation serving as the foundation for Spring Boot 4.0 . It retains a Java 17 baseline while embracing Java 21/25 idi"
+    "text": "Spring 7.x — Current Production Java 17+ baseline • Latest: 7.0.9 (Aug 2026) • Jakarta EE 11 Spring Framework 7.0, released on November 13, 2025 , is the beginning of a new framework generation serving as the foundation for Spring Boot 4.0 . It retains a Java 17 baseline while embracing Java 21/25 i"
   },
   {
     "page": "Spring 7 Features",
