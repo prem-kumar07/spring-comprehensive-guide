@@ -19,8 +19,8 @@
     <h1>Spring Core Framework</h1>
     <div style="margin-bottom:1.25rem">
       <span class="version-badge badge-v5">Spring 5.3.x EOL</span>
-      <span class="version-badge badge-v6">Spring 6.2.x LTS</span>
-      <span class="version-badge badge-v7">Spring 7.0 GA</span>
+      <span class="version-badge badge-v6">Spring 6.2.x Final Branch</span>
+      <span class="version-badge badge-v7">Spring 7.0.x Current ✓</span>
     </div>
 
     <p>Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an <strong>Inversion of Control (IoC) container</strong> that manages object creation and wiring through <strong>Dependency Injection (DI)</strong>, letting you describe your application's architecture as a graph of loosely-coupled components rather than a tangle of hard-coded <code>new</code> calls and static references.</p>
@@ -84,7 +84,7 @@
     </div>
 
     <h2>Version Timeline</h2>
-    <p>Spring 5.x targets Java 8+ with <code>javax.*</code> namespaces (Jakarta EE 8) — EOL December 2024. Spring 6.x requires Java 17+ and migrates to <code>jakarta.*</code> namespaces (Jakarta EE 9+). Spring 7.x (GA November 2025) also requires Java 17+ and targets Jakarta EE 11 (Servlet 6.1, JPA 3.2) with built-in resilience primitives, JSpecify null safety, and native virtual-thread support.</p>
+    <p>Spring 5.3.x open-source support ended August 2024 (<code>javax.*</code>, Jakarta EE 8). Spring 6.2.x (final 6th-gen branch, open-source support ended June 2026) requires Java 17+ and uses <code>jakarta.*</code> namespaces. <strong>Spring 7.0.x is the current recommended production line</strong> — GA since November 2025, also Java 17+, targeting Jakarta EE 11 (Servlet 6.1, JPA 3.2, Bean Validation 3.1) with JSpecify null safety, built-in resilience (<code>@Retryable</code>, <code>@ConcurrencyLimit</code>), API versioning, and Jackson 3.</p>
 
     <div class="diagram-wrap">
       <svg viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" aria-label="Spring version timeline" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
@@ -106,7 +106,7 @@
 
         <circle cx="400" cy="50" r="9" fill="#58a6ff"/>
         <text x="400" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">5.3 EOL</text>
-        <text x="400" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Oct 2020</text>
+        <text x="400" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Oct 2020 · EOL Aug 2024</text>
 
         <!-- Spring 6.x milestones (green) -->
         <circle cx="510" cy="50" r="7" fill="#3fb950"/>
@@ -118,8 +118,8 @@
         <text x="600" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2023</text>
 
         <circle cx="680" cy="50" r="9" fill="#3fb950"/>
-        <text x="680" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">6.2 LTS</text>
-        <text x="680" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2024</text>
+        <text x="680" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">6.2 Final</text>
+        <text x="680" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2024 · OSS ended Jun 2026</text>
 
         <!-- Spring 7.x (amber) -->
         <circle cx="810" cy="50" r="9" fill="#d29922"/>
@@ -128,11 +128,11 @@
 
         <!-- Legend -->
         <circle cx="100" cy="110" r="5" fill="#58a6ff"/>
-        <text x="112" y="114" font-size="11" fill="var(--text-muted)">Spring 5.x (Java 8+, javax.*, EOL)</text>
-        <circle cx="370" cy="110" r="5" fill="#3fb950"/>
-        <text x="382" y="114" font-size="11" fill="var(--text-muted)">Spring 6.x (Java 17+, jakarta.*)</text>
-        <circle cx="610" cy="110" r="5" fill="#d29922"/>
-        <text x="622" y="114" font-size="11" fill="var(--text-muted)">Spring 7.x (Java 17+, Jakarta EE 11)</text>
+        <text x="112" y="114" font-size="11" fill="var(--text-muted)">Spring 5.x (Java 8+, javax.*, OSS EOL Aug 2024)</text>
+        <circle cx="390" cy="110" r="5" fill="#3fb950"/>
+        <text x="402" y="114" font-size="11" fill="var(--text-muted)">Spring 6.x (Java 17+, jakarta.*, OSS ended Jun 2026)</text>
+        <circle cx="660" cy="110" r="5" fill="#d29922"/>
+        <text x="672" y="114" font-size="11" fill="var(--text-muted)">Spring 7.x (Java 17+, Jakarta EE 11, current)</text>
       </svg>
     </div>
 
@@ -176,10 +176,9 @@
 
     <div class="callout info">
       <strong>Java baseline quick reference</strong>
-      Spring 5.3.x requires Java 8+ and uses <code>javax.*</code> package names — reached EOL in December 2024.
-      Spring 6.x requires Java 17+ and migrates all imports to <code>jakarta.*</code> (Jakarta EE 9+) — 6.2.x is the current LTS line.
-      Spring 7.x (GA November 13, 2025) also requires Java 17+ and targets Jakarta EE 11 (Servlet 6.1, JPA 3.2, Bean Validation 3.1) — adds JSpecify null safety, @Retryable, API versioning, and Jackson 3.
-      Choose your version based on your Java runtime and Jakarta EE compatibility requirements.
+      <strong>Spring 7.0.x</strong> is the current production line (GA Nov 2025) — Java 17+, Jakarta EE 11. This is what Spring recommends for new projects.
+      <strong>Spring 6.2.x</strong> (Final Branch) — Java 17+, Jakarta EE 9+. Open-source community support ended June 2026; commercial support options remain.
+      <strong>Spring 5.3.x</strong> — Java 8+, <code>javax.*</code>. Open-source support ended August 2024; do not start new projects on 5.x.
     </div>
 
   </div>
