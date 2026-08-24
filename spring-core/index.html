@@ -18,8 +18,9 @@
 
     <h1>Spring Core Framework</h1>
     <div style="margin-bottom:1.25rem">
-      <span class="version-badge badge-v5">Spring 5.3.x LTS</span>
-      <span class="version-badge badge-v6">Spring 6.2.x Current</span>
+      <span class="version-badge badge-v5">Spring 5.3.x EOL</span>
+      <span class="version-badge badge-v6">Spring 6.2.x LTS</span>
+      <span class="version-badge badge-v7">Spring 7.0 (upcoming)</span>
     </div>
 
     <p>Spring Framework is a comprehensive programming and configuration model for modern Java-based enterprise applications. At its heart is an <strong>Inversion of Control (IoC) container</strong> that manages object creation and wiring through <strong>Dependency Injection (DI)</strong>, letting you describe your application's architecture as a graph of loosely-coupled components rather than a tangle of hard-coded <code>new</code> calls and static references.</p>
@@ -83,55 +84,55 @@
     </div>
 
     <h2>Version Timeline</h2>
-    <p>Spring 5.x targets Java 8+ with <code>javax.*</code> namespaces (Jakarta EE 8). Spring 6.x requires Java 17+ and migrates to <code>jakarta.*</code> namespaces (Jakarta EE 9+). Spring 5.3.x is the LTS release receiving maintenance until 2024; Spring 6.x is the active development line.</p>
+    <p>Spring 5.x targets Java 8+ with <code>javax.*</code> namespaces (Jakarta EE 8) — EOL December 2024. Spring 6.x requires Java 17+ and migrates to <code>jakarta.*</code> namespaces (Jakarta EE 9+). Spring 7.x (upcoming) requires Java 21+ and targets Jakarta EE 11 with first-class virtual thread and Project Loom support.</p>
 
     <div class="diagram-wrap">
-      <svg viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" aria-label="Spring version timeline" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+      <svg viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" aria-label="Spring version timeline" role="img" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
         <!-- Baseline -->
-        <line x1="60" y1="48" x2="740" y2="48" stroke="var(--border)" stroke-width="2"/>
+        <line x1="40" y1="50" x2="870" y2="50" stroke="var(--border)" stroke-width="2"/>
 
         <!-- Spring 5.x milestones (blue) -->
-        <!-- 5.0 Sep 2017 -->
-        <circle cx="100" cy="48" r="7" fill="#58a6ff"/>
-        <text x="100" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.0</text>
-        <text x="100" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2017</text>
+        <circle cx="80" cy="50" r="7" fill="#58a6ff"/>
+        <text x="80" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.0</text>
+        <text x="80" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2017</text>
 
-        <!-- 5.1 Sep 2018 -->
-        <circle cx="230" cy="48" r="7" fill="#58a6ff"/>
-        <text x="230" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.1</text>
-        <text x="230" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2018</text>
+        <circle cx="195" cy="50" r="7" fill="#58a6ff"/>
+        <text x="195" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.1</text>
+        <text x="195" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2018</text>
 
-        <!-- 5.2 Sep 2019 -->
-        <circle cx="360" cy="48" r="7" fill="#58a6ff"/>
-        <text x="360" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.2</text>
-        <text x="360" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2019</text>
+        <circle cx="310" cy="50" r="7" fill="#58a6ff"/>
+        <text x="310" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">5.2</text>
+        <text x="310" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Sep 2019</text>
 
-        <!-- 5.3 LTS Oct 2020 -->
-        <circle cx="460" cy="48" r="9" fill="#58a6ff"/>
-        <text x="460" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">5.3 LTS</text>
-        <text x="460" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Oct 2020</text>
+        <circle cx="400" cy="50" r="9" fill="#58a6ff"/>
+        <text x="400" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">5.3 EOL</text>
+        <text x="400" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Oct 2020</text>
 
         <!-- Spring 6.x milestones (green) -->
-        <!-- 6.0 Nov 2022 -->
-        <circle cx="570" cy="48" r="7" fill="#3fb950"/>
-        <text x="570" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">6.0</text>
-        <text x="570" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2022</text>
+        <circle cx="510" cy="50" r="7" fill="#3fb950"/>
+        <text x="510" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">6.0</text>
+        <text x="510" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2022</text>
 
-        <!-- 6.1 Nov 2023 -->
-        <circle cx="655" cy="48" r="7" fill="#3fb950"/>
-        <text x="655" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">6.1</text>
-        <text x="655" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2023</text>
+        <circle cx="600" cy="50" r="7" fill="#3fb950"/>
+        <text x="600" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">6.1</text>
+        <text x="600" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2023</text>
 
-        <!-- 6.2 Nov 2024 -->
-        <circle cx="720" cy="48" r="9" fill="#3fb950"/>
-        <text x="720" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">6.2</text>
-        <text x="720" y="73" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2024</text>
+        <circle cx="680" cy="50" r="9" fill="#3fb950"/>
+        <text x="680" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">6.2 LTS</text>
+        <text x="680" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">Nov 2024</text>
+
+        <!-- Spring 7.x (amber) -->
+        <circle cx="810" cy="50" r="9" fill="#d29922" stroke-dasharray="4 2" stroke="none"/>
+        <text x="810" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">7.0</text>
+        <text x="810" y="75" text-anchor="middle" font-size="10" fill="var(--text-muted)">2025 (planned)</text>
 
         <!-- Legend -->
-        <circle cx="160" cy="100" r="5" fill="#58a6ff"/>
-        <text x="172" y="104" font-size="11" fill="var(--text-muted)">Spring 5.x (Java 8+, javax.*)</text>
-        <circle cx="430" cy="100" r="5" fill="#3fb950"/>
-        <text x="442" y="104" font-size="11" fill="var(--text-muted)">Spring 6.x (Java 17+, jakarta.*)</text>
+        <circle cx="100" cy="110" r="5" fill="#58a6ff"/>
+        <text x="112" y="114" font-size="11" fill="var(--text-muted)">Spring 5.x (Java 8+, javax.*, EOL)</text>
+        <circle cx="370" cy="110" r="5" fill="#3fb950"/>
+        <text x="382" y="114" font-size="11" fill="var(--text-muted)">Spring 6.x (Java 17+, jakarta.*)</text>
+        <circle cx="610" cy="110" r="5" fill="#d29922"/>
+        <text x="622" y="114" font-size="11" fill="var(--text-muted)">Spring 7.x (Java 21+, Jakarta EE 11)</text>
       </svg>
     </div>
 
@@ -145,15 +146,27 @@
       </a>
       <a href="spring6-features.html" class="feature-card" style="text-decoration:none">
         <h3 id="spring-6-features">Spring 6 Features</h3>
-        <p style="color:var(--text-muted);font-size:0.875rem">Jakarta EE 10, AOT compilation, virtual threads, HTTP client — Java 17+ required</p>
+        <p style="color:var(--text-muted);font-size:0.875rem">Jakarta EE 9+, AOT compilation, HTTP interface clients, Micrometer — Java 17+ required</p>
+      </a>
+      <a href="spring7-features.html" class="feature-card" style="text-decoration:none">
+        <h3 id="spring-7-features">Spring 7 Features</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Project Loom, virtual threads, Jakarta EE 11, Jackson 3, RestClient — Java 21+ required</p>
       </a>
       <a href="version-comparison.html" class="feature-card" style="text-decoration:none">
         <h3 id="version-comparison">Version Comparison</h3>
-        <p style="color:var(--text-muted);font-size:0.875rem">Side-by-side diff of Spring 5 vs 6 — namespace changes, removed APIs, migration guide</p>
+        <p style="color:var(--text-muted);font-size:0.875rem">Side-by-side diff of Spring 5 → 6 → 7 — namespace changes, removed APIs, migration guide</p>
       </a>
       <a href="lifecycle.html" class="feature-card" style="text-decoration:none">
         <h3 id="bean-lifecycle">Bean Lifecycle</h3>
         <p style="color:var(--text-muted);font-size:0.875rem">Full bean lifecycle deep-dive — instantiation, post-processing, init, use, destruction</p>
+      </a>
+      <a href="proxies.html" class="feature-card" style="text-decoration:none">
+        <h3 id="proxy-internals">Proxy Internals</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">JDK dynamic proxy vs CGLIB — how Spring wraps beans, limitations, and gotchas</p>
+      </a>
+      <a href="aop.html" class="feature-card" style="text-decoration:none">
+        <h3 id="aop-deep-dive">AOP Deep Dive</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem">Advice types, pointcut expressions, ordering, real-world patterns with @Aspect</p>
       </a>
       <a href="tooling.html" class="feature-card" style="text-decoration:none">
         <h3 id="tooling-and-setup">Tooling &amp; Setup</h3>
@@ -162,10 +175,11 @@
     </div>
 
     <div class="callout info">
-      <strong>Java baseline reminder</strong>
-      Spring 5.3.x requires Java 8 or higher and uses <code>javax.*</code> package names.
-      Spring 6.x requires Java 17 or higher and migrates all imports to <code>jakarta.*</code>.
-      Choose your branch based on your runtime target before starting a project.
+      <strong>Java baseline quick reference</strong>
+      Spring 5.3.x requires Java 8+ and uses <code>javax.*</code> package names — reached EOL in December 2024.
+      Spring 6.x requires Java 17+ and migrates all imports to <code>jakarta.*</code> (Jakarta EE 9+) — 6.2.x is the current LTS line.
+      Spring 7.x (upcoming) requires Java 21+ and targets Jakarta EE 11 with first-class virtual thread and Loom support.
+      Choose your version based on your Java runtime and Jakarta EE compatibility requirements.
     </div>
 
   </div>
