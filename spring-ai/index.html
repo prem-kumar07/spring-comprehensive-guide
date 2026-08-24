@@ -105,8 +105,28 @@
         </tr>
         <tr style="background:var(--surface)">
           <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Agentic loops</td>
-          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Manual wiring</td>
-          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">First-class agent abstractions</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Manual wiring; <code>RecursiveAdvisor</code> (1.1.x)</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">First-class agent abstractions; <code>ToolCallingAdvisor</code></td>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Spring Boot baseline</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Spring Boot 3.x</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Spring Boot 4 / Spring Framework 7</td>
+        </tr>
+        <tr style="background:var(--surface)">
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Observability</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Micrometer auto-instrumentation (tokens, latency)</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Extended — per tool-call spans, advisor tracing</td>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Structured output</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)"><code>BeanOutputConverter</code>; provider-native via options</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Same + <code>.entity().validateSchema()</code> self-correcting loop</td>
+        </tr>
+        <tr style="background:var(--surface)">
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Model types</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">ChatModel, EmbeddingModel, ImageModel, AudioTranscriptionModel, SpeechModel</td>
+          <td style="padding:0.5rem 0.75rem;border:1px solid var(--border)">Same; <code>getText()</code> replaces <code>getContent()</code> on ChatResponse</td>
         </tr>
       </tbody>
     </table>
@@ -173,7 +193,7 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0">
       <a href="chat-client.html" class="feature-card" style="text-decoration:none">
         <h3 id="nav-chat-client">ChatClient API</h3>
-        <p style="color:var(--text-muted);font-size:0.875rem">Fluent API for chat, streaming, conversation memory, multimodal input</p>
+        <p style="color:var(--text-muted);font-size:0.875rem">Fluent API for chat, streaming, memory, multimodal, EmbeddingModel, ImageModel, TTS/STT</p>
       </a>
       <a href="rag.html" class="feature-card" style="text-decoration:none">
         <h3 id="nav-rag">RAG &amp; VectorStore</h3>
@@ -181,7 +201,7 @@
       </a>
       <a href="tools-advisors.html" class="feature-card" style="text-decoration:none">
         <h3 id="nav-tools-advisors">Tools &amp; Advisors</h3>
-        <p style="color:var(--text-muted);font-size:0.875rem">@Tool function calling, agentic loops, Advisor interceptor chain</p>
+        <p style="color:var(--text-muted);font-size:0.875rem">@Tool function calling, agentic loops, Advisor chain, MCP client &amp; server</p>
       </a>
       <a href="structured-output.html" class="feature-card" style="text-decoration:none">
         <h3 id="nav-structured-output">Structured Output</h3>

@@ -31,6 +31,7 @@
         <button class="tab-btn" data-tab="tab-prompts">Prompt Templates</button>
         <button class="tab-btn" data-tab="tab-multimodal">Multimodal</button>
         <button class="tab-btn" data-tab="tab-testing">Testing</button>
+        <button class="tab-btn" data-tab="tab-other-models">Other AI Models</button>
       </div>
 
       <!-- ── Basic Usage ──────────────────────────────── -->
@@ -824,6 +825,253 @@ class QualityEvaluationTest {
         </div>
 
       </div><!-- /tab-testing -->
+
+      <!-- ── Other AI Models ───────────────────────────── -->
+      <div class="tab-panel" id="tab-other-models">
+
+        <div class="feature-card">
+          <h3 id="embedding-model">EmbeddingModel — Text to Numeric Vectors</h3>
+          <p>Beyond <code>ChatModel</code>, Spring AI's second most-used model type is <strong><code>EmbeddingModel</code></strong>. It converts text (or batches of text) into dense numeric vectors (embeddings) that capture semantic meaning. Embeddings are the foundation of RAG: you embed documents at ingestion time and embed the user's query at retrieval time, then find the most similar documents by vector distance. Spring AI provides <code>EmbeddingModel</code> implementations for every major provider (OpenAI, Anthropic, Mistral, Bedrock, Ollama…) and an identical <code>EmbeddingModel</code> API regardless of provider.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;!-- Uses OpenAI's text-embedding-3-small by default --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.embedding.options.model=text-embedding-3-small
+# text-embedding-3-large produces 3072-dim vectors (more accurate, 3x cost)
+# text-embedding-ada-002 is the legacy 1536-dim model</code></pre>
+
+          <h4>Using EmbeddingModel directly</h4>
+          <pre><code class="language-java">@Service
+public class SemanticSearchService {
+
+    private final EmbeddingModel embeddingModel;
+
+    public SemanticSearchService(EmbeddingModel embeddingModel) {
+        this.embeddingModel = embeddingModel;
+    }
+
+    // Embed a single string
+    public float[] embed(String text) {
+        return embeddingModel.embed(text);
+    }
+
+    // Embed multiple strings in one API call (batched)
+    public EmbeddingResponse embedBatch(List&lt;String&gt; texts) {
+        EmbeddingRequest request = new EmbeddingRequest(texts,
+            EmbeddingOptionsBuilder.builder().build());
+        return embeddingModel.call(request);
+    }
+
+    // Cosine similarity between two texts
+    public double similarity(String a, String b) {
+        float[] va = embed(a);
+        float[] vb = embed(b);
+        return cosineSimilarity(va, vb);  // your own util
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>1.x vs 2.x</strong>
+            The <code>EmbeddingModel</code> API is stable across 1.x and 2.x. The only difference: 2.x aligns with JSpecify null-safety annotations. No migration needed for basic embedding usage.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="image-model">ImageModel — Text-to-Image Generation</h3>
+          <p>Spring AI's <strong><code>ImageModel</code></strong> provides a uniform API for text-to-image generation models such as OpenAI DALL-E 3 and Stability AI. Provide a text prompt and receive a generated image as a URL or base64-encoded bytes. The model, resolution, style, and quality are configured via <code>ImageOptions</code>.</p>
+
+          <h4>Dependency (pom.xml) — OpenAI DALL-E</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.image.options.model=dall-e-3
+spring.ai.openai.image.options.quality=hd
+spring.ai.openai.image.options.size=1024x1024</code></pre>
+
+          <h4>Generate an image</h4>
+          <pre><code class="language-java">@Service
+public class ImageGenerationService {
+
+    private final ImageModel imageModel;
+
+    public ImageGenerationService(ImageModel imageModel) {
+        this.imageModel = imageModel;
+    }
+
+    public String generateImage(String prompt) {
+        ImageOptions options = ImageOptionsBuilder.builder()
+            .model("dall-e-3")
+            .height(1024)
+            .width(1024)
+            .build();
+
+        ImagePrompt imagePrompt = new ImagePrompt(prompt, options);
+        ImageResponse response = imageModel.call(imagePrompt);
+
+        // Returns a URL (dall-e-3 default) or base64 bytes
+        return response.getResult().getOutput().getUrl();
+    }
+}
+
+// Per-call override — generate a smaller image for a thumbnail
+ImageOptions thumbnailOpts = ImageOptionsBuilder.builder()
+    .model("dall-e-3")
+    .height(256)
+    .width(256)
+    .build();
+String url = imageModel.call(
+    new ImagePrompt("A tiny icon of a coffee cup", thumbnailOpts))
+    .getResult().getOutput().getUrl();</code></pre>
+
+          <h4>Provider support</h4>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.75rem">
+            <thead><tr style="background:var(--surface-2)">
+              <th style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Provider</th>
+              <th style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Model</th>
+              <th style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Output</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">OpenAI</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">dall-e-3, dall-e-2</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">URL or base64</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Stability AI</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">stable-diffusion-v1-6</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">base64</td></tr>
+              <tr><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Azure OpenAI</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">dall-e-3</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">URL</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Amazon Bedrock</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">Titan Image Generator, Stable Diffusion XL</td><td style="padding:0.35rem 0.6rem;border:1px solid var(--border)">base64</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="audio-transcription-model">AudioTranscriptionModel — Speech-to-Text (Whisper)</h3>
+          <p>Spring AI's <strong><code>AudioTranscriptionModel</code></strong> wraps speech-to-text APIs such as OpenAI Whisper. Provide an audio file (MP3, WAV, M4A, WebM…) and receive a text transcript. Unlike multimodal <em>chat input</em> (sending audio to a vision-enabled chat model), <code>AudioTranscriptionModel</code> calls the dedicated transcription endpoint and returns a plain text result.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.audio.transcription.options.model=whisper-1
+spring.ai.openai.audio.transcription.options.language=en
+# Response format: json | text | srt | verbose_json | vtt
+spring.ai.openai.audio.transcription.options.response-format=text</code></pre>
+
+          <h4>Transcribe an audio file</h4>
+          <pre><code class="language-java">@Service
+public class TranscriptionService {
+
+    private final AudioTranscriptionModel transcriptionModel;
+
+    public TranscriptionService(AudioTranscriptionModel transcriptionModel) {
+        this.transcriptionModel = transcriptionModel;
+    }
+
+    public String transcribe(Resource audioFile) {
+        AudioTranscriptionOptions options = OpenAiAudioTranscriptionOptions.builder()
+            .model("whisper-1")
+            .language("en")
+            .responseFormat(OpenAiAudioTranscriptionOptions.TranscriptResponseFormat.TEXT)
+            .build();
+
+        AudioTranscriptionPrompt prompt = new AudioTranscriptionPrompt(audioFile, options);
+        return transcriptionModel.call(prompt).getResult().getOutput();
+    }
+
+    // Convenience — transcribe a classpath resource
+    public String transcribeClasspath(String path) {
+        return transcribe(new ClassPathResource(path));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="speech-model">SpeechModel — Text-to-Speech (TTS)</h3>
+          <p>Spring AI's <strong><code>SpeechModel</code></strong> wraps text-to-speech APIs such as OpenAI TTS. Provide a text string and receive synthesized audio as a byte array. Choose a voice, speed, and output format (MP3, AAC, FLAC, WAV, Opus…). The audio can be streamed or written directly to a file.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.audio.speech.options.model=tts-1
+# Voices: alloy | echo | fable | onyx | nova | shimmer
+spring.ai.openai.audio.speech.options.voice=alloy
+spring.ai.openai.audio.speech.options.response-format=mp3
+spring.ai.openai.audio.speech.options.speed=1.0</code></pre>
+
+          <h4>Synthesize speech and save to file</h4>
+          <pre><code class="language-java">@Service
+public class TextToSpeechService {
+
+    private final OpenAiAudioSpeechModel speechModel;
+
+    public TextToSpeechService(OpenAiAudioSpeechModel speechModel) {
+        this.speechModel = speechModel;
+    }
+
+    public byte[] synthesize(String text) {
+        OpenAiAudioSpeechOptions options = OpenAiAudioSpeechOptions.builder()
+            .model("tts-1")
+            .voice(OpenAiAudioSpeechOptions.Voice.ALLOY)
+            .responseFormat(OpenAiAudioSpeechOptions.AudioResponseFormat.MP3)
+            .speed(1.0f)
+            .build();
+
+        SpeechPrompt prompt = new SpeechPrompt(text, options);
+        return speechModel.call(prompt).getResult().getOutput();
+    }
+}
+
+// Expose as a Spring MVC download endpoint
+@GetMapping(value = "/speech", produces = "audio/mpeg")
+public ResponseEntity&lt;byte[]&gt; speech(@RequestParam String text) {
+    byte[] audio = textToSpeechService.synthesize(text);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=speech.mp3")
+        .body(audio);
+}</code></pre>
+
+          <div class="callout info">
+            <strong>tts-1 vs tts-1-hd</strong>
+            <code>tts-1</code> is optimized for real-time low-latency use. <code>tts-1-hd</code> produces higher-quality audio but has slightly higher latency. Use <code>tts-1-hd</code> for pre-generated narration and <code>tts-1</code> for interactive assistant responses.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="ai-model-summary">AI Model Type Summary</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+            <thead>
+              <tr style="background:var(--surface-2)">
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Spring AI Interface</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Purpose</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Primary provider(s)</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Output type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>ChatModel</code> / <code>ChatClient</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Conversational text generation</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">OpenAI, Anthropic, Gemini, Ollama…</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>ChatResponse</code> (text)</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>EmbeddingModel</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Text → numeric vectors (for RAG)</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">OpenAI, Mistral, Ollama, Bedrock</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>EmbeddingResponse</code> (<code>float[]</code>)</td></tr>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>ImageModel</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Text → generated image</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">OpenAI DALL-E, Stability AI, Bedrock</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>ImageResponse</code> (URL / base64)</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>AudioTranscriptionModel</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Audio file → text transcript</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">OpenAI Whisper</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>AudioTranscriptionResponse</code> (String)</td></tr>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>SpeechModel</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Text → synthesized audio</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">OpenAI TTS</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>SpeechResponse</code> (<code>byte[]</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /tab-other-models -->
 
     </div><!-- /tab-container -->
 

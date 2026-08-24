@@ -1136,6 +1136,76 @@
   {
     "page": "Spring AI ChatClient API",
     "href": "spring-ai/chat-client.html",
+    "section": "EmbeddingModel — Text to Numeric Vectors",
+    "anchor": "embedding-model",
+    "text": "EmbeddingModel — Text to Numeric Vectors"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "EmbeddingModel — Text to Numeric Vectors",
+    "anchor": "embedding-model",
+    "text": "Beyond ChatModel , Spring AI's second most-used model type is EmbeddingModel . It converts text (or batches of text) into dense numeric vectors (embeddings) that capture semantic meaning. Embeddings are the foundation of RAG: you embed documents at ingestion time and embed the user's query at retrie"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ImageModel — Text-to-Image Generation",
+    "anchor": "image-model",
+    "text": "ImageModel — Text-to-Image Generation"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "ImageModel — Text-to-Image Generation",
+    "anchor": "image-model",
+    "text": "Spring AI's ImageModel provides a uniform API for text-to-image generation models such as OpenAI DALL-E 3 and Stability AI. Provide a text prompt and receive a generated image as a URL or base64-encoded bytes. The model, resolution, style, and quality are configured via ImageOptions . Dependency (po"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "AudioTranscriptionModel — Speech-to-Text (Whisper)",
+    "anchor": "audio-transcription-model",
+    "text": "AudioTranscriptionModel — Speech-to-Text (Whisper)"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "AudioTranscriptionModel — Speech-to-Text (Whisper)",
+    "anchor": "audio-transcription-model",
+    "text": "Spring AI's AudioTranscriptionModel wraps speech-to-text APIs such as OpenAI Whisper. Provide an audio file (MP3, WAV, M4A, WebM…) and receive a text transcript. Unlike multimodal chat input (sending audio to a vision-enabled chat model), AudioTranscriptionModel calls the dedicated transcription end"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "SpeechModel — Text-to-Speech (TTS)",
+    "anchor": "speech-model",
+    "text": "SpeechModel — Text-to-Speech (TTS)"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "SpeechModel — Text-to-Speech (TTS)",
+    "anchor": "speech-model",
+    "text": "Spring AI's SpeechModel wraps text-to-speech APIs such as OpenAI TTS. Provide a text string and receive synthesized audio as a byte array. Choose a voice, speed, and output format (MP3, AAC, FLAC, WAV, Opus…). The audio can be streamed or written directly to a file. Dependency (pom.xml) <dependency>"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "AI Model Type Summary",
+    "anchor": "ai-model-summary",
+    "text": "AI Model Type Summary"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
+    "section": "AI Model Type Summary",
+    "anchor": "ai-model-summary",
+    "text": "Spring AI Interface Purpose Primary provider(s) Output type ChatModel / ChatClient Conversational text generation OpenAI, Anthropic, Gemini, Ollama… ChatResponse (text) EmbeddingModel Text → numeric vectors (for RAG) OpenAI, Mistral, Ollama, Bedrock EmbeddingResponse ( float[] ) ImageModel Text → ge"
+  },
+  {
+    "page": "Spring AI ChatClient API",
+    "href": "spring-ai/chat-client.html",
     "section": "ChatClient Cheatsheet",
     "anchor": "",
     "text": "ChatClient Cheatsheet"
@@ -1236,7 +1306,7 @@
     "href": "spring-ai/index.html",
     "section": "ChatClient API",
     "anchor": "nav-chat-client",
-    "text": "Fluent API for chat, streaming, conversation memory, multimodal input"
+    "text": "Fluent API for chat, streaming, memory, multimodal, EmbeddingModel, ImageModel, TTS/STT"
   },
   {
     "page": "Spring AI",
@@ -1264,7 +1334,7 @@
     "href": "spring-ai/index.html",
     "section": "Tools & Advisors",
     "anchor": "nav-tools-advisors",
-    "text": "@Tool function calling, agentic loops, Advisor interceptor chain"
+    "text": "@Tool function calling, agentic loops, Advisor chain, MCP client & server"
   },
   {
     "page": "Spring AI",
@@ -2459,6 +2529,20 @@
   {
     "page": "Spring AI Tools & Advisors",
     "href": "spring-ai/tools-advisors.html",
+    "section": "ToolCallingAdvisor — 2.x Tool Loop in the Advisor Chain 2.x",
+    "anchor": "tool-calling-advisor",
+    "text": "ToolCallingAdvisor — 2.x Tool Loop in the Advisor Chain 2.x"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "ToolCallingAdvisor — 2.x Tool Loop in the Advisor Chain 2.x",
+    "anchor": "tool-calling-advisor",
+    "text": "In Spring AI 1.x the tool-calling loop (detect tool-call → dispatch → feed result back to model → repeat) ran inside the ChatModel implementation — it was hidden from the advisor chain. Spring AI 2.x extracts this loop into ToolCallingAdvisor , a regular advisor that sits in the chain like any other"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
     "section": "Spring AI 2.x Composable Tool Architecture",
     "anchor": "tool-2x-composable",
     "text": "Spring AI 2.x Composable Tool Architecture"
@@ -2679,6 +2763,76 @@
     "section": "Modifying Requests and Responses in an Advisor",
     "anchor": "advisor-request-modification",
     "text": "Advisors modify requests by creating a new AdvisedRequest via AdvisedRequest.from(request).with...().build() and passing the modified request to the chain. Response modification works the same way with AdvisedResponse . Common modifications include: appending instructions to the system message, inje"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Model Context Protocol (MCP) Overview",
+    "anchor": "mcp-overview",
+    "text": "Model Context Protocol (MCP) Overview"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "Model Context Protocol (MCP) Overview",
+    "anchor": "mcp-overview",
+    "text": "MCP (Model Context Protocol) is an open standard (introduced by Anthropic) that defines how AI models discover and invoke tools hosted in external processes. Instead of all tools living in the same JVM as the model client, MCP lets tools run in a separate server — possibly a different language or ru"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP Client — Connecting to a Remote Tool Server 1.1.x+",
+    "anchor": "mcp-client-1x",
+    "text": "MCP Client — Connecting to a Remote Tool Server 1.1.x+"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP Client — Connecting to a Remote Tool Server 1.1.x+",
+    "anchor": "mcp-client-1x",
+    "text": "Add the MCP client starter and configure one or more remote MCP servers in application.yml . At startup Spring AI connects to each configured server, fetches its tool list, and registers those tools as ToolCallback instances that the ChatClient can invoke transparently. Dependency (pom.xml) <depende"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP Server — Exposing @Tool Beans via HTTP/SSE 1.1.x+",
+    "anchor": "mcp-server-1x",
+    "text": "MCP Server — Exposing @Tool Beans via HTTP/SSE 1.1.x+"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP Server — Exposing @Tool Beans via HTTP/SSE 1.1.x+",
+    "anchor": "mcp-server-1x",
+    "text": "Any Spring Boot application can become an MCP server by adding the server starter. All @Tool -annotated methods in Spring-managed beans are automatically exposed as MCP tools over an SSE (HTTP) endpoint. MCP clients — including Claude Desktop and other Spring AI apps using the client starter — can t"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@McpTool, @McpResource, @McpPrompt — Annotation-Driven MCP Server 2.x",
+    "anchor": "mcp-annotations-2x",
+    "text": "@McpTool, @McpResource, @McpPrompt — Annotation-Driven MCP Server 2.x"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "@McpTool, @McpResource, @McpPrompt — Annotation-Driven MCP Server 2.x",
+    "anchor": "mcp-annotations-2x",
+    "text": "Spring AI 2.x adds dedicated MCP server annotations that give finer control over what is exposed and how. @McpTool is a more explicit alternative to @Tool for server-side methods. @McpResource exposes a method as an MCP resource — a named, URI-addressable piece of data (think file or database record"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP stdio Transport — Claude Desktop Integration",
+    "anchor": "mcp-stdio-desktop",
+    "text": "MCP stdio Transport — Claude Desktop Integration"
+  },
+  {
+    "page": "Spring AI Tools & Advisors",
+    "href": "spring-ai/tools-advisors.html",
+    "section": "MCP stdio Transport — Claude Desktop Integration",
+    "anchor": "mcp-stdio-desktop",
+    "text": "The stdio transport lets a Spring Boot app act as an MCP server launched by Claude Desktop as a child process. Claude Desktop reads the server's tool list and routes tool calls to it via standard input/output. This is the simplest way to make your Java tools available in Claude Desktop without runni"
   },
   {
     "page": "Spring AI Tools & Advisors",

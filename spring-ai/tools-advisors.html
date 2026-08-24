@@ -29,6 +29,7 @@
         <button class="tab-btn" data-tab="tab-tool-context">Tool Context &amp; Loops</button>
         <button class="tab-btn" data-tab="tab-tool-patterns">Agentic Patterns</button>
         <button class="tab-btn" data-tab="tab-advisors">Advisors</button>
+        <button class="tab-btn" data-tab="tab-mcp">MCP</button>
       </div>
 
       <!-- ── Tool Basics ──────────────────────────────── -->
@@ -407,11 +408,47 @@ ChatClient chatClient = ChatClient.builder(chatModel)
         </div>
 
         <div class="feature-card">
+          <h3 id="tool-calling-advisor">ToolCallingAdvisor — 2.x Tool Loop in the Advisor Chain <span class="version-badge badge-ai2" style="font-size:0.7rem;vertical-align:middle">2.x</span></h3>
+          <p>In Spring AI 1.x the tool-calling loop (detect tool-call → dispatch → feed result back to model → repeat) ran <em>inside</em> the <code>ChatModel</code> implementation — it was hidden from the advisor chain. Spring AI 2.x extracts this loop into <strong><code>ToolCallingAdvisor</code></strong>, a regular advisor that sits in the chain like any other. This means the tool loop now respects advisor ordering, can be intercepted, replaced, or wrapped with custom logic, and participates in Spring's observability instrumentation.</p>
+          <p><code>ToolCallingAdvisor</code> is <strong>auto-registered</strong> at <code>Ordered.LOWEST_PRECEDENCE - 100</code> when tools are present on a request — you do not need to declare it manually. Override the bean to customize its behavior.</p>
+
+          <div class="callout info"><strong>1.x vs 2.x</strong> — In Spring AI 1.x the tool loop was opaque inside <code>ChatModel</code>; you could not intercept individual tool-dispatch cycles. In 2.x <code>ToolCallingAdvisor</code> runs in the open advisor chain, so a logging or observability advisor wrapping it sees every tool-call iteration.</div>
+
+          <h4>Default behavior (nothing to configure)</h4>
+          <pre><code class="language-java">// Spring AI 2.x — ToolCallingAdvisor is auto-registered.
+// Just use ChatClient normally; the tool loop is in the advisor chain.
+String response = chatClient.prompt()
+    .user("What is the weather in Berlin and Paris?")
+    .tools(weatherService)              // @Tool methods
+    .call()
+    .content();
+// Internally: ChatModel → ToolCallingAdvisor intercepts tool-call response
+// → dispatches both tool calls (possibly in parallel)
+// → resubmits results → ChatModel produces final answer</code></pre>
+
+          <h4>Custom ToolCallingAdvisor (override max iterations)</h4>
+          <pre><code class="language-java">import org.springframework.ai.tool.calling.ToolCallingAdvisor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ToolCallingConfig {
+
+    @Bean
+    public ToolCallingAdvisor toolCallingAdvisor(ToolCallingManager manager) {
+        return ToolCallingAdvisor.builder(manager)
+            .maxIterations(5)      // default is unlimited
+            .build();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
           <h3 id="tool-2x-composable">Spring AI 2.x Composable Tool Architecture</h3>
           <p>Spring AI 2.0 introduced a fully redesigned tool-calling architecture based on composable, explicit components. The <code>ToolCallingManager</code> interface encapsulates the dispatch-and-loop logic. You can provide a custom implementation to add retry, circuit-breaking, observability spans per tool call, or custom error recovery — without forking framework internals.</p>
           <p>The new architecture also decouples tool execution from the advisor chain, making it easier to reason about ordering and to test tool-calling logic in isolation.</p>
 
-          <div class="callout info"><strong>Spring AI 2.x</strong> — The composable architecture replaces the implicit, internal function-call loop of 1.x. Key changes: <code>ToolCallingManager</code> is now a first-class bean; <code>ToolContext</code> is the standard way to pass request state; and <code>ToolCallbackProvider</code> beans are auto-discovered. Upgrade paths are documented in the Spring AI 2.0 migration guide.</div>
+          <div class="callout info"><strong>Spring AI 2.x</strong> — The composable architecture replaces the implicit, internal function-call loop of 1.x. Key changes: <code>ToolCallingAdvisor</code> runs in the advisor chain; <code>ToolCallingManager</code> handles dispatch; <code>ToolContext</code> is the standard way to pass request state; and <code>ToolCallbackProvider</code> beans are auto-discovered. Upgrade paths are documented in the Spring AI 2.0 migration guide.</div>
 
           <h4>Custom ToolCallingManager</h4>
           <pre><code class="language-java">import org.springframework.ai.tool.execution.ToolCallingManager;
@@ -1144,6 +1181,236 @@ public class AuditLogAdvisor implements CallAdvisor {
 
       </div><!-- /tab-advisors -->
 
+      <!-- ── MCP ─────────────────────────────────────── -->
+      <div class="tab-panel" id="tab-mcp">
+
+        <div class="feature-card">
+          <h3 id="mcp-overview">Model Context Protocol (MCP) Overview</h3>
+          <p><strong>MCP (Model Context Protocol)</strong> is an open standard (introduced by Anthropic) that defines how AI models discover and invoke tools hosted in external processes. Instead of all tools living in the same JVM as the model client, MCP lets tools run in a separate server — possibly a different language or runtime — and be discovered dynamically at startup. Spring AI added MCP support in <strong>1.1.x</strong> with client and server starters, then extended it in <strong>2.x</strong> with annotation-driven server authoring.</p>
+
+          <div class="callout info">
+            <strong>When to use MCP vs @Tool</strong>
+            Use <code>@Tool</code> when your tools run in the same JVM as your Spring AI app. Use MCP when tools live in a separate process (e.g. a Python script, a Node.js service, or an Anthropic-compatible filesystem server), or when you want Claude Desktop or another MCP client to discover your Spring Boot application's tools.
+          </div>
+
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:1rem">
+            <thead>
+              <tr style="background:var(--surface-2)">
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Feature</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><span class="version-badge badge-ai1">1.1.x</span></th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><span class="version-badge badge-ai2">2.x</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">MCP client</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">SSE + stdio transports</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Same; extended discovery</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">MCP server</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Exposes <code>@Tool</code> beans automatically</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>@McpTool</code>, <code>@McpResource</code>, <code>@McpPrompt</code> annotations</td></tr>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Server transport</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">SSE (HTTP) or stdio</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">SSE, stdio, WebSocket</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Claude Desktop</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Via stdio transport</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Via stdio transport</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="mcp-client-1x">MCP Client — Connecting to a Remote Tool Server <span class="version-badge badge-ai1" style="font-size:0.7rem;vertical-align:middle">1.1.x+</span></h3>
+          <p>Add the MCP client starter and configure one or more remote MCP servers in <code>application.yml</code>. At startup Spring AI connects to each configured server, fetches its tool list, and registers those tools as <code>ToolCallback</code> instances that the <code>ChatClient</code> can invoke transparently.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-mcp-client-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>SSE connection (application.yml)</h4>
+          <pre><code class="language-yaml">spring:
+  ai:
+    mcp:
+      client:
+        sse:
+          connections:
+            # "filesystem-server" is a logical name — choose any identifier
+            filesystem-server:
+              url: http://localhost:3001/sse
+            github-server:
+              url: http://localhost:3002/sse</code></pre>
+
+          <h4>stdio connection (application.yml) — for local processes</h4>
+          <pre><code class="language-yaml">spring:
+  ai:
+    mcp:
+      client:
+        stdio:
+          connections:
+            python-tools:
+              command: python3
+              args:
+                - /path/to/mcp_server.py</code></pre>
+
+          <h4>Usage — MCP tools auto-registered on ChatClient</h4>
+          <pre><code class="language-java">@Service
+public class AssistantService {
+
+    private final ChatClient chatClient;
+
+    // MCP tools from all configured servers are available automatically
+    // when toolCallbackProvider beans are injected into ChatClient.Builder
+    public AssistantService(ChatClient.Builder builder,
+                            ToolCallbackProvider mcpTools) {
+        this.chatClient = builder
+            .defaultTools(mcpTools)   // register MCP tools for all calls
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .content();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="mcp-server-1x">MCP Server — Exposing @Tool Beans via HTTP/SSE <span class="version-badge badge-ai1" style="font-size:0.7rem;vertical-align:middle">1.1.x+</span></h3>
+          <p>Any Spring Boot application can become an MCP server by adding the server starter. All <code>@Tool</code>-annotated methods in Spring-managed beans are automatically exposed as MCP tools over an SSE (HTTP) endpoint. MCP clients — including Claude Desktop and other Spring AI apps using the client starter — can then discover and invoke those tools over the network.</p>
+
+          <h4>Dependency (pom.xml)</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-mcp-server-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!-- The server starter adds spring-boot-starter-web transitively --&gt;</code></pre>
+
+          <h4>application.yml</h4>
+          <pre><code class="language-yaml">spring:
+  ai:
+    mcp:
+      server:
+        name: my-spring-tools-server
+        version: 1.0.0
+        # SSE endpoint defaults to /sse — override here if needed
+        # sse-endpoint: /mcp/sse</code></pre>
+
+          <h4>Tool bean (auto-exposed as MCP tool)</h4>
+          <pre><code class="language-java">@Component
+public class OrderTools {
+
+    @Tool("Looks up an order by its ID and returns status and total")
+    public OrderStatus getOrder(
+            @ToolParam(description = "The order identifier") Long orderId) {
+        return orderRepository.findById(orderId)
+            .map(o -> new OrderStatus(o.getId(), o.getStatus(), o.getTotal()))
+            .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+    }
+
+    @Tool("Cancels an order that is still in PENDING status")
+    public String cancelOrder(
+            @ToolParam(description = "The order identifier to cancel") Long orderId) {
+        orderService.cancel(orderId);
+        return "Order " + orderId + " cancelled";
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="mcp-annotations-2x">@McpTool, @McpResource, @McpPrompt — Annotation-Driven MCP Server <span class="version-badge badge-ai2" style="font-size:0.7rem;vertical-align:middle">2.x</span></h3>
+          <p>Spring AI 2.x adds dedicated MCP server annotations that give finer control over what is exposed and how. <code>@McpTool</code> is a more explicit alternative to <code>@Tool</code> for server-side methods. <code>@McpResource</code> exposes a method as an MCP <em>resource</em> — a named, URI-addressable piece of data (think file or database record). <code>@McpPrompt</code> exposes a prompt template so MCP clients can fill variables and retrieve a ready-to-send prompt.</p>
+
+          <h4>@McpTool</h4>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpTool;
+
+@Component
+public class InventoryMcpServer {
+
+    // @McpTool is the 2.x equivalent of @Tool for MCP server authoring.
+    // The annotation attributes map directly to the MCP tool schema.
+    @McpTool(name = "check_stock",
+             description = "Returns current stock level for a product SKU")
+    public StockLevel checkStock(
+            @ToolParam(description = "Product SKU code") String sku) {
+        return inventoryService.getStock(sku);
+    }
+}</code></pre>
+
+          <h4>@McpResource</h4>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpResource;
+
+@Component
+public class DocumentMcpServer {
+
+    // URI template defines the resource address pattern
+    // MCP clients request resources by URI — e.g. "docs://specifications/order-api"
+    @McpResource(
+        uri = "docs://specifications/{name}",
+        name = "API specification document",
+        description = "Returns the markdown content of an API specification",
+        mimeType = "text/markdown"
+    )
+    public String getSpecification(String name) {
+        return documentRepository.findByName(name)
+            .orElseThrow(() -> new IllegalArgumentException("Not found: " + name));
+    }
+}</code></pre>
+
+          <h4>@McpPrompt</h4>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpPrompt;
+import org.springframework.ai.mcp.server.annotation.McpPromptArg;
+
+@Component
+public class PromptMcpServer {
+
+    // Expose a prompt template — the MCP client fills the arguments
+    // and sends the assembled prompt to its own ChatModel
+    @McpPrompt(
+        name = "summarise-document",
+        description = "Summarises a document in the given language"
+    )
+    public String summarisePrompt(
+            @McpPromptArg(description = "Document text to summarise") String document,
+            @McpPromptArg(description = "Target language, e.g. English, French") String language) {
+        return "Summarise the following document in " + language + ":\n\n" + document;
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>2.x vs 1.x server authoring</strong>
+            In 1.x you add <code>spring-ai-mcp-server-spring-boot-starter</code> and every <code>@Tool</code> bean is automatically exported — no extra annotation needed. In 2.x you can use <code>@McpTool</code> to be explicit about which methods form the MCP surface, and <code>@McpResource</code> / <code>@McpPrompt</code> to expose non-tool capabilities that MCP supports but <code>@Tool</code> cannot express.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="mcp-stdio-desktop">MCP stdio Transport — Claude Desktop Integration</h3>
+          <p>The stdio transport lets a Spring Boot app act as an MCP server launched by Claude Desktop as a child process. Claude Desktop reads the server's tool list and routes tool calls to it via standard input/output. This is the simplest way to make your Java tools available in Claude Desktop without running a separate HTTP server.</p>
+
+          <h4>application.yml — stdio server</h4>
+          <pre><code class="language-yaml">spring:
+  main:
+    web-application-type: none   # no HTTP server needed for stdio
+  ai:
+    mcp:
+      server:
+        stdio: true
+        name: my-java-tools
+        version: 1.0.0</code></pre>
+
+          <h4>Build a fat jar and reference from claude_desktop_config.json</h4>
+          <pre><code class="language-json">// ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "my-java-tools": {
+      "command": "java",
+      "args": ["-jar", "/path/to/my-app.jar"]
+    }
+  }
+}</code></pre>
+
+          <div class="callout warn">
+            <strong>Startup time</strong>
+            Claude Desktop launches the MCP server process on startup and keeps it running for the session. Spring Boot's startup time is relevant — consider enabling CDS (Class Data Sharing) to reduce the initial launch latency when using stdio transport.
+          </div>
+        </div>
+
+      </div><!-- /tab-mcp -->
+
     </div><!-- /tab-container -->
 
     <section class="cheatsheet">
@@ -1242,6 +1509,36 @@ public class AuditLogAdvisor implements CallAdvisor {
               <td><code>RecursiveAdvisor</code></td>
               <td>Re-invokes the pipeline for self-refining agentic loops</td>
               <td>Spring AI 1.1+; always set <code>MAX_RECURSION_DEPTH</code> to cap iterations</td>
+            </tr>
+            <tr>
+              <td><code>ToolCallingAdvisor</code></td>
+              <td>Runs the tool-call dispatch loop inside the advisor chain (2.x)</td>
+              <td>Auto-registered at <code>LOWEST_PRECEDENCE - 100</code>; override bean to customize</td>
+            </tr>
+            <tr>
+              <td><code>@McpTool</code></td>
+              <td>Expose a method as an MCP tool on the MCP server (2.x)</td>
+              <td>More explicit than <code>@Tool</code> for server-side MCP authoring</td>
+            </tr>
+            <tr>
+              <td><code>@McpResource</code></td>
+              <td>Expose a method as a URI-addressed MCP resource (2.x)</td>
+              <td>e.g. <code>uri = "docs://specs/{name}"</code> — accessible by MCP clients</td>
+            </tr>
+            <tr>
+              <td><code>@McpPrompt</code></td>
+              <td>Expose a prompt template as an MCP prompt (2.x)</td>
+              <td>MCP clients fill <code>@McpPromptArg</code> variables and get the assembled prompt</td>
+            </tr>
+            <tr>
+              <td><code>spring-ai-mcp-client-spring-boot-starter</code></td>
+              <td>Auto-discovers and connects to MCP servers (1.1.x+)</td>
+              <td>Configure via <code>spring.ai.mcp.client.sse.connections.*</code> or <code>stdio.connections.*</code></td>
+            </tr>
+            <tr>
+              <td><code>spring-ai-mcp-server-spring-boot-starter</code></td>
+              <td>Makes the app an MCP server over SSE or stdio (1.1.x+)</td>
+              <td>All <code>@Tool</code> beans auto-exposed; set <code>spring.ai.mcp.server.stdio=true</code> for stdio</td>
             </tr>
             <tr>
               <td><code>.defaultAdvisors()</code></td>
