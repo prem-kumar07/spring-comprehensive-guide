@@ -1356,7 +1356,7 @@ public class BatchProcessor {
             <tr>
               <td><code>SimpleAsyncTaskExecutor.setVirtualThreads(true)</code></td>
               <td>Configures the task executor to use Java 21+ virtual threads</td>
-              <td>Java 21+ required; <code>@Scheduled</code> uses virtual threads by default in Spring 7</td>
+              <td>Java 21+ recommended for virtual thread scheduling; <code>@Scheduled</code> uses virtual threads when running on Java 21+</td>
             </tr>
           </tbody>
         </table>
