@@ -576,6 +576,118 @@
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
+    "section": "ProjectLayout — File & Directory Paths",
+    "anchor": "api-layout",
+    "text": "ProjectLayout — File & Directory Paths"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ProjectLayout — File & Directory Paths",
+    "anchor": "api-layout",
+    "text": "project.layout is the recommended way to reference files and directories — it returns lazy Provider -backed paths that work with configuration cache and incremental builds. Never use new File(...) inside tasks. // build.gradle\ntasks.register('generateSources', Copy) {\n    // layout.projectDirectory "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ProviderFactory — Lazy Values & External Inputs",
+    "anchor": "api-providers",
+    "text": "ProviderFactory — Lazy Values & External Inputs"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ProviderFactory — Lazy Values & External Inputs",
+    "anchor": "api-providers",
+    "text": "project.providers gives you lazy, cacheable reads of Gradle properties, environment variables, system properties, and file contents. Values are resolved only when a task actually runs. // Gradle property (-PmyProp=value or gradle.properties)\nProvider<String> appVersion = providers.gradleProperty('ap"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ObjectFactory — Typed Properties & Collections",
+    "anchor": "api-objects",
+    "text": "ObjectFactory — Typed Properties & Collections"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ObjectFactory — Typed Properties & Collections",
+    "anchor": "api-objects",
+    "text": "project.objects creates lazily-evaluated, strongly-typed property objects used in custom task and extension classes. They participate in Gradle's dependency tracking and configuration cache. // In a custom task (abstract class preferred — Gradle injects values)\nabstract class BundleTask extends Defa"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "TaskContainer — Querying & Wiring Tasks",
+    "anchor": "api-tasks",
+    "text": "TaskContainer — Querying & Wiring Tasks"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "TaskContainer — Querying & Wiring Tasks",
+    "anchor": "api-tasks",
+    "text": "project.tasks is the container for all tasks. Use register (lazy, preferred) over create (eager). Wire tasks by referencing their providers — Gradle builds the dependency graph without realizing tasks prematurely. // Register (lazy — task is not created until needed)\ndef compileTask = tasks.register"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ConfigurationContainer — Dependency Scopes API",
+    "anchor": "api-configurations",
+    "text": "ConfigurationContainer — Dependency Scopes API"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ConfigurationContainer — Dependency Scopes API",
+    "anchor": "api-configurations",
+    "text": "project.configurations lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time. // Create a custom configuration (e.g. for code generation)\nconfigurations {\n    codeGen {\n        visible      = false\n        canBeConsumed = fa"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "SourceSetContainer — Source Set API",
+    "anchor": "api-sourcesets",
+    "text": "SourceSetContainer — Source Set API"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "SourceSetContainer — Source Set API",
+    "anchor": "api-sourcesets",
+    "text": "The sourceSets container (applied by the Java plugin) lets you add or configure source sets. Each source set gets its own compile classpath, runtime classpath, and output directories automatically wired into the dependency model. plugins { id 'java' }\n\nsourceSets {\n    // Add an integration-test sou"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ExtensionContainer — Plugin Extensions",
+    "anchor": "api-extensions",
+    "text": "ExtensionContainer — Plugin Extensions"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "ExtensionContainer — Plugin Extensions",
+    "anchor": "api-extensions",
+    "text": "project.extensions is where plugins register their configuration DSL blocks. You can create your own DSL extension for a custom plugin and query extensions registered by other plugins. // ----- Defining an extension in a custom plugin -----\n// Extension class (can be abstract; Gradle injects ObjectF"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Project API — Common Utilities",
+    "anchor": "api-project",
+    "text": "Project API — Common Utilities"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Project API — Common Utilities",
+    "anchor": "api-project",
+    "text": "Frequently used methods on the project object that don't belong to a named container. // ---- File resolution ----\nFile f1 = project.file('relative/path')          // resolved from project root\nFileCollection fc = project.files('a.jar', 'b.jar', configurations.runtimeClasspath)\nFileTree tree = proje"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
     "section": "Gradle Cheatsheet",
     "anchor": "",
     "text": "Gradle Cheatsheet"

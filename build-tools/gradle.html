@@ -32,6 +32,7 @@
         <button class="tab-btn" data-tab="tab-plugins">Plugins &amp; Performance</button>
         <button class="tab-btn" data-tab="tab-publishing">Publishing</button>
         <button class="tab-btn" data-tab="tab-spring">Spring Boot</button>
+        <button class="tab-btn" data-tab="tab-api">Gradle APIs</button>
       </div>
 
       <!-- ══════════════ BASICS ══════════════ -->
@@ -1720,6 +1721,350 @@ class OrderRepositoryIT {
         </div>
 
       </div><!-- /tab-spring -->
+
+      </div><!-- /tab-spring -->
+
+      <div class="tab-panel" id="tab-api">
+
+        <div class="feature-card">
+          <h3 id="api-layout">ProjectLayout — File &amp; Directory Paths</h3>
+          <p><code>project.layout</code> is the recommended way to reference files and directories — it returns lazy <code>Provider</code>-backed paths that work with configuration cache and incremental builds. Never use <code>new File(...)</code> inside tasks.</p>
+          <pre><code class="language-groovy">// build.gradle
+tasks.register('generateSources', Copy) {
+    // layout.projectDirectory — root of the project
+    from layout.projectDirectory.dir('src/templates')
+
+    // layout.buildDirectory — project's build/ folder
+    into layout.buildDirectory.dir('generated/sources')
+}
+
+// Set the build directory to a custom location
+layout.buildDirectory = layout.projectDirectory.dir('out')
+
+// Inside a custom task class
+abstract class MyTask extends DefaultTask {
+    @InputDirectory
+    abstract DirectoryProperty getSourceDir()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    void generate() {
+        def src  = sourceDir.get().asFile
+        def dest = outputDir.get().asFile
+        // ...
+    }
+}
+
+tasks.register('myTask', MyTask) {
+    sourceDir = layout.projectDirectory.dir('src/data')
+    outputDir = layout.buildDirectory.dir('data-out')
+}</code></pre>
+          <div class="callout info"><strong>Key types</strong> — <code>DirectoryProperty</code>, <code>RegularFileProperty</code>, <code>Directory</code>, <code>RegularFile</code>. Prefer <code>layout.buildDirectory.file('...')</code> over <code>"$buildDir/..."</code> string interpolation — the latter breaks configuration cache.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-providers">ProviderFactory — Lazy Values &amp; External Inputs</h3>
+          <p><code>project.providers</code> gives you lazy, cacheable reads of Gradle properties, environment variables, system properties, and file contents. Values are resolved only when a task actually runs.</p>
+          <pre><code class="language-groovy">// Gradle property (-PmyProp=value or gradle.properties)
+Provider&lt;String&gt; appVersion = providers.gradleProperty('appVersion')
+    .orElse('0.0.1-SNAPSHOT')
+
+// Environment variable
+Provider&lt;String&gt; ciToken = providers.environmentVariable('CI_TOKEN')
+
+// System property (-DjavaOpts=...)
+Provider&lt;String&gt; javaOpts = providers.systemProperty('javaOpts')
+
+// File contents (lazy)
+Provider&lt;String&gt; buildTag = providers.fileContents(
+    layout.projectDirectory.file('BUILD_TAG')
+).asText.orElse('local')
+
+// Use inside a task — value resolved at execution time
+tasks.register('printVersion') {
+    doLast {
+        println "Version: ${appVersion.get()}"
+        println "Tag:     ${buildTag.get()}"
+    }
+}
+
+// Pass a provider to a task property (wires the value lazily)
+tasks.register('archive', Zip) {
+    archiveVersion = appVersion
+    from layout.buildDirectory.dir('dist')
+}</code></pre>
+          <div class="callout tip"><strong>Configuration cache rule</strong> — always read external state (env vars, files, system props) via <code>providers</code>, never via <code>System.getenv()</code> or <code>file(...).text</code> at configuration time. Direct reads break the configuration cache.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-objects">ObjectFactory — Typed Properties &amp; Collections</h3>
+          <p><code>project.objects</code> creates lazily-evaluated, strongly-typed property objects used in custom task and extension classes. They participate in Gradle's dependency tracking and configuration cache.</p>
+          <pre><code class="language-groovy">// In a custom task (abstract class preferred — Gradle injects values)
+abstract class BundleTask extends DefaultTask {
+    // Single value property
+    @Input
+    abstract Property&lt;String&gt; getVersion()
+
+    // Boolean with default
+    @Input
+    abstract Property&lt;Boolean&gt; getMinify()
+
+    // List of strings
+    @Input
+    abstract ListProperty&lt;String&gt; getEntryPoints()
+
+    // Map property
+    @Input
+    abstract MapProperty&lt;String, String&gt; getEnvVars()
+
+    // File collection
+    @InputFiles
+    abstract ConfigurableFileCollection getSources()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    void bundle() {
+        def entries = entryPoints.get()
+        def env     = envVars.get()
+        // ...
+    }
+}
+
+tasks.register('bundle', BundleTask) {
+    version      = '2.1.0'
+    minify       = true
+    entryPoints  = ['src/main.js', 'src/admin.js']
+    envVars      = [NODE_ENV: 'production']
+    sources.from(fileTree('src'))
+    outputDir    = layout.buildDirectory.dir('bundle')
+}
+
+// Manual construction (when not using abstract classes)
+def myProp = objects.property(String).convention('default')
+def myList = objects.listProperty(String).convention(['a', 'b'])</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-tasks">TaskContainer — Querying &amp; Wiring Tasks</h3>
+          <p><code>project.tasks</code> is the container for all tasks. Use <code>register</code> (lazy, preferred) over <code>create</code> (eager). Wire tasks by referencing their providers — Gradle builds the dependency graph without realizing tasks prematurely.</p>
+          <pre><code class="language-groovy">// Register (lazy — task is not created until needed)
+def compileTask = tasks.register('compileTemplates', JavaExec) {
+    classpath = configurations.compileClasspath
+    mainClass = 'com.example.TemplateCompiler'
+    args layout.projectDirectory.dir('templates').asFile.absolutePath
+    outputs.dir layout.buildDirectory.dir('compiled-templates')
+}
+
+// Named — get a lazy reference to an existing task
+tasks.named('processResources') {
+    dependsOn compileTask
+}
+
+// withType — configure all tasks of a type (e.g. all Test tasks)
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    maxHeapSize = '512m'
+    systemProperty 'spring.profiles.active', 'test'
+}
+
+// withType — disable all JavaDoc tasks in CI
+tasks.withType(Javadoc).configureEach {
+    enabled = !System.getenv('CI')
+}
+
+// Query by name at execution time
+tasks.named('build').configure {
+    dependsOn tasks.named('generateOpenApi')
+}
+
+// Task ordering without a direct dependency
+tasks.named('startServer').configure {
+    mustRunAfter tasks.named('cleanDatabase')
+}</code></pre>
+          <div class="callout warn"><strong>Avoid <code>tasks.create</code></strong> — it eagerly creates the task and forces all its configuration to run even when the task is never used, slowing configuration time. Prefer <code>tasks.register</code> + <code>tasks.named</code>.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-configurations">ConfigurationContainer — Dependency Scopes API</h3>
+          <p><code>project.configurations</code> lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time.</p>
+          <pre><code class="language-groovy">// Create a custom configuration (e.g. for code generation)
+configurations {
+    codeGen {
+        visible      = false
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    codeGen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.54'
+}
+
+// Use in a JavaExec task
+tasks.register('generateClient', JavaExec) {
+    classpath = configurations.codeGen
+    mainClass = 'io.swagger.codegen.v3.cli.SwaggerCodegen'
+    args 'generate', '-i', 'openapi.yaml', '-l', 'java', '-o', 'build/client'
+}
+
+// Extend an existing configuration
+configurations {
+    testImplementation.extendsFrom(codeGen)
+}
+
+// Resolve and inspect artifacts at configuration time (use sparingly)
+configurations.runtimeClasspath.resolvedConfiguration
+    .resolvedArtifacts
+    .findAll { it.moduleVersion.id.group == 'org.springframework' }
+    .each { println it.file }
+
+// Programmatic BOM import
+dependencies {
+    implementation platform(project.dependencies.enforcedPlatform(
+        'org.springframework.boot:spring-boot-dependencies:3.5.0'))
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-sourcesets">SourceSetContainer — Source Set API</h3>
+          <p>The <code>sourceSets</code> container (applied by the Java plugin) lets you add or configure source sets. Each source set gets its own compile classpath, runtime classpath, and output directories automatically wired into the dependency model.</p>
+          <pre><code class="language-groovy">plugins { id 'java' }
+
+sourceSets {
+    // Add an integration-test source set
+    integrationTest {
+        java.srcDirs   = ['src/integration-test/java']
+        resources.srcDirs = ['src/integration-test/resources']
+        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        runtimeClasspath  += output + compileClasspath
+    }
+}
+
+// Companion configuration (inherits test dependencies)
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom    testRuntimeOnly
+}
+
+// Wire an integrationTest task
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group       = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath       = sourceSets.integrationTest.runtimeClasspath
+    shouldRunAfter tasks.named('test')
+    useJUnitPlatform()
+}
+
+// Inspect source sets
+sourceSets.each { ss -&gt;
+    println "${ss.name}: java=${ss.java.srcDirs}, output=${ss.output.classesDirs.files}"
+}
+
+// Add generated sources to main source set
+sourceSets.main.java.srcDir layout.buildDirectory.dir('generated/sources')</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-extensions">ExtensionContainer — Plugin Extensions</h3>
+          <p><code>project.extensions</code> is where plugins register their configuration DSL blocks. You can create your own DSL extension for a custom plugin and query extensions registered by other plugins.</p>
+          <pre><code class="language-groovy">// ----- Defining an extension in a custom plugin -----
+// Extension class (can be abstract; Gradle injects ObjectFactory)
+abstract class MyPluginExtension {
+    abstract Property&lt;String&gt; getOutputDir()
+    abstract Property&lt;Boolean&gt; getVerbose()
+
+    MyPluginExtension() {
+        outputDir.convention('build/my-plugin')
+        verbose.convention(false)
+    }
+}
+
+class MyPlugin implements Plugin&lt;Project&gt; {
+    void apply(Project project) {
+        def ext = project.extensions.create('myPlugin', MyPluginExtension)
+
+        project.tasks.register('myPluginRun') {
+            doLast {
+                println "Output: ${ext.outputDir.get()}"
+                println "Verbose: ${ext.verbose.get()}"
+            }
+        }
+    }
+}
+
+// ----- Consuming the extension in build.gradle -----
+apply plugin: MyPlugin
+
+myPlugin {
+    outputDir = 'dist/generated'
+    verbose   = true
+}
+
+// ----- Querying an extension from another plugin -----
+// Find by type (null-safe)
+def javaExt = extensions.findByType(JavaPluginExtension)
+if (javaExt) {
+    javaExt.sourceCompatibility = JavaVersion.VERSION_17
+}
+
+// Get by name (throws if absent)
+extensions.getByName('java')      // JavaPluginExtension
+extensions.getByName('publishing') // PublishingExtension</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="api-project">Project API — Common Utilities</h3>
+          <p>Frequently used methods on the <code>project</code> object that don't belong to a named container.</p>
+          <pre><code class="language-groovy">// ---- File resolution ----
+File f1 = project.file('relative/path')          // resolved from project root
+FileCollection fc = project.files('a.jar', 'b.jar', configurations.runtimeClasspath)
+FileTree tree = project.fileTree('src') {
+    include '**/*.java'
+    exclude '**/generated/**'
+}
+
+// ---- Logging ----
+logger.quiet  'Always visible'
+logger.lifecycle 'Shown with --lifecycle'
+logger.info   'Shown with --info'
+logger.debug  'Shown with --debug'
+
+// ---- Exec helpers ----
+project.exec {
+    commandLine 'docker', 'build', '-t', 'my-app', '.'
+}
+
+def output = project.exec {
+    commandLine 'git', 'rev-parse', '--short', 'HEAD'
+    standardOutput = new ByteArrayOutputStream()
+}.standardOutput.toString().trim()
+
+// ---- Project properties ----
+// Check/read a -P flag or gradle.properties entry
+if (project.hasProperty('release')) {
+    version = project.property('release')
+}
+
+// ---- Sub-project references ----
+project(':api').tasks.named('jar')          // task in sibling project
+project(':service').configurations.runtimeClasspath
+
+// ---- afterEvaluate (use sparingly) ----
+afterEvaluate {
+    // Runs after all build.gradle files in this project are evaluated
+    if (plugins.hasPlugin('java')) {
+        tasks.named('jar').configure { archiveClassifier = 'core' }
+    }
+}</code></pre>
+          <div class="callout warn"><strong>Avoid <code>afterEvaluate</code> when possible</strong> — it forces eager evaluation and breaks lazy configuration. Prefer <code>tasks.withType(...).configureEach</code> and <code>plugins.withId('...')</code> for reacting to other plugins.</div>
+        </div>
+
+      </div><!-- /tab-api -->
 
     </div><!-- /tab-container -->
 
