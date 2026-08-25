@@ -18,145 +18,1406 @@
 
     <h1>Maven Deep Dive</h1>
     <div style="margin-bottom:1.25rem">
-      <span class="version-badge badge-maven">Maven 3.x</span>
+      <span class="version-badge badge-maven">Maven 3.9.x</span>
     </div>
-    <p>Apache Maven is a build automation and project management tool based on the Project Object Model (POM). It manages dependencies, compiles source code, runs tests, packages artifacts, and publishes to repositories — all driven by convention over configuration.</p>
+    <p>Apache Maven is a build automation and project management tool based on the Project Object Model (POM). It manages dependencies, compiles source code, runs tests, packages artifacts, and publishes to repositories — all driven by convention over configuration. Maven 3.9.x is the current stable line; Maven 4.x (RC) introduces a new API surface and improved multi-module handling.</p>
 
     <div class="tab-container">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-general">General Java</button>
-        <button class="tab-btn" data-tab="tab-spring">Spring Ecosystem</button>
+        <button class="tab-btn active" data-tab="tab-basics">Basics</button>
+        <button class="tab-btn" data-tab="tab-lifecycle">Lifecycle &amp; Goals</button>
+        <button class="tab-btn" data-tab="tab-deps">Dependencies</button>
+        <button class="tab-btn" data-tab="tab-plugins">Key Plugins</button>
+        <button class="tab-btn" data-tab="tab-multimodule">Multi-Module</button>
+        <button class="tab-btn" data-tab="tab-profiles">Profiles &amp; Properties</button>
+        <button class="tab-btn" data-tab="tab-publishing">Publishing</button>
+        <button class="tab-btn" data-tab="tab-spring">Spring Boot</button>
       </div>
 
-      <!-- ═══════════ TAB 1: GENERAL JAVA ═══════════ -->
-      <div class="tab-panel active" id="tab-general">
+      <!-- ══════════════ BASICS ══════════════ -->
+      <div class="tab-panel active" id="tab-basics">
 
         <div class="feature-card">
-          <h3 id="maven-coordinates">Maven Coordinates &amp; POM Structure</h3>
-          <p>Every Maven project is uniquely identified by its <strong>GAV coordinates</strong> — groupId, artifactId, version. These three values form the address of your artifact in any repository. The <code>pom.xml</code> is the single source of truth for the project's build metadata, dependencies, plugins, and inherited configuration.</p>
-          <pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+          <h3 id="maven-pom-structure">Full POM Structure</h3>
+          <p>The Project Object Model (<code>pom.xml</code>) is the central descriptor for every Maven project. The sections shown here cover the full set of top-level elements; most projects only need a subset. Elements marked <em>(required)</em> must be present in every POM.</p>
+          <pre><code class="language-xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-           https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
-  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
 
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;  &lt;!-- required; always 4.0.0 --&gt;
+
+  &lt;!-- ── Identity (required) ── --&gt;
   &lt;groupId&gt;com.example&lt;/groupId&gt;
   &lt;artifactId&gt;my-app&lt;/artifactId&gt;
   &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
-  &lt;packaging&gt;jar&lt;/packaging&gt;            &lt;!-- jar (default), war, pom --&gt;
-  &lt;name&gt;My Application&lt;/name&gt;
+  &lt;packaging&gt;jar&lt;/packaging&gt;   &lt;!-- jar (default), war, pom, ear --&gt;
 
+  &lt;!-- ── Human-readable metadata ── --&gt;
+  &lt;name&gt;My Application&lt;/name&gt;
+  &lt;description&gt;A sample Spring Boot application&lt;/description&gt;
+  &lt;url&gt;https://github.com/example/my-app&lt;/url&gt;
+
+  &lt;!-- ── Global properties — referenced as ${key} anywhere in the POM ── --&gt;
   &lt;properties&gt;
-    &lt;java.version&gt;21&lt;/java.version&gt;
-    &lt;maven.compiler.source&gt;${java.version}&lt;/maven.compiler.source&gt;
-    &lt;maven.compiler.target&gt;${java.version}&lt;/maven.compiler.target&gt;
+    &lt;java.version&gt;17&lt;/java.version&gt;
+    &lt;spring.version&gt;6.2.0&lt;/spring.version&gt;
+    &lt;maven.compiler.release&gt;17&lt;/maven.compiler.release&gt;
     &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
   &lt;/properties&gt;
+
+  &lt;!-- ── Dependency version management (no transitive pull-in) ── --&gt;
+  &lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-framework-bom&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+  &lt;/dependencyManagement&gt;
+
+  &lt;!-- ── Runtime dependencies ── --&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+      &lt;!-- version omitted — managed by BOM above --&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+      &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+      &lt;version&gt;5.11.0&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;!-- ── Build configuration ── --&gt;
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.13.0&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;release&gt;${java.version}&lt;/release&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+
 &lt;/project&gt;</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-lifecycle">Build Lifecycle &amp; Phases</h3>
-          <p>Maven defines three built-in lifecycles: <strong>default</strong> (build and deploy), <strong>clean</strong> (remove target/), and <strong>site</strong> (generate documentation). The default lifecycle runs phases in strict order — you run a phase and every phase before it executes automatically.</p>
-          <pre><code class="language-bash"># Run all phases up to and including package
-mvn package
+          <h3 id="maven-wrapper">Maven Wrapper</h3>
+          <p>The Maven Wrapper (<code>mvnw</code>) pins a specific Maven version to the project so every developer and CI server uses the same version without installing Maven globally. It is equivalent to the Gradle Wrapper.</p>
+          <pre><code class="language-bash"># Generate the wrapper (requires Maven installed locally, one time)
+mvn wrapper:wrapper -Dmaven=3.9.9
 
-# Skip tests during packaging
-mvn package -DskipTests
+# Files created:
+# .mvn/wrapper/maven-wrapper.properties   ← version + download URL
+# mvnw                                    ← Unix shell script
+# mvnw.cmd                                ← Windows batch script
 
-# Common phase sequence (default lifecycle):
-# validate → initialize → compile → test-compile →
-# test → package → verify → install → deploy</code></pre>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Phase</th><th>What it does</th></tr></thead>
-              <tbody>
-                <tr><td><code>validate</code></td><td>Check POM is correct and all information is available</td></tr>
-                <tr><td><code>compile</code></td><td>Compile <code>src/main/java</code> into <code>target/classes</code></td></tr>
-                <tr><td><code>test</code></td><td>Run unit tests with Surefire; does NOT require the project to be packaged</td></tr>
-                <tr><td><code>package</code></td><td>Pack compiled code into JAR/WAR in <code>target/</code></td></tr>
-                <tr><td><code>verify</code></td><td>Run integration tests and checks (Failsafe plugin)</td></tr>
-                <tr><td><code>install</code></td><td>Install artifact into local <code>~/.m2/repository</code></td></tr>
-                <tr><td><code>deploy</code></td><td>Upload artifact to remote repository (Nexus, Artifactory)</td></tr>
-              </tbody>
-            </table>
-          </div>
+# Use the wrapper instead of system mvn:
+./mvnw clean package
+./mvnw.cmd clean package   # Windows</code></pre>
+          <pre><code class="language-properties"># .mvn/wrapper/maven-wrapper.properties
+distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip
+wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar</code></pre>
+          <div class="callout tip"><strong>Commit the wrapper</strong> Commit <code>mvnw</code>, <code>mvnw.cmd</code>, and <code>.mvn/wrapper/</code> to version control. Do not commit the downloaded Maven distribution itself.</div>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-dependency-scopes">Dependency Scopes</h3>
-          <p>Scopes control when a dependency is available on the classpath and whether it is included in the packaged artifact. Choosing the wrong scope is a common source of "works in test, fails in prod" bugs.</p>
+          <h3 id="maven-coordinates">Maven Coordinates (GAV)</h3>
+          <p>Every artifact is uniquely identified by its <strong>G</strong>roupId, <strong>A</strong>rtifactId, and <strong>V</strong>ersion — the GAV triple. Two additional optional qualifiers are classifier and type.</p>
+          <pre><code class="language-xml">&lt;!-- Standard dependency with GAV --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;version&gt;3.5.3&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Classifier: selects a secondary artifact published alongside the main jar.
+     Common classifiers: sources, javadoc, tests, linux-x86_64 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;com.example&lt;/groupId&gt;
+  &lt;artifactId&gt;my-library&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;classifier&gt;tests&lt;/classifier&gt;   &lt;!-- pulls in the test-jar --&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Type: artifact file extension. Default is jar.
+     Other types: pom, war, ear, zip, tar.gz --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+  &lt;version&gt;3.5.3&lt;/version&gt;
+  &lt;type&gt;pom&lt;/type&gt;
+  &lt;scope&gt;import&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+          <div class="callout info"><strong>SNAPSHOT vs RELEASE</strong> A version ending in <code>-SNAPSHOT</code> is mutable — Maven re-downloads it from the snapshot repository on each build (controlled by <code>-U</code> flag). A RELEASE version (no suffix) is immutable; once deployed it must not change.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-directory-layout">Standard Directory Layout</h3>
+          <p>Maven's convention-over-configuration philosophy means the standard directory structure is understood by all plugins without explicit configuration.</p>
+          <pre><code class="language-bash">my-app/
+├── pom.xml
+├── mvnw / mvnw.cmd
+├── .mvn/
+│   └── wrapper/
+│       └── maven-wrapper.properties
+├── src/
+│   ├── main/
+│   │   ├── java/          ← production Java source
+│   │   │   └── com/example/App.java
+│   │   ├── resources/     ← production classpath resources
+│   │   │   ├── application.properties
+│   │   │   └── logback.xml
+│   │   └── webapp/        ← web application root (WAR packaging only)
+│   └── test/
+│       ├── java/          ← test Java source
+│       │   └── com/example/AppTest.java
+│       └── resources/     ← test classpath resources
+│           └── test.properties
+└── target/                ← all build output (git-ignored)
+    ├── classes/           ← compiled production classes
+    ├── test-classes/      ← compiled test classes
+    ├── surefire-reports/  ← unit test reports
+    └── my-app-1.0.0.jar   ← packaged artifact</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-cli">Command-Line Basics</h3>
+          <p>Common Maven commands you use every day, with the flags that matter most.</p>
+          <pre><code class="language-bash"># Core build commands
+./mvnw compile                  # compile src/main/java only
+./mvnw test                     # compile and run unit tests
+./mvnw package                  # compile, test, package (creates JAR/WAR)
+./mvnw verify                   # package + run integration tests
+./mvnw install                  # verify + install to local ~/.m2 repo
+./mvnw deploy                   # install + upload to remote repo
+
+# Skipping tests
+./mvnw package -DskipTests          # skip test execution (still compiles tests)
+./mvnw package -Dmaven.test.skip=true  # skip compile AND execution of tests
+
+# Multi-module: select specific modules
+./mvnw -pl api,service package      # build only 'api' and 'service' modules
+./mvnw -pl web -am package          # build 'web' AND all modules it depends on
+./mvnw -pl service --also-make-dependents install
+
+# Parallel builds (speeds up multi-module projects)
+./mvnw -T 4 install             # 4 threads
+./mvnw -T 1C install            # 1 thread per CPU core
+
+# Clean before build
+./mvnw clean package            # delete target/, then build
+
+# Verbose / quiet
+./mvnw package --no-transfer-progress   # hide download progress (CI-friendly)
+./mvnw package -q               # quiet — only errors
+./mvnw package -X               # debug — very verbose
+
+# Activate a profile
+./mvnw package -P prod
+
+# Override a property
+./mvnw package -Dspring.profiles.active=prod
+
+# Run a specific plugin goal (without full lifecycle)
+./mvnw dependency:tree
+./mvnw help:effective-pom
+./mvnw versions:display-dependency-updates</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-settings">settings.xml — User and Global Configuration</h3>
+          <p><code>~/.m2/settings.xml</code> holds configuration that is not project-specific: credentials, mirrors, proxy settings, and environment-specific profiles. It is never committed to source control.</p>
+          <pre><code class="language-xml">&lt;!-- ~/.m2/settings.xml --&gt;
+&lt;settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"&gt;
+
+  &lt;!-- Local repository path (default: ~/.m2/repository) --&gt;
+  &lt;localRepository&gt;/opt/maven-repo&lt;/localRepository&gt;
+
+  &lt;!-- Mirror: redirect all central repo requests to a corporate Nexus --&gt;
+  &lt;mirrors&gt;
+    &lt;mirror&gt;
+      &lt;id&gt;nexus-mirror&lt;/id&gt;
+      &lt;name&gt;Corporate Nexus&lt;/name&gt;
+      &lt;url&gt;https://nexus.corp.com/repository/maven-public/&lt;/url&gt;
+      &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;   &lt;!-- mirror ALL repositories --&gt;
+    &lt;/mirror&gt;
+  &lt;/mirrors&gt;
+
+  &lt;!-- Server credentials — matched by repository &lt;id&gt; in POM --&gt;
+  &lt;servers&gt;
+    &lt;server&gt;
+      &lt;id&gt;nexus-releases&lt;/id&gt;
+      &lt;username&gt;deploy-user&lt;/username&gt;
+      &lt;password&gt;${env.NEXUS_PASSWORD}&lt;/password&gt;
+    &lt;/server&gt;
+    &lt;server&gt;
+      &lt;id&gt;github&lt;/id&gt;
+      &lt;username&gt;${env.GITHUB_ACTOR}&lt;/username&gt;
+      &lt;password&gt;${env.GITHUB_TOKEN}&lt;/password&gt;
+    &lt;/server&gt;
+  &lt;/servers&gt;
+
+  &lt;!-- HTTP proxy --&gt;
+  &lt;proxies&gt;
+    &lt;proxy&gt;
+      &lt;id&gt;corp-proxy&lt;/id&gt;
+      &lt;active&gt;true&lt;/active&gt;
+      &lt;protocol&gt;https&lt;/protocol&gt;
+      &lt;host&gt;proxy.corp.com&lt;/host&gt;
+      &lt;port&gt;8080&lt;/port&gt;
+      &lt;nonProxyHosts&gt;localhost|*.corp.com&lt;/nonProxyHosts&gt;
+    &lt;/proxy&gt;
+  &lt;/proxies&gt;
+
+  &lt;!-- Profile active for all projects on this machine --&gt;
+  &lt;activeProfiles&gt;
+    &lt;activeProfile&gt;corp-settings&lt;/activeProfile&gt;
+  &lt;/activeProfiles&gt;
+
+&lt;/settings&gt;</code></pre>
+          <div class="callout warn"><strong>Never store plaintext passwords</strong> Use environment variable interpolation (<code>${env.MY_VAR}</code>) or Maven's encrypted passwords (<code>mvn --encrypt-password</code>) instead of plaintext credentials.</div>
+        </div>
+
+      </div><!-- /tab-basics -->
+
+      <!-- ══════════════ LIFECYCLE & GOALS ══════════════ -->
+      <div class="tab-panel" id="tab-lifecycle">
+
+        <div class="feature-card">
+          <h3 id="maven-lifecycles">Three Built-In Lifecycles</h3>
+          <p>Maven defines three lifecycles. Each lifecycle is a sequence of named <em>phases</em>. Running a phase runs all preceding phases in order. Plugins bind their <em>goals</em> to phases; Maven invokes them in phase order.</p>
+          <pre><code class="language-bash"># default lifecycle — build, test, and deploy the project
+./mvnw deploy        # runs: validate → ... → deploy
+
+# clean lifecycle — remove build output
+./mvnw clean         # runs: pre-clean → clean → post-clean
+
+# site lifecycle — generate project documentation
+./mvnw site          # runs: pre-site → site → post-site → site-deploy
+
+# Combine lifecycles in one command:
+./mvnw clean install                # clean first, then full default lifecycle to install
+./mvnw clean verify -DskipTests     # clean, compile, package, verify (skip tests)</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-default-phases">Default Lifecycle — All 23 Phases in Order</h3>
+          <p>Every phase in the default lifecycle is listed below. Most plugins bind to the shaded phases; the others exist as extension hooks for custom plugin bindings.</p>
+          <pre><code class="language-bash"># Phase order (top to bottom). Running any phase runs all above it first.
+# ─────────────────────────────────────────────────────────────────
+# 1.  validate              ← check POM is valid, required info present
+# 2.  initialize            ← set build properties, create directories
+# 3.  generate-sources      ← generate source code (e.g. JAXB, Thrift)
+# 4.  process-sources       ← post-process generated sources
+# 5.  generate-resources    ← generate resources (properties, XMLs)
+# 6.  process-resources     ← copy and filter resources → target/classes
+# 7.  compile               ← compile src/main/java → target/classes
+# 8.  process-classes       ← post-process compiled classes (e.g. bytecode weaving)
+# 9.  generate-test-sources ← generate test source code
+# 10. process-test-sources  ← post-process test sources
+# 11. generate-test-resources
+# 12. process-test-resources ← copy and filter test resources
+# 13. test-compile          ← compile src/test/java → target/test-classes
+# 14. process-test-classes
+# 15. test                  ← run unit tests (Surefire); fail build on failure
+# 16. prepare-package       ← pre-package operations
+# 17. package               ← assemble JAR/WAR → target/my-app-1.0.jar
+# 18. pre-integration-test  ← start containers, servers
+# 19. integration-test      ← run integration tests (Failsafe)
+# 20. post-integration-test ← stop containers, servers
+# 21. verify                ← check integration test results; fail if needed
+# 22. install               ← copy artifact to ~/.m2/repository
+# 23. deploy                ← upload artifact to remote repository
+# ─────────────────────────────────────────────────────────────────</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-goal-binding">Plugin Goals and Phase Binding</h3>
+          <p>A plugin <em>goal</em> is a single unit of work (like <code>compiler:compile</code>). Plugins declare a <em>default phase</em> for each goal. You can override the phase or add extra executions via <code>&lt;executions&gt;</code>.</p>
+          <pre><code class="language-xml">&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-antrun-plugin&lt;/artifactId&gt;
+      &lt;version&gt;3.1.0&lt;/version&gt;
+      &lt;executions&gt;
+
+        &lt;!-- First execution: bind to validate phase --&gt;
+        &lt;execution&gt;
+          &lt;id&gt;print-start&lt;/id&gt;
+          &lt;phase&gt;validate&lt;/phase&gt;
+          &lt;goals&gt;&lt;goal&gt;run&lt;/goal&gt;&lt;/goals&gt;
+          &lt;configuration&gt;
+            &lt;target&gt;
+              &lt;echo message="Build started for ${project.artifactId}:${project.version}"/&gt;
+            &lt;/target&gt;
+          &lt;/configuration&gt;
+        &lt;/execution&gt;
+
+        &lt;!-- Second execution: bind to package phase --&gt;
+        &lt;execution&gt;
+          &lt;id&gt;print-packaged&lt;/id&gt;
+          &lt;phase&gt;package&lt;/phase&gt;
+          &lt;goals&gt;&lt;goal&gt;run&lt;/goal&gt;&lt;/goals&gt;
+          &lt;configuration&gt;
+            &lt;target&gt;
+              &lt;echo message="JAR created at target/${project.build.finalName}.jar"/&gt;
+            &lt;/target&gt;
+          &lt;/configuration&gt;
+        &lt;/execution&gt;
+
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+          <pre><code class="language-bash"># Invoke a goal directly without running a lifecycle phase:
+./mvnw compiler:compile       # compile only (no test, no package)
+./mvnw surefire:test          # run tests only
+./mvnw dependency:tree        # print dependency tree
+./mvnw help:effective-pom     # show the fully resolved POM (after inheritance)
+./mvnw help:effective-settings
+./mvnw versions:display-dependency-updates  # check for newer versions</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-skip-phases">Skipping Phases and Goals</h3>
+          <p>Several system properties allow skipping phases or goals without modifying the POM. These are especially useful in CI pipelines where different stages handle different concerns.</p>
+          <pre><code class="language-bash"># Skip test execution (tests still compile)
+./mvnw package -DskipTests
+
+# Skip test compilation AND execution
+./mvnw package -Dmaven.test.skip=true
+
+# Skip Javadoc generation
+./mvnw install -Dmaven.javadoc.skip=true
+
+# Skip source attachment
+./mvnw install -Dmaven.source.skip=true
+
+# Skip checkstyle
+./mvnw verify -Dcheckstyle.skip=true
+
+# Skip spotbugs
+./mvnw verify -Dspotbugs.skip=true
+
+# Run a specific test class or method
+./mvnw test -Dtest=OrderServiceTest
+./mvnw test -Dtest=OrderServiceTest#createOrder_returnsId
+./mvnw test -Dtest="Order*Test,Payment*Test"   # glob pattern</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-useful-goals">Useful Utility Goals</h3>
+          <p>These goals are not part of the standard lifecycle but are invaluable for day-to-day development and maintenance.</p>
+          <pre><code class="language-bash"># Dependency analysis
+./mvnw dependency:tree                       # full transitive tree
+./mvnw dependency:tree -Dincludes=org.slf4j  # filter by groupId
+./mvnw dependency:analyze                    # used-undeclared & declared-unused
+./mvnw dependency:resolve                    # resolve all deps (pre-warm local repo)
+./mvnw dependency:copy-dependencies          # copy all JARs to target/dependency/
+
+# Version management (versions-maven-plugin)
+./mvnw versions:display-dependency-updates   # show available newer versions
+./mvnw versions:display-plugin-updates       # show newer plugin versions
+./mvnw versions:use-latest-releases          # auto-update POM to latest releases
+./mvnw versions:set -DnewVersion=2.0.0       # change project version across modules
+
+# Project info
+./mvnw help:effective-pom                    # full resolved POM with defaults
+./mvnw help:describe -Dplugin=compiler       # describe all goals in a plugin
+./mvnw help:describe -Dcmd=compile           # describe a lifecycle phase
+
+# Source code
+./mvnw source:jar                            # build sources jar
+./mvnw javadoc:jar                           # build javadoc jar</code></pre>
+        </div>
+
+      </div><!-- /tab-lifecycle -->
+
+      <!-- ══════════════ DEPENDENCIES ══════════════ -->
+      <div class="tab-panel" id="tab-deps">
+
+        <div class="feature-card">
+          <h3 id="maven-scopes">Dependency Scopes</h3>
+          <p>Scope controls when a dependency is on the classpath. The table below shows what is available at compile time, during test compilation and test execution, and when the final artifact runs.</p>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin:0.75rem 0">
+            <thead>
+              <tr style="background:var(--surface-2)">
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Scope</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Compile CP</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Test CP</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Runtime CP</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Transitive</th>
+                <th style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Use case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>compile</code> (default)</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Yes</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Normal library dependency</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>provided</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✘</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">No</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Container provides it at runtime (Servlet API)</td></tr>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>runtime</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✘</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Yes</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">JDBC drivers, SLF4J implementations</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>test</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✘</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✘</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">No</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">JUnit, Mockito, AssertJ</td></tr>
+              <tr><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>import</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">–</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">–</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">–</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">–</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">BOM import only (type=pom in dependencyManagement)</td></tr>
+              <tr style="background:var(--surface)"><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)"><code>system</code></td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✔</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">✘</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">No</td><td style="padding:0.4rem 0.6rem;border:1px solid var(--border)">Avoid — requires &lt;systemPath&gt;; not portable</td></tr>
+            </tbody>
+          </table>
           <pre><code class="language-xml">&lt;dependencies&gt;
-  &lt;!-- compile (default): on classpath everywhere, included in jar --&gt;
+  &lt;!-- compile (default): available everywhere --&gt;
   &lt;dependency&gt;
-    &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
-    &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
-    &lt;version&gt;2.17.0&lt;/version&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+    &lt;version&gt;6.2.0&lt;/version&gt;
   &lt;/dependency&gt;
 
-  &lt;!-- test: only during test compile + test execution --&gt;
-  &lt;dependency&gt;
-    &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
-    &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
-    &lt;version&gt;5.10.2&lt;/version&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-  &lt;/dependency&gt;
-
-  &lt;!-- provided: compile+test only; container (Tomcat/servlet) provides at runtime --&gt;
+  &lt;!-- provided: compile-time API; not bundled (server provides it) --&gt;
   &lt;dependency&gt;
     &lt;groupId&gt;jakarta.servlet&lt;/groupId&gt;
     &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
-    &lt;version&gt;6.0.0&lt;/version&gt;
+    &lt;version&gt;6.1.0&lt;/version&gt;
     &lt;scope&gt;provided&lt;/scope&gt;
   &lt;/dependency&gt;
 
-  &lt;!-- runtime: not needed to compile, but needed to run (JDBC drivers) --&gt;
+  &lt;!-- runtime: needed at runtime but not at compile time --&gt;
   &lt;dependency&gt;
     &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
     &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
     &lt;version&gt;42.7.3&lt;/version&gt;
     &lt;scope&gt;runtime&lt;/scope&gt;
   &lt;/dependency&gt;
+
+  &lt;!-- test: only for test compilation and execution --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+    &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+    &lt;version&gt;5.11.0&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+  &lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-key-plugins">Key Build Plugins</h3>
-          <p>Maven does all real work through plugins. The three most important plugins in any Java project are bound to lifecycle phases automatically — but you often need to configure them explicitly to control Java version, test behaviour, or output format.</p>
+          <h3 id="maven-transitive">Transitive Dependencies — Mediation and Exclusions</h3>
+          <p>Maven resolves transitive dependencies automatically. When two paths in the dependency tree require different versions of the same artifact, Maven applies <em>nearest-wins</em> mediation — the version declared closest to your project wins. Use <code>&lt;exclusions&gt;</code> to remove transitive dependencies that cause conflicts, and <code>&lt;optional&gt;</code> to prevent a dependency from being pulled in transitively by consumers of your library.</p>
+          <pre><code class="language-xml">&lt;dependencies&gt;
+
+  &lt;!-- Exclude a transitive dependency that conflicts with another version --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-logging&lt;/artifactId&gt;
+    &lt;version&gt;3.5.3&lt;/version&gt;
+    &lt;exclusions&gt;
+      &lt;!-- Exclude Logback so we can use Log4j2 instead --&gt;
+      &lt;exclusion&gt;
+        &lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+        &lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+      &lt;/exclusion&gt;
+    &lt;/exclusions&gt;
+  &lt;/dependency&gt;
+
+  &lt;!-- optional: consumers of YOUR library will NOT get this transitively --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+    &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;version&gt;2.17.0&lt;/version&gt;
+    &lt;optional&gt;true&lt;/optional&gt;
+  &lt;/dependency&gt;
+
+&lt;/dependencies&gt;</code></pre>
+          <pre><code class="language-bash"># Diagnose version conflicts:
+./mvnw dependency:tree -Dverbose         # shows omitted-for-conflict versions
+./mvnw dependency:tree -Dincludes=org.slf4j:slf4j-api
+./mvnw dependency:analyze                # used-but-undeclared / declared-but-unused</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-dependency-management">Dependency Management — Centralising Versions</h3>
+          <p><code>&lt;dependencyManagement&gt;</code> declares versions (and scopes) centrally without adding those artifacts to the classpath. Child POMs or the same POM's <code>&lt;dependencies&gt;</code> section can then omit the version — it is inherited from management.</p>
+          <pre><code class="language-xml">&lt;!-- Parent POM or shared corporate parent --&gt;
+&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+
+    &lt;!-- Declare the version once; no artifact pulled in yet --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+      &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+      &lt;version&gt;2.0.13&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Force a specific version to override transitive conflict --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+      &lt;version&gt;2.17.2&lt;/version&gt;
+    &lt;/dependency&gt;
+
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;!-- In &lt;dependencies&gt;, version is omitted — taken from management --&gt;
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+    &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+    &lt;!-- version not needed — inherited from dependencyManagement --&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-bom">BOM (Bill of Materials) Import</h3>
+          <p>A BOM is a POM with <code>&lt;packaging&gt;pom&lt;/packaging&gt;</code> that declares <code>&lt;dependencyManagement&gt;</code> for a set of related artifacts at compatible versions. Importing a BOM adds all its managed versions to your project. You can stack multiple BOMs — the first declaration wins in case of conflict.</p>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+
+    &lt;!-- Import Spring Boot BOM — manages all Spring Boot dependency versions --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;3.5.3&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Stack a second BOM — Spring Cloud; Boot BOM versions take precedence
+         for any artifact declared in both, because it is listed first --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;2024.0.1&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;!-- With BOMs imported, starters need no version --&gt;
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+        </div>
+
+      </div><!-- /tab-deps -->
+
+      <!-- ══════════════ KEY PLUGINS ══════════════ -->
+      <div class="tab-panel" id="tab-plugins">
+
+        <div class="feature-card">
+          <h3 id="maven-compiler-plugin">maven-compiler-plugin</h3>
+          <p>Controls Java compilation. The <code>&lt;release&gt;</code> element (since JDK 9) sets source, target, and bootstrap classpath in one shot and is preferred over the older <code>&lt;source&gt;</code>/<code>&lt;target&gt;</code> pair.</p>
+          <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.13.0&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;release&gt;17&lt;/release&gt;
+    &lt;encoding&gt;UTF-8&lt;/encoding&gt;
+
+    &lt;!-- Extra compiler flags --&gt;
+    &lt;compilerArgs&gt;
+      &lt;arg&gt;-parameters&lt;/arg&gt;   &lt;!-- preserve parameter names (needed by Spring) --&gt;
+      &lt;arg&gt;-Xlint:unchecked&lt;/arg&gt;
+    &lt;/compilerArgs&gt;
+
+    &lt;!-- Annotation processors (e.g. Lombok, MapStruct) --&gt;
+    &lt;annotationProcessorPaths&gt;
+      &lt;path&gt;
+        &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+        &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+        &lt;version&gt;1.18.34&lt;/version&gt;
+      &lt;/path&gt;
+      &lt;path&gt;
+        &lt;groupId&gt;org.mapstruct&lt;/groupId&gt;
+        &lt;artifactId&gt;mapstruct-processor&lt;/artifactId&gt;
+        &lt;version&gt;1.6.0&lt;/version&gt;
+      &lt;/path&gt;
+    &lt;/annotationProcessorPaths&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-surefire-plugin">maven-surefire-plugin — Unit Tests</h3>
+          <p>Surefire runs unit tests during the <code>test</code> phase. Version 3.x supports JUnit 5 natively (via the <code>junit-platform-launcher</code> on the classpath). Tests in <code>src/test/java</code> whose names match <code>*Test</code>, <code>Test*</code>, or <code>*Tests</code> are included by default.</p>
+          <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.3.1&lt;/version&gt;
+  &lt;configuration&gt;
+
+    &lt;!-- Include / exclude patterns --&gt;
+    &lt;includes&gt;
+      &lt;include&gt;**/*Test.java&lt;/include&gt;
+      &lt;include&gt;**/*Tests.java&lt;/include&gt;
+    &lt;/includes&gt;
+    &lt;excludes&gt;
+      &lt;exclude&gt;**/*IT.java&lt;/exclude&gt;  &lt;!-- exclude integration tests --&gt;
+    &lt;/excludes&gt;
+
+    &lt;!-- Parallel test execution --&gt;
+    &lt;parallel&gt;methods&lt;/parallel&gt;     &lt;!-- classes | methods | both --&gt;
+    &lt;threadCount&gt;4&lt;/threadCount&gt;
+    &lt;forkCount&gt;1&lt;/forkCount&gt;
+
+    &lt;!-- JVM args for tests --&gt;
+    &lt;argLine&gt;-Xmx512m -Dfile.encoding=UTF-8&lt;/argLine&gt;
+
+    &lt;!-- System properties available inside tests --&gt;
+    &lt;systemPropertyVariables&gt;
+      &lt;spring.profiles.active&gt;test&lt;/spring.profiles.active&gt;
+    &lt;/systemPropertyVariables&gt;
+
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+          <pre><code class="language-bash"># Run a specific test class or method
+./mvnw test -Dtest=OrderServiceTest
+./mvnw test -Dtest=OrderServiceTest#createOrder_returnsId
+
+# Run tests matching a glob
+./mvnw test -Dtest="Order*,Payment*"
+
+# Run failing tests only (after first failure)
+./mvnw test -Dsurefire.failIfNoSpecifiedTests=false</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-failsafe-plugin">maven-failsafe-plugin — Integration Tests</h3>
+          <p>Failsafe runs integration tests (<code>*IT.java</code>) during the <code>integration-test</code> phase and reports results during <code>verify</code>. This separation is important: it allows pre/post-integration-test hooks (starting/stopping containers) to run even if tests fail, so you don't leave dangling processes.</p>
+          <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.3.1&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;integration-test&lt;/goal&gt;  &lt;!-- run *IT tests --&gt;
+        &lt;goal&gt;verify&lt;/goal&gt;             &lt;!-- fail build if ITs failed --&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+  &lt;configuration&gt;
+    &lt;includes&gt;
+      &lt;include&gt;**/*IT.java&lt;/include&gt;
+      &lt;include&gt;**/*IntegrationTest.java&lt;/include&gt;
+    &lt;/includes&gt;
+    &lt;argLine&gt;-Xmx1g&lt;/argLine&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+          <pre><code class="language-bash"># Run full integration test cycle (unit + IT):
+./mvnw verify
+
+# Run only integration tests (skip unit tests):
+./mvnw verify -DskipTests -DskipITs=false
+
+# Tip: combine with Testcontainers — containers start inside the test itself,
+# so no separate pre/post-integration-test hooks needed.</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-assembly-shade">maven-assembly-plugin &amp; maven-shade-plugin — Fat JARs</h3>
+          <p><strong>Assembly plugin</strong> creates a JAR containing all dependencies using a built-in <code>jar-with-dependencies</code> descriptor. <strong>Shade plugin</strong> produces an uber JAR with relocation and resource merging — the right choice for libraries to avoid classpath conflicts.</p>
+          <pre><code class="language-xml">&lt;!-- Assembly plugin: simple fat JAR for runnable apps --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.7.1&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;archive&gt;
+      &lt;manifest&gt;
+        &lt;mainClass&gt;com.example.Main&lt;/mainClass&gt;
+      &lt;/manifest&gt;
+    &lt;/archive&gt;
+    &lt;descriptorRefs&gt;
+      &lt;descriptorRef&gt;jar-with-dependencies&lt;/descriptorRef&gt;
+    &lt;/descriptorRefs&gt;
+    &lt;appendAssemblyId&gt;false&lt;/appendAssemblyId&gt;
+  &lt;/configuration&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;make-assembly&lt;/id&gt;
+      &lt;phase&gt;package&lt;/phase&gt;
+      &lt;goals&gt;&lt;goal&gt;single&lt;/goal&gt;&lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;
+
+&lt;!-- Shade plugin: uber JAR with relocation (for libraries) --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.6.0&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;phase&gt;package&lt;/phase&gt;
+      &lt;goals&gt;&lt;goal&gt;shade&lt;/goal&gt;&lt;/goals&gt;
+      &lt;configuration&gt;
+        &lt;createDependencyReducedPom&gt;true&lt;/createDependencyReducedPom&gt;
+        &lt;relocations&gt;
+          &lt;relocation&gt;
+            &lt;!-- Relocate Guava to avoid conflicts with app's Guava version --&gt;
+            &lt;pattern&gt;com.google.common&lt;/pattern&gt;
+            &lt;shadedPattern&gt;com.example.shaded.google.common&lt;/shadedPattern&gt;
+          &lt;/relocation&gt;
+        &lt;/relocations&gt;
+        &lt;transformers&gt;
+          &lt;!-- Merge META-INF/services for SPI --&gt;
+          &lt;transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/&gt;
+          &lt;!-- Set main class in MANIFEST.MF --&gt;
+          &lt;transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"&gt;
+            &lt;mainClass&gt;com.example.Main&lt;/mainClass&gt;
+          &lt;/transformer&gt;
+        &lt;/transformers&gt;
+      &lt;/configuration&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-exec-plugin">exec-maven-plugin — Run Java During Build</h3>
+          <p>The exec plugin runs a Java class or shell command during the build — useful for code generation, database migrations, or integration test pre-conditions.</p>
+          <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+  &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.4.0&lt;/version&gt;
+  &lt;executions&gt;
+
+    &lt;!-- Run a Java class bound to generate-sources phase --&gt;
+    &lt;execution&gt;
+      &lt;id&gt;generate-api-client&lt;/id&gt;
+      &lt;phase&gt;generate-sources&lt;/phase&gt;
+      &lt;goals&gt;&lt;goal&gt;java&lt;/goal&gt;&lt;/goals&gt;
+      &lt;configuration&gt;
+        &lt;mainClass&gt;com.example.tools.ApiClientGenerator&lt;/mainClass&gt;
+        &lt;arguments&gt;
+          &lt;argument&gt;${project.basedir}/api-spec.yaml&lt;/argument&gt;
+          &lt;argument&gt;${project.build.directory}/generated-sources&lt;/argument&gt;
+        &lt;/arguments&gt;
+      &lt;/configuration&gt;
+    &lt;/execution&gt;
+
+    &lt;!-- Run a shell command --&gt;
+    &lt;execution&gt;
+      &lt;id&gt;flyway-migrate&lt;/id&gt;
+      &lt;phase&gt;pre-integration-test&lt;/phase&gt;
+      &lt;goals&gt;&lt;goal&gt;exec&lt;/goal&gt;&lt;/goals&gt;
+      &lt;configuration&gt;
+        &lt;executable&gt;flyway&lt;/executable&gt;
+        &lt;arguments&gt;
+          &lt;argument&gt;migrate&lt;/argument&gt;
+        &lt;/arguments&gt;
+      &lt;/configuration&gt;
+    &lt;/execution&gt;
+
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+          <pre><code class="language-bash"># Run a main class directly from the command line (no POM config needed):
+./mvnw exec:java -Dexec.mainClass=com.example.Main
+./mvnw exec:java -Dexec.mainClass=com.example.Main -Dexec.args="arg1 arg2"</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-jar-source-javadoc">maven-jar-plugin, maven-source-plugin, maven-javadoc-plugin</h3>
+          <p>These three plugins control the primary JAR's manifest, and produce the sources and Javadoc JARs required for publishing to Maven Central.</p>
+          <pre><code class="language-xml">&lt;!-- Configure the main JAR manifest --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.4.2&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;archive&gt;
+      &lt;manifest&gt;
+        &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+        &lt;mainClass&gt;com.example.Application&lt;/mainClass&gt;
+      &lt;/manifest&gt;
+      &lt;manifestEntries&gt;
+        &lt;Build-Time&gt;${maven.build.timestamp}&lt;/Build-Time&gt;
+        &lt;Git-Commit&gt;${git.commit.id.abbrev}&lt;/Git-Commit&gt;
+      &lt;/manifestEntries&gt;
+    &lt;/archive&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;
+
+&lt;!-- Attach sources JAR --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-source-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.3.1&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;attach-sources&lt;/id&gt;
+      &lt;goals&gt;&lt;goal&gt;jar-no-fork&lt;/goal&gt;&lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;
+
+&lt;!-- Attach Javadoc JAR --&gt;
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-javadoc-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.10.0&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;attach-javadocs&lt;/id&gt;
+      &lt;goals&gt;&lt;goal&gt;jar&lt;/goal&gt;&lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+  &lt;configuration&gt;
+    &lt;doclint&gt;none&lt;/doclint&gt;  &lt;!-- relax strict Javadoc checks --&gt;
+    &lt;quiet&gt;true&lt;/quiet&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+        </div>
+
+      </div><!-- /tab-plugins -->
+
+      <!-- ══════════════ MULTI-MODULE ══════════════ -->
+      <div class="tab-panel" id="tab-multimodule">
+
+        <div class="feature-card">
+          <h3 id="maven-parent-pom">Parent POM Structure</h3>
+          <p>A multi-module Maven project has a <em>parent POM</em> with <code>&lt;packaging&gt;pom&lt;/packaging&gt;</code> that lists all child modules. The parent centralises shared configuration: Java version, plugin versions, dependency management, and common dependencies.</p>
+          <pre><code class="language-xml">&lt;!-- pom.xml (project root — parent and aggregator) --&gt;
+&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+  &lt;groupId&gt;com.example&lt;/groupId&gt;
+  &lt;artifactId&gt;my-platform&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;packaging&gt;pom&lt;/packaging&gt;  &lt;!-- must be pom for a parent --&gt;
+  &lt;name&gt;My Platform&lt;/name&gt;
+
+  &lt;!-- List all child modules (directory names relative to this POM) --&gt;
+  &lt;modules&gt;
+    &lt;module&gt;platform-api&lt;/module&gt;
+    &lt;module&gt;platform-service&lt;/module&gt;
+    &lt;module&gt;platform-web&lt;/module&gt;
+    &lt;module&gt;platform-common&lt;/module&gt;
+  &lt;/modules&gt;
+
+  &lt;properties&gt;
+    &lt;java.version&gt;17&lt;/java.version&gt;
+    &lt;maven.compiler.release&gt;17&lt;/maven.compiler.release&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+      &lt;!-- BOM import --&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+        &lt;version&gt;3.5.3&lt;/version&gt;
+        &lt;type&gt;pom&lt;/type&gt;
+        &lt;scope&gt;import&lt;/scope&gt;
+      &lt;/dependency&gt;
+      &lt;!-- Cross-module dependency version management --&gt;
+      &lt;dependency&gt;
+        &lt;groupId&gt;com.example&lt;/groupId&gt;
+        &lt;artifactId&gt;platform-common&lt;/artifactId&gt;
+        &lt;version&gt;${project.version}&lt;/version&gt;
+      &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+  &lt;/dependencyManagement&gt;
+
+  &lt;!-- Shared test dependencies for all modules --&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;pluginManagement&gt;
+      &lt;plugins&gt;
+        &lt;plugin&gt;
+          &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+          &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+          &lt;version&gt;3.13.0&lt;/version&gt;
+        &lt;/plugin&gt;
+        &lt;plugin&gt;
+          &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+          &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+          &lt;version&gt;3.3.1&lt;/version&gt;
+        &lt;/plugin&gt;
+      &lt;/plugins&gt;
+    &lt;/pluginManagement&gt;
+  &lt;/build&gt;
+
+&lt;/project&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-child-module">Child Module POM</h3>
+          <p>Each child module references the parent via <code>&lt;parent&gt;</code>. It inherits the parent's <code>&lt;groupId&gt;</code>, <code>&lt;version&gt;</code>, properties, dependency management, and plugin management.</p>
+          <pre><code class="language-xml">&lt;!-- platform-service/pom.xml --&gt;
+&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+  &lt;parent&gt;
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;my-platform&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;!-- relativePath: default is "../pom.xml". Set to empty string
+         if parent is published to repo and not on disk relative to this module. --&gt;
+    &lt;relativePath&gt;../pom.xml&lt;/relativePath&gt;
+  &lt;/parent&gt;
+
+  &lt;!-- groupId and version inherited from parent --&gt;
+  &lt;artifactId&gt;platform-service&lt;/artifactId&gt;
+  &lt;name&gt;Platform Service&lt;/name&gt;
+
+  &lt;dependencies&gt;
+    &lt;!-- Depend on sibling module — version from parent dependencyManagement --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.example&lt;/groupId&gt;
+      &lt;artifactId&gt;platform-common&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Override a property from parent --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+
+&lt;/project&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-multimodule-build">Building Multi-Module Projects</h3>
+          <p>Maven computes the reactor build order automatically based on inter-module dependencies. The <code>-pl</code> and <code>-am</code> flags let you build subsets of the reactor.</p>
+          <pre><code class="language-bash"># Build everything from the root
+./mvnw clean install
+
+# Build only specific modules (comma-separated module artifact IDs or paths)
+./mvnw -pl platform-api,platform-service clean package
+
+# Build a module AND all modules it depends on (--also-make / -am)
+./mvnw -pl platform-web -am clean package
+# → also builds platform-common, platform-api, platform-service (web's deps)
+
+# Build a module AND all modules that depend on it
+./mvnw -pl platform-common --also-make-dependents install
+# → rebuilds everything that uses platform-common
+
+# Parallel build — 4 threads, massive speed-up for large multi-module projects
+./mvnw -T 4 clean install
+
+# Show reactor build order without building
+./mvnw -N install              # -N = non-recursive; installs root POM only
+./mvnw dependency:tree         # run from root to see full cross-module tree</code></pre>
+          <div class="callout info"><strong>Reactor build order</strong> Maven sorts modules topologically — a module is built after all modules it depends on. Maven detects cycles and fails fast if one is present.</div>
+        </div>
+
+      </div><!-- /tab-multimodule -->
+
+      <!-- ══════════════ PROFILES & PROPERTIES ══════════════ -->
+      <div class="tab-panel" id="tab-profiles">
+
+        <div class="feature-card">
+          <h3 id="maven-profiles">Defining and Activating Profiles</h3>
+          <p>Profiles allow conditional configuration — different plugins, dependencies, and properties for different environments. A profile can be activated explicitly (<code>-P</code>), by default, or automatically based on JDK version, OS, environment variable, property, or file existence.</p>
+          <pre><code class="language-xml">&lt;profiles&gt;
+
+  &lt;!-- ── dev: active by default ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;dev&lt;/id&gt;
+    &lt;activation&gt;
+      &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+    &lt;/activation&gt;
+    &lt;properties&gt;
+      &lt;app.log.level&gt;DEBUG&lt;/app.log.level&gt;
+      &lt;db.url&gt;jdbc:h2:mem:testdb&lt;/db.url&gt;
+    &lt;/properties&gt;
+  &lt;/profile&gt;
+
+  &lt;!-- ── prod: activated with -P prod ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;prod&lt;/id&gt;
+    &lt;properties&gt;
+      &lt;app.log.level&gt;WARN&lt;/app.log.level&gt;
+      &lt;db.url&gt;jdbc:postgresql://prod-db:5432/app&lt;/db.url&gt;
+    &lt;/properties&gt;
+  &lt;/profile&gt;
+
+  &lt;!-- ── native: activated by property -Pnative or -Dnative ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;native&lt;/id&gt;
+    &lt;activation&gt;
+      &lt;property&gt;
+        &lt;name&gt;native&lt;/name&gt;
+      &lt;/property&gt;
+    &lt;/activation&gt;
+    &lt;build&gt;
+      &lt;plugins&gt;
+        &lt;plugin&gt;
+          &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+          &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+          &lt;extensions&gt;true&lt;/extensions&gt;
+        &lt;/plugin&gt;
+      &lt;/plugins&gt;
+    &lt;/build&gt;
+  &lt;/profile&gt;
+
+  &lt;!-- ── java24: activated when JDK &gt;= 24 ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;java24&lt;/id&gt;
+    &lt;activation&gt;
+      &lt;jdk&gt;[24,)&lt;/jdk&gt;
+    &lt;/activation&gt;
+    &lt;properties&gt;
+      &lt;extra.compiler.args&gt;--enable-preview&lt;/extra.compiler.args&gt;
+    &lt;/properties&gt;
+  &lt;/profile&gt;
+
+  &lt;!-- ── windows: activated on Windows OS ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;windows&lt;/id&gt;
+    &lt;activation&gt;
+      &lt;os&gt;
+        &lt;family&gt;windows&lt;/family&gt;
+      &lt;/os&gt;
+    &lt;/activation&gt;
+  &lt;/profile&gt;
+
+  &lt;!-- ── ci: activated by CI env variable ── --&gt;
+  &lt;profile&gt;
+    &lt;id&gt;ci&lt;/id&gt;
+    &lt;activation&gt;
+      &lt;property&gt;
+        &lt;name&gt;env.CI&lt;/name&gt;
+      &lt;/property&gt;
+    &lt;/activation&gt;
+  &lt;/profile&gt;
+
+&lt;/profiles&gt;</code></pre>
+          <pre><code class="language-bash"># Activate a profile explicitly
+./mvnw package -P prod
+
+# Activate multiple profiles
+./mvnw package -P prod,signing
+
+# Deactivate a profile that is active by default
+./mvnw package -P !dev,prod
+
+# List active profiles for a build
+./mvnw help:active-profiles</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-resource-filtering">Resource Filtering — Inject Build Properties into Files</h3>
+          <p>With <code>&lt;filtering&gt;true&lt;/filtering&gt;</code>, Maven replaces <code>${property}</code> placeholders in resource files at build time. This is useful for injecting the active profile's properties into <code>application.properties</code>, SQL scripts, or configuration files.</p>
           <pre><code class="language-xml">&lt;build&gt;
+  &lt;resources&gt;
+    &lt;resource&gt;
+      &lt;directory&gt;src/main/resources&lt;/directory&gt;
+      &lt;filtering&gt;true&lt;/filtering&gt;
+      &lt;!-- Optionally restrict which files are filtered (binary files must NOT be filtered) --&gt;
+      &lt;includes&gt;
+        &lt;include&gt;**/*.properties&lt;/include&gt;
+        &lt;include&gt;**/*.yml&lt;/include&gt;
+        &lt;include&gt;**/*.xml&lt;/include&gt;
+      &lt;/includes&gt;
+    &lt;/resource&gt;
+    &lt;!-- Binary resources (images, fonts) without filtering --&gt;
+    &lt;resource&gt;
+      &lt;directory&gt;src/main/resources&lt;/directory&gt;
+      &lt;filtering&gt;false&lt;/filtering&gt;
+      &lt;includes&gt;
+        &lt;include&gt;**/*.png&lt;/include&gt;
+        &lt;include&gt;**/*.woff2&lt;/include&gt;
+      &lt;/includes&gt;
+    &lt;/resource&gt;
+  &lt;/resources&gt;
+&lt;/build&gt;</code></pre>
+          <pre><code class="language-properties"># src/main/resources/application.properties
+# ${db.url} replaced by the active profile's property at build time
+spring.datasource.url=${db.url}
+logging.level.root=${app.log.level}
+app.version=${project.version}
+app.build-time=${maven.build.timestamp}</code></pre>
+          <div class="callout warn"><strong>Spring Boot and resource filtering</strong> Spring Boot's starter-parent already configures resource filtering for <code>*.properties</code> and <code>*.yml</code> but uses <code>@property@</code> delimiters instead of <code>${}</code> to avoid conflicts with Spring's own <code>${}</code> placeholder syntax. When using starter-parent, use <code>@db.url@</code> in your properties files.</div>
+        </div>
+
+      </div><!-- /tab-profiles -->
+
+      <!-- ══════════════ PUBLISHING ══════════════ -->
+      <div class="tab-panel" id="tab-publishing">
+
+        <div class="feature-card">
+          <h3 id="maven-local-repo">Local Repository and Manual Install</h3>
+          <p>The local repository at <code>~/.m2/repository</code> acts as a cache and a way to share artifacts between local projects before they are published remotely.</p>
+          <pre><code class="language-bash"># Install project artifact to local repo (available to all local Maven projects)
+./mvnw install
+
+# Install a third-party JAR that has no public Maven repo (legacy/internal JARs)
+mvn install:install-file \
+  -Dfile=vendor-lib-1.0.jar \
+  -DgroupId=com.vendor \
+  -DartifactId=vendor-lib \
+  -Dversion=1.0 \
+  -Dpackaging=jar
+
+# Install with sources and POM
+mvn install:install-file \
+  -Dfile=vendor-lib-1.0.jar \
+  -DpomFile=vendor-lib-1.0.pom \
+  -Dsources=vendor-lib-1.0-sources.jar</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-deploy-nexus">Deploy to Nexus / Artifactory</h3>
+          <p>Configure <code>&lt;distributionManagement&gt;</code> in the POM to point to your internal repository manager. Credentials go in <code>~/.m2/settings.xml</code> — never in the POM.</p>
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;distributionManagement&gt;
+  &lt;!-- Release artifacts (non-SNAPSHOT versions) --&gt;
+  &lt;repository&gt;
+    &lt;id&gt;nexus-releases&lt;/id&gt;  &lt;!-- must match &lt;server&gt; id in settings.xml --&gt;
+    &lt;name&gt;Nexus Release Repository&lt;/name&gt;
+    &lt;url&gt;https://nexus.corp.com/repository/maven-releases/&lt;/url&gt;
+  &lt;/repository&gt;
+
+  &lt;!-- Snapshot artifacts (*-SNAPSHOT versions) --&gt;
+  &lt;snapshotRepository&gt;
+    &lt;id&gt;nexus-snapshots&lt;/id&gt;
+    &lt;name&gt;Nexus Snapshot Repository&lt;/name&gt;
+    &lt;url&gt;https://nexus.corp.com/repository/maven-snapshots/&lt;/url&gt;
+  &lt;/snapshotRepository&gt;
+&lt;/distributionManagement&gt;</code></pre>
+          <pre><code class="language-xml">&lt;!-- ~/.m2/settings.xml — credentials (never in pom.xml) --&gt;
+&lt;servers&gt;
+  &lt;server&gt;
+    &lt;id&gt;nexus-releases&lt;/id&gt;
+    &lt;username&gt;deploy-user&lt;/username&gt;
+    &lt;password&gt;${env.NEXUS_PASSWORD}&lt;/password&gt;
+  &lt;/server&gt;
+  &lt;server&gt;
+    &lt;id&gt;nexus-snapshots&lt;/id&gt;
+    &lt;username&gt;deploy-user&lt;/username&gt;
+    &lt;password&gt;${env.NEXUS_PASSWORD}&lt;/password&gt;
+  &lt;/server&gt;
+&lt;/servers&gt;</code></pre>
+          <pre><code class="language-bash"># Deploy (runs full default lifecycle including install):
+./mvnw deploy
+
+# Deploy without running tests:
+./mvnw deploy -DskipTests</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-github-packages">GitHub Packages</h3>
+          <p>GitHub Packages hosts Maven artifacts under the GitHub Packages Maven registry. Authentication uses a personal access token (PAT) or <code>GITHUB_TOKEN</code> in Actions.</p>
+          <pre><code class="language-xml">&lt;!-- pom.xml --&gt;
+&lt;distributionManagement&gt;
+  &lt;repository&gt;
+    &lt;id&gt;github&lt;/id&gt;
+    &lt;name&gt;GitHub Packages&lt;/name&gt;
+    &lt;url&gt;https://maven.pkg.github.com/MY-ORG/MY-REPO&lt;/url&gt;
+  &lt;/repository&gt;
+&lt;/distributionManagement&gt;
+
+&lt;!-- To consume packages from GitHub Packages in a project --&gt;
+&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;github&lt;/id&gt;
+    &lt;url&gt;https://maven.pkg.github.com/MY-ORG/MY-REPO&lt;/url&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;</code></pre>
+          <pre><code class="language-xml">&lt;!-- ~/.m2/settings.xml --&gt;
+&lt;server&gt;
+  &lt;id&gt;github&lt;/id&gt;
+  &lt;username&gt;${env.GITHUB_ACTOR}&lt;/username&gt;
+  &lt;password&gt;${env.GITHUB_TOKEN}&lt;/password&gt;
+&lt;/server&gt;</code></pre>
+          <pre><code class="language-bash"># GitHub Actions CI deploy step:
+# env:
+#   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+./mvnw --no-transfer-progress deploy</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-release">Release Process — maven-release-plugin</h3>
+          <p>The release plugin automates the SNAPSHOT → RELEASE → next SNAPSHOT version cycle: it verifies no uncommitted changes, updates the version, commits, tags, deploys, then bumps to the next development version.</p>
+          <pre><code class="language-xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-release-plugin&lt;/artifactId&gt;
+  &lt;version&gt;3.1.1&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;tagNameFormat&gt;v@{project.version}&lt;/tagNameFormat&gt;
+    &lt;autoVersionSubmodules&gt;true&lt;/autoVersionSubmodules&gt;
+    &lt;releaseProfiles&gt;release&lt;/releaseProfiles&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+          <pre><code class="language-bash"># Step 1: prepare — checks, updates version (1.0.0-SNAPSHOT → 1.0.0),
+#          commits, tags, bumps to next dev (1.0.1-SNAPSHOT), commits
+./mvnw release:prepare
+
+# Step 2: perform — checks out the tag and deploys the release artifact
+./mvnw release:perform
+
+# Rollback if something went wrong during prepare (before perform)
+./mvnw release:rollback
+
+# Dry-run (no commits or tags written):
+./mvnw release:prepare -DdryRun=true</code></pre>
+          <div class="callout info"><strong>Version numbering</strong> Start at <code>1.0.0-SNAPSHOT</code>. After <code>release:prepare</code> the POM becomes <code>1.0.0</code> (tagged), then <code>1.0.1-SNAPSHOT</code> (next development). Use <code>-DreleaseVersion</code> and <code>-DdevelopmentVersion</code> to override the defaults.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-gpg-signing">GPG Signing for Maven Central</h3>
+          <p>Maven Central requires all published artifacts to be GPG-signed. The <code>maven-gpg-plugin</code> signs the artifact, sources JAR, and Javadoc JAR during the <code>verify</code> phase.</p>
+          <pre><code class="language-xml">&lt;!-- In a 'release' profile so signing only happens during releases --&gt;
+&lt;profile&gt;
+  &lt;id&gt;release&lt;/id&gt;
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-gpg-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.2.5&lt;/version&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;id&gt;sign-artifacts&lt;/id&gt;
+            &lt;phase&gt;verify&lt;/phase&gt;
+            &lt;goals&gt;&lt;goal&gt;sign&lt;/goal&gt;&lt;/goals&gt;
+            &lt;configuration&gt;
+              &lt;!-- Non-interactive signing for CI --&gt;
+              &lt;gpgArguments&gt;
+                &lt;arg&gt;--pinentry-mode&lt;/arg&gt;
+                &lt;arg&gt;loopback&lt;/arg&gt;
+              &lt;/gpgArguments&gt;
+            &lt;/configuration&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/profile&gt;</code></pre>
+          <pre><code class="language-bash"># CI: import GPG key and set passphrase as env var
+export GPG_PASSPHRASE="${{ secrets.GPG_PASSPHRASE }}"
+./mvnw deploy -P release -Dgpg.passphrase="${GPG_PASSPHRASE}"</code></pre>
+        </div>
+
+      </div><!-- /tab-publishing -->
+
+      <!-- ══════════════ SPRING BOOT ══════════════ -->
+      <div class="tab-panel" id="tab-spring">
+
+        <div class="feature-card">
+          <h3 id="maven-spring-parent">spring-boot-starter-parent</h3>
+          <p>Inheriting from <code>spring-boot-starter-parent</code> is the simplest way to set up a Spring Boot project. The parent sets plugin versions, Java version, UTF-8 encoding, resource filtering with <code>@</code> delimiters, and inherits from <code>spring-boot-dependencies</code> BOM so all Spring Boot starters can be declared without a version.</p>
+          <pre><code class="language-xml">&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+  &lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;3.5.3&lt;/version&gt;
+    &lt;relativePath/&gt;  &lt;!-- always empty — resolved from repo, not disk --&gt;
+  &lt;/parent&gt;
+
+  &lt;groupId&gt;com.example&lt;/groupId&gt;
+  &lt;artifactId&gt;demo&lt;/artifactId&gt;
+  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+
+  &lt;properties&gt;
+    &lt;java.version&gt;17&lt;/java.version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;!-- No version needed — managed by spring-boot-starter-parent --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+
+&lt;/project&gt;</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="maven-spring-bom-no-parent">BOM Without Inheriting starter-parent</h3>
+          <p>When your project already has a corporate parent POM, you cannot inherit from <code>spring-boot-starter-parent</code>. Import the BOM instead. You must also configure the compiler plugin and resource filtering yourself.</p>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;!-- Import Spring Boot BOM — same managed versions as starter-parent --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;3.5.3&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;build&gt;
   &lt;plugins&gt;
-    &lt;!-- Compiler: set Java version --&gt;
+    &lt;!-- Must configure compiler plugin manually when not using starter-parent --&gt;
     &lt;plugin&gt;
       &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
       &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
       &lt;version&gt;3.13.0&lt;/version&gt;
       &lt;configuration&gt;
-        &lt;release&gt;21&lt;/release&gt;       &lt;!-- preferred over source+target --&gt;
-        &lt;compilerArgs&gt;
-          &lt;arg&gt;-parameters&lt;/arg&gt;    &lt;!-- preserve param names (needed by Spring) --&gt;
-        &lt;/compilerArgs&gt;
+        &lt;release&gt;17&lt;/release&gt;
+        &lt;parameters&gt;true&lt;/parameters&gt;
       &lt;/configuration&gt;
     &lt;/plugin&gt;
-
-    &lt;!-- Surefire: unit tests (bound to test phase) --&gt;
     &lt;plugin&gt;
-      &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-      &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
-      &lt;version&gt;3.2.5&lt;/version&gt;
-    &lt;/plugin&gt;
-
-    &lt;!-- Failsafe: integration tests (bound to verify phase) --&gt;
-    &lt;plugin&gt;
-      &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-      &lt;artifactId&gt;maven-failsafe-plugin&lt;/artifactId&gt;
-      &lt;version&gt;3.2.5&lt;/version&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+      &lt;version&gt;3.5.3&lt;/version&gt;
       &lt;executions&gt;
         &lt;execution&gt;
-          &lt;goals&gt;
-            &lt;goal&gt;integration-test&lt;/goal&gt;
-            &lt;goal&gt;verify&lt;/goal&gt;
-          &lt;/goals&gt;
+          &lt;goals&gt;&lt;goal&gt;repackage&lt;/goal&gt;&lt;/goals&gt;
         &lt;/execution&gt;
       &lt;/executions&gt;
     &lt;/plugin&gt;
@@ -165,149 +1426,55 @@ mvn package -DskipTests
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-multi-module">Multi-Module Projects</h3>
-          <p>A multi-module project has a root POM with <code>packaging=pom</code> that lists child modules. Each child module has its own <code>pom.xml</code> and can depend on sibling modules. The parent POM centralises dependency versions via <code>&lt;dependencyManagement&gt;</code> so child POMs declare dependencies without specifying versions.</p>
-          <pre><code class="language-xml">&lt;!-- root pom.xml --&gt;
-&lt;groupId&gt;com.example&lt;/groupId&gt;
-&lt;artifactId&gt;my-project&lt;/artifactId&gt;
-&lt;version&gt;1.0.0&lt;/version&gt;
-&lt;packaging&gt;pom&lt;/packaging&gt;
-
-&lt;modules&gt;
-  &lt;module&gt;common&lt;/module&gt;
-  &lt;module&gt;service&lt;/module&gt;
-  &lt;module&gt;api&lt;/module&gt;
-&lt;/modules&gt;
-
-&lt;dependencyManagement&gt;
-  &lt;dependencies&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;com.example&lt;/groupId&gt;
-      &lt;artifactId&gt;common&lt;/artifactId&gt;
-      &lt;version&gt;${project.version}&lt;/version&gt;
-    &lt;/dependency&gt;
-  &lt;/dependencies&gt;
-&lt;/dependencyManagement&gt;</code></pre>
-          <pre><code class="language-xml">&lt;!-- service/pom.xml --&gt;
-&lt;parent&gt;
-  &lt;groupId&gt;com.example&lt;/groupId&gt;
-  &lt;artifactId&gt;my-project&lt;/artifactId&gt;
-  &lt;version&gt;1.0.0&lt;/version&gt;
-&lt;/parent&gt;
-&lt;artifactId&gt;service&lt;/artifactId&gt;
-
-&lt;dependencies&gt;
-  &lt;dependency&gt;
-    &lt;groupId&gt;com.example&lt;/groupId&gt;
-    &lt;artifactId&gt;common&lt;/artifactId&gt;
-    &lt;!-- version inherited from parent dependencyManagement --&gt;
-  &lt;/dependency&gt;
-&lt;/dependencies&gt;</code></pre>
-          <pre><code class="language-bash"># Build all modules in reactor order
-mvn install
-
-# Build only one module and its dependencies
-mvn install -pl service -am</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="maven-wrapper">Maven Wrapper</h3>
-          <p>The Maven Wrapper (<code>mvnw</code>) pins a specific Maven version to the project and downloads it automatically. No local Maven installation required. Every developer and CI server uses exactly the same version — eliminates "works on my machine" build differences.</p>
-          <pre><code class="language-bash"># Generate wrapper (requires Maven installed once)
-mvn wrapper:wrapper -Dmaven=3.9.6
-
-# Files created:
-# mvnw                           (Unix shell script)
-# mvnw.cmd                       (Windows batch)
-# .mvn/wrapper/maven-wrapper.properties
-
-# Use exactly like mvn:
-./mvnw package
-./mvnw spring-boot:run</code></pre>
-          <pre><code class="language-properties"># .mvn/wrapper/maven-wrapper.properties
-distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.6/apache-maven-3.9.6-bin.zip
-wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar</code></pre>
-        </div>
-
-      </div><!-- /tab-general -->
-
-      <!-- ═══════════ TAB 2: SPRING ECOSYSTEM ═══════════ -->
-      <div class="tab-panel" id="tab-spring">
-
-        <div class="feature-card">
-          <h3 id="maven-spring-parent">spring-boot-starter-parent</h3>
-          <p>The easiest way to manage Spring Boot dependencies. Declaring <code>spring-boot-starter-parent</code> as your parent POM inherits pre-configured plugin versions, encoding settings, resource filtering, and the entire <code>spring-boot-dependencies</code> BOM — so all Spring starters are versioned automatically. You only specify the Boot version once.</p>
-          <pre><code class="language-xml">&lt;parent&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;3.3.4&lt;/version&gt;
-  &lt;relativePath/&gt;  &lt;!-- always look up from repository --&gt;
-&lt;/parent&gt;
-
-&lt;dependencies&gt;
-  &lt;!-- No version needed — parent manages it --&gt;
-  &lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-  &lt;/dependency&gt;
-  &lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-    &lt;scope&gt;test&lt;/scope&gt;
-  &lt;/dependency&gt;
-&lt;/dependencies&gt;</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="maven-spring-bom">BOM Import (without parent)</h3>
-          <p>When you already have a corporate parent POM and can't use <code>spring-boot-starter-parent</code>, import the <code>spring-boot-dependencies</code> BOM via <code>&lt;dependencyManagement&gt;</code> with <code>scope=import, type=pom</code>. You lose the plugin pre-configuration from the parent but gain the same dependency version management.</p>
-          <pre><code class="language-xml">&lt;dependencyManagement&gt;
-  &lt;dependencies&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
-      &lt;version&gt;3.3.4&lt;/version&gt;
-      &lt;type&gt;pom&lt;/type&gt;
-      &lt;scope&gt;import&lt;/scope&gt;
-    &lt;/dependency&gt;
-  &lt;/dependencies&gt;
-&lt;/dependencyManagement&gt;
-
-&lt;!-- Override a single managed version --&gt;
-&lt;properties&gt;
-  &lt;jackson.version&gt;2.17.1&lt;/jackson.version&gt;
-&lt;/properties&gt;</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="maven-spring-boot-plugin">spring-boot-maven-plugin</h3>
-          <p>Provides the goals that make Spring Boot work: <code>repackage</code> creates an executable fat JAR (bound to the <code>package</code> phase automatically when you use <code>spring-boot-starter-parent</code>), <code>run</code> starts the application with hot-reload via DevTools, and <code>build-image</code> creates an OCI container image using Cloud Native Buildpacks.</p>
+          <h3 id="maven-spring-plugin">spring-boot-maven-plugin — bootRun and bootJar</h3>
+          <p>The Spring Boot Maven plugin provides <code>bootRun</code> (run the app) and <code>repackage</code> (create a fat JAR). It is bound to the <code>package</code> phase by default when using starter-parent.</p>
           <pre><code class="language-xml">&lt;plugin&gt;
   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
   &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
   &lt;configuration&gt;
-    &lt;!-- Exclude DevTools from production fat JAR --&gt;
-    &lt;excludeDevtools&gt;true&lt;/excludeDevtools&gt;
-    &lt;!-- Add build info to /actuator/info --&gt;
-    &lt;additionalProperties&gt;
-      &lt;encoding.source&gt;UTF-8&lt;/encoding.source&gt;
-    &lt;/additionalProperties&gt;
+
+    &lt;!-- Explicit main class (auto-detected if there is only one @SpringBootApplication) --&gt;
+    &lt;mainClass&gt;com.example.DemoApplication&lt;/mainClass&gt;
+
+    &lt;!-- Exclude devtools from the packaged JAR (not needed in production) --&gt;
+    &lt;excludes&gt;
+      &lt;exclude&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+      &lt;/exclude&gt;
+    &lt;/excludes&gt;
+
+    &lt;!-- JVM arguments for bootRun --&gt;
+    &lt;jvmArguments&gt;-Xmx512m -Dspring.profiles.active=dev&lt;/jvmArguments&gt;
+
+    &lt;!-- System properties injected at bootRun runtime --&gt;
+    &lt;systemPropertyVariables&gt;
+      &lt;spring.profiles.active&gt;dev&lt;/spring.profiles.active&gt;
+      &lt;LOG_LEVEL&gt;DEBUG&lt;/LOG_LEVEL&gt;
+    &lt;/systemPropertyVariables&gt;
+
   &lt;/configuration&gt;
-  &lt;executions&gt;
-    &lt;execution&gt;
-      &lt;goals&gt;&lt;goal&gt;build-info&lt;/goal&gt;&lt;/goals&gt;
-    &lt;/execution&gt;
-  &lt;/executions&gt;
 &lt;/plugin&gt;</code></pre>
-          <pre><code class="language-bash">./mvnw spring-boot:run          # run with DevTools live reload
-./mvnw package                  # produces target/my-app-1.0.jar (executable)
-./mvnw spring-boot:build-image  # OCI image via Cloud Native Buildpacks
-java -jar target/my-app-1.0.jar # run the fat JAR</code></pre>
+          <pre><code class="language-bash"># Run the application (starts embedded Tomcat):
+./mvnw spring-boot:run
+
+# Run with a specific Spring profile:
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Pass JVM args at command line:
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xmx1g"
+
+# Build the fat JAR and run it directly:
+./mvnw package
+java -jar target/demo-0.0.1-SNAPSHOT.jar
+
+# Build with a specific profile:
+./mvnw package -P prod</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-spring-layered-jar">Layered JARs for Docker</h3>
-          <p>By default, the fat JAR packs everything together — meaning a one-line code change rebuilds and re-pushes the full JAR layer in Docker. Layered JARs split the artifact into four layers (dependencies, Spring Boot loader, snapshot-dependencies, application) ordered by change frequency. Docker caches the dependency layers and only the thin application layer changes on most rebuilds.</p>
+          <h3 id="maven-spring-layered-jar">Layered JAR for Docker</h3>
+          <p>Spring Boot's layered JAR structure separates the application's classes from its dependencies into distinct Docker image layers. Because dependencies change far less often than application code, Docker only rebuilds the upper layers when you push an update — dramatically reducing push/pull times.</p>
           <pre><code class="language-xml">&lt;plugin&gt;
   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
   &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
@@ -317,104 +1484,140 @@ java -jar target/my-app-1.0.jar # run the fat JAR</code></pre>
     &lt;/layers&gt;
   &lt;/configuration&gt;
 &lt;/plugin&gt;</code></pre>
-          <pre><code class="language-dockerfile"># Dockerfile using layered extraction
-FROM eclipse-temurin:21-jre AS builder
-WORKDIR /app
-COPY target/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
+          <pre><code class="language-bash"># Inspect layers in a built JAR (Boot 3.3+):
+java -Djarmode=tools -jar target/demo.jar list-layers
+# Output:
+# dependencies
+# spring-boot-loader
+# snapshot-dependencies
+# application
 
-FROM eclipse-temurin:21-jre
+# Extract layers (Boot 3.3+ jarmode):
+java -Djarmode=tools -jar target/demo.jar extract --destination target/extracted</code></pre>
+          <pre><code class="language-bash"># Multi-stage Dockerfile using extracted layers:
+# ── Stage 1: Extract ──────────────────────────────────────────
+FROM eclipse-temurin:17-jre AS builder
 WORKDIR /app
-COPY --from=builder /app/dependencies/ ./
-COPY --from=builder /app/spring-boot-loader/ ./
-COPY --from=builder /app/snapshot-dependencies/ ./
-COPY --from=builder /app/application/ ./
+COPY target/demo.jar demo.jar
+RUN java -Djarmode=tools -jar demo.jar extract --destination extracted
+
+# ── Stage 2: Runtime ──────────────────────────────────────────
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=builder /app/extracted/dependencies/ ./
+COPY --from=builder /app/extracted/spring-boot-loader/ ./
+COPY --from=builder /app/extracted/snapshot-dependencies/ ./
+COPY --from=builder /app/extracted/application/ ./
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-spring-native">Native Image (GraalVM)</h3>
-          <p>Spring Boot 3.x supports GraalVM native image compilation via the <code>native-maven-plugin</code>. Native images start in milliseconds and use a fraction of the heap — ideal for serverless and CLI tools. AOT processing runs at build time to generate reflection hints, proxy configurations, and serialization metadata.</p>
-          <pre><code class="language-xml">&lt;profiles&gt;
-  &lt;profile&gt;
-    &lt;id&gt;native&lt;/id&gt;
-    &lt;build&gt;
-      &lt;plugins&gt;
-        &lt;plugin&gt;
-          &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
-          &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
-        &lt;/plugin&gt;
-      &lt;/plugins&gt;
-    &lt;/build&gt;
-  &lt;/profile&gt;
-&lt;/profiles&gt;</code></pre>
-          <pre><code class="language-bash"># Compile to native binary (requires GraalVM JDK)
-./mvnw native:compile -Pnative
+          <h3 id="maven-spring-native">GraalVM Native Image</h3>
+          <p>The <code>native-maven-plugin</code> (from GraalVM Buildtools) compiles the Spring Boot application to a platform-native binary. Native images start in under 100ms and use a fraction of the heap compared to a JVM run, at the cost of longer build times.</p>
+          <pre><code class="language-xml">&lt;!-- In a 'native' profile — activate with -Pnative --&gt;
+&lt;profile&gt;
+  &lt;id&gt;native&lt;/id&gt;
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.graalvm.buildtools&lt;/groupId&gt;
+        &lt;artifactId&gt;native-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;0.10.3&lt;/version&gt;
+        &lt;extensions&gt;true&lt;/extensions&gt;
+        &lt;configuration&gt;
+          &lt;buildArgs&gt;
+            &lt;buildArg&gt;--no-fallback&lt;/buildArg&gt;
+            &lt;buildArg&gt;--verbose&lt;/buildArg&gt;
+          &lt;/buildArgs&gt;
+        &lt;/configuration&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;id&gt;build-native&lt;/id&gt;
+            &lt;goals&gt;&lt;goal&gt;compile-no-fork&lt;/goal&gt;&lt;/goals&gt;
+            &lt;phase&gt;package&lt;/phase&gt;
+          &lt;/execution&gt;
+          &lt;execution&gt;
+            &lt;id&gt;test-native&lt;/id&gt;
+            &lt;goals&gt;&lt;goal&gt;test&lt;/goal&gt;&lt;/goals&gt;
+            &lt;phase&gt;test&lt;/phase&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/profile&gt;</code></pre>
+          <pre><code class="language-bash"># Build native image (requires GraalVM JDK with native-image):
+./mvnw -Pnative native:compile
 
-# Or build OCI image with native binary inside (no local GraalVM needed)
+# Run native tests:
+./mvnw -Pnative test
+
+# Build Docker image with Buildpacks (no GraalVM required locally):
 ./mvnw spring-boot:build-image -Pnative
 
-# Run the native binary
-./target/my-app</code></pre>
+# Run the native binary:
+./target/demo</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="maven-testcontainers">Testcontainers + @ServiceConnection</h3>
-          <p>Spring Boot 3.1+ integrates Testcontainers with <code>@ServiceConnection</code> — the annotation reads the container's exposed port and sets the matching <code>spring.datasource.*</code> / <code>spring.redis.*</code> etc. properties automatically. No manual <code>@DynamicPropertySource</code> needed.</p>
-          <pre><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-testcontainers&lt;/artifactId&gt;
-  &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
+          <h3 id="maven-spring-aot">AOT Processing and DevTools</h3>
+          <p>Spring Boot 3+ runs an AOT (Ahead-of-Time) processing step that generates code for GraalVM native images and improves startup performance even on a regular JVM. Spring Boot DevTools enables hot restart during development — changes to classes trigger a fast context restart without a full JVM restart.</p>
+          <pre><code class="language-xml">&lt;!-- DevTools: optional so it is excluded from the production JAR --&gt;
 &lt;dependency&gt;
-  &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
-  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
-  &lt;scope&gt;test&lt;/scope&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
 &lt;/dependency&gt;</code></pre>
-          <pre><code class="language-java">@SpringBootTest
-@Testcontainers
-class UserRepositoryTest {
+          <pre><code class="language-bash"># Run AOT processing explicitly (generates code in target/spring-aot/):
+./mvnw spring-boot:process-aot
 
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer&lt;?&gt; postgres =
-            new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+# What AOT generates:
+# target/spring-aot/main/sources/     ← BeanFactoryRegistrations.java (no reflection)
+# target/spring-aot/main/resources/   ← reflect-config.json, resource-config.json
+# target/spring-aot/main/classes/     ← compiled AOT-generated classes
 
-    @Autowired UserRepository repo;
-
-    @Test
-    void savesUser() {
-        repo.save(new User("alice"));
-        assertThat(repo.count()).isEqualTo(1);
-    }
-}</code></pre>
+# DevTools hot-restart — just run normally; file changes trigger restart:
+./mvnw spring-boot:run</code></pre>
+          <pre><code class="language-properties"># src/main/resources/application.properties — DevTools configuration
+spring.devtools.restart.enabled=true
+spring.devtools.livereload.enabled=true
+# Exclude paths from triggering restart:
+spring.devtools.restart.exclude=static/**,public/**</code></pre>
         </div>
 
       </div><!-- /tab-spring -->
+
     </div><!-- /tab-container -->
 
     <section class="cheatsheet">
       <h2>Maven Cheatsheet</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Command / Element</th><th>Purpose</th><th>Notes</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Command / Element</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td><code>mvn compile</code></td><td>Compile main sources</td><td>Output: <code>target/classes</code></td></tr>
-            <tr><td><code>mvn test</code></td><td>Run unit tests</td><td>Surefire plugin; skips packaging</td></tr>
-            <tr><td><code>mvn package</code></td><td>Create JAR/WAR</td><td>Output: <code>target/*.jar</code></td></tr>
-            <tr><td><code>mvn verify</code></td><td>Run integration tests</td><td>Failsafe plugin; needs packaged artifact</td></tr>
-            <tr><td><code>mvn install</code></td><td>Install to local repo</td><td><code>~/.m2/repository</code></td></tr>
-            <tr><td><code>mvn clean package</code></td><td>Clean then build</td><td>Removes <code>target/</code> first</td></tr>
-            <tr><td><code>-DskipTests</code></td><td>Skip test execution</td><td>Still compiles test sources</td></tr>
-            <tr><td><code>-pl module -am</code></td><td>Build one module + its deps</td><td>Reactor build</td></tr>
-            <tr><td><code>scope=test</code></td><td>Test-only dependency</td><td>Not in final artifact</td></tr>
-            <tr><td><code>scope=provided</code></td><td>Provided by container</td><td>Not in fat JAR</td></tr>
-            <tr><td><code>scope=import, type=pom</code></td><td>BOM import</td><td>Inside <code>&lt;dependencyManagement&gt;</code></td></tr>
-            <tr><td><code>spring-boot-starter-parent</code></td><td>Parent POM for Spring Boot</td><td>Manages all dep versions</td></tr>
-            <tr><td><code>spring-boot:run</code></td><td>Run app with DevTools</td><td>Hot reload on classpath changes</td></tr>
-            <tr><td><code>spring-boot:build-image</code></td><td>OCI image via Buildpacks</td><td>No Dockerfile needed</td></tr>
-            <tr><td><code>native:compile -Pnative</code></td><td>GraalVM native binary</td><td>Requires GraalVM JDK</td></tr>
-            <tr><td><code>./mvnw</code></td><td>Maven Wrapper</td><td>Pins Maven version per project</td></tr>
+            <tr><td><code>./mvnw clean package</code></td><td>Clean and build JAR</td><td>Add <code>-DskipTests</code> to skip tests</td></tr>
+            <tr><td><code>./mvnw verify</code></td><td>Full build incl. integration tests</td><td>Runs Failsafe; use in CI</td></tr>
+            <tr><td><code>./mvnw deploy</code></td><td>Build and upload to remote repo</td><td>Requires <code>&lt;distributionManagement&gt;</code></td></tr>
+            <tr><td><code>-pl module -am</code></td><td>Build module and its dependencies</td><td>Reactor subset build</td></tr>
+            <tr><td><code>-T 4</code></td><td>Parallel build with 4 threads</td><td>Use <code>-T 1C</code> for 1 thread/CPU</td></tr>
+            <tr><td><code>dependency:tree</code></td><td>Print transitive dependency tree</td><td>Add <code>-Dverbose</code> for conflict details</td></tr>
+            <tr><td><code>dependency:analyze</code></td><td>Find used-undeclared / unused-declared deps</td><td>Fix findings to keep POM clean</td></tr>
+            <tr><td><code>versions:display-dependency-updates</code></td><td>Show available newer versions</td><td>versions-maven-plugin required</td></tr>
+            <tr><td><code>&lt;scope&gt;import&lt;/scope&gt;</code></td><td>Import a BOM into dependencyManagement</td><td>Must have <code>&lt;type&gt;pom&lt;/type&gt;</code></td></tr>
+            <tr><td><code>&lt;optional&gt;true&lt;/optional&gt;</code></td><td>Prevents transitive pull-in by consumers</td><td>Use for framework optional integrations</td></tr>
+            <tr><td><code>&lt;exclusions&gt;</code></td><td>Remove a specific transitive dependency</td><td>Use <code>*</code> wildcards for group/artifact</td></tr>
+            <tr><td><code>&lt;packaging&gt;pom&lt;/packaging&gt;</code></td><td>Mark POM as parent/aggregator only</td><td>No JAR produced; holds modules list</td></tr>
+            <tr><td><code>release:prepare</code></td><td>Tag release, bump versions</td><td>Commits two times: release + next SNAPSHOT</td></tr>
+            <tr><td><code>release:perform</code></td><td>Deploy tagged release artifact</td><td>Run after prepare; deploys to remote repo</td></tr>
+            <tr><td><code>spring-boot:run</code></td><td>Start Spring Boot app via Maven</td><td>Add <code>-Dspring-boot.run.profiles=dev</code></td></tr>
+            <tr><td><code>spring-boot:process-aot</code></td><td>Run AOT compiler step</td><td>Generates code for native image</td></tr>
+            <tr><td><code>native:compile -Pnative</code></td><td>Compile to GraalVM native binary</td><td>Requires GraalVM JDK</td></tr>
           </tbody>
         </table>
       </div>

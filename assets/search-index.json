@@ -2,86 +2,44 @@
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Gradle Deep Dive",
+    "section": "Gradle (Groovy DSL)",
     "anchor": "",
-    "text": "Gradle Deep Dive"
+    "text": "Gradle (Groovy DSL)"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Gradle Deep Dive",
+    "section": "Gradle (Groovy DSL)",
     "anchor": "",
-    "text": "Gradle 8.x Gradle is a flexible, high-performance build tool using a Groovy or Kotlin DSL. Unlike Maven's fixed lifecycle, Gradle models the build as a directed acyclic graph (DAG) of tasks — giving you fine-grained control and incremental, cacheable builds out of the box. General Java Spring Ecosys"
+    "text": "Gradle 8.x Gradle is a flexible, high-performance build tool that models a build as a directed acyclic graph (DAG) of tasks. All examples here use the Groovy DSL ( build.gradle ). Unlike Maven's fixed lifecycle, Gradle gives you fine-grained control, incremental and cacheable builds, and a rich plug"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Build File Structure (Kotlin DSL)",
-    "anchor": "gradle-build-file",
-    "text": "Build File Structure (Kotlin DSL)"
+    "section": "build.gradle — Full Project Structure (Groovy DSL)",
+    "anchor": "build-gradle-structure",
+    "text": "build.gradle — Full Project Structure (Groovy DSL)"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Build File Structure (Kotlin DSL)",
-    "anchor": "gradle-build-file",
-    "text": "The build.gradle.kts file is Kotlin script that configures the project. Gradle recommends the Kotlin DSL (`.kts`) over the Groovy DSL for new projects because it provides type safety, IDE completion, and refactoring support. The settings.gradle.kts file defines the project name and included subproje"
+    "section": "build.gradle — Full Project Structure (Groovy DSL)",
+    "anchor": "build-gradle-structure",
+    "text": "The top-level build.gradle defines plugins, project metadata, repositories, dependencies, and task configuration. The Groovy DSL uses plain method calls and closures — no type annotations, no .set() calls. // build.gradle (Groovy DSL)\n\nplugins {\n    id 'java'                                         "
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Task DAG & Lifecycle",
-    "anchor": "gradle-task-lifecycle",
-    "text": "Task DAG & Lifecycle"
+    "section": "settings.gradle — Project Name and Submodules",
+    "anchor": "settings-gradle",
+    "text": "settings.gradle — Project Name and Submodules"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Task DAG & Lifecycle",
-    "anchor": "gradle-task-lifecycle",
-    "text": "Gradle builds are not phases — they are a graph of tasks. When you run ./gradlew build , Gradle computes which tasks need to run based on dependencies and up-to-date checks, then executes them in dependency order. Incremental builds skip tasks whose inputs and outputs haven't changed. # Show all ava"
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Dependency Configurations",
-    "anchor": "gradle-dependency-configs",
-    "text": "Dependency Configurations"
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Dependency Configurations",
-    "anchor": "gradle-dependency-configs",
-    "text": "Dependency configurations in Gradle correspond roughly to Maven scopes, but they're more granular. The Java plugin (and Spring Boot plugin) define the common ones; you can also create custom configurations for specific needs. dependencies {\n    // implementation: compile + runtime, NOT exposed to co"
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Custom Tasks",
-    "anchor": "gradle-custom-tasks",
-    "text": "Custom Tasks"
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Custom Tasks",
-    "anchor": "gradle-custom-tasks",
-    "text": "Tasks are first-class objects in Gradle. You can define custom tasks, make them depend on others, and configure inputs/outputs for incremental builds. Declaring inputs and outputs lets Gradle skip the task when nothing has changed. // Simple ad-hoc task\ntasks.register(\"hello\") {\n    doLast {\n       "
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Multi-Project Builds",
-    "anchor": "gradle-multi-project",
-    "text": "Multi-Project Builds"
-  },
-  {
-    "page": "Gradle Deep Dive",
-    "href": "build-tools/gradle.html",
-    "section": "Multi-Project Builds",
-    "anchor": "gradle-multi-project",
-    "text": "Multi-project builds use settings.gradle.kts to declare included subprojects. A root build.gradle.kts can apply common configuration to all subprojects using allprojects {} or subprojects {} . Subprojects declare dependencies on siblings by project path. // settings.gradle.kts\nrootProject.name = \"my"
+    "section": "settings.gradle — Project Name and Submodules",
+    "anchor": "settings-gradle",
+    "text": "settings.gradle is always the entry point for Gradle. It declares the root project name and includes any subprojects. For single-project builds it is minimal; for multi-module builds it lists every subproject path. // settings.gradle\n\n// Required: sets the root project name (also the default artifac"
   },
   {
     "page": "Gradle Deep Dive",
@@ -95,105 +53,525 @@
     "href": "build-tools/gradle.html",
     "section": "Gradle Wrapper",
     "anchor": "gradle-wrapper",
-    "text": "The Gradle Wrapper ( gradlew ) pins the exact Gradle version for the project and auto-downloads it on first run. Commit the wrapper files — never the Gradle distribution itself. CI servers and other developers automatically use the same version without any installation. # Generate wrapper (requires "
+    "text": "The Gradle Wrapper ( gradlew / gradlew.bat ) pins the Gradle version for a project so everyone on the team — and CI — uses the same version without installing Gradle manually. Always commit the wrapper files. # Generate or upgrade the wrapper to a specific version\n./gradlew wrapper --gradle-version="
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "org.springframework.boot Plugin",
-    "anchor": "gradle-spring-boot-plugin",
-    "text": "org.springframework.boot Plugin"
+    "section": "gradle.properties — Build Configuration",
+    "anchor": "gradle-properties",
+    "text": "gradle.properties — Build Configuration"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "org.springframework.boot Plugin",
-    "anchor": "gradle-spring-boot-plugin",
-    "text": "The org.springframework.boot plugin is the entry point for all Spring Boot Gradle builds. It adds bootJar (executable fat JAR), bootRun (run with DevTools), and bootBuildImage (OCI image) tasks. It also disables the plain jar task by default and configures the main class automatically if only one @S"
+    "section": "gradle.properties — Build Configuration",
+    "anchor": "gradle-properties",
+    "text": "gradle.properties in the project root sets Gradle behaviour flags and project properties. Values are available in build.gradle as project properties. Sensitive values (passwords, tokens) belong in ~/.gradle/gradle.properties (the user home properties), never in the project file. # gradle.properties "
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "io.spring.dependency-management Plugin",
-    "anchor": "gradle-dependency-management",
-    "text": "io.spring.dependency-management Plugin"
+    "section": "Command-Line Reference",
+    "anchor": "gradle-cli",
+    "text": "Command-Line Reference"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "io.spring.dependency-management Plugin",
-    "anchor": "gradle-dependency-management",
-    "text": "Imports the Spring Boot BOM so all Spring dependency versions are managed centrally — just like spring-boot-starter-parent does in Maven. Without this plugin you'd need to specify versions on every Spring dependency. Alternatively you can use Gradle's native platform() / enforcedPlatform() BOM suppo"
+    "section": "Command-Line Reference",
+    "anchor": "gradle-cli",
+    "text": "Gradle's CLI accepts task names, flags, and project properties in any order. Multiple tasks can be chained; Gradle resolves the DAG and executes each task at most once per build. # ── Discovery ──────────────────────────────────────────────────\n./gradlew tasks                       # list all availa"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Layered JARs for Docker",
-    "anchor": "gradle-layered-jar",
-    "text": "Layered JARs for Docker"
+    "section": "Extra Properties and the ext Block",
+    "anchor": "extra-properties",
+    "text": "Extra Properties and the ext Block"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Layered JARs for Docker",
-    "anchor": "gradle-layered-jar",
-    "text": "Layered JARs split the fat JAR into Docker-cacheable layers ordered by change frequency: dependencies (rarely change), Spring Boot loader, snapshot dependencies, and application classes (change on every commit). The Docker build only re-uploads the thin application layer on most changes, cutting ima"
+    "section": "Extra Properties and the ext Block",
+    "anchor": "extra-properties",
+    "text": "The ext block (short for project.extensions.extraProperties ) stores arbitrary key-value pairs on the project or any domain object. Use it to centralise version strings or share constants across subprojects. // Root build.gradle — define shared constants in ext\next {\n    javaVersion        = 21\n    "
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "bootBuildImage (Cloud Native Buildpacks)",
-    "anchor": "gradle-build-image",
-    "text": "bootBuildImage (Cloud Native Buildpacks)"
+    "section": "Dependency Configurations — When to Use Each",
+    "anchor": "dep-configurations",
+    "text": "Dependency Configurations — When to Use Each"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "bootBuildImage (Cloud Native Buildpacks)",
-    "anchor": "gradle-build-image",
-    "text": "bootBuildImage creates an OCI-compliant container image using Cloud Native Buildpacks — no Dockerfile required. It detects your Java version, sets memory limits intelligently, and produces a production-ready image. The Spring Boot Gradle plugin configures Paketo Buildpacks by default. // Configure i"
+    "section": "Dependency Configurations — When to Use Each",
+    "anchor": "dep-configurations",
+    "text": "Each configuration controls the classpath scope in which a dependency is visible. Choosing the right one reduces classpath pollution and improves compile times. dependencies {\n\n    // ── Runtime + compile classpath; leaked to consumers ──\n    // Use for: APIs you expose in your own public method sig"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Native Image (GraalVM)",
-    "anchor": "gradle-native",
-    "text": "Native Image (GraalVM)"
+    "section": "Rich Versions and Dynamic Resolution",
+    "anchor": "rich-versions",
+    "text": "Rich Versions and Dynamic Resolution"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Native Image (GraalVM)",
-    "anchor": "gradle-native",
-    "text": "The org.graalvm.buildtools.native plugin enables AOT compilation to a GraalVM native binary. Native images start in <50ms and use a fraction of the JVM heap — ideal for AWS Lambda, Google Cloud Run, and CLI tools. Spring Boot 3.x includes all necessary AOT processing. plugins {\n    java\n    id(\"org."
+    "section": "Rich Versions and Dynamic Resolution",
+    "anchor": "rich-versions",
+    "text": "Gradle's rich version model lets you express constraints beyond a simple version string — strictly pinned, preferred, required ranges, and rejection patterns. dependencies {\n\n    // ── Dynamic version (resolves at build time — avoid in production) ──\n    implementation 'com.example:some-lib:1.+'    "
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Testcontainers + @ServiceConnection",
-    "anchor": "gradle-testcontainers",
-    "text": "Testcontainers + @ServiceConnection"
+    "section": "Dependency Resolution Strategy",
+    "anchor": "resolution-strategy",
+    "text": "Dependency Resolution Strategy"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Testcontainers + @ServiceConnection",
-    "anchor": "gradle-testcontainers",
-    "text": "Spring Boot 3.1+ works with Testcontainers using @ServiceConnection — the annotation wires the container's dynamic port to the matching Spring property automatically. Gradle includes Testcontainers BOM management when using the Spring dependency-management plugin. dependencies {\n    testImplementati"
+    "section": "Dependency Resolution Strategy",
+    "anchor": "resolution-strategy",
+    "text": "Resolution strategies allow you to globally force versions, substitute modules, or fail on dynamic versions — useful for ensuring reproducible builds across teams. configurations.all {\n    resolutionStrategy {\n\n        // Force a specific version regardless of what dependencies request\n        force"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Kotlin DSL Tips for Spring Projects",
-    "anchor": "gradle-kotlin-dsl-spring",
-    "text": "Kotlin DSL Tips for Spring Projects"
+    "section": "Version Catalogs (libs.versions.toml)",
+    "anchor": "version-catalog",
+    "text": "Version Catalogs (libs.versions.toml)"
   },
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
-    "section": "Kotlin DSL Tips for Spring Projects",
-    "anchor": "gradle-kotlin-dsl-spring",
-    "text": "When writing Spring Boot builds in Kotlin DSL, a few patterns come up constantly: configuring compiler options for Kotlin projects, using extra[] to override managed versions, and using tasks.withType<> for type-safe task configuration. import org.jetbrains.kotlin.gradle.tasks.KotlinCompile\n\nplugins"
+    "section": "Version Catalogs (libs.versions.toml)",
+    "anchor": "version-catalog",
+    "text": "Version catalogs centralise dependency coordinates in gradle/libs.versions.toml . All subprojects share the same catalog, giving you a single place to update versions and ensuring consistent resolution across the build. # gradle/libs.versions.toml\n\n[versions]\nspring-boot   = \"3.5.0\"\nspring-ai     = "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "BOM and Platform Imports",
+    "anchor": "bom-platform",
+    "text": "BOM and Platform Imports"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "BOM and Platform Imports",
+    "anchor": "bom-platform",
+    "text": "A BOM (Bill of Materials) enforces consistent versions across a set of related dependencies. Use platform() to import a BOM — the BOM's version recommendations are applied as constraints, not forced versions. Use enforcedPlatform() to override any dependency's own version. dependencies {\n\n    // ── "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Viewing and Diagnosing Dependencies",
+    "anchor": "dep-insight",
+    "text": "Viewing and Diagnosing Dependencies"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Viewing and Diagnosing Dependencies",
+    "anchor": "dep-insight",
+    "text": "Gradle provides rich CLI commands for inspecting the resolved dependency graph, tracing why a particular version was chosen, and identifying unwanted transitive inclusions. # Full dependency tree for the runtimeClasspath configuration\n./gradlew dependencies --configuration runtimeClasspath\n\n# Show w"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Built-In Task Types",
+    "anchor": "builtin-task-types",
+    "text": "Built-In Task Types"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Built-In Task Types",
+    "anchor": "builtin-task-types",
+    "text": "Gradle ships task types for the most common operations. Use these instead of custom Exec calls where possible — they participate in incremental build and build cache. // ── Copy files ──\ntasks.register('copyConfig', Copy) {\n    group       = 'build'\n    description = 'Copy environment config to buil"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Custom Task Classes with Incremental Build",
+    "anchor": "custom-tasks",
+    "text": "Custom Task Classes with Incremental Build"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Custom Task Classes with Incremental Build",
+    "anchor": "custom-tasks",
+    "text": "Define a custom task class with annotated inputs and outputs so Gradle can determine whether the task is up-to-date and skip it when nothing changed. // buildSrc/src/main/groovy/com/example/GenerateVersionFileTask.groovy\nimport org.gradle.api.DefaultTask\nimport org.gradle.api.file.RegularFilePropert"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task Dependencies and Ordering",
+    "anchor": "task-dependencies",
+    "text": "Task Dependencies and Ordering"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task Dependencies and Ordering",
+    "anchor": "task-dependencies",
+    "text": "Gradle resolves a task DAG from dependency declarations. Declare semantic dependencies with dependsOn ; use ordering hints ( mustRunAfter ) when tasks are independent but must not run concurrently in a certain order. // ── dependsOn: task A must complete before task B can start ──\ntasks.register('ge"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Incremental Builds and Build Cache",
+    "anchor": "incremental-builds",
+    "text": "Incremental Builds and Build Cache"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Incremental Builds and Build Cache",
+    "anchor": "incremental-builds",
+    "text": "Gradle skips tasks whose inputs and outputs have not changed since the last build ( up-to-date check). With the build cache enabled, outputs from a previous build — even on another machine — can be reused ( cache hit ). # Run the build — Gradle checks inputs/outputs\n./gradlew build\n# Output example:"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task Lifecycle — Configuration vs Execution",
+    "anchor": "task-lifecycle",
+    "text": "Task Lifecycle — Configuration vs Execution"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Task Lifecycle — Configuration vs Execution",
+    "anchor": "task-lifecycle",
+    "text": "Gradle builds in two phases: configuration (all build.gradle files evaluated, task DAG assembled) and execution (selected tasks run in DAG order). Code inside a task closure but outside doFirst {} / doLast {} runs at configuration time — a common mistake. // ── WRONG — println runs at configuration "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Multi-Project settings.gradle",
+    "anchor": "multiproject-settings",
+    "text": "Multi-Project settings.gradle"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Multi-Project settings.gradle",
+    "anchor": "multiproject-settings",
+    "text": "Declare all subprojects in settings.gradle . Each subproject path maps to a directory relative to the root. Gradle resolves subproject directories automatically. // settings.gradle (root)\nrootProject.name = 'ecommerce-platform'\n\n// Include subprojects — directory structure:\n// ecommerce-platform/\n//"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Root build.gradle — allprojects and subprojects",
+    "anchor": "root-build-gradle",
+    "text": "Root build.gradle — allprojects and subprojects"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Root build.gradle — allprojects and subprojects",
+    "anchor": "root-build-gradle",
+    "text": "The root build.gradle configures behaviour common to all subprojects. Prefer subprojects {} (excludes root) over allprojects {} (includes root) for dependency configuration. // Root build.gradle\n\n// Shared version constants\next {\n    springBootVersion = '3.5.0'\n    lombokVersion     = '1.18.36'\n}\n\n/"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "buildSrc — Shared Build Logic",
+    "anchor": "buildsrc",
+    "text": "buildSrc — Shared Build Logic"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "buildSrc — Shared Build Logic",
+    "anchor": "buildsrc",
+    "text": "buildSrc is a special Gradle subproject whose compiled classes are automatically available on the classpath of every build.gradle in the project. Use it for shared task types, custom plugins, and convention plugins. buildSrc/\n  build.gradle\n  src/\n    main/\n      groovy/\n        com/example/build/\n "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Composite Builds",
+    "anchor": "composite-builds",
+    "text": "Composite Builds"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Composite Builds",
+    "anchor": "composite-builds",
+    "text": "Composite builds let you include an external Gradle build as if it were a local subproject. Gradle substitutes published artifacts with the local build, making cross-repository development seamless without publishing snapshots. // settings.gradle — include an external build\nrootProject.name = 'my-ap"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JUnit 5 Setup",
+    "anchor": "junit5-setup",
+    "text": "JUnit 5 Setup"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JUnit 5 Setup",
+    "anchor": "junit5-setup",
+    "text": "JUnit 5 (JUnit Platform) requires explicit opt-in via useJUnitPlatform() . The single junit-jupiter dependency pulls in the JUnit 5 API, engine, and params module. dependencies {\n    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'\n    testImplementation 'org.assertj:assertj-core:3.26.3'\n"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Parallel Execution and Test Filtering",
+    "anchor": "parallel-tests",
+    "text": "Parallel Execution and Test Filtering"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Parallel Execution and Test Filtering",
+    "anchor": "parallel-tests",
+    "text": "Gradle can run test classes across multiple JVMs simultaneously via maxParallelForks . Use --tests on the CLI or include / exclude in the task to filter which tests run. test {\n    useJUnitPlatform()\n\n    // Run tests in multiple JVM forks (class-level parallelism)\n    maxParallelForks = Runtime.run"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Integration Tests — Separate Source Set",
+    "anchor": "integration-tests",
+    "text": "Integration Tests — Separate Source Set"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Integration Tests — Separate Source Set",
+    "anchor": "integration-tests",
+    "text": "Separate integration tests from unit tests using a custom source set. This gives them their own classpath, allows them to depend on the compiled application, and lets CI run them independently from unit tests. // Declare the integrationTest source set\nsourceSets {\n    integrationTest {\n        java."
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JaCoCo Code Coverage",
+    "anchor": "jacoco",
+    "text": "JaCoCo Code Coverage"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JaCoCo Code Coverage",
+    "anchor": "jacoco",
+    "text": "The JaCoCo plugin generates coverage reports after the test task runs. Configure minimum thresholds to fail the build if coverage drops below acceptable levels. plugins {\n    id 'java'\n    id 'jacoco'\n}\n\njacoco {\n    toolVersion = '0.8.12'\n}\n\ntest {\n    useJUnitPlatform()\n    finalizedBy jacocoTestR"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Applying Plugins",
+    "anchor": "applying-plugins",
+    "text": "Applying Plugins"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Applying Plugins",
+    "anchor": "applying-plugins",
+    "text": "Plugins are the primary extension mechanism in Gradle. The plugins {} block (preferred) resolves plugins from the Gradle Plugin Portal and applies them atomically. Legacy apply plugin: is still valid for plugins not on the portal or for conditional application. // ── Preferred: plugins {} block ──\np"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Writing a Custom Gradle Plugin",
+    "anchor": "custom-plugin",
+    "text": "Writing a Custom Gradle Plugin"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Writing a Custom Gradle Plugin",
+    "anchor": "custom-plugin",
+    "text": "A custom plugin encapsulates reusable build logic. Define it in buildSrc (project-local) or a standalone plugin project (shareable via the Plugin Portal). // buildSrc/src/main/groovy/com/example/build/BannerPlugin.groovy\npackage com.example.build\n\nimport org.gradle.api.Plugin\nimport org.gradle.api.P"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Daemon and Performance",
+    "anchor": "gradle-daemon",
+    "text": "Gradle Daemon and Performance"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle Daemon and Performance",
+    "anchor": "gradle-daemon",
+    "text": "The Gradle Daemon is a long-lived JVM process that keeps the build warm between invocations, dramatically reducing startup time. It is enabled by default. The configuration cache takes this further by caching the configuration phase result. # gradle.properties — performance tuning\norg.gradle.daemon="
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Build Scans and Develocity",
+    "anchor": "build-scans",
+    "text": "Build Scans and Develocity"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Build Scans and Develocity",
+    "anchor": "build-scans",
+    "text": "Build scans provide a shareable web view of every build: task timeline, dependency tree, test results, and configuration cache status. Free scans go to scans.gradle.com ; enterprise teams use Develocity (self-hosted or cloud). // settings.gradle — enable build scans (Gradle 8.x)\nplugins {\n    id 'co"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Configuration Cache",
+    "anchor": "configuration-cache",
+    "text": "Configuration Cache"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Configuration Cache",
+    "anchor": "configuration-cache",
+    "text": "The configuration cache stores the result of the configuration phase (the resolved task graph) so Gradle can skip it entirely on subsequent builds — cutting seconds from every invocation in large projects. # gradle.properties — enable configuration cache\norg.gradle.configuration-cache=true\n# Treat p"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "maven-publish Plugin — Basic Setup",
+    "anchor": "maven-publish",
+    "text": "maven-publish Plugin — Basic Setup"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "maven-publish Plugin — Basic Setup",
+    "anchor": "maven-publish",
+    "text": "The maven-publish plugin publishes artifacts to Maven repositories. Define one or more MavenPublication objects in the publications block and point repositories at where to deploy. plugins {\n    id 'java-library'\n    id 'maven-publish'\n}\n\njava {\n    withSourcesJar()   // attach *-sources.jar to the "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Publishing to Nexus / Artifactory",
+    "anchor": "publish-nexus",
+    "text": "Publishing to Nexus / Artifactory"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Publishing to Nexus / Artifactory",
+    "anchor": "publish-nexus",
+    "text": "Store repository credentials in ~/.gradle/gradle.properties — never in the project's gradle.properties or build.gradle . Read them via findProperty() which returns null if the property is missing. # ~/.gradle/gradle.properties  (user home — NEVER commit this)\nnexusUsername=jenkins-deploy\nnexusPasswo"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Publishing to GitHub Packages",
+    "anchor": "publish-github",
+    "text": "Publishing to GitHub Packages"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Publishing to GitHub Packages",
+    "anchor": "publish-github",
+    "text": "GitHub Packages requires Maven repository authentication even for public packages. Use a Personal Access Token (PAT) with write:packages scope, stored in the environment or user-level gradle.properties . publishing {\n    repositories {\n        maven {\n            name = 'GitHubPackages'\n            "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Signing Artifacts with GPG",
+    "anchor": "signing",
+    "text": "Signing Artifacts with GPG"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Signing Artifacts with GPG",
+    "anchor": "signing",
+    "text": "Maven Central requires signed artifacts. The signing plugin uses GPG to sign publications. Configure GPG credentials in ~/.gradle/gradle.properties . # ~/.gradle/gradle.properties\nsigning.keyId=ABCDEF01                  # last 8 chars of key ID\nsigning.password=my-gpg-passphrase\nsigning.secretKeyRin"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Full Spring Boot build.gradle",
+    "anchor": "spring-boot-full-build",
+    "text": "Full Spring Boot build.gradle"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Full Spring Boot build.gradle",
+    "anchor": "spring-boot-full-build",
+    "text": "A production-ready Spring Boot Gradle build uses two plugins: org.springframework.boot (adds bootJar , bootRun , bootBuildImage ) and io.spring.dependency-management (imports the Spring Boot BOM so you omit versions for managed deps). // build.gradle — Spring Boot 4 project (Groovy DSL)\n\nplugins {\n "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootJar and bootRun Tasks",
+    "anchor": "spring-bootjar-bootrun",
+    "text": "bootJar and bootRun Tasks"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootJar and bootRun Tasks",
+    "anchor": "spring-bootjar-bootrun",
+    "text": "bootJar creates the executable fat JAR (replaces the standard jar task). bootRun runs the application from the build, passing JVM args and system properties. DevTools enables live class reloading. // Configure the executable fat JAR\nbootJar {\n    // Override the main class (auto-detected if there is"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Layered JAR for Docker",
+    "anchor": "spring-layered-jar",
+    "text": "Layered JAR for Docker"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Layered JAR for Docker",
+    "anchor": "spring-layered-jar",
+    "text": "Layered JARs split the fat JAR into Docker layers (dependencies, Spring Boot loader, snapshot dependencies, application code) so that the largest layers — third-party dependencies — are cached by Docker and not re-pushed on every code change. bootJar {\n    layered {\n        enabled = true\n        //"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootBuildImage — Cloud Native Buildpacks",
+    "anchor": "spring-build-image",
+    "text": "bootBuildImage — Cloud Native Buildpacks"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "bootBuildImage — Cloud Native Buildpacks",
+    "anchor": "spring-build-image",
+    "text": "bootBuildImage uses Buildpacks (Paketo by default) to create a production-ready OCI image without a Dockerfile. No Docker daemon required — the image is built inside the build process using pack . bootBuildImage {\n    // Image name and tags\n    imageName = \"docker.io/${project.group}/${project.name}"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "GraalVM Native Image",
+    "anchor": "spring-graalvm",
+    "text": "GraalVM Native Image"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "GraalVM Native Image",
+    "anchor": "spring-graalvm",
+    "text": "The org.graalvm.buildtools.native plugin adds the nativeCompile and nativeTest tasks. Spring Boot 4's AOT processor runs automatically as part of the native image build, eliminating most manual hint declarations. plugins {\n    id 'java'\n    id 'org.springframework.boot'        version '4.0.0'\n    id"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Testcontainers with @ServiceConnection",
+    "anchor": "spring-testcontainers",
+    "text": "Testcontainers with @ServiceConnection"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Testcontainers with @ServiceConnection",
+    "anchor": "spring-testcontainers",
+    "text": "Spring Boot 4 auto-configures connection properties from a running Testcontainers container annotated with @ServiceConnection — no manual @DynamicPropertySource needed. dependencies {\n    testImplementation 'org.springframework.boot:spring-boot-starter-test'\n    testImplementation 'org.springframewo"
   },
   {
     "page": "Gradle Deep Dive",
@@ -207,7 +585,7 @@
     "href": "build-tools/gradle.html",
     "section": "Gradle Cheatsheet",
     "anchor": "",
-    "text": "Command / Element Purpose Notes ./gradlew build Compile + test + jar Skips up-to-date tasks automatically ./gradlew test Run unit tests Reports in build/reports/tests/ ./gradlew bootRun Run Spring Boot app DevTools hot reload ./gradlew bootJar Build executable fat JAR Output: build/libs/*.jar ./grad"
+    "text": "Command / Concept Purpose Notes ./gradlew tasks List available tasks Add --all for internal tasks ./gradlew build Full build (compile + test + jar) Equivalent to assemble + check ./gradlew clean Delete build/ directory Chain: clean build ./gradlew test Run unit tests --tests \"*.MyTest\" to filter ./g"
   },
   {
     "page": "Maven Deep Dive",
@@ -221,77 +599,21 @@
     "href": "build-tools/maven.html",
     "section": "Maven Deep Dive",
     "anchor": "",
-    "text": "Maven 3.x Apache Maven is a build automation and project management tool based on the Project Object Model (POM). It manages dependencies, compiles source code, runs tests, packages artifacts, and publishes to repositories — all driven by convention over configuration. General Java Spring Ecosystem"
+    "text": "Maven 3.9.x Apache Maven is a build automation and project management tool based on the Project Object Model (POM). It manages dependencies, compiles source code, runs tests, packages artifacts, and publishes to repositories — all driven by convention over configuration. Maven 3.9.x is the current s"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Maven Coordinates & POM Structure",
-    "anchor": "maven-coordinates",
-    "text": "Maven Coordinates & POM Structure"
+    "section": "Full POM Structure",
+    "anchor": "maven-pom-structure",
+    "text": "Full POM Structure"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Maven Coordinates & POM Structure",
-    "anchor": "maven-coordinates",
-    "text": "Every Maven project is uniquely identified by its GAV coordinates — groupId, artifactId, version. These three values form the address of your artifact in any repository. The pom.xml is the single source of truth for the project's build metadata, dependencies, plugins, and inherited configuration. <?"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Build Lifecycle & Phases",
-    "anchor": "maven-lifecycle",
-    "text": "Build Lifecycle & Phases"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Build Lifecycle & Phases",
-    "anchor": "maven-lifecycle",
-    "text": "Maven defines three built-in lifecycles: default (build and deploy), clean (remove target/), and site (generate documentation). The default lifecycle runs phases in strict order — you run a phase and every phase before it executes automatically. # Run all phases up to and including package\nmvn packa"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Dependency Scopes",
-    "anchor": "maven-dependency-scopes",
-    "text": "Dependency Scopes"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Dependency Scopes",
-    "anchor": "maven-dependency-scopes",
-    "text": "Scopes control when a dependency is available on the classpath and whether it is included in the packaged artifact. Choosing the wrong scope is a common source of \"works in test, fails in prod\" bugs. <dependencies>\n  <!-- compile (default): on classpath everywhere, included in jar -->\n  <dependency>"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Key Build Plugins",
-    "anchor": "maven-key-plugins",
-    "text": "Key Build Plugins"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Key Build Plugins",
-    "anchor": "maven-key-plugins",
-    "text": "Maven does all real work through plugins. The three most important plugins in any Java project are bound to lifecycle phases automatically — but you often need to configure them explicitly to control Java version, test behaviour, or output format. <build>\n  <plugins>\n    <!-- Compiler: set Java vers"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Multi-Module Projects",
-    "anchor": "maven-multi-module",
-    "text": "Multi-Module Projects"
-  },
-  {
-    "page": "Maven Deep Dive",
-    "href": "build-tools/maven.html",
-    "section": "Multi-Module Projects",
-    "anchor": "maven-multi-module",
-    "text": "A multi-module project has a root POM with packaging=pom that lists child modules. Each child module has its own pom.xml and can depend on sibling modules. The parent POM centralises dependency versions via <dependencyManagement> so child POMs declare dependencies without specifying versions. <!-- r"
+    "section": "Full POM Structure",
+    "anchor": "maven-pom-structure",
+    "text": "The Project Object Model ( pom.xml ) is the central descriptor for every Maven project. The sections shown here cover the full set of top-level elements; most projects only need a subset. Elements marked (required) must be present in every POM. <project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n    "
   },
   {
     "page": "Maven Deep Dive",
@@ -305,7 +627,413 @@
     "href": "build-tools/maven.html",
     "section": "Maven Wrapper",
     "anchor": "maven-wrapper",
-    "text": "The Maven Wrapper ( mvnw ) pins a specific Maven version to the project and downloads it automatically. No local Maven installation required. Every developer and CI server uses exactly the same version — eliminates \"works on my machine\" build differences. # Generate wrapper (requires Maven installed"
+    "text": "The Maven Wrapper ( mvnw ) pins a specific Maven version to the project so every developer and CI server uses the same version without installing Maven globally. It is equivalent to the Gradle Wrapper. # Generate the wrapper (requires Maven installed locally, one time)\nmvn wrapper:wrapper -Dmaven=3."
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Coordinates (GAV)",
+    "anchor": "maven-coordinates",
+    "text": "Maven Coordinates (GAV)"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Maven Coordinates (GAV)",
+    "anchor": "maven-coordinates",
+    "text": "Every artifact is uniquely identified by its G roupId, A rtifactId, and V ersion — the GAV triple. Two additional optional qualifiers are classifier and type. <!-- Standard dependency with GAV -->\n<dependency>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-starter-web</artif"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Standard Directory Layout",
+    "anchor": "maven-directory-layout",
+    "text": "Standard Directory Layout"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Standard Directory Layout",
+    "anchor": "maven-directory-layout",
+    "text": "Maven's convention-over-configuration philosophy means the standard directory structure is understood by all plugins without explicit configuration. my-app/\n├── pom.xml\n├── mvnw / mvnw.cmd\n├── .mvn/\n│   └── wrapper/\n│       └── maven-wrapper.properties\n├── src/\n│   ├── main/\n│   │   ├── java/       "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Command-Line Basics",
+    "anchor": "maven-cli",
+    "text": "Command-Line Basics"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Command-Line Basics",
+    "anchor": "maven-cli",
+    "text": "Common Maven commands you use every day, with the flags that matter most. # Core build commands\n./mvnw compile                  # compile src/main/java only\n./mvnw test                     # compile and run unit tests\n./mvnw package                  # compile, test, package (creates JAR/WAR)\n./mvnw "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "settings.xml — User and Global Configuration",
+    "anchor": "maven-settings",
+    "text": "settings.xml — User and Global Configuration"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "settings.xml — User and Global Configuration",
+    "anchor": "maven-settings",
+    "text": "~/.m2/settings.xml holds configuration that is not project-specific: credentials, mirrors, proxy settings, and environment-specific profiles. It is never committed to source control. <!-- ~/.m2/settings.xml -->\n<settings xmlns=\"http://maven.apache.org/SETTINGS/1.2.0\">\n\n  <!-- Local repository path ("
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Three Built-In Lifecycles",
+    "anchor": "maven-lifecycles",
+    "text": "Three Built-In Lifecycles"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Three Built-In Lifecycles",
+    "anchor": "maven-lifecycles",
+    "text": "Maven defines three lifecycles. Each lifecycle is a sequence of named phases . Running a phase runs all preceding phases in order. Plugins bind their goals to phases; Maven invokes them in phase order. # default lifecycle — build, test, and deploy the project\n./mvnw deploy        # runs: validate → "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Default Lifecycle — All 23 Phases in Order",
+    "anchor": "maven-default-phases",
+    "text": "Default Lifecycle — All 23 Phases in Order"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Default Lifecycle — All 23 Phases in Order",
+    "anchor": "maven-default-phases",
+    "text": "Every phase in the default lifecycle is listed below. Most plugins bind to the shaded phases; the others exist as extension hooks for custom plugin bindings. # Phase order (top to bottom). Running any phase runs all above it first.\n# ─────────────────────────────────────────────────────────────────\n"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Plugin Goals and Phase Binding",
+    "anchor": "maven-goal-binding",
+    "text": "Plugin Goals and Phase Binding"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Plugin Goals and Phase Binding",
+    "anchor": "maven-goal-binding",
+    "text": "A plugin goal is a single unit of work (like compiler:compile ). Plugins declare a default phase for each goal. You can override the phase or add extra executions via <executions> . <build>\n  <plugins>\n    <plugin>\n      <groupId>org.apache.maven.plugins</groupId>\n      <artifactId>maven-antrun-plug"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Skipping Phases and Goals",
+    "anchor": "maven-skip-phases",
+    "text": "Skipping Phases and Goals"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Skipping Phases and Goals",
+    "anchor": "maven-skip-phases",
+    "text": "Several system properties allow skipping phases or goals without modifying the POM. These are especially useful in CI pipelines where different stages handle different concerns. # Skip test execution (tests still compile)\n./mvnw package -DskipTests\n\n# Skip test compilation AND execution\n./mvnw packa"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Useful Utility Goals",
+    "anchor": "maven-useful-goals",
+    "text": "Useful Utility Goals"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Useful Utility Goals",
+    "anchor": "maven-useful-goals",
+    "text": "These goals are not part of the standard lifecycle but are invaluable for day-to-day development and maintenance. # Dependency analysis\n./mvnw dependency:tree                       # full transitive tree\n./mvnw dependency:tree -Dincludes=org.slf4j  # filter by groupId\n./mvnw dependency:analyze      "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Scopes",
+    "anchor": "maven-scopes",
+    "text": "Dependency Scopes"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Scopes",
+    "anchor": "maven-scopes",
+    "text": "Scope controls when a dependency is on the classpath. The table below shows what is available at compile time, during test compilation and test execution, and when the final artifact runs. Scope Compile CP Test CP Runtime CP Transitive Use case compile (default) ✔ ✔ ✔ Yes Normal library dependency p"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Transitive Dependencies — Mediation and Exclusions",
+    "anchor": "maven-transitive",
+    "text": "Transitive Dependencies — Mediation and Exclusions"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Transitive Dependencies — Mediation and Exclusions",
+    "anchor": "maven-transitive",
+    "text": "Maven resolves transitive dependencies automatically. When two paths in the dependency tree require different versions of the same artifact, Maven applies nearest-wins mediation — the version declared closest to your project wins. Use <exclusions> to remove transitive dependencies that cause conflic"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Management — Centralising Versions",
+    "anchor": "maven-dependency-management",
+    "text": "Dependency Management — Centralising Versions"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Dependency Management — Centralising Versions",
+    "anchor": "maven-dependency-management",
+    "text": "<dependencyManagement> declares versions (and scopes) centrally without adding those artifacts to the classpath. Child POMs or the same POM's <dependencies> section can then omit the version — it is inherited from management. <!-- Parent POM or shared corporate parent -->\n<dependencyManagement>\n  <d"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "BOM (Bill of Materials) Import",
+    "anchor": "maven-bom",
+    "text": "BOM (Bill of Materials) Import"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "BOM (Bill of Materials) Import",
+    "anchor": "maven-bom",
+    "text": "A BOM is a POM with <packaging>pom</packaging> that declares <dependencyManagement> for a set of related artifacts at compatible versions. Importing a BOM adds all its managed versions to your project. You can stack multiple BOMs — the first declaration wins in case of conflict. <dependencyManagemen"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-compiler-plugin",
+    "anchor": "maven-compiler-plugin",
+    "text": "maven-compiler-plugin"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-compiler-plugin",
+    "anchor": "maven-compiler-plugin",
+    "text": "Controls Java compilation. The <release> element (since JDK 9) sets source, target, and bootstrap classpath in one shot and is preferred over the older <source> / <target> pair. <plugin>\n  <groupId>org.apache.maven.plugins</groupId>\n  <artifactId>maven-compiler-plugin</artifactId>\n  <version>3.13.0<"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-surefire-plugin — Unit Tests",
+    "anchor": "maven-surefire-plugin",
+    "text": "maven-surefire-plugin — Unit Tests"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-surefire-plugin — Unit Tests",
+    "anchor": "maven-surefire-plugin",
+    "text": "Surefire runs unit tests during the test phase. Version 3.x supports JUnit 5 natively (via the junit-platform-launcher on the classpath). Tests in src/test/java whose names match *Test , Test* , or *Tests are included by default. <plugin>\n  <groupId>org.apache.maven.plugins</groupId>\n  <artifactId>m"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-failsafe-plugin — Integration Tests",
+    "anchor": "maven-failsafe-plugin",
+    "text": "maven-failsafe-plugin — Integration Tests"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-failsafe-plugin — Integration Tests",
+    "anchor": "maven-failsafe-plugin",
+    "text": "Failsafe runs integration tests ( *IT.java ) during the integration-test phase and reports results during verify . This separation is important: it allows pre/post-integration-test hooks (starting/stopping containers) to run even if tests fail, so you don't leave dangling processes. <plugin>\n  <grou"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-assembly-plugin & maven-shade-plugin — Fat JARs",
+    "anchor": "maven-assembly-shade",
+    "text": "maven-assembly-plugin & maven-shade-plugin — Fat JARs"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-assembly-plugin & maven-shade-plugin — Fat JARs",
+    "anchor": "maven-assembly-shade",
+    "text": "Assembly plugin creates a JAR containing all dependencies using a built-in jar-with-dependencies descriptor. Shade plugin produces an uber JAR with relocation and resource merging — the right choice for libraries to avoid classpath conflicts. <!-- Assembly plugin: simple fat JAR for runnable apps --"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "exec-maven-plugin — Run Java During Build",
+    "anchor": "maven-exec-plugin",
+    "text": "exec-maven-plugin — Run Java During Build"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "exec-maven-plugin — Run Java During Build",
+    "anchor": "maven-exec-plugin",
+    "text": "The exec plugin runs a Java class or shell command during the build — useful for code generation, database migrations, or integration test pre-conditions. <plugin>\n  <groupId>org.codehaus.mojo</groupId>\n  <artifactId>exec-maven-plugin</artifactId>\n  <version>3.4.0</version>\n  <executions>\n\n    <!-- "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-jar-plugin, maven-source-plugin, maven-javadoc-plugin",
+    "anchor": "maven-jar-source-javadoc",
+    "text": "maven-jar-plugin, maven-source-plugin, maven-javadoc-plugin"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "maven-jar-plugin, maven-source-plugin, maven-javadoc-plugin",
+    "anchor": "maven-jar-source-javadoc",
+    "text": "These three plugins control the primary JAR's manifest, and produce the sources and Javadoc JARs required for publishing to Maven Central. <!-- Configure the main JAR manifest -->\n<plugin>\n  <groupId>org.apache.maven.plugins</groupId>\n  <artifactId>maven-jar-plugin</artifactId>\n  <version>3.4.2</ver"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Parent POM Structure",
+    "anchor": "maven-parent-pom",
+    "text": "Parent POM Structure"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Parent POM Structure",
+    "anchor": "maven-parent-pom",
+    "text": "A multi-module Maven project has a parent POM with <packaging>pom</packaging> that lists all child modules. The parent centralises shared configuration: Java version, plugin versions, dependency management, and common dependencies. <!-- pom.xml (project root — parent and aggregator) -->\n<project>\n  "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Child Module POM",
+    "anchor": "maven-child-module",
+    "text": "Child Module POM"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Child Module POM",
+    "anchor": "maven-child-module",
+    "text": "Each child module references the parent via <parent> . It inherits the parent's <groupId> , <version> , properties, dependency management, and plugin management. <!-- platform-service/pom.xml -->\n<project>\n  <modelVersion>4.0.0</modelVersion>\n\n  <parent>\n    <groupId>com.example</groupId>\n    <artif"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Building Multi-Module Projects",
+    "anchor": "maven-multimodule-build",
+    "text": "Building Multi-Module Projects"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Building Multi-Module Projects",
+    "anchor": "maven-multimodule-build",
+    "text": "Maven computes the reactor build order automatically based on inter-module dependencies. The -pl and -am flags let you build subsets of the reactor. # Build everything from the root\n./mvnw clean install\n\n# Build only specific modules (comma-separated module artifact IDs or paths)\n./mvnw -pl platform"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Defining and Activating Profiles",
+    "anchor": "maven-profiles",
+    "text": "Defining and Activating Profiles"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Defining and Activating Profiles",
+    "anchor": "maven-profiles",
+    "text": "Profiles allow conditional configuration — different plugins, dependencies, and properties for different environments. A profile can be activated explicitly ( -P ), by default, or automatically based on JDK version, OS, environment variable, property, or file existence. <profiles>\n\n  <!-- ── dev: ac"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Resource Filtering — Inject Build Properties into Files",
+    "anchor": "maven-resource-filtering",
+    "text": "Resource Filtering — Inject Build Properties into Files"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Resource Filtering — Inject Build Properties into Files",
+    "anchor": "maven-resource-filtering",
+    "text": "With <filtering>true</filtering> , Maven replaces ${property} placeholders in resource files at build time. This is useful for injecting the active profile's properties into application.properties , SQL scripts, or configuration files. <build>\n  <resources>\n    <resource>\n      <directory>src/main/r"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Local Repository and Manual Install",
+    "anchor": "maven-local-repo",
+    "text": "Local Repository and Manual Install"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Local Repository and Manual Install",
+    "anchor": "maven-local-repo",
+    "text": "The local repository at ~/.m2/repository acts as a cache and a way to share artifacts between local projects before they are published remotely. # Install project artifact to local repo (available to all local Maven projects)\n./mvnw install\n\n# Install a third-party JAR that has no public Maven repo "
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Deploy to Nexus / Artifactory",
+    "anchor": "maven-deploy-nexus",
+    "text": "Deploy to Nexus / Artifactory"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Deploy to Nexus / Artifactory",
+    "anchor": "maven-deploy-nexus",
+    "text": "Configure <distributionManagement> in the POM to point to your internal repository manager. Credentials go in ~/.m2/settings.xml — never in the POM. <!-- pom.xml -->\n<distributionManagement>\n  <!-- Release artifacts (non-SNAPSHOT versions) -->\n  <repository>\n    <id>nexus-releases</id>  <!-- must ma"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "GitHub Packages",
+    "anchor": "maven-github-packages",
+    "text": "GitHub Packages"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "GitHub Packages",
+    "anchor": "maven-github-packages",
+    "text": "GitHub Packages hosts Maven artifacts under the GitHub Packages Maven registry. Authentication uses a personal access token (PAT) or GITHUB_TOKEN in Actions. <!-- pom.xml -->\n<distributionManagement>\n  <repository>\n    <id>github</id>\n    <name>GitHub Packages</name>\n    <url>https://maven.pkg.githu"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Release Process — maven-release-plugin",
+    "anchor": "maven-release",
+    "text": "Release Process — maven-release-plugin"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "Release Process — maven-release-plugin",
+    "anchor": "maven-release",
+    "text": "The release plugin automates the SNAPSHOT → RELEASE → next SNAPSHOT version cycle: it verifies no uncommitted changes, updates the version, commits, tags, deploys, then bumps to the next development version. <plugin>\n  <groupId>org.apache.maven.plugins</groupId>\n  <artifactId>maven-release-plugin</a"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "GPG Signing for Maven Central",
+    "anchor": "maven-gpg-signing",
+    "text": "GPG Signing for Maven Central"
+  },
+  {
+    "page": "Maven Deep Dive",
+    "href": "build-tools/maven.html",
+    "section": "GPG Signing for Maven Central",
+    "anchor": "maven-gpg-signing",
+    "text": "Maven Central requires all published artifacts to be GPG-signed. The maven-gpg-plugin signs the artifact, sources JAR, and Javadoc JAR during the verify phase. <!-- In a 'release' profile so signing only happens during releases -->\n<profile>\n  <id>release</id>\n  <build>\n    <plugins>\n      <plugin>\n"
   },
   {
     "page": "Maven Deep Dive",
@@ -319,77 +1047,77 @@
     "href": "build-tools/maven.html",
     "section": "spring-boot-starter-parent",
     "anchor": "maven-spring-parent",
-    "text": "The easiest way to manage Spring Boot dependencies. Declaring spring-boot-starter-parent as your parent POM inherits pre-configured plugin versions, encoding settings, resource filtering, and the entire spring-boot-dependencies BOM — so all Spring starters are versioned automatically. You only speci"
+    "text": "Inheriting from spring-boot-starter-parent is the simplest way to set up a Spring Boot project. The parent sets plugin versions, Java version, UTF-8 encoding, resource filtering with @ delimiters, and inherits from spring-boot-dependencies BOM so all Spring Boot starters can be declared without a ve"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "BOM Import (without parent)",
-    "anchor": "maven-spring-bom",
-    "text": "BOM Import (without parent)"
+    "section": "BOM Without Inheriting starter-parent",
+    "anchor": "maven-spring-bom-no-parent",
+    "text": "BOM Without Inheriting starter-parent"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "BOM Import (without parent)",
-    "anchor": "maven-spring-bom",
-    "text": "When you already have a corporate parent POM and can't use spring-boot-starter-parent , import the spring-boot-dependencies BOM via <dependencyManagement> with scope=import, type=pom . You lose the plugin pre-configuration from the parent but gain the same dependency version management. <dependencyM"
+    "section": "BOM Without Inheriting starter-parent",
+    "anchor": "maven-spring-bom-no-parent",
+    "text": "When your project already has a corporate parent POM, you cannot inherit from spring-boot-starter-parent . Import the BOM instead. You must also configure the compiler plugin and resource filtering yourself. <dependencyManagement>\n  <dependencies>\n    <!-- Import Spring Boot BOM — same managed versi"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "spring-boot-maven-plugin",
-    "anchor": "maven-spring-boot-plugin",
-    "text": "spring-boot-maven-plugin"
+    "section": "spring-boot-maven-plugin — bootRun and bootJar",
+    "anchor": "maven-spring-plugin",
+    "text": "spring-boot-maven-plugin — bootRun and bootJar"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "spring-boot-maven-plugin",
-    "anchor": "maven-spring-boot-plugin",
-    "text": "Provides the goals that make Spring Boot work: repackage creates an executable fat JAR (bound to the package phase automatically when you use spring-boot-starter-parent ), run starts the application with hot-reload via DevTools, and build-image creates an OCI container image using Cloud Native Build"
+    "section": "spring-boot-maven-plugin — bootRun and bootJar",
+    "anchor": "maven-spring-plugin",
+    "text": "The Spring Boot Maven plugin provides bootRun (run the app) and repackage (create a fat JAR). It is bound to the package phase by default when using starter-parent. <plugin>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-maven-plugin</artifactId>\n  <configuration>\n\n    <!-- "
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Layered JARs for Docker",
+    "section": "Layered JAR for Docker",
     "anchor": "maven-spring-layered-jar",
-    "text": "Layered JARs for Docker"
+    "text": "Layered JAR for Docker"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Layered JARs for Docker",
+    "section": "Layered JAR for Docker",
     "anchor": "maven-spring-layered-jar",
-    "text": "By default, the fat JAR packs everything together — meaning a one-line code change rebuilds and re-pushes the full JAR layer in Docker. Layered JARs split the artifact into four layers (dependencies, Spring Boot loader, snapshot-dependencies, application) ordered by change frequency. Docker caches t"
+    "text": "Spring Boot's layered JAR structure separates the application's classes from its dependencies into distinct Docker image layers. Because dependencies change far less often than application code, Docker only rebuilds the upper layers when you push an update — dramatically reducing push/pull times. <p"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Native Image (GraalVM)",
+    "section": "GraalVM Native Image",
     "anchor": "maven-spring-native",
-    "text": "Native Image (GraalVM)"
+    "text": "GraalVM Native Image"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Native Image (GraalVM)",
+    "section": "GraalVM Native Image",
     "anchor": "maven-spring-native",
-    "text": "Spring Boot 3.x supports GraalVM native image compilation via the native-maven-plugin . Native images start in milliseconds and use a fraction of the heap — ideal for serverless and CLI tools. AOT processing runs at build time to generate reflection hints, proxy configurations, and serialization met"
+    "text": "The native-maven-plugin (from GraalVM Buildtools) compiles the Spring Boot application to a platform-native binary. Native images start in under 100ms and use a fraction of the heap compared to a JVM run, at the cost of longer build times. <!-- In a 'native' profile — activate with -Pnative -->\n<pro"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Testcontainers + @ServiceConnection",
-    "anchor": "maven-testcontainers",
-    "text": "Testcontainers + @ServiceConnection"
+    "section": "AOT Processing and DevTools",
+    "anchor": "maven-spring-aot",
+    "text": "AOT Processing and DevTools"
   },
   {
     "page": "Maven Deep Dive",
     "href": "build-tools/maven.html",
-    "section": "Testcontainers + @ServiceConnection",
-    "anchor": "maven-testcontainers",
-    "text": "Spring Boot 3.1+ integrates Testcontainers with @ServiceConnection — the annotation reads the container's exposed port and sets the matching spring.datasource.* / spring.redis.* etc. properties automatically. No manual @DynamicPropertySource needed. <dependency>\n  <groupId>org.springframework.boot</"
+    "section": "AOT Processing and DevTools",
+    "anchor": "maven-spring-aot",
+    "text": "Spring Boot 3+ runs an AOT (Ahead-of-Time) processing step that generates code for GraalVM native images and improves startup performance even on a regular JVM. Spring Boot DevTools enables hot restart during development — changes to classes trigger a fast context restart without a full JVM restart."
   },
   {
     "page": "Maven Deep Dive",
@@ -403,7 +1131,7 @@
     "href": "build-tools/maven.html",
     "section": "Maven Cheatsheet",
     "anchor": "",
-    "text": "Command / Element Purpose Notes mvn compile Compile main sources Output: target/classes mvn test Run unit tests Surefire plugin; skips packaging mvn package Create JAR/WAR Output: target/*.jar mvn verify Run integration tests Failsafe plugin; needs packaged artifact mvn install Install to local repo"
+    "text": "Command / Element Purpose Notes ./mvnw clean package Clean and build JAR Add -DskipTests to skip tests ./mvnw verify Full build incl. integration tests Runs Failsafe; use in CI ./mvnw deploy Build and upload to remote repo Requires <distributionManagement> -pl module -am Build module and its depende"
   },
   {
     "page": "Spring Comprehensive Guide",

@@ -16,483 +16,1754 @@
   </header>
   <div id="content">
 
-    <h1>Gradle Deep Dive</h1>
+    <h1>Gradle (Groovy DSL)</h1>
     <div style="margin-bottom:1.25rem">
       <span class="version-badge badge-gradle">Gradle 8.x</span>
     </div>
-    <p>Gradle is a flexible, high-performance build tool using a Groovy or Kotlin DSL. Unlike Maven's fixed lifecycle, Gradle models the build as a directed acyclic graph (DAG) of tasks — giving you fine-grained control and incremental, cacheable builds out of the box.</p>
+    <p>Gradle is a flexible, high-performance build tool that models a build as a directed acyclic graph (DAG) of tasks. All examples here use the <strong>Groovy DSL</strong> (<code>build.gradle</code>). Unlike Maven's fixed lifecycle, Gradle gives you fine-grained control, incremental and cacheable builds, and a rich plugin ecosystem covering everything from simple JAR packaging to GraalVM native images.</p>
 
     <div class="tab-container">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-general">General Java</button>
-        <button class="tab-btn" data-tab="tab-spring">Spring Ecosystem</button>
+        <button class="tab-btn active" data-tab="tab-basics">Basics</button>
+        <button class="tab-btn" data-tab="tab-deps">Dependencies</button>
+        <button class="tab-btn" data-tab="tab-tasks">Tasks</button>
+        <button class="tab-btn" data-tab="tab-multiproject">Multi-Project</button>
+        <button class="tab-btn" data-tab="tab-testing">Testing</button>
+        <button class="tab-btn" data-tab="tab-plugins">Plugins &amp; Performance</button>
+        <button class="tab-btn" data-tab="tab-publishing">Publishing</button>
+        <button class="tab-btn" data-tab="tab-spring">Spring Boot</button>
       </div>
 
-      <!-- ═══════════ TAB 1: GENERAL JAVA ═══════════ -->
-      <div class="tab-panel active" id="tab-general">
+      <!-- ══════════════ BASICS ══════════════ -->
+      <div class="tab-panel active" id="tab-basics">
 
         <div class="feature-card">
-          <h3 id="gradle-build-file">Build File Structure (Kotlin DSL)</h3>
-          <p>The <code>build.gradle.kts</code> file is Kotlin script that configures the project. Gradle recommends the Kotlin DSL (`.kts`) over the Groovy DSL for new projects because it provides type safety, IDE completion, and refactoring support. The <code>settings.gradle.kts</code> file defines the project name and included subprojects.</p>
-          <pre><code class="language-kotlin">// settings.gradle.kts
-rootProject.name = "my-app"
+          <h3 id="build-gradle-structure">build.gradle — Full Project Structure (Groovy DSL)</h3>
+          <p>The top-level <code>build.gradle</code> defines plugins, project metadata, repositories, dependencies, and task configuration. The Groovy DSL uses plain method calls and closures — no type annotations, no <code>.set()</code> calls.</p>
+          <pre><code class="language-groovy">// build.gradle (Groovy DSL)
 
-// build.gradle.kts
 plugins {
-    java
-    application
+    id 'java'                                            // Java compilation, test, jar
+    id 'application'                                     // adds 'run' task + distribution zip
+    id 'checkstyle'                                      // static analysis
 }
 
-group = "com.example"
-version = "1.0.0"
+// Project coordinates
+group   = 'com.example'
+version = '1.0.0'
+description = 'Order management service'
 
+// Java toolchain — reproducible across machines
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    withSourcesJar()   // produce *-sources.jar
+    withJavadocJar()   // produce *-javadoc.jar
 }
 
+// Repositories searched in declaration order
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }    // Spring milestones
+    mavenLocal()                                         // ~/.m2 (last resort in dev)
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.5.0'
+    runtimeOnly    'org.postgresql:postgresql:42.7.4'
+    compileOnly    'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.0'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
 }
 
+// Configure the application entry point (required by 'application' plugin)
 application {
-    mainClass = "com.example.Main"
+    mainClass = 'com.example.order.OrderApplication'
 }
 
-tasks.test {
+// Fine-tune the test task
+test {
     useJUnitPlatform()
+    maxHeapSize = '1g'
+}
+
+// Compiler options
+compileJava {
+    options.encoding    = 'UTF-8'
+    options.compilerArgs << '-parameters'    // preserve parameter names (needed by Spring)
+}
+
+// Jar manifest
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title':   project.name,
+            'Implementation-Version': project.version
+        )
+    }
 }</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-task-lifecycle">Task DAG &amp; Lifecycle</h3>
-          <p>Gradle builds are not phases — they are a graph of tasks. When you run <code>./gradlew build</code>, Gradle computes which tasks need to run based on dependencies and up-to-date checks, then executes them in dependency order. Incremental builds skip tasks whose inputs and outputs haven't changed.</p>
-          <pre><code class="language-bash"># Show all available tasks
-./gradlew tasks
-
-# Run the build task (compileJava → processResources → classes → jar → test → check → build)
-./gradlew build
-
-# Run only tests
-./gradlew test
-
-# Skip tests
-./gradlew build -x test
-
-# Show the task dependency graph
-./gradlew build --dry-run
-
-# Force re-run even if up-to-date
-./gradlew test --rerun-tasks
-
-# Show task timing
-./gradlew build --profile</code></pre>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Task</th><th>What it does</th></tr></thead>
-              <tbody>
-                <tr><td><code>compileJava</code></td><td>Compile <code>src/main/java</code> → <code>build/classes/java/main</code></td></tr>
-                <tr><td><code>processResources</code></td><td>Copy <code>src/main/resources</code> → <code>build/resources/main</code></td></tr>
-                <tr><td><code>classes</code></td><td>Lifecycle task depending on compileJava + processResources</td></tr>
-                <tr><td><code>jar</code></td><td>Package compiled classes into <code>build/libs/*.jar</code></td></tr>
-                <tr><td><code>test</code></td><td>Run unit tests; report in <code>build/reports/tests/</code></td></tr>
-                <tr><td><code>check</code></td><td>Lifecycle task; depends on test + any other verification tasks</td></tr>
-                <tr><td><code>build</code></td><td>Top-level lifecycle: assemble + check</td></tr>
-                <tr><td><code>clean</code></td><td>Delete <code>build/</code> directory</td></tr>
-              </tbody>
-            </table>
+          <div class="callout tip">
+            <strong>Groovy vs Kotlin DSL</strong>
+            Groovy DSL uses single or double quotes, optional parentheses, and closures (<code>{ }</code>). Kotlin DSL (<code>.kts</code>) requires double quotes everywhere and uses lambdas. This page uses Groovy DSL exclusively.
           </div>
         </div>
 
         <div class="feature-card">
-          <h3 id="gradle-dependency-configs">Dependency Configurations</h3>
-          <p>Dependency configurations in Gradle correspond roughly to Maven scopes, but they're more granular. The Java plugin (and Spring Boot plugin) define the common ones; you can also create custom configurations for specific needs.</p>
-          <pre><code class="language-kotlin">dependencies {
-    // implementation: compile + runtime, NOT exposed to consumers' compile classpath
-    implementation("com.google.guava:guava:33.0-jre")
+          <h3 id="settings-gradle">settings.gradle — Project Name and Submodules</h3>
+          <p><code>settings.gradle</code> is always the entry point for Gradle. It declares the root project name and includes any subprojects. For single-project builds it is minimal; for multi-module builds it lists every subproject path.</p>
+          <pre><code class="language-groovy">// settings.gradle
 
-    // api: compile + runtime, IS exposed to consumers (use sparingly — library modules only)
-    api("org.slf4j:slf4j-api:2.0.12")
+// Required: sets the root project name (also the default artifact ID)
+rootProject.name = 'order-service'
 
-    // compileOnly: compile only, not in runtime (like Maven's provided)
-    compileOnly("org.projectlombok:lombok:1.18.32")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
+// Plugin management — where to resolve plugins from
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+}
 
-    // runtimeOnly: runtime only, not needed to compile (JDBC drivers)
-    runtimeOnly("org.postgresql:postgresql:42.7.3")
+// Dependency resolution management — centralize for all subprojects
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)  // enforce central repos
+    repositories {
+        mavenCentral()
+    }
+    // Point to the version catalog
+    versionCatalogs {
+        libs {
+            from(files('gradle/libs.versions.toml'))
+        }
+    }
+}
 
-    // testImplementation: test compile + runtime
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+// Include subprojects (for multi-module builds)
+include ':api'
+include ':service'
+include ':web'
+include ':common'</code></pre>
+        </div>
 
-    // testRuntimeOnly: test runtime only
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        <div class="feature-card">
+          <h3 id="gradle-wrapper">Gradle Wrapper</h3>
+          <p>The Gradle Wrapper (<code>gradlew</code> / <code>gradlew.bat</code>) pins the Gradle version for a project so everyone on the team — and CI — uses the same version without installing Gradle manually. Always commit the wrapper files.</p>
+          <pre><code class="language-bash"># Generate or upgrade the wrapper to a specific version
+./gradlew wrapper --gradle-version=8.13 --distribution-type=bin
 
-    // testCompileOnly: test compile only
-    testCompileOnly("org.projectlombok:lombok:1.18.32")
+# Use the wrapper for all builds (never use a system-installed gradle)
+./gradlew build
+./gradlew clean build
+./gradlew bootRun</code></pre>
+          <pre><code class="language-properties"># gradle/wrapper/gradle-wrapper.properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists</code></pre>
+          <div class="callout info">
+            <strong>Files to commit</strong>
+            Always commit <code>gradlew</code>, <code>gradlew.bat</code>, <code>gradle/wrapper/gradle-wrapper.jar</code>, and <code>gradle/wrapper/gradle-wrapper.properties</code>. Add <code>.gradle/</code> to <code>.gitignore</code>.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gradle-properties">gradle.properties — Build Configuration</h3>
+          <p><code>gradle.properties</code> in the project root sets Gradle behaviour flags and project properties. Values are available in <code>build.gradle</code> as project properties. Sensitive values (passwords, tokens) belong in <code>~/.gradle/gradle.properties</code> (the <em>user</em> home properties), never in the project file.</p>
+          <pre><code class="language-properties"># gradle.properties (project root — commit this)
+
+# JVM settings for the Gradle build itself (not for the application)
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+
+# Build performance
+org.gradle.parallel=true            # build independent subprojects in parallel
+org.gradle.caching=true             # enable local build cache
+org.gradle.daemon=true              # keep the daemon alive between builds (default true)
+org.gradle.configuration-cache=true # experimental: cache the configuration phase
+
+# Custom project properties — read in build.gradle as `project.appPort`
+appPort=8080
+appEnv=development
+
+# Spring Boot specific
+spring.profiles.active=dev</code></pre>
+          <pre><code class="language-groovy">// Reading gradle.properties values in build.gradle
+bootRun {
+    systemProperty 'server.port', project.findProperty('appPort') ?: '8080'
+    systemProperty 'spring.profiles.active', project.findProperty('spring.profiles.active') ?: 'dev'
+}
+
+// Properties passed via -P flag on the command line:
+// ./gradlew build -PappEnv=staging
+// Access: project.appEnv  or  project.findProperty('appEnv')</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gradle-cli">Command-Line Reference</h3>
+          <p>Gradle's CLI accepts task names, flags, and project properties in any order. Multiple tasks can be chained; Gradle resolves the DAG and executes each task at most once per build.</p>
+          <pre><code class="language-bash"># ── Discovery ──────────────────────────────────────────────────
+./gradlew tasks                       # list all available tasks with descriptions
+./gradlew tasks --all                  # include internal/lifecycle tasks
+./gradlew help --task bootRun          # detailed help for a specific task
+./gradlew properties                   # dump all project properties
+
+# ── Core build lifecycle ────────────────────────────────────────
+./gradlew assemble                     # compile + package (no tests)
+./gradlew check                        # run all verification tasks (tests, lint)
+./gradlew build                        # assemble + check (full build)
+./gradlew clean build                  # delete outputs then full build
+./gradlew clean build --parallel       # run independent subprojects in parallel
+
+# ── Running and testing ─────────────────────────────────────────
+./gradlew run                          # run the application (application plugin)
+./gradlew test                         # run unit tests
+./gradlew test --tests "com.example.order.*"          # filter by package
+./gradlew test --tests "com.example.OrderServiceTest" # specific class
+./gradlew test --tests "*.OrderServiceTest.save*"     # by method pattern
+
+# ── Diagnostics ─────────────────────────────────────────────────
+./gradlew build --info                 # extra lifecycle logging
+./gradlew build --debug                # full debug output
+./gradlew build --stacktrace           # print full stack traces on errors
+./gradlew build --scan                 # publish a Build Scan to scans.gradle.com
+./gradlew dependencies                 # full dependency tree for all configurations
+./gradlew :service:dependencies        # dependency tree for a specific subproject
+./gradlew dependencyInsight --dependency spring-core  # trace why a dep is included
+
+# ── Daemon management ───────────────────────────────────────────
+./gradlew --status                     # show running daemons
+./gradlew --stop                       # stop all daemons
+
+# ── Skipping tasks ──────────────────────────────────────────────
+./gradlew build -x test               # skip the test task
+./gradlew build --continue            # keep going after a failure</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="extra-properties">Extra Properties and the ext Block</h3>
+          <p>The <code>ext</code> block (short for <code>project.extensions.extraProperties</code>) stores arbitrary key-value pairs on the project or any domain object. Use it to centralise version strings or share constants across subprojects.</p>
+          <pre><code class="language-groovy">// Root build.gradle — define shared constants in ext
+ext {
+    javaVersion        = 21
+    springBootVersion  = '3.5.0'
+    lombokVersion      = '1.18.36'
+    postgresVersion    = '42.7.4'
+    junitVersion       = '5.11.4'
+
+    // Computed value
+    isRelease = !version.endsWith('-SNAPSHOT')
+}
+
+// Use in the same build.gradle
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(javaVersion) }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compileOnly    "org.projectlombok:lombok:${lombokVersion}"
+}
+
+// In a subproject — read ext defined in root
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web:${rootProject.ext.springBootVersion}"
+}
+
+// Conditional logic using ext properties
+if (ext.isRelease) {
+    apply plugin: 'signing'
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-basics -->
+
+      <!-- ══════════════ DEPENDENCIES ══════════════ -->
+      <div class="tab-panel" id="tab-deps">
+
+        <div class="feature-card">
+          <h3 id="dep-configurations">Dependency Configurations — When to Use Each</h3>
+          <p>Each configuration controls the classpath scope in which a dependency is visible. Choosing the right one reduces classpath pollution and improves compile times.</p>
+          <pre><code class="language-groovy">dependencies {
+
+    // ── Runtime + compile classpath; leaked to consumers ──
+    // Use for: APIs you expose in your own public method signatures
+    api 'com.example:common-types:1.0.0'
+
+    // ── Runtime + compile classpath; NOT leaked to consumers ──
+    // Use for: internal implementation details (99% of your deps)
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.5.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+
+    // ── Compile classpath only; NOT on runtime classpath ──
+    // Use for: annotations, code generation tools, Servlet API (provided by container)
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+
+    // ── Annotation processors (separate from compileOnly) ──
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // ── Runtime classpath only; NOT available at compile time ──
+    // Use for: JDBC drivers, logging implementations, DB migration tools
+    runtimeOnly 'org.postgresql:postgresql:42.7.4'
+    runtimeOnly 'ch.qos.logback:logback-classic:1.5.15'
+    runtimeOnly 'org.flywaydb:flyway-core:10.21.0'
+
+    // ── Test compile + runtime classpath ──
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.0'
+    testImplementation 'org.testcontainers:postgresql:1.20.4'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+
+    // ── Test runtime only (e.g. JUnit launcher) ──
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // ── Compile-time test annotation processor ──
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+}</code></pre>
+          <div class="callout warn">
+            <strong>api vs implementation</strong>
+            Only use <code>api</code> for dependencies whose types appear in your public API signatures. Every <code>api</code> dependency is recompiled when it changes, affecting downstream consumers. Prefer <code>implementation</code> — it avoids leaking internal dependencies and speeds up incremental compilation.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="rich-versions">Rich Versions and Dynamic Resolution</h3>
+          <p>Gradle's rich version model lets you express constraints beyond a simple version string — strictly pinned, preferred, required ranges, and rejection patterns.</p>
+          <pre><code class="language-groovy">dependencies {
+
+    // ── Dynamic version (resolves at build time — avoid in production) ──
+    implementation 'com.example:some-lib:1.+'          // latest 1.x
+    implementation 'com.example:some-lib:latest.release'
+
+    // ── Version range ──
+    implementation 'com.fasterxml.jackson.core:jackson-databind:[2.16,3.0)'
+
+    // ── Rich versions (use inside a dependency { } closure) ──
+    implementation('com.google.guava:guava') {
+        version {
+            require  '[32.0,)'   // minimum version required
+            prefer   '33.4.0-jre'  // use this if nothing else forces a different version
+            strictly '[33.0,34.0)' // reject anything outside this range
+            reject   '33.1.0-jre'  // never use this specific version (known bug)
+        }
+    }
+
+    // ── Exclude a transitive dependency ──
+    implementation('org.springframework.boot:spring-boot-starter-web:3.5.0') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    // Add Undertow instead
+    implementation 'org.springframework.boot:spring-boot-starter-undertow:3.5.0'
+
+    // ── Disable transitive dependencies entirely ──
+    implementation('com.example:legacy-lib:2.0.0') {
+        transitive = false
+    }
 }</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="gradle-custom-tasks">Custom Tasks</h3>
-          <p>Tasks are first-class objects in Gradle. You can define custom tasks, make them depend on others, and configure inputs/outputs for incremental builds. Declaring inputs and outputs lets Gradle skip the task when nothing has changed.</p>
-          <pre><code class="language-kotlin">// Simple ad-hoc task
-tasks.register("hello") {
-    doLast {
-        println("Hello, Gradle!")
+          <h3 id="resolution-strategy">Dependency Resolution Strategy</h3>
+          <p>Resolution strategies allow you to globally force versions, substitute modules, or fail on dynamic versions — useful for ensuring reproducible builds across teams.</p>
+          <pre><code class="language-groovy">configurations.all {
+    resolutionStrategy {
+
+        // Force a specific version regardless of what dependencies request
+        force 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+        force 'org.yaml:snakeyaml:2.3'
+
+        // Fail the build if any dependency uses a dynamic version
+        failOnDynamicVersions()
+
+        // Fail if any version was changed by conflict resolution
+        // failOnVersionConflict()
+
+        // Cache dynamic versions for this long (default: 24h)
+        cacheDynamicVersionsFor 10, 'minutes'
+
+        // Module substitution — replace one module with another
+        dependencySubstitution {
+            substitute module('log4j:log4j') using module('org.apache.logging.log4j:log4j-core:2.24.2')
+            substitute module('commons-logging:commons-logging') using module('org.slf4j:jcl-over-slf4j:2.0.16')
+        }
     }
 }
 
-// Typed task with inputs/outputs for incrementality
-tasks.register&lt;Copy&gt;("copyConfigs") {
-    from("src/main/config")
-    into(layout.buildDirectory.dir("config"))
+// Enforce consistent versions across a configuration
+configurations.runtimeClasspath {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'org.slf4j') {
+            details.useVersion '2.0.16'
+            details.because 'Align all SLF4J modules'
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="version-catalog">Version Catalogs (libs.versions.toml)</h3>
+          <p>Version catalogs centralise dependency coordinates in <code>gradle/libs.versions.toml</code>. All subprojects share the same catalog, giving you a single place to update versions and ensuring consistent resolution across the build.</p>
+          <pre><code class="language-toml"># gradle/libs.versions.toml
+
+[versions]
+spring-boot   = "3.5.0"
+spring-ai     = "2.0.0"
+jackson       = "2.18.2"
+lombok        = "1.18.36"
+postgres      = "42.7.4"
+testcontainers = "1.20.4"
+mapstruct     = "1.6.3"
+
+[libraries]
+# Spring Boot starters
+spring-boot-starter-web       = { module = "org.springframework.boot:spring-boot-starter-web",       version.ref = "spring-boot" }
+spring-boot-starter-data-jpa  = { module = "org.springframework.boot:spring-boot-starter-data-jpa",  version.ref = "spring-boot" }
+spring-boot-starter-test      = { module = "org.springframework.boot:spring-boot-starter-test",      version.ref = "spring-boot" }
+spring-boot-devtools          = { module = "org.springframework.boot:spring-boot-devtools",          version.ref = "spring-boot" }
+
+# Spring AI
+spring-ai-bom                 = { module = "org.springframework.ai:spring-ai-bom", version.ref = "spring-ai" }
+
+# Third party
+jackson-databind              = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+lombok                        = { module = "org.projectlombok:lombok",               version.ref = "lombok" }
+postgres                      = { module = "org.postgresql:postgresql",               version.ref = "postgres" }
+testcontainers-postgresql     = { module = "org.testcontainers:postgresql",          version.ref = "testcontainers" }
+mapstruct                     = { module = "org.mapstruct:mapstruct",                version.ref = "mapstruct" }
+mapstruct-processor           = { module = "org.mapstruct:mapstruct-processor",      version.ref = "mapstruct" }
+
+[bundles]
+# Bundle: declare multiple deps by a single alias
+spring-web = ["spring-boot-starter-web", "jackson-databind"]
+testing    = ["spring-boot-starter-test", "testcontainers-postgresql"]
+
+[plugins]
+spring-boot            = { id = "org.springframework.boot",                version.ref = "spring-boot" }
+spring-dep-management  = { id = "io.spring.dependency-management",         version = "1.1.7" }
+graalvm-native         = { id = "org.graalvm.buildtools.native",           version = "0.10.4" }</code></pre>
+          <pre><code class="language-groovy">// build.gradle — use catalog aliases
+plugins {
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dep.management)
 }
 
-// Custom task class
-abstract class GenerateVersionTask : DefaultTask() {
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
+dependencies {
+    implementation libs.spring.boot.starter.web      // single lib alias
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.bundles.spring.web           // bundle alias
+    compileOnly    libs.lombok
+    annotationProcessor libs.mapstruct.processor
+    runtimeOnly    libs.postgres
+    testImplementation libs.bundles.testing
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="bom-platform">BOM and Platform Imports</h3>
+          <p>A BOM (Bill of Materials) enforces consistent versions across a set of related dependencies. Use <code>platform()</code> to import a BOM — the BOM's version recommendations are applied as constraints, not forced versions. Use <code>enforcedPlatform()</code> to override any dependency's own version.</p>
+          <pre><code class="language-groovy">dependencies {
+
+    // ── Import a BOM (recommended — respects local overrides) ──
+    implementation platform('org.springframework.boot:spring-boot-dependencies:3.5.0')
+
+    // After importing the BOM, omit versions for managed dependencies:
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // ── Import multiple BOMs (order matters — first BOM wins on conflict) ──
+    implementation platform('org.springframework.cloud:spring-cloud-dependencies:2024.0.1')
+    implementation platform('org.springframework.ai:spring-ai-bom:2.0.0')
+
+    // ── Enforced platform (overrides all, including transitive) ──
+    // Use sparingly — prevents apps from overriding versions
+    implementation enforcedPlatform('com.fasterxml.jackson:jackson-bom:2.18.2')
+    implementation 'com.fasterxml.jackson.core:jackson-databind'  // version from BOM
+}
+
+// Verify BOM is applied — show resolved versions:
+// ./gradlew dependencies --configuration runtimeClasspath | grep jackson</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="dep-insight">Viewing and Diagnosing Dependencies</h3>
+          <p>Gradle provides rich CLI commands for inspecting the resolved dependency graph, tracing why a particular version was chosen, and identifying unwanted transitive inclusions.</p>
+          <pre><code class="language-bash"># Full dependency tree for the runtimeClasspath configuration
+./gradlew dependencies --configuration runtimeClasspath
+
+# Show why spring-core is on the classpath and which version won
+./gradlew dependencyInsight --dependency spring-core --configuration runtimeClasspath
+
+# Dependency tree for a specific subproject
+./gradlew :service:dependencies
+
+# Generate an HTML dependency report (outputs to build/reports/project/dependencies/)
+./gradlew htmlDependencyReport
+
+# Check for dependency updates (requires the versions plugin)
+./gradlew dependencyUpdates          # needs id 'com.github.ben-manes.versions'</code></pre>
+          <pre><code class="language-groovy">// build.gradle — add the versions-checker plugin for update reports
+plugins {
+    id 'com.github.ben-manes.versions' version '0.51.0'
+}
+
+// Filter out non-stable releases from the update report
+dependencyUpdates {
+    rejectVersionIf {
+        def v = it.candidate.version
+        ['alpha','beta','rc','cr','m','preview'].any { q -> v.toLowerCase().contains(q) }
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-deps -->
+
+      <!-- ══════════════ TASKS ══════════════ -->
+      <div class="tab-panel" id="tab-tasks">
+
+        <div class="feature-card">
+          <h3 id="builtin-task-types">Built-In Task Types</h3>
+          <p>Gradle ships task types for the most common operations. Use these instead of custom <code>Exec</code> calls where possible — they participate in incremental build and build cache.</p>
+          <pre><code class="language-groovy">// ── Copy files ──
+tasks.register('copyConfig', Copy) {
+    group       = 'build'
+    description = 'Copy environment config to build output directory'
+    from 'src/main/config'
+    into "${buildDir}/resources/main"
+    include '*.properties', '*.yml'
+    filter { line -> line.replace('__VERSION__', project.version.toString()) }
+}
+
+// ── Delete files ──
+tasks.register('cleanGeneratedSources', Delete) {
+    group       = 'build'
+    description = 'Remove generated source files'
+    delete "${projectDir}/src/generated"
+    delete fileTree(buildDir) { include '**/*.tmp' }
+}
+
+// ── Run a Java main class ──
+tasks.register('seedDatabase', JavaExec) {
+    group       = 'application'
+    description = 'Populate the database with seed data'
+    classpath   = sourceSets.main.runtimeClasspath
+    mainClass   = 'com.example.order.tools.DatabaseSeeder'
+    args        = ['--env', 'dev', '--count', '1000']
+    jvmArgs     = ['-Xmx512m', '-Dspring.profiles.active=dev']
+}
+
+// ── Run a shell command ──
+tasks.register('generateOpenApiSpec', Exec) {
+    group       = 'documentation'
+    description = 'Generate OpenAPI spec using the running server'
+    commandLine 'curl', '-s', 'http://localhost:8080/v3/api-docs', '-o', 'api-spec.json'
+}
+
+// ── Create an additional JAR (e.g. sources-only archive) ──
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// ── Zip release artifacts ──
+tasks.register('releaseBundle', Zip) {
+    archiveFileName = "order-service-${project.version}.zip"
+    destinationDirectory = file("${buildDir}/release")
+    from bootJar
+    from file('README.md')
+    from file('CHANGELOG.md')
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="custom-tasks">Custom Task Classes with Incremental Build</h3>
+          <p>Define a custom task class with annotated inputs and outputs so Gradle can determine whether the task is up-to-date and skip it when nothing changed.</p>
+          <pre><code class="language-groovy">// buildSrc/src/main/groovy/com/example/GenerateVersionFileTask.groovy
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
+
+@CacheableTask   // makes the task cacheable in the build cache
+abstract class GenerateVersionFileTask extends DefaultTask {
+
+    @Input
+    abstract Property&lt;String&gt; getVersion()
+
+    @Input
+    abstract Property&lt;String&gt; getBuildTime()
+
+    @OutputFile
+    abstract RegularFileProperty getOutputFile()
 
     @TaskAction
-    fun generate() {
-        outputFile.get().asFile.writeText("version=${project.version}")
+    void generate() {
+        outputFile.get().asFile.text = """\
+            app.version=${version.get()}
+            app.build-time=${buildTime.get()}
+            """.stripIndent()
     }
 }
 
-tasks.register&lt;GenerateVersionTask&gt;("generateVersion") {
-    outputFile = layout.buildDirectory.file("version.txt")
+// ── Use the custom task in build.gradle ──
+tasks.register('generateVersionFile', GenerateVersionFileTask) {
+    group       = 'build'
+    description = 'Write version info to a properties file'
+    version     = project.version.toString()
+    buildTime   = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    outputFile  = layout.buildDirectory.file('resources/main/version.properties')
 }
 
-// Make a task depend on another
-tasks.named("processResources") {
-    dependsOn("generateVersion")
+// Ensure the file is generated before resources are processed
+processResources.dependsOn generateVersionFile</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="task-dependencies">Task Dependencies and Ordering</h3>
+          <p>Gradle resolves a task DAG from dependency declarations. Declare <em>semantic</em> dependencies with <code>dependsOn</code>; use ordering hints (<code>mustRunAfter</code>) when tasks are independent but must not run concurrently in a certain order.</p>
+          <pre><code class="language-groovy">// ── dependsOn: task A must complete before task B can start ──
+tasks.register('generateCode') {
+    doLast { println 'Code generation complete' }
+}
+
+tasks.register('compileGeneratedCode') {
+    dependsOn 'generateCode'     // explicit dependency
+    doLast { println 'Compilation complete' }
+}
+
+// ── finalizedBy: run cleanup task after main task, even on failure ──
+tasks.register('integrationTest', Test) {
+    description = 'Run integration tests'
+    group       = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath       = sourceSets.integrationTest.runtimeClasspath
+    finalizedBy 'stopTestContainers'   // always stop containers after tests
+}
+
+tasks.register('stopTestContainers') {
+    doLast { println 'Stopping test containers' }
+}
+
+// ── mustRunAfter: ordering without dependency (both may not always run) ──
+test.mustRunAfter compileJava
+integrationTest.mustRunAfter test
+
+// ── doFirst / doLast: add actions to existing tasks ──
+test {
+    doFirst {
+        println "Starting test run with ${maxParallelForks} parallel forks"
+    }
+    doLast {
+        println "Test results: ${testResultsDir}"
+    }
+}
+
+// ── taskGraph.whenReady: react to the full resolved task graph ──
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(':release')) {
+        println "RELEASE BUILD — signing will be applied"
+    }
 }</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="gradle-multi-project">Multi-Project Builds</h3>
-          <p>Multi-project builds use <code>settings.gradle.kts</code> to declare included subprojects. A root <code>build.gradle.kts</code> can apply common configuration to all subprojects using <code>allprojects {}</code> or <code>subprojects {}</code>. Subprojects declare dependencies on siblings by project path.</p>
-          <pre><code class="language-kotlin">// settings.gradle.kts
-rootProject.name = "my-platform"
-include("common", "service", "api")
+          <h3 id="incremental-builds">Incremental Builds and Build Cache</h3>
+          <p>Gradle skips tasks whose inputs and outputs have not changed since the last build (<em>up-to-date</em> check). With the build cache enabled, outputs from a previous build — even on another machine — can be reused (<em>cache hit</em>).</p>
+          <pre><code class="language-bash"># Run the build — Gradle checks inputs/outputs
+./gradlew build
+# Output example:
+# > Task :compileJava UP-TO-DATE       (inputs unchanged — skipped)
+# > Task :processResources UP-TO-DATE
+# > Task :test UP-TO-DATE
+# > Task :bootJar UP-TO-DATE
 
-// Root build.gradle.kts — shared config
+# Force re-run of a specific task (ignore up-to-date check)
+./gradlew test --rerun-tasks
+
+# Enable the local build cache (also set in gradle.properties)
+./gradlew build --build-cache
+
+# Clear the local build cache
+./gradlew cleanBuildCache</code></pre>
+          <pre><code class="language-groovy">// gradle.properties — enable caching
+org.gradle.caching=true
+
+// Configure remote build cache (e.g. Gradle Enterprise / Develocity)
+buildCache {
+    local {
+        enabled = true
+        removeUnusedEntriesAfterDays = 30
+    }
+    remote(HttpBuildCache) {
+        url = 'https://cache.example.com/cache/'
+        credentials {
+            username = System.getenv('CACHE_USER')
+            password = System.getenv('CACHE_PASSWORD')
+        }
+        push = System.getenv('CI') == 'true'   // only push from CI
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="task-lifecycle">Task Lifecycle — Configuration vs Execution</h3>
+          <p>Gradle builds in two phases: <em>configuration</em> (all <code>build.gradle</code> files evaluated, task DAG assembled) and <em>execution</em> (selected tasks run in DAG order). Code inside a task closure but outside <code>doFirst {}</code> / <code>doLast {}</code> runs at configuration time — a common mistake.</p>
+          <pre><code class="language-groovy">// ── WRONG — println runs at configuration time for every ./gradlew invocation ──
+tasks.register('badTask') {
+    println 'This runs even if badTask is not selected!'  // ← configuration-time side effect
+    doLast {
+        println 'This runs at execution time'
+    }
+}
+
+// ── CORRECT — configuration code reads properties, execution code does work ──
+tasks.register('generateReport') {
+    group       = 'reporting'
+    description = 'Generate HTML report'
+    // Configuration: declare inputs/outputs
+    def outputDir = layout.buildDirectory.dir('reports/custom')
+    outputs.dir(outputDir)
+
+    doLast {
+        // Execution: do the actual work
+        println "Writing report to ${outputDir.get()}"
+        outputDir.get().asFile.mkdirs()
+        new File(outputDir.get().asFile, 'report.html').text = '&lt;html&gt;&lt;body&gt;Report&lt;/body&gt;&lt;/html&gt;'
+    }
+}
+
+// ── Lazy evaluation with providers — avoids configuration-time evaluation ──
+tasks.register('printVersion') {
+    doLast {
+        // providers.provider {} is lazy — evaluated at execution time
+        def ver = providers.provider { project.version }.get()
+        println "Version: ${ver}"
+    }
+}</code></pre>
+          <div class="callout warn">
+            <strong>Configuration cache</strong>
+            When <code>org.gradle.configuration-cache=true</code> is set, the configuration phase result is cached. Tasks must not capture non-serialisable objects at configuration time (e.g. direct references to <code>project</code> inside <code>doLast {}</code>). Use <code>providers</code> and <code>layout</code> APIs instead.
+          </div>
+        </div>
+
+      </div><!-- /tab-tasks -->
+
+      <!-- ══════════════ MULTI-PROJECT ══════════════ -->
+      <div class="tab-panel" id="tab-multiproject">
+
+        <div class="feature-card">
+          <h3 id="multiproject-settings">Multi-Project settings.gradle</h3>
+          <p>Declare all subprojects in <code>settings.gradle</code>. Each subproject path maps to a directory relative to the root. Gradle resolves subproject directories automatically.</p>
+          <pre><code class="language-groovy">// settings.gradle (root)
+rootProject.name = 'ecommerce-platform'
+
+// Include subprojects — directory structure:
+// ecommerce-platform/
+//   common/
+//   api/
+//   service/
+//   web/
+//   build-conventions/   (shared build logic)
+include ':common'
+include ':api'
+include ':service'
+include ':web'
+include ':build-conventions'
+
+// Non-standard directory name — project path vs directory
+include ':payment-gateway'
+project(':payment-gateway').projectDir = file('modules/payment')
+
+// Composite build — include another Gradle build as a dependency
+includeBuild '../shared-libraries'</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="root-build-gradle">Root build.gradle — allprojects and subprojects</h3>
+          <p>The root <code>build.gradle</code> configures behaviour common to all subprojects. Prefer <code>subprojects {}</code> (excludes root) over <code>allprojects {}</code> (includes root) for dependency configuration.</p>
+          <pre><code class="language-groovy">// Root build.gradle
+
+// Shared version constants
+ext {
+    springBootVersion = '3.5.0'
+    lombokVersion     = '1.18.36'
+}
+
+// Apply configuration to ALL subprojects
 subprojects {
-    apply(plugin = "java")
+    apply plugin: 'java'
+
+    java {
+        toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    }
 
     repositories {
         mavenCentral()
     }
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
+    dependencies {
+        // Every subproject gets Lombok
+        compileOnly    "org.projectlombok:lombok:${rootProject.ext.lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${rootProject.ext.lombokVersion}"
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+        testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
     }
 
-    tasks.withType&lt;Test&gt; {
+    test {
         useJUnitPlatform()
     }
+
+    // Fail the build if tests fail in any subproject
+    test.ignoreFailures = false
 }
 
-// service/build.gradle.kts
-plugins { java }
-
-dependencies {
-    implementation(project(":common"))  // sibling project dependency
+// Configure only Java-library subprojects
+configure(subprojects.findAll { it.name in [':common', ':api'] }) {
+    apply plugin: 'java-library'
 }
 
-// Build one subproject and its dependencies
-// ./gradlew :service:build
-// Build all subprojects
-// ./gradlew build</code></pre>
+// Cross-project dependencies
+project(':service') {
+    dependencies {
+        implementation project(':common')
+        implementation project(':api')
+    }
+}
+
+project(':web') {
+    dependencies {
+        implementation project(':service')
+        implementation project(':api')
+    }
+}</code></pre>
         </div>
 
         <div class="feature-card">
-          <h3 id="gradle-wrapper">Gradle Wrapper</h3>
-          <p>The Gradle Wrapper (<code>gradlew</code>) pins the exact Gradle version for the project and auto-downloads it on first run. Commit the wrapper files — never the Gradle distribution itself. CI servers and other developers automatically use the same version without any installation.</p>
-          <pre><code class="language-bash"># Generate wrapper (requires Gradle installed once)
-gradle wrapper --gradle-version 8.8
-
-# Files created:
-# gradlew                               (Unix shell script)
-# gradlew.bat                           (Windows batch)
-# gradle/wrapper/gradle-wrapper.jar     (minimal bootstrapper)
-# gradle/wrapper/gradle-wrapper.properties
-
-# Use exactly like gradle:
-./gradlew build
-./gradlew bootRun</code></pre>
-          <pre><code class="language-properties"># gradle/wrapper/gradle-wrapper.properties
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.8-bin.zip
-networkTimeout=10000
-validateDistributionUrl=true
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists</code></pre>
-        </div>
-
-      </div><!-- /tab-general -->
-
-      <!-- ═══════════ TAB 2: SPRING ECOSYSTEM ═══════════ -->
-      <div class="tab-panel" id="tab-spring">
-
-        <div class="feature-card">
-          <h3 id="gradle-spring-boot-plugin">org.springframework.boot Plugin</h3>
-          <p>The <code>org.springframework.boot</code> plugin is the entry point for all Spring Boot Gradle builds. It adds <code>bootJar</code> (executable fat JAR), <code>bootRun</code> (run with DevTools), and <code>bootBuildImage</code> (OCI image) tasks. It also disables the plain <code>jar</code> task by default and configures the main class automatically if only one <code>@SpringBootApplication</code> class exists.</p>
-          <pre><code class="language-kotlin">// build.gradle.kts
+          <h3 id="buildsrc">buildSrc — Shared Build Logic</h3>
+          <p><code>buildSrc</code> is a special Gradle subproject whose compiled classes are automatically available on the classpath of every <code>build.gradle</code> in the project. Use it for shared task types, custom plugins, and convention plugins.</p>
+          <pre><code class="language-text">buildSrc/
+  build.gradle
+  src/
+    main/
+      groovy/
+        com/example/build/
+          JavaConventionsPlugin.groovy
+        java-conventions.gradle      ← precompiled script plugin
+</code></pre>
+          <pre><code class="language-groovy">// buildSrc/build.gradle
 plugins {
-    java
-    id("org.springframework.boot") version "3.3.4"
-    id("io.spring.dependency-management") version "1.1.6"
+    id 'groovy-gradle-plugin'   // enables precompiled script plugins
 }
 
-group = "com.example"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-repositories {
-    mavenCentral()
-}
+repositories { gradlePluginPortal() }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType&lt;Test&gt; {
-    useJUnitPlatform()
+    // Plugins used by the build logic itself
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.5.0'
 }</code></pre>
-          <pre><code class="language-bash">./gradlew bootRun          # Run with DevTools hot reload
-./gradlew bootJar          # Build executable fat JAR → build/libs/*.jar
-./gradlew build            # Compile + test + bootJar
-java -jar build/libs/my-app-0.0.1-SNAPSHOT.jar</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-dependency-management">io.spring.dependency-management Plugin</h3>
-          <p>Imports the Spring Boot BOM so all Spring dependency versions are managed centrally — just like <code>spring-boot-starter-parent</code> does in Maven. Without this plugin you'd need to specify versions on every Spring dependency. Alternatively you can use Gradle's native <code>platform()</code> / <code>enforcedPlatform()</code> BOM support instead of this plugin.</p>
-          <pre><code class="language-kotlin">// Option A: io.spring.dependency-management plugin (classic)
-plugins {
-    id("io.spring.dependency-management") version "1.1.6"
-}
-// No versions needed on Spring starters — managed by BOM
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("org.postgresql:postgresql")
-}
-
-// Option B: Gradle native BOM platform (no plugin needed)
-dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.3.4"))
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("org.postgresql:postgresql")
-}
-
-// Override a managed version in either option
-extra["jackson.version"] = "2.17.1"</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-layered-jar">Layered JARs for Docker</h3>
-          <p>Layered JARs split the fat JAR into Docker-cacheable layers ordered by change frequency: dependencies (rarely change), Spring Boot loader, snapshot dependencies, and application classes (change on every commit). The Docker build only re-uploads the thin application layer on most changes, cutting image push times dramatically.</p>
-          <pre><code class="language-kotlin">// Layered JARs are enabled by default in Spring Boot 3.x Gradle plugin
-// Explicitly configure custom layers if needed:
-tasks.named&lt;org.springframework.boot.gradle.tasks.bundling.BootJar&gt;("bootJar") {
-    layered {
-        application {
-            intoLayer("spring-boot-loader") {
-                include("org/springframework/boot/loader/**")
-            }
-            intoLayer("application")
-        }
-        dependencies {
-            intoLayer("snapshot-dependencies") {
-                include("*:*:*SNAPSHOT")
-            }
-            intoLayer("dependencies")
-        }
-        layerOrder.addAll("dependencies", "spring-boot-loader",
-                          "snapshot-dependencies", "application")
-    }
-}</code></pre>
-          <pre><code class="language-dockerfile"># Dockerfile using layered extraction
-FROM eclipse-temurin:21-jre AS builder
-WORKDIR /app
-COPY build/libs/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
-
-FROM eclipse-temurin:21-jre
-WORKDIR /app
-COPY --from=builder /app/dependencies/ ./
-COPY --from=builder /app/spring-boot-loader/ ./
-COPY --from=builder /app/snapshot-dependencies/ ./
-COPY --from=builder /app/application/ ./
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-build-image">bootBuildImage (Cloud Native Buildpacks)</h3>
-          <p><code>bootBuildImage</code> creates an OCI-compliant container image using Cloud Native Buildpacks — no Dockerfile required. It detects your Java version, sets memory limits intelligently, and produces a production-ready image. The Spring Boot Gradle plugin configures Paketo Buildpacks by default.</p>
-          <pre><code class="language-kotlin">// Configure image name and builder
-tasks.named&lt;org.springframework.boot.gradle.tasks.bundling.BootBuildImage&gt;("bootBuildImage") {
-    imageName = "myregistry/my-app:${project.version}"
-    // Use a specific builder (default is paketobuildpacks/builder-jammy-base)
-    builder = "paketobuildpacks/builder-jammy-base:latest"
-    // Pass environment to the buildpack
-    environment = mapOf(
-        "BP_JVM_VERSION" to "21",
-        "BPE_SPRING_PROFILES_ACTIVE" to "production"
-    )
-    // Push to registry after build
-    publish = false
-    docker {
-        publishRegistry {
-            username = System.getenv("DOCKER_USERNAME")
-            password = System.getenv("DOCKER_PASSWORD")
-        }
-    }
-}</code></pre>
-          <pre><code class="language-bash">./gradlew bootBuildImage                   # Build OCI image locally
-./gradlew bootBuildImage --imageName=myapp # Override image name
-docker run --rm -p 8080:8080 myregistry/my-app:0.0.1-SNAPSHOT</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-native">Native Image (GraalVM)</h3>
-          <p>The <code>org.graalvm.buildtools.native</code> plugin enables AOT compilation to a GraalVM native binary. Native images start in &lt;50ms and use a fraction of the JVM heap — ideal for AWS Lambda, Google Cloud Run, and CLI tools. Spring Boot 3.x includes all necessary AOT processing.</p>
-          <pre><code class="language-kotlin">plugins {
-    java
-    id("org.springframework.boot") version "3.3.4"
-    id("io.spring.dependency-management") version "1.1.6"
-    id("org.graalvm.buildtools.native") version "0.10.2"
-}
-
-graalvmNative {
-    binaries {
-        named("main") {
-            imageName = "my-app"
-            buildArgs.add("--verbose")
-        }
-    }
-    // Test support
-    testSupport = true
-}</code></pre>
-          <pre><code class="language-bash"># Compile to native binary (requires GraalVM JDK)
-./gradlew nativeCompile
-
-# Run the native binary
-build/native/nativeCompile/my-app
-
-# Or build OCI image with native binary (no local GraalVM needed)
-./gradlew bootBuildImage -PnativeImage=true
-
-# Run native tests
-./gradlew nativeTest</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-testcontainers">Testcontainers + @ServiceConnection</h3>
-          <p>Spring Boot 3.1+ works with Testcontainers using <code>@ServiceConnection</code> — the annotation wires the container's dynamic port to the matching Spring property automatically. Gradle includes Testcontainers BOM management when using the Spring dependency-management plugin.</p>
-          <pre><code class="language-kotlin">dependencies {
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
-}</code></pre>
-          <pre><code class="language-java">@SpringBootTest
-@Testcontainers
-class ProductRepositoryTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer&lt;?&gt; postgres =
-            new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
-
-    @Autowired ProductRepository repo;
-
-    @Test
-    void persistsProduct() {
-        repo.save(new Product("Widget", 9.99));
-        assertThat(repo.count()).isEqualTo(1);
-    }
-}</code></pre>
-        </div>
-
-        <div class="feature-card">
-          <h3 id="gradle-kotlin-dsl-spring">Kotlin DSL Tips for Spring Projects</h3>
-          <p>When writing Spring Boot builds in Kotlin DSL, a few patterns come up constantly: configuring compiler options for Kotlin projects, using <code>extra[]</code> to override managed versions, and using <code>tasks.withType&lt;&gt;</code> for type-safe task configuration.</p>
-          <pre><code class="language-kotlin">import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+          <pre><code class="language-groovy">// buildSrc/src/main/groovy/java-conventions.gradle
+// Precompiled script plugin — apply with: plugins { id 'java-conventions' }
 
 plugins {
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.spring") version "2.0.0"     // opens classes for proxies
-    kotlin("plugin.jpa") version "2.0.0"        // no-arg for JPA entities
-    id("org.springframework.boot") version "3.3.4"
-    id("io.spring.dependency-management") version "1.1.6"
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
 }
 
 java {
     toolchain { languageVersion = JavaLanguageVersion.of(21) }
 }
 
-tasks.withType&lt;KotlinCompile&gt; {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+repositories { mavenCentral() }
+
+dependencies {
+    compileOnly    'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+}
+
+test {
+    useJUnitPlatform()
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
+
+checkstyle {
+    toolVersion = '10.21.2'
+    configFile  = rootProject.file('config/checkstyle/checkstyle.xml')
+}</code></pre>
+          <pre><code class="language-groovy">// Any subproject build.gradle — apply the convention plugin
+plugins {
+    id 'java-conventions'   // from buildSrc — no version needed
+}
+
+// Add subproject-specific deps on top of the convention
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.0'
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="composite-builds">Composite Builds</h3>
+          <p>Composite builds let you include an external Gradle build as if it were a local subproject. Gradle substitutes published artifacts with the local build, making cross-repository development seamless without publishing snapshots.</p>
+          <pre><code class="language-groovy">// settings.gradle — include an external build
+rootProject.name = 'my-app'
+
+includeBuild '../shared-lib' {
+    // Replace any published artifact with the local source build
+    dependencySubstitution {
+        substitute module('com.example:shared-lib') using project(':')
     }
 }
 
+includeBuild '../build-conventions'</code></pre>
+          <pre><code class="language-groovy">// my-app/build.gradle — reference as if published artifact
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Resolved from the local ../shared-lib build, not Maven Central
+    implementation 'com.example:shared-lib:1.0-SNAPSHOT'
 }
 
-// Override a BOM-managed version
-extra["jackson.version"] = "2.17.1"</code></pre>
+// Build shared-lib and my-app together:
+// ./gradlew :my-app:build   (automatically builds shared-lib first)</code></pre>
+        </div>
+
+      </div><!-- /tab-multiproject -->
+
+      <!-- ══════════════ TESTING ══════════════ -->
+      <div class="tab-panel" id="tab-testing">
+
+        <div class="feature-card">
+          <h3 id="junit5-setup">JUnit 5 Setup</h3>
+          <p>JUnit 5 (JUnit Platform) requires explicit opt-in via <code>useJUnitPlatform()</code>. The single <code>junit-jupiter</code> dependency pulls in the JUnit 5 API, engine, and params module.</p>
+          <pre><code class="language-groovy">dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
+
+    // Ensure the launcher is on the runtime classpath (Gradle 8.3+)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+
+    // Show test results in the console
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showExceptions     = true
+        showCauses         = true
+        showStackTraces    = true
+        exceptionFormat    = 'full'
+    }
+
+    // Fail the build immediately on the first test failure
+    failFast = false
+
+    // Set maximum heap for test JVM
+    maxHeapSize = '1g'
+
+    // Pass system properties to tests
+    systemProperty 'spring.profiles.active', 'test'
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="parallel-tests">Parallel Execution and Test Filtering</h3>
+          <p>Gradle can run test classes across multiple JVMs simultaneously via <code>maxParallelForks</code>. Use <code>--tests</code> on the CLI or <code>include</code>/<code>exclude</code> in the task to filter which tests run.</p>
+          <pre><code class="language-groovy">test {
+    useJUnitPlatform()
+
+    // Run tests in multiple JVM forks (class-level parallelism)
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    // JUnit 5 method-level parallelism (within a single JVM fork)
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+
+    // Class filter — only run classes matching these patterns
+    include '**/*Test.class'
+    include '**/*Tests.class'
+    include '**/*Spec.class'
+    exclude '**/*IT.class'          // exclude integration tests from unit test task
+
+    // Tag-based filtering (JUnit 5 tags)
+    useJUnitPlatform {
+        includeTags 'unit'           // @Tag("unit")
+        excludeTags 'slow', 'manual'
+    }
+}</code></pre>
+          <pre><code class="language-bash"># Filter tests from the command line
+./gradlew test --tests "com.example.*"                          # entire package
+./gradlew test --tests "com.example.order.OrderServiceTest"     # single class
+./gradlew test --tests "com.example.order.OrderServiceTest.save*" # method pattern
+./gradlew test --tests "*.OrderServiceTest"                     # any package
+
+# Rerun only failed tests from the previous run
+./gradlew test --rerun</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="integration-tests">Integration Tests — Separate Source Set</h3>
+          <p>Separate integration tests from unit tests using a custom source set. This gives them their own classpath, allows them to depend on the compiled application, and lets CI run them independently from unit tests.</p>
+          <pre><code class="language-groovy">// Declare the integrationTest source set
+sourceSets {
+    integrationTest {
+        java.srcDir   'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        // Access compiled main classes
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+// Integration test configuration inherits from testImplementation
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+// Integration test dependencies
+dependencies {
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.0'
+    integrationTestImplementation 'org.testcontainers:postgresql:1.20.4'
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+}
+
+// Create the integrationTest task
+tasks.register('integrationTest', Test) {
+    description = 'Run integration tests'
+    group       = 'verification'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath       = sourceSets.integrationTest.runtimeClasspath
+
+    useJUnitPlatform()
+    shouldRunAfter test          // unit tests first, then integration tests
+
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+// Include integrationTest in the check lifecycle
+check.dependsOn integrationTest</code></pre>
+          <pre><code class="language-bash"># Run only integration tests
+./gradlew integrationTest
+
+# Run unit tests then integration tests
+./gradlew test integrationTest
+
+# Run everything via check (which now includes integrationTest)
+./gradlew check</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="jacoco">JaCoCo Code Coverage</h3>
+          <p>The JaCoCo plugin generates coverage reports after the test task runs. Configure minimum thresholds to fail the build if coverage drops below acceptable levels.</p>
+          <pre><code class="language-groovy">plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport   // generate report after tests complete
+}
+
+jacocoTestReport {
+    dependsOn test    // tests must run before the report is generated
+    reports {
+        xml.required  = true    // for CI / SonarQube
+        html.required = true    // human-readable report
+        csv.required  = false
+    }
+    // Exclude generated / boilerplate classes from the report
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                'com/example/**/dto/**',
+                'com/example/**/config/**',
+                '**/*Application.class'
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80    // 80% line coverage required
+            }
+        }
+        rule {
+            enabled = true
+            element = 'CLASS'
+            excludes = ['com.example.order.OrderApplication']
+            limit {
+                counter = 'BRANCH'
+                value   = 'COVEREDRATIO'
+                minimum = 0.75
+            }
+        }
+    }
+}
+
+// Include coverage verification in the check lifecycle
+check.dependsOn jacocoTestCoverageVerification</code></pre>
+          <pre><code class="language-bash"># Generate the coverage report
+./gradlew jacocoTestReport
+# Open: build/reports/jacoco/test/html/index.html
+
+# Verify coverage thresholds (fails build if below minimum)
+./gradlew jacocoTestCoverageVerification</code></pre>
+        </div>
+
+      </div><!-- /tab-testing -->
+
+      <!-- ══════════════ PLUGINS & PERFORMANCE ══════════════ -->
+      <div class="tab-panel" id="tab-plugins">
+
+        <div class="feature-card">
+          <h3 id="applying-plugins">Applying Plugins</h3>
+          <p>Plugins are the primary extension mechanism in Gradle. The <code>plugins {}</code> block (preferred) resolves plugins from the Gradle Plugin Portal and applies them atomically. Legacy <code>apply plugin:</code> is still valid for plugins not on the portal or for conditional application.</p>
+          <pre><code class="language-groovy">// ── Preferred: plugins {} block ──
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+    id 'checkstyle'
+
+    // Community plugins from Gradle Plugin Portal
+    id 'org.springframework.boot'        version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.cloud.tools.jib'      version '3.4.4'
+    id 'com.github.ben-manes.versions'   version '0.51.0'
+    id 'com.gorylenko.gradle-git-properties' version '2.4.2'
+}
+
+// ── Legacy apply (needed for conditional application or local plugins) ──
+if (project.hasProperty('enableProfiling')) {
+    apply plugin: 'com.example.profiling-plugin'
+}
+
+// ── Apply a script plugin (a .gradle file with shared config) ──
+apply from: 'gradle/code-quality.gradle'
+apply from: "${rootDir}/gradle/publishing.gradle"</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="custom-plugin">Writing a Custom Gradle Plugin</h3>
+          <p>A custom plugin encapsulates reusable build logic. Define it in <code>buildSrc</code> (project-local) or a standalone plugin project (shareable via the Plugin Portal).</p>
+          <pre><code class="language-groovy">// buildSrc/src/main/groovy/com/example/build/BannerPlugin.groovy
+package com.example.build
+
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+
+class BannerPlugin implements Plugin&lt;Project&gt; {
+
+    @Override
+    void apply(Project project) {
+        // Register an extension so users can configure the plugin
+        def extension = project.extensions.create('banner', BannerExtension)
+
+        // Register a task that uses the extension
+        project.tasks.register('printBanner') {
+            group       = 'application'
+            description = 'Print the application start banner'
+            doLast {
+                println "=" * 60
+                println "  App:     ${extension.appName.getOrElse(project.name)}"
+                println "  Version: ${project.version}"
+                println "  Env:     ${extension.environment.getOrElse('development')}"
+                println "=" * 60
+            }
+        }
+
+        // Make bootRun print the banner first
+        project.tasks.matching { it.name == 'bootRun' }.configureEach {
+            dependsOn 'printBanner'
+        }
+    }
+}
+
+// buildSrc/src/main/groovy/com/example/build/BannerExtension.groovy
+import org.gradle.api.provider.Property
+
+abstract class BannerExtension {
+    abstract Property&lt;String&gt; getAppName()
+    abstract Property&lt;String&gt; getEnvironment()
+}</code></pre>
+          <pre><code class="language-groovy">// build.gradle — use the custom plugin
+plugins {
+    id 'com.example.banner-plugin'   // from buildSrc
+}
+
+banner {
+    appName   = 'Order Service'
+    environment = findProperty('env') ?: 'development'
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gradle-daemon">Gradle Daemon and Performance</h3>
+          <p>The Gradle Daemon is a long-lived JVM process that keeps the build warm between invocations, dramatically reducing startup time. It is enabled by default. The configuration cache takes this further by caching the configuration phase result.</p>
+          <pre><code class="language-properties"># gradle.properties — performance tuning
+org.gradle.daemon=true                 # keep the daemon alive (default)
+org.gradle.parallel=true               # build independent subprojects concurrently
+org.gradle.caching=true                # enable local build cache
+org.gradle.configuration-cache=true   # cache the configuration phase (Gradle 8.1+)
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m
+org.gradle.workers.max=8              # max worker threads (default: CPU count)</code></pre>
+          <pre><code class="language-bash"># Daemon management
+./gradlew --status           # list running daemons
+./gradlew --stop             # stop all daemons for this Gradle version
+./gradlew --no-daemon        # run without daemon (useful for CI)
+
+# Profiling
+./gradlew build --profile    # generate build profile HTML report
+./gradlew build --scan       # rich build scan on scans.gradle.com (free account needed)
+
+# Dry run — show which tasks WOULD run without executing them
+./gradlew build --dry-run</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="build-scans">Build Scans and Develocity</h3>
+          <p>Build scans provide a shareable web view of every build: task timeline, dependency tree, test results, and configuration cache status. Free scans go to <code>scans.gradle.com</code>; enterprise teams use Develocity (self-hosted or cloud).</p>
+          <pre><code class="language-groovy">// settings.gradle — enable build scans (Gradle 8.x)
+plugins {
+    id 'com.gradle.develocity' version '3.19.2'
+}
+
+develocity {
+    buildScan {
+        termsOfUseUrl   = 'https://gradle.com/help/legal-terms-of-use'
+        termsOfUseAgree = 'yes'
+        // Publish scans automatically on CI, on-demand locally
+        publishing.onlyIf { System.getenv('CI') == 'true' }
+        // Or always publish:
+        // publishing.always()
+
+        // Tag the scan for easy filtering
+        tag System.getenv('CI') ? 'CI' : 'local'
+        tag project.version.toString()
+    }
+}</code></pre>
+          <pre><code class="language-bash"># Publish a build scan on demand
+./gradlew build --scan
+# Output: Publishing build scan...
+# https://scans.gradle.com/s/abcdef123456</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="configuration-cache">Configuration Cache</h3>
+          <p>The configuration cache stores the result of the configuration phase (the resolved task graph) so Gradle can skip it entirely on subsequent builds — cutting seconds from every invocation in large projects.</p>
+          <pre><code class="language-properties"># gradle.properties — enable configuration cache
+org.gradle.configuration-cache=true
+# Treat problems as warnings (not errors) during migration:
+org.gradle.configuration-cache.problems=warn</code></pre>
+          <pre><code class="language-bash"># First build: configuration cache MISS (computed and stored)
+./gradlew build
+# > Calculating task graph as no cached configuration is available for tasks: build
+# > Configuration cache entry stored.
+
+# Second build: configuration cache HIT (skips configuration phase entirely)
+./gradlew build
+# > Reusing configuration cache.
+
+# Verify configuration cache compatibility
+./gradlew build --configuration-cache
+
+# Invalidate the cache
+./gradlew build --no-configuration-cache</code></pre>
+          <div class="callout warn">
+            <strong>Compatibility</strong>
+            Not all plugins support the configuration cache. Gradle reports incompatibilities as problems. Common ones: avoid referencing <code>project</code> inside <code>doLast {}</code> — use providers instead. Check <code>build/reports/configuration-cache/</code> for the problem report.
+          </div>
+        </div>
+
+      </div><!-- /tab-plugins -->
+
+      <!-- ══════════════ PUBLISHING ══════════════ -->
+      <div class="tab-panel" id="tab-publishing">
+
+        <div class="feature-card">
+          <h3 id="maven-publish">maven-publish Plugin — Basic Setup</h3>
+          <p>The <code>maven-publish</code> plugin publishes artifacts to Maven repositories. Define one or more <code>MavenPublication</code> objects in the <code>publications</code> block and point <code>repositories</code> at where to deploy.</p>
+          <pre><code class="language-groovy">plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+java {
+    withSourcesJar()   // attach *-sources.jar to the publication
+    withJavadocJar()   // attach *-javadoc.jar to the publication
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java   // includes jar, sources, javadoc
+
+            groupId    = project.group
+            artifactId = project.name
+            version    = project.version
+
+            // Customise the generated pom.xml
+            pom {
+                name        = 'Order Service Common Library'
+                description = 'Shared domain types for the Order service'
+                url         = 'https://github.com/example/order-service'
+                inceptionYear = '2024'
+
+                licenses {
+                    license {
+                        name = 'Apache License, Version 2.0'
+                        url  = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id    = 'dev1'
+                        name  = 'Jane Developer'
+                        email = 'jane@example.com'
+                    }
+                }
+                scm {
+                    connection          = 'scm:git:git://github.com/example/order-service.git'
+                    developerConnection = 'scm:git:ssh://github.com/example/order-service.git'
+                    url                 = 'https://github.com/example/order-service'
+                }
+            }
+        }
+    }
+
+    repositories {
+        // Publish to local Maven repository (~/.m2)
+        maven {
+            name = 'local'
+            url  = uri(layout.buildDirectory.dir('local-repo'))
+        }
+    }
+}</code></pre>
+          <pre><code class="language-bash"># Publish to ~/.m2 (local Maven repository)
+./gradlew publishToMavenLocal
+
+# Publish to all configured repositories
+./gradlew publish
+
+# Publish only the mavenJava publication to the local repository
+./gradlew publishMavenJavaPublicationToLocalRepository</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="publish-nexus">Publishing to Nexus / Artifactory</h3>
+          <p>Store repository credentials in <code>~/.gradle/gradle.properties</code> — never in the project's <code>gradle.properties</code> or <code>build.gradle</code>. Read them via <code>findProperty()</code> which returns <code>null</code> if the property is missing.</p>
+          <pre><code class="language-properties"># ~/.gradle/gradle.properties  (user home — NEVER commit this)
+nexusUsername=jenkins-deploy
+nexusPassword=super-secret-token</code></pre>
+          <pre><code class="language-groovy">// build.gradle
+publishing {
+    repositories {
+        maven {
+            name = 'nexus'
+            // Publish to releases or snapshots based on version suffix
+            def releasesUrl  = 'https://nexus.example.com/repository/maven-releases/'
+            def snapshotsUrl = 'https://nexus.example.com/repository/maven-snapshots/'
+            url = project.version.toString().endsWith('SNAPSHOT') ? snapshotsUrl : releasesUrl
+
+            credentials {
+                username = findProperty('nexusUsername') ?: System.getenv('NEXUS_USER')
+                password = findProperty('nexusPassword') ?: System.getenv('NEXUS_PASSWORD')
+            }
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="publish-github">Publishing to GitHub Packages</h3>
+          <p>GitHub Packages requires Maven repository authentication even for public packages. Use a Personal Access Token (PAT) with <code>write:packages</code> scope, stored in the environment or user-level <code>gradle.properties</code>.</p>
+          <pre><code class="language-groovy">publishing {
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url  = uri('https://maven.pkg.github.com/example/order-service')
+            credentials {
+                username = System.getenv('GITHUB_ACTOR') ?: findProperty('gprUser')
+                password = System.getenv('GITHUB_TOKEN') ?: findProperty('gprToken')
+            }
+        }
+    }
+}</code></pre>
+          <pre><code class="language-yaml"># .github/workflows/publish.yml
+name: Publish package
+on:
+  push:
+    tags: ['v*']
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="signing">Signing Artifacts with GPG</h3>
+          <p>Maven Central requires signed artifacts. The <code>signing</code> plugin uses GPG to sign publications. Configure GPG credentials in <code>~/.gradle/gradle.properties</code>.</p>
+          <pre><code class="language-properties"># ~/.gradle/gradle.properties
+signing.keyId=ABCDEF01                  # last 8 chars of key ID
+signing.password=my-gpg-passphrase
+signing.secretKeyRingFile=/home/user/.gnupg/secring.gpg
+
+# Or use ASCII-armored key (better for CI):
+# signing.key=-----BEGIN PGP PRIVATE KEY BLOCK-----...</code></pre>
+          <pre><code class="language-groovy">plugins {
+    id 'maven-publish'
+    id 'signing'
+}
+
+signing {
+    // Only sign release builds (not snapshots)
+    required { !project.version.toString().endsWith('SNAPSHOT') && gradle.taskGraph.hasTask('publish') }
+
+    // Sign all Maven publications
+    sign publishing.publications.mavenJava
+
+    // In-memory ASCII-armored key (for CI)
+    def signingKey      = findProperty('signingKey')      ?: System.getenv('SIGNING_KEY')
+    def signingPassword = findProperty('signingPassword') ?: System.getenv('SIGNING_PASSWORD')
+    if (signingKey) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-publishing -->
+
+      <!-- ══════════════ SPRING BOOT ══════════════ -->
+      <div class="tab-panel" id="tab-spring">
+
+        <div class="feature-card">
+          <h3 id="spring-boot-full-build">Full Spring Boot build.gradle</h3>
+          <p>A production-ready Spring Boot Gradle build uses two plugins: <code>org.springframework.boot</code> (adds <code>bootJar</code>, <code>bootRun</code>, <code>bootBuildImage</code>) and <code>io.spring.dependency-management</code> (imports the Spring Boot BOM so you omit versions for managed deps).</p>
+          <pre><code class="language-groovy">// build.gradle — Spring Boot 4 project (Groovy DSL)
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot'        version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group   = 'com.example'
+version = '1.0.0'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// The dependency-management plugin imports the Spring Boot BOM automatically.
+// All Spring Boot managed dependencies can omit the version:
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Lombok
+    compileOnly         'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Runtime
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.flywaydb:flyway-core'
+
+    // Dev tools (excluded from the bootJar automatically)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-bootjar-bootrun">bootJar and bootRun Tasks</h3>
+          <p><code>bootJar</code> creates the executable fat JAR (replaces the standard <code>jar</code> task). <code>bootRun</code> runs the application from the build, passing JVM args and system properties. DevTools enables live class reloading.</p>
+          <pre><code class="language-groovy">// Configure the executable fat JAR
+bootJar {
+    // Override the main class (auto-detected if there is only one @SpringBootApplication)
+    mainClass = 'com.example.order.OrderApplication'
+
+    // Custom archive name
+    archiveFileName = "order-service-${project.version}.jar"
+
+    // Exclude dev-only resources from the JAR
+    exclude 'application-local.properties'
+
+    // Manifest entries
+    manifest {
+        attributes 'Implementation-Title':   project.name,
+                   'Implementation-Version': project.version
+    }
+}
+
+// Disable the default plain jar task (only ship the fat JAR)
+jar {
+    enabled = false
+}
+
+// Configure the bootRun task for local development
+bootRun {
+    mainClass = 'com.example.order.OrderApplication'
+
+    // Active Spring profiles
+    systemProperty 'spring.profiles.active', findProperty('spring.profiles.active') ?: 'local'
+
+    // Pass arbitrary system properties
+    systemProperties System.properties.subMap(['server.port', 'logging.level.root'])
+
+    // JVM arguments
+    jvmArgs '-Xmx512m', '-XX:+UseG1GC', '-Dfile.encoding=UTF-8'
+
+    // Application arguments
+    args '--debug'
+
+    // Source sets for live reload with DevTools
+    sourceResources sourceSets.main
+}
+
+// Run with a specific profile: ./gradlew bootRun -Pspring.profiles.active=dev</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-layered-jar">Layered JAR for Docker</h3>
+          <p>Layered JARs split the fat JAR into Docker layers (dependencies, Spring Boot loader, snapshot dependencies, application code) so that the largest layers — third-party dependencies — are cached by Docker and not re-pushed on every code change.</p>
+          <pre><code class="language-groovy">bootJar {
+    layered {
+        enabled = true
+        // Optional: customise the layer order and which files go where
+        application {
+            intoLayer('spring-boot-loader') {
+                include 'org/springframework/boot/loader/**'
+            }
+            intoLayer('snapshot-dependencies') {
+                include '*:*:*SNAPSHOT'
+            }
+            intoLayer('dependencies')
+            intoLayer('application')
+        }
+        layerOrder = ['dependencies', 'spring-boot-loader', 'snapshot-dependencies', 'application']
+    }
+}</code></pre>
+          <pre><code class="language-dockerfile"># Dockerfile — multi-stage with layered JAR
+FROM eclipse-temurin:21-jre AS builder
+WORKDIR /app
+COPY build/libs/order-service-*.jar app.jar
+RUN java -Djarmode=tools -jar app.jar extract --layers --launcher --destination extracted
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=builder /app/extracted/dependencies/          ./
+COPY --from=builder /app/extracted/spring-boot-loader/   ./
+COPY --from=builder /app/extracted/snapshot-dependencies/ ./
+COPY --from=builder /app/extracted/application/          ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-build-image">bootBuildImage — Cloud Native Buildpacks</h3>
+          <p><code>bootBuildImage</code> uses Buildpacks (Paketo by default) to create a production-ready OCI image without a Dockerfile. No Docker daemon required — the image is built inside the build process using <code>pack</code>.</p>
+          <pre><code class="language-groovy">bootBuildImage {
+    // Image name and tags
+    imageName = "docker.io/${project.group}/${project.name}:${project.version}"
+    tags = ["docker.io/${project.group}/${project.name}:latest"]
+
+    // Publish directly to a registry after building
+    publish = true
+    docker {
+        publishRegistry {
+            username = System.getenv('DOCKER_USERNAME')
+            password = System.getenv('DOCKER_PASSWORD')
+        }
+    }
+
+    // Environment variables passed to the image build
+    environment = [
+        'BP_JVM_VERSION': '21',           // JVM version inside the image
+        'BP_JVM_TYPE'   : 'JRE',          // JRE (not JDK) in the final image
+        'BPE_SPRING_PROFILES_ACTIVE': 'production'
+    ]
+
+    // Use a specific Paketo builder
+    builder = 'paketobuildpacks/builder-jammy-base:latest'
+}</code></pre>
+          <pre><code class="language-bash"># Build the image (Docker daemon must be running)
+./gradlew bootBuildImage
+
+# Build and push to a registry
+./gradlew bootBuildImage --imageName=registry.example.com/my-app:1.0.0
+
+# Run the image locally
+docker run -p 8080:8080 com.example/order-service:1.0.0</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-graalvm">GraalVM Native Image</h3>
+          <p>The <code>org.graalvm.buildtools.native</code> plugin adds the <code>nativeCompile</code> and <code>nativeTest</code> tasks. Spring Boot 4's AOT processor runs automatically as part of the native image build, eliminating most manual hint declarations.</p>
+          <pre><code class="language-groovy">plugins {
+    id 'java'
+    id 'org.springframework.boot'        version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.graalvm.buildtools.native'   version '0.10.4'
+}
+
+// GraalVM native image configuration
+graalvmNative {
+    binaries {
+        main {
+            mainClass          = 'com.example.order.OrderApplication'
+            imageName          = 'order-service'
+            buildArgs.add      '--no-fallback'
+            buildArgs.add      '-O2'           // optimization level
+            buildArgs.add      '-H:+ReportExceptionStackTraces'
+        }
+        test {
+            buildArgs.add '--no-fallback'
+        }
+    }
+    toolchainDetection = true   // auto-detect GraalVM toolchain
+}
+
+// AOT processing task (runs before nativeCompile)
+// Spring Boot AOT runs automatically — no extra config needed</code></pre>
+          <pre><code class="language-bash"># Requires GraalVM JDK with native-image installed
+sdk install java 21.0.5-graalce   # using SDKMAN
+
+# Compile to native binary (slow — minutes)
+./gradlew nativeCompile
+# Output: build/native/nativeCompile/order-service
+
+# Run the native binary
+./build/native/nativeCompile/order-service
+
+# Run native tests
+./gradlew nativeTest
+
+# Build native image inside a container (no local GraalVM required)
+./gradlew bootBuildImage</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="spring-testcontainers">Testcontainers with @ServiceConnection</h3>
+          <p>Spring Boot 4 auto-configures connection properties from a running Testcontainers container annotated with <code>@ServiceConnection</code> — no manual <code>@DynamicPropertySource</code> needed.</p>
+          <pre><code class="language-groovy">dependencies {
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+}</code></pre>
+          <pre><code class="language-java">// src/test/java/com/example/order/OrderRepositoryIT.java
+@SpringBootTest
+@Testcontainers
+class OrderRepositoryIT {
+
+    @Container
+    @ServiceConnection                      // auto-configures spring.datasource.*
+    static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:17-alpine");
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Test
+    void save_and_find() {
+        Order saved = orderRepository.save(new Order("PENDING", BigDecimal.TEN));
+        assertThat(orderRepository.findById(saved.getId())).isPresent();
+    }
+}</code></pre>
+          <pre><code class="language-bash"># Run integration tests (Docker must be running)
+./gradlew test --tests "com.example.order.*IT"</code></pre>
         </div>
 
       </div><!-- /tab-spring -->
+
     </div><!-- /tab-container -->
 
+    <!-- ══════════════ CHEATSHEET ══════════════ -->
     <section class="cheatsheet">
       <h2>Gradle Cheatsheet</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Command / Element</th><th>Purpose</th><th>Notes</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Command / Concept</th>
+              <th>Purpose</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td><code>./gradlew build</code></td><td>Compile + test + jar</td><td>Skips up-to-date tasks automatically</td></tr>
-            <tr><td><code>./gradlew test</code></td><td>Run unit tests</td><td>Reports in <code>build/reports/tests/</code></td></tr>
-            <tr><td><code>./gradlew bootRun</code></td><td>Run Spring Boot app</td><td>DevTools hot reload</td></tr>
+            <tr><td><code>./gradlew tasks</code></td><td>List available tasks</td><td>Add <code>--all</code> for internal tasks</td></tr>
+            <tr><td><code>./gradlew build</code></td><td>Full build (compile + test + jar)</td><td>Equivalent to <code>assemble + check</code></td></tr>
+            <tr><td><code>./gradlew clean</code></td><td>Delete <code>build/</code> directory</td><td>Chain: <code>clean build</code></td></tr>
+            <tr><td><code>./gradlew test</code></td><td>Run unit tests</td><td><code>--tests "*.MyTest"</code> to filter</td></tr>
+            <tr><td><code>./gradlew check</code></td><td>All verification tasks</td><td>Includes test, linting, coverage</td></tr>
+            <tr><td><code>./gradlew assemble</code></td><td>Compile + package (no tests)</td><td>Faster for deployment artifacts</td></tr>
+            <tr><td><code>./gradlew dependencies</code></td><td>Show dependency tree</td><td>Add <code>--configuration runtimeClasspath</code></td></tr>
+            <tr><td><code>./gradlew dependencyInsight</code></td><td>Trace a single dependency</td><td><code>--dependency spring-core</code></td></tr>
+            <tr><td><code>./gradlew --scan</code></td><td>Publish a build scan</td><td>Free at scans.gradle.com</td></tr>
+            <tr><td><code>./gradlew -x test</code></td><td>Skip the test task</td><td>Works for any task name</td></tr>
+            <tr><td><code>./gradlew bootRun</code></td><td>Run Spring Boot app</td><td>Supports <code>-Pspring.profiles.active=dev</code></td></tr>
             <tr><td><code>./gradlew bootJar</code></td><td>Build executable fat JAR</td><td>Output: <code>build/libs/*.jar</code></td></tr>
-            <tr><td><code>./gradlew bootBuildImage</code></td><td>OCI image via Buildpacks</td><td>No Dockerfile needed</td></tr>
-            <tr><td><code>./gradlew nativeCompile</code></td><td>GraalVM native binary</td><td>Requires GraalVM JDK + native plugin</td></tr>
-            <tr><td><code>./gradlew -x test</code></td><td>Skip test task</td><td><code>-x</code> excludes any task</td></tr>
-            <tr><td><code>./gradlew :module:task</code></td><td>Run task in one subproject</td><td>Multi-project builds</td></tr>
-            <tr><td><code>./gradlew tasks</code></td><td>List available tasks</td><td><code>--all</code> shows all including dependencies</td></tr>
-            <tr><td><code>./gradlew dependencies</code></td><td>Dependency tree</td><td><code>--configuration runtimeClasspath</code></td></tr>
-            <tr><td><code>--dry-run</code></td><td>Show task graph without running</td><td>Useful for understanding execution order</td></tr>
-            <tr><td><code>--rerun-tasks</code></td><td>Force re-run all tasks</td><td>Bypass up-to-date checks</td></tr>
-            <tr><td><code>implementation</code></td><td>Compile + runtime dep</td><td>Not exposed to consumers</td></tr>
-            <tr><td><code>api</code></td><td>Exposed compile dep</td><td>Library modules only; needs <code>java-library</code> plugin</td></tr>
-            <tr><td><code>runtimeOnly</code></td><td>Runtime only dep</td><td>JDBC drivers, logging impls</td></tr>
-            <tr><td><code>compileOnly</code></td><td>Compile only dep</td><td>Like Maven <code>provided</code>; Lombok, annotations</td></tr>
-            <tr><td><code>platform()</code></td><td>Import BOM natively</td><td>Alternative to dependency-management plugin</td></tr>
-            <tr><td><code>extra["key"] = "val"</code></td><td>Override managed version</td><td>Works with dependency-management plugin</td></tr>
+            <tr><td><code>./gradlew bootBuildImage</code></td><td>Build OCI image via Buildpacks</td><td>No Dockerfile needed</td></tr>
+            <tr><td><code>./gradlew nativeCompile</code></td><td>Build GraalVM native binary</td><td>Requires GraalVM JDK</td></tr>
+            <tr><td><code>./gradlew publishToMavenLocal</code></td><td>Install to ~/.m2</td><td>For local dev testing</td></tr>
+            <tr><td><code>./gradlew publish</code></td><td>Publish to all configured repos</td><td>Configure in <code>publishing {}</code> block</td></tr>
+            <tr><td><code>./gradlew wrapper --gradle-version=8.13</code></td><td>Upgrade the Gradle wrapper</td><td>Commit result to VCS</td></tr>
+            <tr><td><code>./gradlew --stop</code></td><td>Stop all Gradle daemons</td><td>Frees memory</td></tr>
+            <tr><td><code>implementation</code></td><td>Compile + runtime; not leaked to consumers</td><td>Use for 99% of dependencies</td></tr>
+            <tr><td><code>api</code></td><td>Compile + runtime; leaked to consumers</td><td>Only for types in your public API</td></tr>
+            <tr><td><code>compileOnly</code></td><td>Compile only (not in JAR)</td><td>Lombok, Servlet API, annotations</td></tr>
+            <tr><td><code>runtimeOnly</code></td><td>Runtime only (not available at compile)</td><td>JDBC drivers, logging impls</td></tr>
+            <tr><td><code>annotationProcessor</code></td><td>Annotation processor classpath</td><td>Lombok, MapStruct, Dagger</td></tr>
+            <tr><td><code>platform(bom)</code></td><td>Import a BOM as version constraints</td><td>Respects local overrides</td></tr>
+            <tr><td><code>enforcedPlatform(bom)</code></td><td>Import BOM; override any version</td><td>Use carefully — can cause conflicts</td></tr>
+            <tr><td><code>ext {}</code></td><td>Extra properties on the project</td><td>Share constants across subprojects</td></tr>
+            <tr><td><code>subprojects {}</code></td><td>Configure all subprojects (excludes root)</td><td>Prefer over <code>allprojects {}</code></td></tr>
+            <tr><td><code>buildSrc/</code></td><td>Shared build logic and plugins</td><td>Auto-compiled and on the build classpath</td></tr>
           </tbody>
         </table>
       </div>
