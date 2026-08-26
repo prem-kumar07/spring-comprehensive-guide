@@ -18,7 +18,7 @@
 
     <h1>Gradle (Groovy DSL)</h1>
     <div style="margin-bottom:1.25rem">
-      <span class="version-badge badge-gradle">Gradle 8.x</span>
+      <span class="version-badge badge-gradle">Gradle 9.x</span>
     </div>
     <p>Gradle is a flexible, high-performance build tool that models a build as a directed acyclic graph (DAG) of tasks. All examples here use the <strong>Groovy DSL</strong> (<code>build.gradle</code>). Unlike Maven's fixed lifecycle, Gradle gives you fine-grained control, incremental and cacheable builds, and a rich plugin ecosystem covering everything from simple JAR packaging to GraalVM native images.</p>
 
@@ -155,7 +155,7 @@ include ':common'</code></pre>
           <h3 id="gradle-wrapper">Gradle Wrapper</h3>
           <p>The Gradle Wrapper (<code>gradlew</code> / <code>gradlew.bat</code>) pins the Gradle version for a project so everyone on the team — and CI — uses the same version without installing Gradle manually. Always commit the wrapper files.</p>
           <pre><code class="language-bash"># Generate or upgrade the wrapper to a specific version
-./gradlew wrapper --gradle-version=8.13 --distribution-type=bin
+./gradlew wrapper --gradle-version=9.7.1 --distribution-type=bin
 
 # Use the wrapper for all builds (never use a system-installed gradle)
 ./gradlew build
@@ -164,7 +164,7 @@ include ':common'</code></pre>
           <pre><code class="language-properties"># gradle/wrapper/gradle-wrapper.properties
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.7.1-bin.zip
 networkTimeout=10000
 validateDistributionUrl=true
 zipStoreBase=GRADLE_USER_HOME
@@ -181,13 +181,13 @@ zipStorePath=wrapper/dists</code></pre>
           <pre><code class="language-properties"># gradle.properties (project root — commit this)
 
 # JVM settings for the Gradle build itself (not for the application)
-org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8  # Gradle 9 daemon requires JVM 17+
 
 # Build performance
 org.gradle.parallel=true            # build independent subprojects in parallel
 org.gradle.caching=true             # enable local build cache
 org.gradle.daemon=true              # keep the daemon alive between builds (default true)
-org.gradle.configuration-cache=true # experimental: cache the configuration phase
+org.gradle.configuration-cache=true  # stable in Gradle 9; prompts to enable if not set
 
 # Custom project properties — read in build.gradle as `project.appPort`
 appPort=8080
@@ -281,6 +281,26 @@ dependencies {
 if (ext.isRelease) {
     apply plugin: 'signing'
 }</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="gradle9-highlights">Gradle 9.x — What Changed from 8.x</h3>
+          <p>Gradle 9.0 (Jul 2025) is the current major line. Latest stable: <strong>9.7.1</strong> (Aug 2026). Key changes every Groovy DSL user must know:</p>
+          <table class="comparison-table">
+            <thead><tr><th>Area</th><th>Gradle 8.x</th><th>Gradle 9.x</th></tr></thead>
+            <tbody>
+              <tr><td>Daemon JVM minimum</td><td>JVM 8+</td><td><strong>JVM 17+</strong></td></tr>
+              <tr><td>Groovy version</td><td>Groovy 3.0</td><td><strong>Groovy 4.0</strong></td></tr>
+              <tr><td>Configuration Cache</td><td>Opt-in, experimental</td><td><strong>Stable; Gradle prompts to enable</strong></td></tr>
+              <tr><td>Reproducible archives</td><td>Opt-in per task</td><td><strong>Default for Jar/Zip/Tar</strong></td></tr>
+              <tr><td>Isolated Projects</td><td>Experimental (<code>org.gradle.unsafe.isolated-projects</code>)</td><td><strong>Incubating (<code>org.gradle.isolated-projects</code>)</strong></td></tr>
+              <tr><td>Configuration lazy</td><td><code>configurations.create()</code> eager</td><td><strong><code>configurations.register()</code> preferred</strong></td></tr>
+              <tr><td>CC CI mode</td><td>Not available</td><td><strong><code>--configuration-cache=read-only</code></strong></td></tr>
+              <tr><td>Task graph viz</td><td>Not available</td><td><strong><code>./gradlew &lt;task&gt; --task-graph</code></strong></td></tr>
+              <tr><td>Version format</td><td><code>9.0</code></td><td><strong><code>9.0.0</code> (semver)</strong></td></tr>
+            </tbody>
+          </table>
+          <div class="callout info"><strong>8.14.x LTS</strong> — Gradle 8.14 is an LTS release (last patch: 8.14.5, May 2026) for teams not yet on 9.x. Most new features and the configuration cache stability improvements require 9.x.</div>
         </div>
 
       </div><!-- /tab-basics -->
@@ -1225,9 +1245,11 @@ banner {
 org.gradle.daemon=true                 # keep the daemon alive (default)
 org.gradle.parallel=true               # build independent subprojects concurrently
 org.gradle.caching=true                # enable local build cache
-org.gradle.configuration-cache=true   # cache the configuration phase (Gradle 8.1+)
-org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m
-org.gradle.workers.max=8              # max worker threads (default: CPU count)</code></pre>
+org.gradle.configuration-cache=true   # stable in Gradle 9; prompts to enable if absent
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m  # daemon requires JVM 17+ (Gradle 9)
+org.gradle.workers.max=8              # max worker threads (default: CPU count)
+# Isolated Projects (incubating, Gradle 9.7+) — safe parallel project configuration
+org.gradle.isolated-projects=true</code></pre>
           <pre><code class="language-bash"># Daemon management
 ./gradlew --status           # list running daemons
 ./gradlew --stop             # stop all daemons for this Gradle version
@@ -1238,13 +1260,16 @@ org.gradle.workers.max=8              # max worker threads (default: CPU count)<
 ./gradlew build --scan       # rich build scan on scans.gradle.com (free account needed)
 
 # Dry run — show which tasks WOULD run without executing them
-./gradlew build --dry-run</code></pre>
+./gradlew build --dry-run
+
+# Visualize task dependency graph (Gradle 9.1+)
+./gradlew build --task-graph</code></pre>
         </div>
 
         <div class="feature-card">
           <h3 id="build-scans">Build Scans and Develocity</h3>
           <p>Build scans provide a shareable web view of every build: task timeline, dependency tree, test results, and configuration cache status. Free scans go to <code>scans.gradle.com</code>; enterprise teams use Develocity (self-hosted or cloud).</p>
-          <pre><code class="language-groovy">// settings.gradle — enable build scans (Gradle 8.x)
+          <pre><code class="language-groovy">// settings.gradle — enable build scans (Gradle 9.x / Develocity plugin)
 plugins {
     id 'com.gradle.develocity' version '3.19.2'
 }
@@ -1271,11 +1296,13 @@ develocity {
 
         <div class="feature-card">
           <h3 id="configuration-cache">Configuration Cache</h3>
-          <p>The configuration cache stores the result of the configuration phase (the resolved task graph) so Gradle can skip it entirely on subsequent builds — cutting seconds from every invocation in large projects.</p>
+          <p>Stable in Gradle 9 — the configuration cache stores the resolved task graph so Gradle skips the entire configuration phase on cache hits. Gradle 9 prompts users to enable it automatically and reports problems gracefully instead of failing the build.</p>
           <pre><code class="language-properties"># gradle.properties — enable configuration cache
 org.gradle.configuration-cache=true
-# Treat problems as warnings (not errors) during migration:
-org.gradle.configuration-cache.problems=warn</code></pre>
+# Treat problems as warnings (not errors) during migration (Gradle 9 default):
+org.gradle.configuration-cache.problems=warn
+# Stricter validation (optional):
+org.gradle.configuration-cache.integrity-check=true</code></pre>
           <pre><code class="language-bash"># First build: configuration cache MISS (computed and stored)
 ./gradlew build
 # > Calculating task graph as no cached configuration is available for tasks: build
@@ -1285,14 +1312,13 @@ org.gradle.configuration-cache.problems=warn</code></pre>
 ./gradlew build
 # > Reusing configuration cache.
 
-# Verify configuration cache compatibility
-./gradlew build --configuration-cache
+# CI read-only mode (Gradle 9.1+): consume cache, never write
+./gradlew build --configuration-cache=read-only
 
 # Invalidate the cache
 ./gradlew build --no-configuration-cache</code></pre>
-          <div class="callout warn">
-            <strong>Compatibility</strong>
-            Not all plugins support the configuration cache. Gradle reports incompatibilities as problems. Common ones: avoid referencing <code>project</code> inside <code>doLast {}</code> — use providers instead. Check <code>build/reports/configuration-cache/</code> for the problem report.
+          <div class="callout info">
+            <strong>Gradle 9 rules for CC compatibility</strong> — never capture <code>project</code> or mutable objects at configuration time; use <code>providers</code> and <code>layout</code> APIs; read env vars via <code>providers.environmentVariable()</code> not <code>System.getenv()</code>. Check <code>build/reports/configuration-cache/</code> for the problem report.
           </div>
         </div>
 
@@ -1888,15 +1914,15 @@ tasks.named('startServer').configure {
 
         <div class="feature-card">
           <h3 id="api-configurations">ConfigurationContainer — Dependency Scopes API</h3>
-          <p><code>project.configurations</code> lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time.</p>
-          <pre><code class="language-groovy">// Create a custom configuration (e.g. for code generation)
-configurations {
-    codeGen {
-        visible      = false
-        canBeConsumed = false
-        canBeResolved = true
-    }
+          <p><code>project.configurations</code> lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time. Gradle 9 prefers <code>configurations.register()</code> (lazy) over <code>configurations.create()</code> (eager) — mirrors the tasks pattern.</p>
+          <pre><code class="language-groovy">// Create a custom configuration (lazy — Gradle 9+ preferred)
+configurations.register('codeGen') {
+    visible       = false
+    canBeConsumed = false
+    canBeResolved = true
 }
+// Legacy eager form (still works but avoid in new code):
+// configurations { codeGen { ... } }
 
 dependencies {
     codeGen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.54'
@@ -2095,7 +2121,7 @@ afterEvaluate {
             <tr><td><code>./gradlew nativeCompile</code></td><td>Build GraalVM native binary</td><td>Requires GraalVM JDK</td></tr>
             <tr><td><code>./gradlew publishToMavenLocal</code></td><td>Install to ~/.m2</td><td>For local dev testing</td></tr>
             <tr><td><code>./gradlew publish</code></td><td>Publish to all configured repos</td><td>Configure in <code>publishing {}</code> block</td></tr>
-            <tr><td><code>./gradlew wrapper --gradle-version=8.13</code></td><td>Upgrade the Gradle wrapper</td><td>Commit result to VCS</td></tr>
+            <tr><td><code>./gradlew wrapper --gradle-version=9.7.1</code></td><td>Upgrade the Gradle wrapper</td><td>Commit result to VCS</td></tr>
             <tr><td><code>./gradlew --stop</code></td><td>Stop all Gradle daemons</td><td>Frees memory</td></tr>
             <tr><td><code>implementation</code></td><td>Compile + runtime; not leaked to consumers</td><td>Use for 99% of dependencies</td></tr>
             <tr><td><code>api</code></td><td>Compile + runtime; leaked to consumers</td><td>Only for types in your public API</td></tr>

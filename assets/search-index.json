@@ -11,7 +11,7 @@
     "href": "build-tools/gradle.html",
     "section": "Gradle (Groovy DSL)",
     "anchor": "",
-    "text": "Gradle 8.x Gradle is a flexible, high-performance build tool that models a build as a directed acyclic graph (DAG) of tasks. All examples here use the Groovy DSL ( build.gradle ). Unlike Maven's fixed lifecycle, Gradle gives you fine-grained control, incremental and cacheable builds, and a rich plug"
+    "text": "Gradle 9.x Gradle is a flexible, high-performance build tool that models a build as a directed acyclic graph (DAG) of tasks. All examples here use the Groovy DSL ( build.gradle ). Unlike Maven's fixed lifecycle, Gradle gives you fine-grained control, incremental and cacheable builds, and a rich plug"
   },
   {
     "page": "Gradle Deep Dive",
@@ -96,6 +96,20 @@
     "section": "Extra Properties and the ext Block",
     "anchor": "extra-properties",
     "text": "The ext block (short for project.extensions.extraProperties ) stores arbitrary key-value pairs on the project or any domain object. Use it to centralise version strings or share constants across subprojects. // Root build.gradle — define shared constants in ext\next {\n    javaVersion        = 21\n    "
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle 9.x — What Changed from 8.x",
+    "anchor": "gradle9-highlights",
+    "text": "Gradle 9.x — What Changed from 8.x"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Gradle 9.x — What Changed from 8.x",
+    "anchor": "gradle9-highlights",
+    "text": "Gradle 9.0 (Jul 2025) is the current major line. Latest stable: 9.7.1 (Aug 2026). Key changes every Groovy DSL user must know: Area Gradle 8.x Gradle 9.x Daemon JVM minimum JVM 8+ JVM 17+ Groovy version Groovy 3.0 Groovy 4.0 Configuration Cache Opt-in, experimental Stable; Gradle prompts to enable R"
   },
   {
     "page": "Gradle Deep Dive",
@@ -417,7 +431,7 @@
     "href": "build-tools/gradle.html",
     "section": "Build Scans and Develocity",
     "anchor": "build-scans",
-    "text": "Build scans provide a shareable web view of every build: task timeline, dependency tree, test results, and configuration cache status. Free scans go to scans.gradle.com ; enterprise teams use Develocity (self-hosted or cloud). // settings.gradle — enable build scans (Gradle 8.x)\nplugins {\n    id 'co"
+    "text": "Build scans provide a shareable web view of every build: task timeline, dependency tree, test results, and configuration cache status. Free scans go to scans.gradle.com ; enterprise teams use Develocity (self-hosted or cloud). // settings.gradle — enable build scans (Gradle 9.x / Develocity plugin)\n"
   },
   {
     "page": "Gradle Deep Dive",
@@ -431,7 +445,7 @@
     "href": "build-tools/gradle.html",
     "section": "Configuration Cache",
     "anchor": "configuration-cache",
-    "text": "The configuration cache stores the result of the configuration phase (the resolved task graph) so Gradle can skip it entirely on subsequent builds — cutting seconds from every invocation in large projects. # gradle.properties — enable configuration cache\norg.gradle.configuration-cache=true\n# Treat p"
+    "text": "Stable in Gradle 9 — the configuration cache stores the resolved task graph so Gradle skips the entire configuration phase on cache hits. Gradle 9 prompts users to enable it automatically and reports problems gracefully instead of failing the build. # gradle.properties — enable configuration cache\no"
   },
   {
     "page": "Gradle Deep Dive",
@@ -641,7 +655,7 @@
     "href": "build-tools/gradle.html",
     "section": "ConfigurationContainer — Dependency Scopes API",
     "anchor": "api-configurations",
-    "text": "project.configurations lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time. // Create a custom configuration (e.g. for code generation)\nconfigurations {\n    codeGen {\n        visible      = false\n        canBeConsumed = fa"
+    "text": "project.configurations lets you create custom dependency buckets, resolve artifacts programmatically, and query resolved dependency graphs at build time. Gradle 9 prefers configurations.register() (lazy) over configurations.create() (eager) — mirrors the tasks pattern. // Create a custom configurati"
   },
   {
     "page": "Gradle Deep Dive",
