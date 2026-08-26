@@ -380,6 +380,34 @@
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
+    "section": "JUnit 6 Setup (Latest: 6.1.3)",
+    "anchor": "junit6-setup",
+    "text": "JUnit 6 Setup (Latest: 6.1.3)"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JUnit 6 Setup (Latest: 6.1.3)",
+    "anchor": "junit6-setup",
+    "text": "JUnit 6 (released 2026) unifies versioning — Platform, Jupiter, and Vintage all share a single 6.x version number. Java 17+ is required. Annotations are identical to JUnit 5; migration is mostly a dependency version bump. // build.gradle — JUnit 6 with BOM (recommended)\nplugins { id 'java' }\n\njava {"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JUnit 6 — New Features vs JUnit 5",
+    "anchor": "junit6-features",
+    "text": "JUnit 6 — New Features vs JUnit 5"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "JUnit 6 — New Features vs JUnit 5",
+    "anchor": "junit6-features",
+    "text": "JUnit 6 adds several built-in extensions and improvements that previously required third-party libraries or manual setup. Feature JUnit 5 JUnit 6 Java baseline Java 8+ Java 17+ Version scheme Platform 1.x / Jupiter 5.x separate Unified 6.x across all modules @DefaultLocale / @DefaultTimeZone Externa"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
     "section": "Applying Plugins",
     "anchor": "applying-plugins",
     "text": "Applying Plugins"

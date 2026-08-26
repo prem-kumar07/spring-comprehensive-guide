@@ -1151,6 +1151,103 @@ check.dependsOn jacocoTestCoverageVerification</code></pre>
 ./gradlew jacocoTestCoverageVerification</code></pre>
         </div>
 
+        <div class="feature-card">
+          <h3 id="junit6-setup">JUnit 6 Setup (Latest: 6.1.3)</h3>
+          <p>JUnit 6 (released 2026) unifies versioning — Platform, Jupiter, and Vintage all share a single <code>6.x</code> version number. <strong>Java 17+ is required.</strong> Annotations are identical to JUnit 5; migration is mostly a dependency version bump.</p>
+          <pre><code class="language-groovy">// build.gradle — JUnit 6 with BOM (recommended)
+plugins { id 'java' }
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) } // Java 17+ required
+}
+
+dependencies {
+    // BOM — pins all JUnit 6 artifacts to the same version
+    testImplementation platform('org.junit:junit-bom:6.1.3')
+
+    // Jupiter API + engine in one dependency
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Required by Gradle to discover and run tests
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Assertion library (unchanged from JUnit 5 projects)
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
+
+    // Optional: run legacy JUnit 3/4 tests (deprecated in JUnit 6)
+    // testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = '512m'
+
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showExceptions  = true
+        showCauses      = true
+        exceptionFormat = 'full'
+    }
+
+    // JUnit 6 parallel execution (new thread pool option)
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+    // New in JUnit 6: WorkerThread pool instead of ForkJoinPool
+    systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'fixed'
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.parallelism', '4'
+}</code></pre>
+          <div class="callout info"><strong>Migrating from JUnit 5?</strong> Change the BOM from <code>org.junit.jupiter:junit-jupiter:5.x</code> to <code>platform('org.junit:junit-bom:6.1.3')</code> and keep all other dependency names identical. No annotation changes needed — <code>@Test</code>, <code>@BeforeEach</code>, <code>@Nested</code>, <code>@ParameterizedTest</code> are all the same.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="junit6-features">JUnit 6 — New Features vs JUnit 5</h3>
+          <p>JUnit 6 adds several built-in extensions and improvements that previously required third-party libraries or manual setup.</p>
+          <table class="comparison-table">
+            <thead><tr><th>Feature</th><th>JUnit 5</th><th>JUnit 6</th></tr></thead>
+            <tbody>
+              <tr><td>Java baseline</td><td>Java 8+</td><td><strong>Java 17+</strong></td></tr>
+              <tr><td>Version scheme</td><td>Platform 1.x / Jupiter 5.x separate</td><td><strong>Unified 6.x across all modules</strong></td></tr>
+              <tr><td><code>@DefaultLocale</code> / <code>@DefaultTimeZone</code></td><td>External extension needed</td><td><strong>Built-in</strong></td></tr>
+              <tr><td><code>@SetSystemProperty</code></td><td>External extension needed</td><td><strong>Built-in</strong></td></tr>
+              <tr><td>JFR (Flight Recorder) integration</td><td>Separate module</td><td><strong>Built into platform-launcher</strong></td></tr>
+              <tr><td>Kotlin <code>suspend</code> test functions</td><td>Not supported</td><td><strong>Supported natively</strong></td></tr>
+              <tr><td>Parallel thread pool</td><td>ForkJoinPool only</td><td><strong>WorkerThreadPool option added</strong></td></tr>
+              <tr><td><code>@Nested</code> ordering</td><td>Non-deterministic</td><td><strong>Deterministic</strong></td></tr>
+              <tr><td><code>@TestMethodOrder</code> on <code>@Nested</code></td><td>Not inherited</td><td><strong>Inherited by nested classes</strong></td></tr>
+              <tr><td><code>@TempDir</code> deletion</td><td>Always delete on test end</td><td><strong>Configurable deletion strategies</strong></td></tr>
+              <tr><td>Vintage engine (JUnit 3/4)</td><td>Active</td><td><strong>Deprecated</strong></td></tr>
+            </tbody>
+          </table>
+          <pre><code class="language-java">// JUnit 6 built-in annotations (no extra dependency)
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.*;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class OrderServiceTest {
+
+    @Test @Order(1)
+    @DefaultLocale("en-US")          // built-in JUnit 6 — no extension needed
+    @DefaultTimeZone("America/NYC")
+    void price_formatted_in_locale() {
+        // ...
+    }
+
+    @Test
+    @SetSystemProperty(key = "app.mode", value = "test") // built-in JUnit 6
+    void reads_system_property() {
+        assertThat(System.getProperty("app.mode")).isEqualTo("test");
+    }
+
+    @Test
+    void temp_dir_with_cleanup_strategy(
+            @TempDir(cleanup = CleanupMode.ON_SUCCESS) Path dir) {
+        // dir is deleted only if the test passes — inspect on failure
+    }
+}</code></pre>
+          <div class="callout tip"><strong>junit-vintage-engine</strong> is deprecated in JUnit 6 and will be removed in a future version. Migrate any remaining JUnit 3/4 tests to JUnit 6 before the next major release.</div>
+        </div>
+
       </div><!-- /tab-testing -->
 
       <!-- ══════════════ PLUGINS & PERFORMANCE ══════════════ -->
