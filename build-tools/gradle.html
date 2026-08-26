@@ -185,21 +185,53 @@ class AppTest {
 
         <div class="feature-card">
           <h3 id="quickstart-spring">Quick Start — Spring Boot Project</h3>
-          <p>The fastest path is <a href="https://start.spring.io">start.spring.io</a> (Spring Initializr). For a manual setup, apply both the Spring Boot and dependency-management plugins.</p>
-          <pre><code class="language-bash"># Option A — Spring Initializr CLI (HTTPie)
-https start.spring.io/starter.zip \
-  type==gradle-project \
-  language==java \
-  bootVersion==3.5.0 \
-  groupId==com.example \
-  artifactId==my-service \
-  name==my-service \
-  javaVersion==21 \
-  dependencies==web,data-jpa,validation,actuator \
-  -o my-service.zip && unzip my-service.zip && cd my-service
+          <p>Use the official <strong>Spring Boot CLI</strong> (<code>spring</code>) to scaffold projects from the terminal — the same engine as <a href="https://start.spring.io">start.spring.io</a>. Install it first, then run <code>spring init</code>.</p>
 
-# Build and run
-./gradlew bootRun</code></pre>
+          <pre><code class="language-bash">## ── Install Spring Boot CLI ───────────────────────────────────────
+
+# macOS — Homebrew (recommended)
+brew install spring-boot
+spring --version   # Spring CLI vX.Y.Z
+
+# Any OS — SDKMAN (also manages Java, Gradle, Maven)
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install springboot
+spring --version
+
+# Any OS — manual ZIP install
+# 1. Download from https://repo.spring.io/release/org/springframework/boot/spring-boot-cli/
+# 2. Unzip and add the bin/ directory to your PATH</code></pre>
+
+          <pre><code class="language-bash">## ── Create a project with spring init ────────────────────────────
+
+# Basic usage — generates my-service.zip in current directory
+spring init \
+  --build=gradle \
+  --java-version=21 \
+  --boot-version=3.5.0 \
+  --group-id=com.example \
+  --artifact-id=my-service \
+  --name=my-service \
+  --dependencies=web,data-jpa,validation,actuator \
+  my-service.zip
+
+# Extract and enter
+unzip my-service.zip -d my-service && cd my-service
+./gradlew bootRun
+
+# Shorthand flags (-d, -j, -b, -g, -a, -n)
+spring init -d web,actuator -j 21 -b 3.5.0 -g com.example -a my-app --build=gradle my-app.zip
+
+# Extract directly into a new folder (no manual unzip)
+spring init -d web,data-jpa -j 21 --build=gradle my-app --extract
+cd my-app && ./gradlew bootRun
+
+# List all available dependencies
+spring init --list
+
+# List available Spring Boot versions
+spring init --list | grep "Available boot versions"</code></pre>
           <pre><code class="language-groovy">// build.gradle — Spring Boot 3.5 manual setup
 plugins {
     id 'java'

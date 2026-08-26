@@ -53,7 +53,7 @@
     "href": "build-tools/gradle.html",
     "section": "Quick Start — Spring Boot Project",
     "anchor": "quickstart-spring",
-    "text": "The fastest path is start.spring.io (Spring Initializr). For a manual setup, apply both the Spring Boot and dependency-management plugins. # Option A — Spring Initializr CLI (HTTPie)\nhttps start.spring.io/starter.zip \\\n  type==gradle-project \\\n  language==java \\\n  bootVersion==3.5.0 \\\n  groupId==com"
+    "text": "Use the official Spring Boot CLI ( spring ) to scaffold projects from the terminal — the same engine as start.spring.io . Install it first, then run spring init . ## ── Install Spring Boot CLI ───────────────────────────────────────\n\n# macOS — Homebrew (recommended)\nbrew install spring-boot\nspring -"
   },
   {
     "page": "Gradle Deep Dive",
