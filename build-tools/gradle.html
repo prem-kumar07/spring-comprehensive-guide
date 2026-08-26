@@ -191,7 +191,7 @@ class AppTest {
 
 # macOS — Homebrew (recommended)
 brew install spring-boot
-spring --version   # Spring CLI vX.Y.Z
+spring --version   # Spring CLI v4.1.1  (latest, Aug 2026; CLI version = Boot version)
 
 # Any OS — SDKMAN (also manages Java, Gradle, Maven)
 curl -s "https://get.sdkman.io" | bash
@@ -205,11 +205,22 @@ spring --version
 
           <pre><code class="language-bash">## ── Create a project with spring init ────────────────────────────
 
-# Basic usage — generates my-service.zip in current directory
+# Latest Boot 4.x (recommended for new projects)
 spring init \
   --build=gradle \
   --java-version=21 \
-  --boot-version=3.5.0 \
+  --boot-version=4.1.1 \
+  --group-id=com.example \
+  --artifact-id=my-service \
+  --name=my-service \
+  --dependencies=web,data-jpa,validation,actuator \
+  my-service.zip
+
+# Boot 3.x LTS (long-term support line)
+spring init \
+  --build=gradle \
+  --java-version=21 \
+  --boot-version=3.5.15 \
   --group-id=com.example \
   --artifact-id=my-service \
   --name=my-service \
@@ -220,8 +231,8 @@ spring init \
 unzip my-service.zip -d my-service && cd my-service
 ./gradlew bootRun
 
-# Shorthand flags (-d, -j, -b, -g, -a, -n)
-spring init -d web,actuator -j 21 -b 3.5.0 -g com.example -a my-app --build=gradle my-app.zip
+# Shorthand flags (-d, -j, -b, -g, -a)
+spring init -d web,actuator -j 21 -b 4.1.1 -g com.example -a my-app --build=gradle my-app.zip
 
 # Extract directly into a new folder (no manual unzip)
 spring init -d web,data-jpa -j 21 --build=gradle my-app --extract
