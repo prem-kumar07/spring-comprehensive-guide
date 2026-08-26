@@ -16,6 +16,48 @@
   {
     "page": "Gradle Deep Dive",
     "href": "build-tools/gradle.html",
+    "section": "Quick Start — Java + JUnit 5",
+    "anchor": "quickstart-java-junit5",
+    "text": "Quick Start — Java + JUnit 5"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Quick Start — Java + JUnit 5",
+    "anchor": "quickstart-java-junit5",
+    "text": "Initialize a bare Java project, then add JUnit 5. Two options: use gradle init (interactive wizard) or create the files manually. # Option A — Gradle init wizard (Gradle 9)\nmkdir my-app && cd my-app\ngradle init \\\n  --type java-application \\\n  --dsl groovy \\\n  --test-framework junit-jupiter \\\n  --jav"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Quick Start — Java + JUnit 6",
+    "anchor": "quickstart-java-junit6",
+    "text": "Quick Start — Java + JUnit 6"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Quick Start — Java + JUnit 6",
+    "anchor": "quickstart-java-junit6",
+    "text": "JUnit 6 (6.1.3, Aug 2026) requires Java 17+ and uses a unified BOM. All annotations are the same as JUnit 5 — only the dependency changes. # Initialize project skeleton\nmkdir my-app && cd my-app\ngradle init \\\n  --type java-application \\\n  --dsl groovy \\\n  --test-framework junit-jupiter \\\n  --java-ve"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Quick Start — Spring Boot Project",
+    "anchor": "quickstart-spring",
+    "text": "Quick Start — Spring Boot Project"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
+    "section": "Quick Start — Spring Boot Project",
+    "anchor": "quickstart-spring",
+    "text": "The fastest path is start.spring.io (Spring Initializr). For a manual setup, apply both the Spring Boot and dependency-management plugins. # Option A — Spring Initializr CLI (HTTPie)\nhttps start.spring.io/starter.zip \\\n  type==gradle-project \\\n  language==java \\\n  bootVersion==3.5.0 \\\n  groupId==com"
+  },
+  {
+    "page": "Gradle Deep Dive",
+    "href": "build-tools/gradle.html",
     "section": "build.gradle — Full Project Structure (Groovy DSL)",
     "anchor": "build-gradle-structure",
     "text": "build.gradle — Full Project Structure (Groovy DSL)"

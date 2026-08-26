@@ -38,6 +38,235 @@
       <!-- ══════════════ BASICS ══════════════ -->
       <div class="tab-panel active" id="tab-basics">
 
+        <!-- ── Quick Start ── -->
+        <div class="feature-card">
+          <h3 id="quickstart-java-junit5">Quick Start — Java + JUnit 5</h3>
+          <p>Initialize a bare Java project, then add JUnit 5. Two options: use <code>gradle init</code> (interactive wizard) or create the files manually.</p>
+          <pre><code class="language-bash"># Option A — Gradle init wizard (Gradle 9)
+mkdir my-app && cd my-app
+gradle init \
+  --type java-application \
+  --dsl groovy \
+  --test-framework junit-jupiter \
+  --java-version 21 \
+  --package com.example \
+  --project-name my-app
+
+# Generates:
+# settings.gradle  build.gradle  gradlew  gradlew.bat
+# src/main/java/com/example/App.java
+# src/test/java/com/example/AppTest.java
+
+# Build and test
+./gradlew test</code></pre>
+          <pre><code class="language-groovy">// build.gradle — Option B: manual minimal setup with JUnit 5
+plugins {
+    id 'java'
+}
+
+group   = 'com.example'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'skipped', 'failed' }
+}</code></pre>
+          <pre><code class="language-java">// src/test/java/com/example/AppTest.java
+package com.example;
+
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AppTest {
+
+    @Test
+    void app_returns_greeting() {
+        assertEquals("Hello, World!", new App().greeting());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Alice", "Bob"})
+    void greets_by_name(String name) {
+        assertTrue(new App().greet(name).contains(name));
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="quickstart-java-junit6">Quick Start — Java + JUnit 6</h3>
+          <p>JUnit 6 (6.1.3, Aug 2026) requires <strong>Java 17+</strong> and uses a unified BOM. All annotations are the same as JUnit 5 — only the dependency changes.</p>
+          <pre><code class="language-bash"># Initialize project skeleton
+mkdir my-app && cd my-app
+gradle init \
+  --type java-application \
+  --dsl groovy \
+  --test-framework junit-jupiter \
+  --java-version 21 \
+  --package com.example \
+  --project-name my-app
+
+# Then replace the generated test dependency with JUnit 6 (see build.gradle below)</code></pre>
+          <pre><code class="language-groovy">// build.gradle — Java + JUnit 6
+plugins {
+    id 'java'
+}
+
+group   = 'com.example'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) } // 17+ required
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // BOM pins all JUnit 6 modules to the same version
+    testImplementation platform('org.junit:junit-bom:6.1.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+
+    // Optional — assertion + mock libraries (unchanged from JUnit 5 projects)
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'skipped', 'failed' }
+}</code></pre>
+          <pre><code class="language-java">// src/test/java/com/example/AppTest.java
+// Annotation imports identical to JUnit 5 — no code changes needed
+package com.example;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.assertj.core.api.Assertions.*;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class AppTest {
+
+    @Test @Order(1)
+    @DefaultLocale("en-US")         // JUnit 6 built-in, no extra extension
+    @SetSystemProperty(key = "env", value = "test") // JUnit 6 built-in
+    void environment_is_test() {
+        assertThat(System.getProperty("env")).isEqualTo("test");
+    }
+
+    @Test @Order(2)
+    void app_returns_greeting() {
+        assertThat(new App().greeting()).isEqualTo("Hello, World!");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Alice", "Bob"})
+    void greets_by_name(String name) {
+        assertThat(new App().greet(name)).contains(name);
+    }
+}</code></pre>
+          <div class="callout tip"><strong>Migrating from JUnit 5?</strong> Replace <code>testImplementation 'org.junit.jupiter:junit-jupiter:5.x'</code> with the BOM block above. No annotation changes required.</div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="quickstart-spring">Quick Start — Spring Boot Project</h3>
+          <p>The fastest path is <a href="https://start.spring.io">start.spring.io</a> (Spring Initializr). For a manual setup, apply both the Spring Boot and dependency-management plugins.</p>
+          <pre><code class="language-bash"># Option A — Spring Initializr CLI (HTTPie)
+https start.spring.io/starter.zip \
+  type==gradle-project \
+  language==java \
+  bootVersion==3.5.0 \
+  groupId==com.example \
+  artifactId==my-service \
+  name==my-service \
+  javaVersion==21 \
+  dependencies==web,data-jpa,validation,actuator \
+  -o my-service.zip && unzip my-service.zip && cd my-service
+
+# Build and run
+./gradlew bootRun</code></pre>
+          <pre><code class="language-groovy">// build.gradle — Spring Boot 3.5 manual setup
+plugins {
+    id 'java'
+    id 'org.springframework.boot'        version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group   = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    runtimeOnly 'com.h2database:h2'          // in-memory DB for dev/test
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // spring-boot-starter-test pulls in JUnit 5, Mockito, AssertJ, Testcontainers BOM
+}
+
+test {
+    useJUnitPlatform()
+}</code></pre>
+          <pre><code class="language-java">// src/main/java/com/example/MyServiceApplication.java
+package com.example;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class MyServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyServiceApplication.class, args);
+    }
+}
+
+// src/test/java/com/example/MyServiceApplicationTests.java
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class MyServiceApplicationTests {
+
+    @Test
+    void context_loads() {
+        // verifies the entire Spring context starts without errors
+    }
+}</code></pre>
+          <pre><code class="language-bash"># Common Spring Boot Gradle tasks
+./gradlew bootRun                    # run with embedded Tomcat
+./gradlew bootJar                    # build executable JAR → build/libs/my-service-0.0.1-SNAPSHOT.jar
+./gradlew test                       # run unit + slice tests
+./gradlew bootBuildImage             # build OCI image via Buildpacks (no Dockerfile needed)
+./gradlew nativeCompile              # GraalVM native binary (needs native-maven-plugin)</code></pre>
+          <div class="callout info"><strong>Spring Boot 4 / Gradle 9</strong> — use Spring Boot 4.0+ with Gradle 9 for the full set of AOT, virtual-thread, and Buildpacks improvements. Boot 4 requires Java 17+.</div>
+        </div>
+
         <div class="feature-card">
           <h3 id="build-gradle-structure">build.gradle — Full Project Structure (Groovy DSL)</h3>
           <p>The top-level <code>build.gradle</code> defines plugins, project metadata, repositories, dependencies, and task configuration. The Groovy DSL uses plain method calls and closures — no type annotations, no <code>.set()</code> calls.</p>
