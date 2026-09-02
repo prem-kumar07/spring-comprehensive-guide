@@ -52,13 +52,11 @@
     {
       group: 'Spring AI',
       items: [
-        { label: 'Overview',           href: ROOT + 'spring-ai/index.html' },
-        { label: 'ChatClient API',     href: ROOT + 'spring-ai/chat-client.html' },
-        { label: 'RAG & VectorStore',  href: ROOT + 'spring-ai/rag.html' },
-        { label: 'Tools & Advisors',   href: ROOT + 'spring-ai/tools-advisors.html' },
-        { label: 'Structured Output',  href: ROOT + 'spring-ai/structured-output.html' },
-        { label: 'Version Comparison', href: ROOT + 'spring-ai/version-comparison.html' },
-        { label: 'Providers',          href: ROOT + 'spring-ai/providers.html' },
+        { label: 'Overview',              href: ROOT + 'spring-ai/index.html' },
+        { label: '1.x Guide (Boot 3)',    href: ROOT + 'spring-ai/spring-ai-1x.html' },
+        { label: '2.x Guide (Boot 4)',    href: ROOT + 'spring-ai/spring-ai-2x.html' },
+        { label: '1.x vs 2.x Comparison',href: ROOT + 'spring-ai/version-comparison.html' },
+        { label: 'Providers',             href: ROOT + 'spring-ai/providers.html' },
       ],
     },
   ];
