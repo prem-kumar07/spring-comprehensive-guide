@@ -121,16 +121,41 @@
 
     <!-- Spring AI -->
     <h2>Spring AI</h2>
-    <p>Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output, and the leap from 1.x to 2.x.</p>
+    <p>Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output. Two major generations: 1.x (Spring Boot 3) and 2.x (Spring Boot 4).</p>
+
+    <h3 style="margin-top:1.25rem;margin-bottom:0.5rem;font-size:1rem;color:var(--text-muted)">
+      <span class="version-badge badge-ai1">Spring AI 1.x</span> — Spring Boot 3 &bull; GA May 2024
+    </h3>
     <div class="section-grid">
+      <a href="spring-ai/spring-ai-1x.html" class="section-card">
+        <div class="section-card-icon">1️⃣</div>
+        <h3>Spring AI 1.x Guide</h3>
+        <p>Setup, ChatClient (getContent), QuestionAnswerAdvisor, @Tool, MCP 1.1.x, BeanOutputConverter</p>
+      </a>
       <a href="spring-ai/index.html" class="section-card">
         <div class="section-card-icon">🤖</div>
-        <h3>Overview</h3>
-        <p>What Spring AI is, 8 core pillars, provider landscape</p>
+        <h3>Overview &amp; Architecture</h3>
+        <p>8 core pillars, provider landscape, 1.x vs 2.x timeline</p>
+      </a>
+      <a href="spring-ai/providers.html" class="section-card">
+        <div class="section-card-icon">🔌</div>
+        <h3>Providers</h3>
+        <p>OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more</p>
+      </a>
+    </div>
+
+    <h3 style="margin-top:1.5rem;margin-bottom:0.5rem;font-size:1rem;color:var(--text-muted)">
+      <span class="version-badge badge-ai2">Spring AI 2.x</span> — Spring Boot 4 &bull; GA June 2026
+    </h3>
+    <div class="section-grid">
+      <a href="spring-ai/spring-ai-2x.html" class="section-card">
+        <div class="section-card-icon">2️⃣</div>
+        <h3>Spring AI 2.x Guide</h3>
+        <p>Setup, ChatClient (getText), RetrievalAugmentationAdvisor, ToolCallingAdvisor, @McpTool, self-correcting output</p>
       </a>
       <a href="spring-ai/chat-client.html" class="section-card">
         <div class="section-card-icon">💬</div>
-        <h3>ChatClient API</h3>
+        <h3>ChatClient Deep Dive</h3>
         <p>Fluent builder, streaming, memory, multimodal, testing</p>
       </a>
       <a href="spring-ai/rag.html" class="section-card">
@@ -141,22 +166,21 @@
       <a href="spring-ai/tools-advisors.html" class="section-card">
         <div class="section-card-icon">🔨</div>
         <h3>Tools &amp; Advisors</h3>
-        <p>@Tool function calling, agentic loops, Advisor chain</p>
+        <p>ToolCallingAdvisor, ToolContext, agentic loops, MCP annotations</p>
       </a>
       <a href="spring-ai/structured-output.html" class="section-card">
         <div class="section-card-icon">📋</div>
         <h3>Structured Output</h3>
-        <p>BeanOutputConverter, self-correcting, provider-native JSON</p>
+        <p>BeanOutputConverter, .entity(), self-correcting, JSON Schema</p>
       </a>
+    </div>
+
+    <h3 style="margin-top:1.5rem;margin-bottom:0.5rem;font-size:1rem;color:var(--text-muted)">Comparison</h3>
+    <div class="section-grid">
       <a href="spring-ai/version-comparison.html" class="section-card">
         <div class="section-card-icon">📊</div>
-        <h3>Version Comparison</h3>
-        <p>Spring AI 1.x vs 2.x — API changes, MCP, agentic architecture</p>
-      </a>
-      <a href="spring-ai/providers.html" class="section-card">
-        <div class="section-card-icon">🔌</div>
-        <h3>Providers</h3>
-        <p>OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more</p>
+        <h3>1.x vs 2.x Comparison</h3>
+        <p>Side-by-side API diffs, migration guide, every changed and new feature</p>
       </a>
     </div>
 

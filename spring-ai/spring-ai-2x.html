@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring AI 2.x</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+<div id="main">
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle nav">☰</button>
+    <input id="search-input" type="search" placeholder="Search Spring Guide…" autocomplete="off" />
+    <div id="search-results"></div>
+    <button id="theme-toggle">☀️ Light</button>
+  </header>
+  <div id="content">
+
+    <h1>Spring AI 2.x</h1>
+    <div style="margin-bottom:1.25rem">
+      <span class="version-badge badge-ai2">Spring AI 2.x</span>
+      Spring Boot 4 baseline &bull; GA: 2.0.0 (Jun 12, 2026) &bull; Spring Framework 7 required
+    </div>
+
+    <p>Spring AI 2.0 (GA June 2026) is the current major release, built on Spring Boot 4 and Spring Framework 7. The biggest architectural shift is moving the tool-calling loop out of <code>ChatModel</code> and into the open advisor chain via <code>ToolCallingAdvisor</code>, making it interceptable and composable. This release also introduces <code>RetrievalAugmentationAdvisor</code> with a modular retrieval pipeline, annotation-driven MCP server authoring (<code>@McpTool</code>, <code>@McpResource</code>, <code>@McpPrompt</code>), self-correcting structured output via <code>.entity()</code>, and adopts JSpecify null-safety annotations throughout.</p>
+
+    <div class="callout warn">
+      <strong>Spring Boot 4 required</strong>
+      Spring AI 2.x requires Spring Boot 4.x (Spring Framework 7, Java 17+). If you are on Spring Boot 3.x, use <a href="spring-ai-1x.html">Spring AI 1.x</a>.
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-gs">Getting Started</button>
+        <button class="tab-btn" data-tab="tab-chat">ChatClient</button>
+        <button class="tab-btn" data-tab="tab-rag">RAG</button>
+        <button class="tab-btn" data-tab="tab-tools">Tools</button>
+        <button class="tab-btn" data-tab="tab-advisors">Advisors</button>
+        <button class="tab-btn" data-tab="tab-mcp">MCP</button>
+        <button class="tab-btn" data-tab="tab-structured">Structured Output</button>
+      </div>
+
+      <!-- ══ GETTING STARTED ══ -->
+      <div class="tab-panel active" id="tab-gs">
+
+        <div class="feature-card">
+          <h3 id="2x-bom-setup">BOM + Maven / Gradle Setup</h3>
+          <p>Import the Spring AI BOM so you never have to specify individual artifact versions. Add the provider starter for your chosen model (OpenAI shown) and any infrastructure starters you need (e.g. PgVector for RAG).</p>
+
+          <h4>Maven — pom.xml</h4>
+          <pre><code class="language-xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-ai-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.0.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;!-- Chat provider --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-openai-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- Vector store for RAG (optional) --&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-ai-pgvector-store-spring-boot-starter&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+          <h4>Groovy Gradle — build.gradle</h4>
+          <pre><code class="language-groovy">dependencies {
+    implementation platform('org.springframework.ai:spring-ai-bom:2.0.0')
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter'
+}</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o
+spring.ai.openai.chat.options.temperature=0.7
+
+# Enable virtual threads (Spring Boot 4 + Java 21)
+spring.threads.virtual.enabled=true</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-first-call">First ChatClient Call (2.x)</h3>
+          <p>Inject <code>ChatClient.Builder</code>, build a client, and call <code>.text()</code> to get the response string. In Spring AI 2.x, <code>text()</code> replaces the 1.x <code>content()</code> method.</p>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AssistantService {
+
+    private final ChatClient chatClient;
+
+    public AssistantService(ChatClient.Builder builder) {
+        this.chatClient = builder
+            .defaultSystem("You are a helpful assistant.")
+            .build();
+    }
+
+    public String ask(String question) {
+        // 2.x: .text() replaces 1.x .content()
+        return chatClient.prompt()
+            .user(question)
+            .call()
+            .text();
+    }
+
+    public String askWithFullResponse(String question) {
+        var response = chatClient.prompt()
+            .user(question)
+            .call()
+            .chatResponse();
+        // 2.x: getText() replaces 1.x getContent()
+        String text = response.getResult().getOutput().getText();
+        String finishReason = response.getResult().getMetadata().getFinishReason();
+        return text + " [finished: " + finishReason + "]";
+    }
+}</code></pre>
+
+          <div class="callout info">
+            <strong>API change from 1.x</strong>
+            <code>text()</code> / <code>getText()</code> replaces <code>content()</code> / <code>getContent()</code>. The old methods are deprecated in 2.x and will be removed in a future release.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-vs-1x-glance">Key Differences from Spring AI 1.x</h3>
+          <p>A quick reference for teams migrating from 1.x or starting fresh on 2.x.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th><span class="version-badge badge-ai1">1.x</span></th>
+                  <th><span class="version-badge badge-ai2">2.x</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Spring Boot baseline</td>
+                  <td>3.x (Spring Framework 6)</td>
+                  <td>4.x (Spring Framework 7)</td>
+                </tr>
+                <tr style="background:var(--surface)">
+                  <td>Get response text</td>
+                  <td><code>getContent()</code> / <code>content()</code></td>
+                  <td><code>getText()</code> / <code>text()</code></td>
+                </tr>
+                <tr>
+                  <td>RAG advisor</td>
+                  <td><code>QuestionAnswerAdvisor</code></td>
+                  <td><code>RetrievalAugmentationAdvisor</code></td>
+                </tr>
+                <tr style="background:var(--surface)">
+                  <td>Tool-calling loop</td>
+                  <td>Inside <code>ChatModel</code> (opaque)</td>
+                  <td><code>ToolCallingAdvisor</code> in advisor chain</td>
+                </tr>
+                <tr>
+                  <td>MCP server authoring</td>
+                  <td>Auto-exports all <code>@Tool</code> beans</td>
+                  <td><code>@McpTool</code>, <code>@McpResource</code>, <code>@McpPrompt</code></td>
+                </tr>
+                <tr style="background:var(--surface)">
+                  <td>Structured output</td>
+                  <td><code>BeanOutputConverter</code> + manual convert</td>
+                  <td><code>.entity(MyClass.class)</code> one-step</td>
+                </tr>
+                <tr>
+                  <td>Null safety</td>
+                  <td>Spring <code>@Nullable</code></td>
+                  <td>JSpecify annotations throughout</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-gs -->
+
+      <!-- ══ CHAT CLIENT ══ -->
+      <div class="tab-panel" id="tab-chat">
+
+        <div class="feature-card">
+          <h3 id="2x-basic-chat">Basic Chat — system, user, call</h3>
+          <p>The fluent <code>ChatClient</code> API is the primary entry point. Set a system prompt for persona, pass the user message, and call <code>.text()</code> for a simple string result.</p>
+          <pre><code class="language-java">// Stateless call with inline system prompt
+String reply = chatClient.prompt()
+    .system("You are a concise technical writer.")
+    .user("Explain dependency injection in two sentences.")
+    .call()
+    .text();
+
+// Access full ChatResponse for metadata
+ChatResponse response = chatClient.prompt()
+    .user("What is the capital of France?")
+    .call()
+    .chatResponse();
+
+String text         = response.getResult().getOutput().getText();
+String finishReason = response.getResult().getMetadata().getFinishReason();
+int promptTokens    = response.getMetadata().getUsage().getPromptTokens();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-streaming">Streaming</h3>
+          <p>Use <code>.stream().text()</code> to receive a <code>Flux&lt;String&gt;</code> of incremental tokens — useful for displaying output progressively in a UI.</p>
+          <pre><code class="language-java">import reactor.core.publisher.Flux;
+
+// Stream tokens as they arrive
+Flux&lt;String&gt; tokens = chatClient.prompt()
+    .user("Write a short poem about Spring Framework.")
+    .stream()
+    .text();
+
+// Collect all tokens when you need the full string
+String fullText = tokens.collectList().block()
+    .stream().collect(java.util.stream.Collectors.joining());
+
+// Stream full ChatResponse objects (for metadata per chunk)
+Flux&lt;ChatResponse&gt; responses = chatClient.prompt()
+    .user("Tell me a story.")
+    .stream()
+    .chatResponse();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-chat-memory">Chat Memory — Conversation History</h3>
+          <p><code>MessageChatMemoryAdvisor</code> maintains conversation history per session. The API is unchanged from Spring AI 1.x.</p>
+          <pre><code class="language-java">import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+
+InMemoryChatMemory memory = new InMemoryChatMemory();
+
+ChatClient chatClient = builder
+    .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
+    .build();
+
+// First turn
+String r1 = chatClient.prompt()
+    .user("My name is Alice.")
+    .advisorParam(MessageChatMemoryAdvisor.CONVERSATION_ID_KEY, "session-42")
+    .call().text();
+
+// Second turn — model remembers "Alice"
+String r2 = chatClient.prompt()
+    .user("What is my name?")
+    .advisorParam(MessageChatMemoryAdvisor.CONVERSATION_ID_KEY, "session-42")
+    .call().text(); // → "Your name is Alice."</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-multimodal">Multimodal Input (Images, Audio)</h3>
+          <p>Pass images or audio alongside text using <code>Media</code> objects in a <code>UserMessage</code>. Only providers that support the modality will process it.</p>
+          <pre><code class="language-java">import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.model.Media;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.core.io.ClassPathResource;
+
+// Image from classpath resource
+var imageResource = new ClassPathResource("images/chart.png");
+var media = new Media(MimeTypeUtils.IMAGE_PNG, imageResource);
+
+UserMessage msg = new UserMessage(
+    "Describe what you see in this chart.",
+    List.of(media)
+);
+
+String description = chatClient.prompt()
+    .messages(msg)
+    .call()
+    .text();</code></pre>
+          <div class="callout info">
+            <strong>Provider support</strong>
+            Multimodal input requires a model that supports vision (e.g. GPT-4o, Claude 3, Gemini 1.5 Pro). Passing images to a text-only model throws a provider API error.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-virtual-threads">Virtual Threads + ChatClient</h3>
+          <p>With <code>spring.threads.virtual.enabled=true</code> (Spring Boot 4 + Java 21), synchronous <code>.call()</code> runs on virtual threads. You get high concurrency without reactive code.</p>
+          <pre><code class="language-java">import java.util.concurrent.CompletableFuture;
+
+// Fan out multiple questions concurrently — each runs on a virtual thread
+List&lt;String&gt; questions = List.of(
+    "Explain CAP theorem",
+    "What is eventual consistency?",
+    "Define distributed transaction"
+);
+
+List&lt;String&gt; answers = questions.stream()
+    .map(q -&gt; CompletableFuture.supplyAsync(
+        () -&gt; chatClient.prompt().user(q).call().text()))
+    .toList()
+    .stream()
+    .map(CompletableFuture::join)
+    .toList();</code></pre>
+        </div>
+
+      </div><!-- /tab-chat -->
+
+      <!-- ══ RAG ══ -->
+      <div class="tab-panel" id="tab-rag">
+
+        <div class="feature-card">
+          <h3 id="2x-retrieval-advisor">RetrievalAugmentationAdvisor (2.x RAG)</h3>
+          <p>The 2.x replacement for <code>QuestionAnswerAdvisor</code>. It uses a modular pipeline — <code>QueryTransformer</code> → <code>DocumentRetriever</code> → <code>DocumentPostProcessor</code> — before augmenting the prompt with retrieved context. Each stage is pluggable.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-pgvector-store-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>Example</h4>
+          <pre><code class="language-java">import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.source.VectorStoreDocumentRetriever;
+
+@Service
+public class KnowledgeBaseService {
+
+    private final ChatClient chatClient;
+    private final RetrievalAugmentationAdvisor ragAdvisor;
+
+    public KnowledgeBaseService(ChatClient.Builder builder, VectorStore vectorStore) {
+        this.ragAdvisor = RetrievalAugmentationAdvisor.builder()
+            .documentRetriever(VectorStoreDocumentRetriever.builder()
+                .vectorStore(vectorStore)
+                .similarityThreshold(0.7)
+                .topK(5)
+                .build())
+            .build();
+
+        this.chatClient = builder.build();
+    }
+
+    public String answer(String question) {
+        return chatClient.prompt()
+            .user(question)
+            .advisors(ragAdvisor)
+            .call()
+            .text();
+    }
+}</code></pre>
+          <div class="callout warn">
+            <strong>Migration from 1.x</strong>
+            <code>QuestionAnswerAdvisor</code> still compiles in 2.x but is deprecated. Replace with <code>RetrievalAugmentationAdvisor</code> for access to query transformation, re-ranking, and the full retrieval pipeline.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-doc-ingestion">Document Ingestion Pipeline</h3>
+          <p>Load documents from any source, split into chunks, embed them, and store in a <code>VectorStore</code>. Run this once (or on a schedule) to build the knowledge base your RAG advisor will query.</p>
+          <pre><code class="language-java">import org.springframework.ai.document.Document;
+import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+
+@Component
+public class DocumentIngestionPipeline {
+
+    private final VectorStore vectorStore;
+
+    public void ingest(Resource pdfResource) {
+        // 1. Read documents from PDF
+        List&lt;Document&gt; docs = new TikaDocumentReader(pdfResource).get();
+
+        // 2. Split into ~512-token chunks with 64-token overlap
+        List&lt;Document&gt; chunks = new TokenTextSplitter(512, 64).apply(docs);
+
+        // 3. Embed and store (EmbeddingModel called automatically by VectorStore)
+        vectorStore.add(chunks);
+    }
+}</code></pre>
+
+          <h4>application.properties — PgVector</h4>
+          <pre><code class="language-properties">spring.datasource.url=jdbc:postgresql://localhost:5432/mydb
+spring.ai.vectorstore.pgvector.index-type=HNSW
+spring.ai.vectorstore.pgvector.distance-type=COSINE_DISTANCE
+spring.ai.vectorstore.pgvector.dimensions=1536</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-query-transform">Query Transformation (2.x)</h3>
+          <p><code>RewriteQueryTransformer</code> rewrites a vague or conversational user question into a retrieval-optimised query before hitting the vector store. Improves recall significantly for multi-turn conversations.</p>
+          <pre><code class="language-java">import org.springframework.ai.rag.query.transformer.RewriteQueryTransformer;
+
+RetrievalAugmentationAdvisor ragAdvisor = RetrievalAugmentationAdvisor.builder()
+    // Rewrite "What about the refund policy?" into a standalone retrieval query
+    .queryTransformer(RewriteQueryTransformer.builder()
+        .chatClientBuilder(builder)
+        .build())
+    .documentRetriever(VectorStoreDocumentRetriever.builder()
+        .vectorStore(vectorStore)
+        .topK(5)
+        .build())
+    .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-vectorstore-impl">VectorStore Implementations</h3>
+          <p>Spring AI 2.x supports all 1.x stores plus newer additions. Switch providers by changing the starter dependency and properties — no application code changes.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Store</th><th>Starter artifact</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>PgVector</td><td><code>spring-ai-pgvector-store-spring-boot-starter</code></td><td>PostgreSQL extension; easiest to self-host</td></tr>
+                <tr style="background:var(--surface)"><td>Redis</td><td><code>spring-ai-redis-store-spring-boot-starter</code></td><td>In-memory; good for low-latency lookup</td></tr>
+                <tr><td>MongoDB Atlas</td><td><code>spring-ai-mongodb-atlas-store-spring-boot-starter</code></td><td>Managed; no extra infra for Mongo users</td></tr>
+                <tr style="background:var(--surface)"><td>Pinecone</td><td><code>spring-ai-pinecone-store-spring-boot-starter</code></td><td>Managed; production-grade</td></tr>
+                <tr><td>Chroma</td><td><code>spring-ai-chroma-store-spring-boot-starter</code></td><td>Open-source; good for local dev</td></tr>
+                <tr style="background:var(--surface)"><td>Weaviate</td><td><code>spring-ai-weaviate-store-spring-boot-starter</code></td><td>Hybrid search (vector + keyword)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /tab-rag -->
+
+      <!-- ══ TOOLS ══ -->
+      <div class="tab-panel" id="tab-tools">
+
+        <div class="feature-card">
+          <h3 id="2x-tool-calling-advisor">ToolCallingAdvisor — Tool Loop in the Advisor Chain</h3>
+          <p>In Spring AI 2.x, the tool-calling loop (detect tool call → dispatch → feed result back → repeat) runs as <code>ToolCallingAdvisor</code> in the open advisor chain instead of being hidden inside <code>ChatModel</code>. It is <strong>auto-registered</strong> when tools are present — no explicit wiring needed for standard use.</p>
+          <pre><code class="language-java">// Standard usage — ToolCallingAdvisor is auto-registered
+String response = chatClient.prompt()
+    .user("What is the weather in London and Berlin?")
+    .tools(weatherService)   // ToolCallingAdvisor joins the chain automatically
+    .call()
+    .text();
+
+// Advanced: configure max iterations explicitly
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+
+ChatClient chatClient = builder
+    .defaultAdvisors(
+        ToolCallingAdvisor.builder().maxIterations(10).build(),
+        new SimpleLoggerAdvisor()  // sees every tool-call iteration
+    )
+    .build();</code></pre>
+          <div class="callout info">
+            <strong>Why this matters</strong>
+            Because <code>ToolCallingAdvisor</code> is a regular advisor, a logging or observability advisor placed around it sees every tool-dispatch cycle, enabling per-tool-call tracing. In 1.x this was impossible — the loop was opaque inside the model implementation.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-tool-annotation">@Tool Annotation (unchanged, works in 2.x)</h3>
+          <p>The <code>@Tool</code> annotation is unchanged from 1.x. Annotate any Spring service method to make it callable by the model.</p>
+          <pre><code class="language-java">import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.stereotype.Service;
+
+@Service
+public class WeatherService {
+
+    @Tool(description = "Get current weather and temperature for a city")
+    public WeatherInfo getWeather(
+            @ToolParam(description = "City name, e.g. London, Tokyo") String city,
+            @ToolParam(description = "Unit: celsius or fahrenheit") String unit) {
+        return weatherClient.fetch(city, unit);
+    }
+}
+
+// Usage
+String answer = chatClient.prompt()
+    .user("What's the weather in Tokyo in Celsius?")
+    .tools(weatherService)
+    .call()
+    .text();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-tool-context">ToolContext — Injecting Runtime State into Tools</h3>
+          <p><code>ToolContext</code> is the 2.x mechanism for passing request-scoped state (user ID, tenant, auth token) into tool methods securely — without putting sensitive values in the prompt where the model can see them.</p>
+          <pre><code class="language-java">import org.springframework.ai.tool.ToolContext;
+
+@Service
+public class OrderService {
+
+    @Tool(description = "Get recent orders for the currently authenticated user")
+    public List&lt;Order&gt; getMyOrders(ToolContext ctx) {
+        // Retrieve state injected at the call site — not from the prompt
+        String userId   = ctx.get("userId", String.class);
+        String tenantId = ctx.get("tenantId", String.class);
+        return orderRepository.findByUserAndTenant(userId, tenantId);
+    }
+}
+
+// Call site — inject context map
+String response = chatClient.prompt()
+    .user("Show me my last 5 orders")
+    .tools(orderService)
+    .toolContext(Map.of(
+        "userId",   currentUser.getId(),
+        "tenantId", currentTenant.getId()
+    ))
+    .call()
+    .text();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-tool-callback-provider">ToolCallbackProvider — Global Tool Registration</h3>
+          <p>Implement <code>ToolCallbackProvider</code> as a Spring bean to register a set of tools globally. They are available to every <code>ChatClient</code> call without being passed per-request.</p>
+          <pre><code class="language-java">import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+
+@Configuration
+public class GlobalToolsConfig {
+
+    // All @Tool methods on weatherService and calendarService are auto-discovered
+    @Bean
+    public ToolCallbackProvider globalTools(
+            WeatherService weatherService,
+            CalendarService calendarService) {
+        return MethodToolCallbackProvider.builder()
+            .toolObjects(weatherService, calendarService)
+            .build();
+    }
+}</code></pre>
+          <div class="callout tip">
+            <strong>Per-call vs global</strong>
+            Pass tools via <code>.tools(myService)</code> for request-specific tools (e.g. user-owned resources). Use <code>ToolCallbackProvider</code> beans for shared, stateless utilities available to all requests.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-tool-calling-manager">ToolCallingManager — Programmatic Tool Dispatch</h3>
+          <p>For advanced scenarios where you need to resolve and execute tools outside the advisor chain — e.g. in a custom agentic loop — inject <code>ToolCallingManager</code> directly.</p>
+          <pre><code class="language-java">import org.springframework.ai.tool.execution.ToolCallingManager;
+
+@Service
+public class CustomAgentLoop {
+
+    private final ChatClient chatClient;
+    private final ToolCallingManager toolCallingManager;
+
+    public String run(String userMessage) {
+        var request = ChatRequest.builder()
+            .message(userMessage)
+            .tools(myTools)
+            .build();
+
+        ChatResponse response = chatClient.call(request);
+
+        // Manually process tool calls if present
+        while (response.hasToolCalls()) {
+            var toolResults = toolCallingManager.executeToolCalls(request, response);
+            response = chatClient.callWithToolResults(request, toolResults);
+        }
+        return response.getResult().getOutput().getText();
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-tools -->
+
+      <!-- ══ ADVISORS ══ -->
+      <div class="tab-panel" id="tab-advisors">
+
+        <div class="feature-card">
+          <h3 id="2x-advisor-chain">Advisor Chain Architecture (2.x)</h3>
+          <p>Advisors wrap the chat call in a chain, from highest to lowest priority. In 2.x, <code>ToolCallingAdvisor</code> joins the chain as a first-class participant — it must have lower priority than RAG and memory advisors so that the augmented prompt reaches the model before tools are dispatched.</p>
+          <pre><code class="language-java">import org.springframework.core.Ordered;
+
+ChatClient chatClient = builder
+    .defaultAdvisors(
+        // Order 0 — executes first (outermost)
+        new SimpleLoggerAdvisor(),
+
+        // Order 100 — RAG augmentation before the model sees the prompt
+        RetrievalAugmentationAdvisor.builder()
+            .documentRetriever(retriever)
+            .build(),
+
+        // Order 200 — memory injected after RAG context
+        new MessageChatMemoryAdvisor(memory),
+
+        // ToolCallingAdvisor auto-registers at Ordered.LOWEST_PRECEDENCE - 1
+        // so it runs after all augmentation advisors
+        ToolCallingAdvisor.builder().maxIterations(5).build()
+    )
+    .build();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-memory-advisor">MessageChatMemoryAdvisor</h3>
+          <p>Maintains conversation history keyed by conversation ID. Unchanged from Spring AI 1.x.</p>
+          <pre><code class="language-java">InMemoryChatMemory memory = new InMemoryChatMemory();
+MessageChatMemoryAdvisor memoryAdvisor = new MessageChatMemoryAdvisor(memory, 20); // keep 20 messages
+
+String reply = chatClient.prompt()
+    .user("Remember: my favourite colour is blue.")
+    .advisors(memoryAdvisor)
+    .advisorParam(MessageChatMemoryAdvisor.CONVERSATION_ID_KEY, "conv-99")
+    .call().text();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-recursive-advisor">RecursiveAdvisor — Self-Refining Loops</h3>
+          <p>Introduced in Spring AI 1.1.x and continued in 2.x. Feeds the model's own response back as context for iterative refinement (e.g. critique → rewrite → critique).</p>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.RecursiveAdvisor;
+
+String refined = chatClient.prompt()
+    .user("Write a technical blog post about Spring AI 2.x.")
+    .advisors(new RecursiveAdvisor())
+    .advisorParam(RecursiveAdvisor.MAX_RECURSION_DEPTH, 3) // max 3 refinement passes
+    .call()
+    .text();</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-custom-advisor">Writing a Custom Advisor</h3>
+          <p>Implement <code>CallAdvisor</code> to intercept requests and responses. The <code>order()</code> method controls priority — lower numbers run first (outermost).</p>
+          <pre><code class="language-java">import org.springframework.ai.chat.client.advisor.api.*;
+import org.springframework.core.Ordered;
+
+public class TimingAdvisor implements CallAdvisor {
+
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest request, CallAroundAdvisorChain chain) {
+        long start = System.currentTimeMillis();
+        try {
+            AdvisedResponse response = chain.nextAroundCall(request);
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.printf("LLM call took %d ms%n", elapsed);
+            return response;
+        } catch (Exception ex) {
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.printf("LLM call failed after %d ms: %s%n", elapsed, ex.getMessage());
+            throw ex;
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE; // runs outermost — measures total time
+    }
+}</code></pre>
+        </div>
+
+      </div><!-- /tab-advisors -->
+
+      <!-- ══ MCP ══ -->
+      <div class="tab-panel" id="tab-mcp">
+
+        <div class="callout info" style="margin-bottom:1rem">
+          <strong>Spring AI 2.x MCP enhancements</strong>
+          Spring AI 2.x adds dedicated MCP server annotations — <code>@McpTool</code>, <code>@McpResource</code>, and <code>@McpPrompt</code> — giving fine-grained control over what is exposed on the MCP surface. In 1.x all <code>@Tool</code> beans were auto-exported; 2.x lets you be selective and exposes MCP capabilities beyond just tools.
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-mcp-client">MCP Client — Connecting to an External Tool Server</h3>
+          <p>Add the MCP client starter and configure the server URL. Spring AI auto-discovers available tools from the server and makes them available to <code>ChatClient</code>.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-mcp-client-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.mcp.client.transport.sse.connections.myserver.url=http://localhost:8090/sse</code></pre>
+
+          <h4>Usage</h4>
+          <pre><code class="language-java">@Service
+public class AgentService {
+
+    private final ChatClient chatClient;
+
+    // ToolCallbackProvider bean is auto-registered from discovered MCP tools
+    public AgentService(ChatClient.Builder builder,
+                        ToolCallbackProvider mcpTools) {
+        this.chatClient = builder
+            .defaultTools(mcpTools)
+            .build();
+    }
+
+    public String ask(String question) {
+        return chatClient.prompt().user(question).call().text();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-mcp-tool">@McpTool — Explicit MCP Tool Declaration</h3>
+          <p><code>@McpTool</code> is the 2.x annotation for explicitly marking a method as an MCP tool. It gives more control than <code>@Tool</code> — you can set the MCP name separately from the Java method name, mark it read-only, or exclude it from auto-export.</p>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpTool;
+import org.springframework.stereotype.Component;
+
+@Component
+public class InventoryMcpService {
+
+    // Explicit MCP tool name, separate from Java method name
+    @McpTool(name = "check-stock",
+             description = "Check inventory stock level for a product SKU")
+    public StockInfo checkStock(String sku) {
+        return inventoryRepository.findBySku(sku)
+            .map(StockInfo::from)
+            .orElse(StockInfo.outOfStock(sku));
+    }
+
+    @McpTool(name = "list-categories",
+             description = "List all product categories",
+             readOnly = true)
+    public List&lt;String&gt; listCategories() {
+        return categoryRepository.findAllNames();
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-mcp-resource">@McpResource — URI-Addressable Data</h3>
+          <p>New in Spring AI 2.x. Expose a method as an MCP <em>resource</em> — a named, URI-addressable piece of data that MCP clients can read by URI template. Unlike tools, resources represent data, not actions.</p>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpResource;
+
+@Component
+public class UserProfileMcpResource {
+
+    @McpResource(
+        uri = "resource://users/{userId}",
+        description = "Returns the full profile of a user as JSON",
+        mimeType = "application/json"
+    )
+    public String getUserProfile(String userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -&gt; new ResourceNotFoundException("User not found: " + userId));
+        return objectMapper.writeValueAsString(user);
+    }
+
+    @McpResource(
+        uri = "resource://users/{userId}/orders",
+        description = "Returns order history for a user as JSON"
+    )
+    public String getUserOrders(String userId) {
+        List&lt;Order&gt; orders = orderRepository.findByUserId(userId);
+        return objectMapper.writeValueAsString(orders);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-mcp-prompt">@McpPrompt — Reusable Prompt Templates</h3>
+          <p>Expose a method as an MCP <em>prompt template</em>. MCP clients call the prompt endpoint with variable values and receive a ready-to-send prompt string — useful for standardising prompt formats across teams or services.</p>
+          <pre><code class="language-java">import org.springframework.ai.mcp.server.annotation.McpPrompt;
+
+@Component
+public class PromptLibrary {
+
+    @McpPrompt(
+        name = "summarize-document",
+        description = "Generate a summarization prompt for a document on a given topic"
+    )
+    public String summarizePrompt(String topic, String maxWords) {
+        return """
+            You are a technical writer. Summarize the following document about %s
+            in at most %s words. Be concise and focus on the key points.
+            """.formatted(topic, maxWords);
+    }
+
+    @McpPrompt(
+        name = "code-review",
+        description = "Generate a code review prompt for the given language"
+    )
+    public String codeReviewPrompt(String language, String focusArea) {
+        return """
+            Review the following %s code. Focus on %s.
+            Identify bugs, suggest improvements, and explain your reasoning.
+            """.formatted(language, focusArea);
+    }
+}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-mcp-server-config">MCP Server Configuration</h3>
+          <p>Add the MCP server starter and configure transport. In 2.x, only methods annotated with <code>@McpTool</code>, <code>@McpResource</code>, or <code>@McpPrompt</code> are exported — unlike 1.x where all <code>@Tool</code> beans were auto-exposed.</p>
+
+          <h4>Dependency</h4>
+          <pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.ai&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-ai-mcp-server-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+          <h4>application.properties</h4>
+          <pre><code class="language-properties">spring.ai.mcp.server.transport=SSE
+spring.ai.mcp.server.name=inventory-service
+spring.ai.mcp.server.version=1.0.0
+spring.ai.mcp.server.sse.path=/mcp/sse</code></pre>
+
+          <div class="callout info">
+            <strong>1.x vs 2.x server authoring</strong>
+            In Spring AI 1.x, adding the MCP server starter automatically exports every <code>@Tool</code>-annotated bean method. In 2.x, use <code>@McpTool</code> for explicit tool exposure and <code>@McpResource</code> / <code>@McpPrompt</code> to expose MCP capabilities that <code>@Tool</code> cannot express.
+          </div>
+        </div>
+
+      </div><!-- /tab-mcp -->
+
+      <!-- ══ STRUCTURED OUTPUT ══ -->
+      <div class="tab-panel" id="tab-structured">
+
+        <div class="feature-card">
+          <h3 id="2x-entity-shortcut">.entity() — One-Step Structured Output (2.x)</h3>
+          <p>The 2.x <code>.entity(Class&lt;T&gt;)</code> shortcut combines <code>BeanOutputConverter</code>, JSON schema injection, and response parsing into a single call. The model is instructed to return valid JSON matching your class's schema, and Spring AI parses the result into the target type automatically.</p>
+          <pre><code class="language-java">import jakarta.validation.constraints.NotNull;
+
+// 1. Define the target type (record or class)
+record ProductInfo(
+    String name,
+    String category,
+    @NotNull Double price,
+    boolean inStock
+) {}
+
+// 2. Use .entity() — no manual BeanOutputConverter needed
+@Service
+public class CatalogService {
+
+    private final ChatClient chatClient;
+
+    public ProductInfo describeProduct(String productDescription) {
+        return chatClient.prompt()
+            .user("Extract product details from: " + productDescription)
+            .call()
+            .entity(ProductInfo.class);  // parses JSON → ProductInfo automatically
+    }
+
+    // List of objects
+    public List&lt;ProductInfo&gt; extractMultipleProducts(String text) {
+        return chatClient.prompt()
+            .user("Extract all products mentioned in: " + text)
+            .call()
+            .entity(new ParameterizedTypeReference&lt;List&lt;ProductInfo&gt;&gt;() {});
+    }
+}</code></pre>
+          <div class="callout info">
+            <strong>Self-correcting loop</strong>
+            When the model response doesn't match the expected schema, Spring AI 2.x automatically retries with the schema violation details as feedback, giving the model a chance to correct itself before throwing an exception.
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-bean-output-converter">BeanOutputConverter (still supported in 2.x)</h3>
+          <p>The 1.x manual approach still works in 2.x and is useful when you need the raw JSON string alongside the converted object, or when you want to customise the schema.</p>
+          <pre><code class="language-java">import org.springframework.ai.converter.BeanOutputConverter;
+
+record SentimentResult(String sentiment, double confidence, String reasoning) {}
+
+BeanOutputConverter&lt;SentimentResult&gt; converter =
+    new BeanOutputConverter&lt;&gt;(SentimentResult.class);
+
+String prompt = "Analyse the sentiment of this text and respond as JSON.\n"
+    + converter.getFormat()  // appends JSON schema instructions
+    + "\n\nText: I absolutely loved the product!";
+
+String rawJson = chatClient.prompt()
+    .user(prompt)
+    .call()
+    .text();
+
+SentimentResult result = converter.convert(rawJson);</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-map-output">MapOutputConverter</h3>
+          <p>Use <code>MapOutputConverter</code> when the output schema is dynamic or not known at compile time. Returns a <code>Map&lt;String, Object&gt;</code>.</p>
+          <pre><code class="language-java">import org.springframework.ai.converter.MapOutputConverter;
+
+MapOutputConverter converter = new MapOutputConverter();
+
+String prompt = "List the top 3 programming languages with their key use cases. "
+    + converter.getFormat();
+
+String json = chatClient.prompt().user(prompt).call().text();
+Map&lt;String, Object&gt; result = converter.convert(json);
+// result = {"Python": "data science, scripting", "Java": "enterprise, Android", ...}</code></pre>
+        </div>
+
+        <div class="feature-card">
+          <h3 id="2x-native-json-mode">Provider-Native JSON Schema Mode</h3>
+          <p>For providers that support structured output natively (OpenAI, Gemini), you can request JSON Schema-constrained output. Combined with <code>.entity()</code>, this gives guaranteed schema conformance at the provider level.</p>
+          <pre><code class="language-java">import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.ResponseFormat;
+
+record FlightInfo(String airline, String flightNumber,
+                  String departure, String arrival, double price) {}
+
+FlightInfo flight = chatClient.prompt()
+    .user("Find me the cheapest flight from London to New York next Monday")
+    .options(OpenAiChatOptions.builder()
+        .withResponseFormat(ResponseFormat.JSON_SCHEMA)
+        .build())
+    .call()
+    .entity(FlightInfo.class);</code></pre>
+          <div class="callout tip">
+            <strong>Best practice</strong>
+            Use <code>ResponseFormat.JSON_SCHEMA</code> with <code>.entity()</code> for the most reliable structured output. The provider enforces the schema token-by-token, so malformed JSON is impossible — no retry needed.
+          </div>
+        </div>
+
+      </div><!-- /tab-structured -->
+
+    </div><!-- /tab-container -->
+  </div>
+</div>
+<script src="../assets/js/nav.js"></script>
+<script src="../assets/js/prism.js"></script>
+<script src="../assets/js/search.js"></script>
+</body>
+</html>

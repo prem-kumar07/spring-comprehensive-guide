@@ -1593,33 +1593,89 @@
     "href": "index.html",
     "section": "Spring AI",
     "anchor": "",
-    "text": "Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output, and the leap from 1.x to 2.x. 🤖"
+    "text": "Unified API for 20+ model providers — ChatClient, RAG pipelines, tool calling, structured output. Two major generations: 1.x (Spring Boot 3) and 2.x (Spring Boot 4)."
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Overview",
+    "section": "Spring AI 1.x — Spring Boot 3 • GA May 2024",
     "anchor": "",
-    "text": "Overview"
+    "text": "Spring AI 1.x — Spring Boot 3 • GA May 2024"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Overview",
+    "section": "Spring AI 1.x Guide",
     "anchor": "",
-    "text": "What Spring AI is, 8 core pillars, provider landscape 💬"
+    "text": "Spring AI 1.x Guide"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "ChatClient API",
+    "section": "Spring AI 1.x Guide",
     "anchor": "",
-    "text": "ChatClient API"
+    "text": "Setup, ChatClient (getContent), QuestionAnswerAdvisor, @Tool, MCP 1.1.x, BeanOutputConverter 🤖"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "ChatClient API",
+    "section": "Overview & Architecture",
+    "anchor": "",
+    "text": "Overview & Architecture"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Overview & Architecture",
+    "anchor": "",
+    "text": "8 core pillars, provider landscape, 1.x vs 2.x timeline 🔌"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Providers",
+    "anchor": "",
+    "text": "Providers"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Providers",
+    "anchor": "",
+    "text": "OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring AI 2.x — Spring Boot 4 • GA June 2026",
+    "anchor": "",
+    "text": "Spring AI 2.x — Spring Boot 4 • GA June 2026"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring AI 2.x Guide",
+    "anchor": "",
+    "text": "Spring AI 2.x Guide"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "Spring AI 2.x Guide",
+    "anchor": "",
+    "text": "Setup, ChatClient (getText), RetrievalAugmentationAdvisor, ToolCallingAdvisor, @McpTool, self-correcting output 💬"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "ChatClient Deep Dive",
+    "anchor": "",
+    "text": "ChatClient Deep Dive"
+  },
+  {
+    "page": "Spring Comprehensive Guide",
+    "href": "index.html",
+    "section": "ChatClient Deep Dive",
     "anchor": "",
     "text": "Fluent builder, streaming, memory, multimodal, testing 📚"
   },
@@ -1649,7 +1705,7 @@
     "href": "index.html",
     "section": "Tools & Advisors",
     "anchor": "",
-    "text": "@Tool function calling, agentic loops, Advisor chain 📋"
+    "text": "ToolCallingAdvisor, ToolContext, agentic loops, MCP annotations 📋"
   },
   {
     "page": "Spring Comprehensive Guide",
@@ -1663,35 +1719,28 @@
     "href": "index.html",
     "section": "Structured Output",
     "anchor": "",
-    "text": "BeanOutputConverter, self-correcting, provider-native JSON 📊"
+    "text": "BeanOutputConverter, .entity(), self-correcting, JSON Schema"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Version Comparison",
+    "section": "Comparison",
     "anchor": "",
-    "text": "Version Comparison"
+    "text": "Comparison"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Version Comparison",
+    "section": "1.x vs 2.x Comparison",
     "anchor": "",
-    "text": "Spring AI 1.x vs 2.x — API changes, MCP, agentic architecture 🔌"
+    "text": "1.x vs 2.x Comparison"
   },
   {
     "page": "Spring Comprehensive Guide",
     "href": "index.html",
-    "section": "Providers",
+    "section": "1.x vs 2.x Comparison",
     "anchor": "",
-    "text": "Providers"
-  },
-  {
-    "page": "Spring Comprehensive Guide",
-    "href": "index.html",
-    "section": "Providers",
-    "anchor": "",
-    "text": "OpenAI, Anthropic, Ollama, Bedrock, Gemini and 15+ more"
+    "text": "Side-by-side API diffs, migration guide, every changed and new feature"
   },
   {
     "page": "Spring AI ChatClient API",
@@ -2153,7 +2202,7 @@
     "href": "spring-ai/index.html",
     "section": "Spring AI",
     "anchor": "",
-    "text": "Spring AI 1.x Spring AI 2.x Spring AI is an application framework for AI engineering that provides a portable, unified API across AI model providers — covering chat, text-to-image, audio transcription, text-to-speech, and embedding models. Rather than shipping a model of its own, Spring AI acts as t"
+    "text": "Spring AI 1.x Spring AI 2.x Spring AI is an application framework for AI engineering that provides a portable, unified API across AI model providers — covering chat, text-to-image, audio transcription, text-to-speech, and embedding models. It embraces Spring Boot idioms (auto-configuration, starters"
   },
   {
     "page": "Spring AI",
@@ -2172,65 +2221,86 @@
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "1.x vs 2.x at a Glance",
+    "section": "Spring AI 1.x Spring Boot 3 • GA May 2024",
     "anchor": "",
-    "text": "1.x vs 2.x at a Glance"
+    "text": "Spring AI 1.x Spring Boot 3 • GA May 2024"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "1.x vs 2.x at a Glance",
+    "section": "Spring AI 1.x Spring Boot 3 • GA May 2024",
     "anchor": "",
-    "text": "Concern 1.x 2.x BOM artifact spring-ai-bom:1.0.0 spring-ai-bom:2.0.0 Tool calling @Tool on methods; loop embedded inside ChatModel ToolCallingAdvisor auto-registered; composable in advisor chain RAG advisor QuestionAnswerAdvisor RetrievalAugmentationAdvisor Result text response.getContent() response"
+    "text": "Built on Spring Boot 3.x and Spring Framework 6. The first stable generation of Spring AI — choose this if your project is on Boot 3 or you need the proven 1.x API. 1.x baseline: BOM spring-ai-bom:1.1.0 • Java 17+ • Spring Boot 3.x • getContent() API • QuestionAnswerAdvisor • tool loop inside ChatMo"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Architecture",
-    "anchor": "",
-    "text": "Architecture"
+    "section": "Spring AI 1.x Guide",
+    "anchor": "nav-1x-guide",
+    "text": "Spring AI 1.x Guide"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Architecture",
-    "anchor": "",
-    "text": "Spring AI inserts a vendor-neutral abstraction layer between your application and the chosen model provider, translating Spring idioms (auto-configuration, dependency injection, @Tool annotations) into each provider's native API format at runtime. Your Spring Boot Application ChatClient · VectorStor"
+    "section": "Spring AI 1.x Guide",
+    "anchor": "nav-1x-guide",
+    "text": "Complete 1.x reference: setup, ChatClient, RAG, Tools, Advisors, MCP 1.1.x, Structured Output"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Provider Landscape",
-    "anchor": "",
-    "text": "Provider Landscape"
+    "section": "Providers",
+    "anchor": "nav-providers",
+    "text": "Providers"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Provider Landscape",
-    "anchor": "",
-    "text": "Spring AI ships first-class support for 20+ providers organized into three tiers: commercial frontier APIs with the deepest feature coverage, additional cloud APIs for specialized workloads, and local runtimes for air-gapped or cost-sensitive deployments. Tier 1 — Commercial OpenAI (GPT-4o, o-series"
+    "section": "Providers",
+    "anchor": "nav-providers",
+    "text": "20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Explore the Guide",
+    "section": "Spring AI 2.x Spring Boot 4 • GA June 2026",
     "anchor": "",
-    "text": "Explore the Guide"
+    "text": "Spring AI 2.x Spring Boot 4 • GA June 2026"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "ChatClient API",
+    "section": "Spring AI 2.x Spring Boot 4 • GA June 2026",
+    "anchor": "",
+    "text": "Built on Spring Boot 4 and Spring Framework 7. The current major release — choose this for new projects. Requires Java 17+. 2.x baseline: BOM spring-ai-bom:2.0.0 • Spring Boot 4.x required • getText() API • ToolCallingAdvisor in advisor chain • RetrievalAugmentationAdvisor • @McpTool"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Spring AI 2.x Guide",
+    "anchor": "nav-2x-guide",
+    "text": "Spring AI 2.x Guide"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "Spring AI 2.x Guide",
+    "anchor": "nav-2x-guide",
+    "text": "Complete 2.x reference: setup, ChatClient, RAG, ToolCallingAdvisor, MCP annotations, self-correcting output"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "ChatClient Deep Dive",
     "anchor": "nav-chat-client",
-    "text": "ChatClient API"
+    "text": "ChatClient Deep Dive"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "ChatClient API",
+    "section": "ChatClient Deep Dive",
     "anchor": "nav-chat-client",
-    "text": "Fluent API for chat, streaming, memory, multimodal, EmbeddingModel, ImageModel, TTS/STT"
+    "text": "Fluent API, streaming, memory, multimodal, EmbeddingModel, TTS/STT"
   },
   {
     "page": "Spring AI",
@@ -2258,7 +2328,7 @@
     "href": "spring-ai/index.html",
     "section": "Tools & Advisors",
     "anchor": "nav-tools-advisors",
-    "text": "@Tool function calling, agentic loops, Advisor chain, MCP client & server"
+    "text": "ToolCallingAdvisor, ToolContext, agentic loops, MCP client & server"
   },
   {
     "page": "Spring AI",
@@ -2272,35 +2342,42 @@
     "href": "spring-ai/index.html",
     "section": "Structured Output",
     "anchor": "nav-structured-output",
-    "text": "BeanOutputConverter, self-correcting output, provider-native JSON mode"
+    "text": "BeanOutputConverter, .entity(), self-correcting output, provider-native JSON Schema"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Version Comparison",
+    "section": "1.x vs 2.x Comparison",
+    "anchor": "",
+    "text": "1.x vs 2.x Comparison"
+  },
+  {
+    "page": "Spring AI",
+    "href": "spring-ai/index.html",
+    "section": "1.x vs 2.x Comparison",
     "anchor": "nav-version-comparison",
-    "text": "Version Comparison"
+    "text": "1.x vs 2.x Comparison"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Version Comparison",
+    "section": "1.x vs 2.x Comparison",
     "anchor": "nav-version-comparison",
-    "text": "Spring AI 1.x vs 2.x — API changes, new features, migration guide"
+    "text": "Side-by-side API diffs, migration guide, every changed, new, and removed API"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Providers",
-    "anchor": "nav-providers",
-    "text": "Providers"
+    "section": "Architecture",
+    "anchor": "",
+    "text": "Architecture"
   },
   {
     "page": "Spring AI",
     "href": "spring-ai/index.html",
-    "section": "Providers",
-    "anchor": "nav-providers",
-    "text": "20+ providers: OpenAI, Anthropic, Ollama, Bedrock, Gemini and more"
+    "section": "Architecture",
+    "anchor": "",
+    "text": "Spring AI inserts a vendor-neutral abstraction layer between your application and the chosen model provider. Your Spring Boot Application ChatClient · VectorStore · EmbeddingModel Spring AI Abstraction Layer Advisors · Tools · RAG · Structured Output Model Provider OpenAI · Anthropic · Ollama · Gemi"
   },
   {
     "page": "Spring AI Providers",
@@ -3043,6 +3120,790 @@
     "section": "RAG & VectorStore Cheatsheet",
     "anchor": "",
     "text": "Class / Method Purpose Notes TextReader(resource) Read plain text, Markdown, CSV as Document Returns single Document; pass to TokenTextSplitter PdfDocumentReader(resource) Parse PDF to List<Document> — one per page Requires spring-ai-pdf-document-reader TikaDocumentReader(resource) Parse Word, Excel"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Spring AI 1.x",
+    "anchor": "",
+    "text": "Spring AI 1.x"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Spring AI 1.x",
+    "anchor": "",
+    "text": "Spring AI 1.x Spring Boot 3.x baseline • Latest 1.x: 1.1.0 (Jul 2024) • First GA: 1.0.0 (May 2024) Spring AI 1.x is the first stable generation of the framework, built on Spring Boot 3 and Spring Framework 6. It introduced the portable ChatClient fluent API, a pluggable VectorStore abstraction, the "
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "BOM + Maven / Gradle Setup [Basic]",
+    "anchor": "gs-bom-setup",
+    "text": "BOM + Maven / Gradle Setup [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "BOM + Maven / Gradle Setup [Basic]",
+    "anchor": "gs-bom-setup",
+    "text": "Import the Spring AI BOM in dependencyManagement to align all starter versions, then add the provider starter for your chosen model. No version is needed on individual starters once the BOM is in place. Maven <dependencyManagement>\n  <dependencies>\n    <dependency>\n      <groupId>org.springframework"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "First ChatClient Call (1.x) [Basic]",
+    "anchor": "gs-first-call",
+    "text": "First ChatClient Call (1.x) [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "First ChatClient Call (1.x) [Basic]",
+    "anchor": "gs-first-call",
+    "text": "Inject ChatClient.Builder (auto-configured), build your ChatClient , and call .content() to get a plain String response. This is the canonical 1.x pattern. Example import org.springframework.ai.chat.client.ChatClient;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class AssistantSer"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Basic Chat — system, user, call [Basic]",
+    "anchor": "chat-basic",
+    "text": "Basic Chat — system, user, call [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Basic Chat — system, user, call [Basic]",
+    "anchor": "chat-basic",
+    "text": "The ChatClient fluent API chains system() , user() , and then either call() (blocking) or stream() (reactive). In 1.x, the final accessor for the text is content() . Example // Simple call with system prompt\nString answer = chatClient.prompt()\n    .system(\"You are a concise technical assistant. Answ"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Streaming Responses [Intermediate]",
+    "anchor": "chat-streaming",
+    "text": "Streaming Responses [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Streaming Responses [Intermediate]",
+    "anchor": "chat-streaming",
+    "text": "Switch from call() to stream() to get a Flux<String> for token-by-token streaming. Useful for long responses or real-time UIs. Example import reactor.core.publisher.Flux;\n\n// Stream tokens as they arrive\nFlux<String> tokenStream = chatClient.prompt()\n    .user(\"Write a short poem about Java.\")\n    ."
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Chat Memory (1.x) [Intermediate]",
+    "anchor": "chat-memory",
+    "text": "Chat Memory (1.x) [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Chat Memory (1.x) [Intermediate]",
+    "anchor": "chat-memory",
+    "text": "Use MessageChatMemoryAdvisor with InMemoryChatMemory to maintain conversation history across calls. Pass a conversationId via advisor parameters to keep sessions isolated. Example import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;\nimport org.springframework.ai.chat.memory.In"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "ChatOptions — Per-Call Overrides [Intermediate]",
+    "anchor": "chat-options",
+    "text": "ChatOptions — Per-Call Overrides [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "ChatOptions — Per-Call Overrides [Intermediate]",
+    "anchor": "chat-options",
+    "text": "Override model, temperature, max tokens, and other parameters per request using provider-specific ChatOptions . Options set at call time take precedence over global application.properties defaults. Example import org.springframework.ai.openai.OpenAiChatOptions;\n\nOpenAiChatOptions options = OpenAiCha"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "QuestionAnswerAdvisor — 1.x RAG in One Line [Basic]",
+    "anchor": "rag-question-answer-advisor",
+    "text": "QuestionAnswerAdvisor — 1.x RAG in One Line [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "QuestionAnswerAdvisor — 1.x RAG in One Line [Basic]",
+    "anchor": "rag-question-answer-advisor",
+    "text": "QuestionAnswerAdvisor is the built-in 1.x advisor for retrieval-augmented generation. It automatically embeds the user's question, retrieves the top-K similar documents from a VectorStore , and appends them to the system context before calling the model. Dependency <!-- spring-ai-bom:1.1.0 manages v"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Document Ingestion Pipeline [Intermediate]",
+    "anchor": "rag-ingestion",
+    "text": "Document Ingestion Pipeline [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Document Ingestion Pipeline [Intermediate]",
+    "anchor": "rag-ingestion",
+    "text": "Load documents with a DocumentReader , split them with a DocumentTransformer , then store the chunks in a VectorStore . Spring AI auto-embeds each chunk using the configured EmbeddingModel . Example import org.springframework.ai.document.Document;\nimport org.springframework.ai.reader.tika.TikaDocume"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "VectorStore Implementations (1.x) [Basic]",
+    "anchor": "rag-vectorstores",
+    "text": "VectorStore Implementations (1.x) [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "VectorStore Implementations (1.x) [Basic]",
+    "anchor": "rag-vectorstores",
+    "text": "Spring AI 1.x ships first-class starters for popular vector databases. All implement the same VectorStore interface — swap providers by changing the starter dependency and a few properties. Provider Starter artifact PgVector (PostgreSQL) spring-ai-pgvector-store-spring-boot-starter Chroma spring-ai-"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "@Tool — Declaring a Java Method as a Tool [Basic]",
+    "anchor": "tools-annotation",
+    "text": "@Tool — Declaring a Java Method as a Tool [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "@Tool — Declaring a Java Method as a Tool [Basic]",
+    "anchor": "tools-annotation",
+    "text": "Annotate any Spring-managed method with @Tool(description = \"...\") to expose it as a callable function. The description is sent to the model so it knows when to invoke the tool. In Spring AI 1.x the tool-calling loop (detect → invoke → feed result back) runs inside the ChatModel implementation. Exam"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "FunctionCallback — Pre-GA / Legacy Style [Intermediate]",
+    "anchor": "tools-function-callback",
+    "text": "FunctionCallback — Pre-GA / Legacy Style [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "FunctionCallback — Pre-GA / Legacy Style [Intermediate]",
+    "anchor": "tools-function-callback",
+    "text": "Before @Tool was available, tools were registered as FunctionCallback beans implementing java.util.function.Function . This pattern still works in 1.x but @Tool is the preferred approach. Example import org.springframework.ai.model.function.FunctionCallback;\nimport org.springframework.ai.model.funct"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "@ToolParam — Documenting Parameters [Basic]",
+    "anchor": "tools-param",
+    "text": "@ToolParam — Documenting Parameters [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "@ToolParam — Documenting Parameters [Basic]",
+    "anchor": "tools-param",
+    "text": "Add @ToolParam(description = \"...\") to each parameter so the model receives clear instructions about what values to supply. Without descriptions the model relies solely on the parameter name. Example import org.springframework.ai.tool.annotation.Tool;\nimport org.springframework.ai.tool.annotation.To"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Multi-Tool & Parallel Invocations [Intermediate]",
+    "anchor": "tools-parallel",
+    "text": "Multi-Tool & Parallel Invocations [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Multi-Tool & Parallel Invocations [Intermediate]",
+    "anchor": "tools-parallel",
+    "text": "Models like GPT-4o can request multiple tools in a single response. Spring AI 1.x detects parallel tool-call requests, dispatches all of them, collects the results, and feeds them back to the model in one batch. The loop repeats until the model stops requesting tools. Example // Register multiple @T"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "CallAdvisor Interface [Intermediate]",
+    "anchor": "advisors-interface",
+    "text": "CallAdvisor Interface [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "CallAdvisor Interface [Intermediate]",
+    "anchor": "advisors-interface",
+    "text": "All Spring AI advisors implement CallAdvisor (for blocking) or StreamAdvisor (for reactive). An advisor wraps the request/response pipeline — similar to a servlet filter — and can modify, log, or short-circuit calls. Implement order() to control priority in the chain. Interface import org.springfram"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MessageChatMemoryAdvisor [Basic]",
+    "anchor": "advisors-memory",
+    "text": "MessageChatMemoryAdvisor [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MessageChatMemoryAdvisor [Basic]",
+    "anchor": "advisors-memory",
+    "text": "Maintains conversation history across calls using a ChatMemory store. By default keeps the last N messages. Use CONVERSATION_ID_KEY to isolate concurrent user sessions. Example import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;\nimport org.springframework.ai.chat.memory.InMem"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "SimpleLoggerAdvisor [Basic]",
+    "anchor": "advisors-logger",
+    "text": "SimpleLoggerAdvisor [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "SimpleLoggerAdvisor [Basic]",
+    "anchor": "advisors-logger",
+    "text": "Logs the full AdvisedRequest and AdvisedResponse at DEBUG level. Useful during development to inspect what is being sent to and received from the model. Example import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;\n\nString response = chatClient.prompt()\n    .system(\"You are a helpfu"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "SafeGuardAdvisor — Content Filtering [Intermediate]",
+    "anchor": "advisors-safeguard",
+    "text": "SafeGuardAdvisor — Content Filtering [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "SafeGuardAdvisor — Content Filtering [Intermediate]",
+    "anchor": "advisors-safeguard",
+    "text": "Rejects requests containing any of a list of sensitive keywords before they reach the model. A lightweight first-line guard — complement with server-side moderation APIs for production use. Example import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;\n\nSafeGuardAdvisor guard = new Safe"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Advisor Chain Ordering [Intermediate]",
+    "anchor": "advisors-ordering",
+    "text": "Advisor Chain Ordering [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Advisor Chain Ordering [Intermediate]",
+    "anchor": "advisors-ordering",
+    "text": "Advisors execute in ascending order() value — lower numbers run first on the way in , and last on the way out (like servlet filters). Use Spring's Ordered constants for clarity. Recommended ordering for typical setups // 1 — SafeGuardAdvisor: filter bad input before anything else (HIGHEST priority)\n"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP Client — Connecting to an External Tool Server [Intermediate]",
+    "anchor": "mcp-client",
+    "text": "MCP Client — Connecting to an External Tool Server [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP Client — Connecting to an External Tool Server [Intermediate]",
+    "anchor": "mcp-client",
+    "text": "Add the MCP client starter and configure the server URL. Spring AI discovers available tools from the server at startup and registers them as ToolCallback beans that can be injected into ChatClient . Dependency <dependency>\n  <groupId>org.springframework.ai</groupId>\n  <artifactId>spring-ai-mcp-clie"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP Server — Exposing @Tool Beans via SSE [Intermediate]",
+    "anchor": "mcp-server",
+    "text": "MCP Server — Exposing @Tool Beans via SSE [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP Server — Exposing @Tool Beans via SSE [Intermediate]",
+    "anchor": "mcp-server",
+    "text": "Add the MCP server starter to turn your Spring Boot app into an MCP server. Every @Tool -annotated method in a Spring bean is automatically discovered and exported over the configured transport (SSE or stdio). Dependency <dependency>\n  <groupId>org.springframework.ai</groupId>\n  <artifactId>spring-a"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP stdio Transport — Claude Desktop Integration [Advanced]",
+    "anchor": "mcp-stdio",
+    "text": "MCP stdio Transport — Claude Desktop Integration [Advanced]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "MCP stdio Transport — Claude Desktop Integration [Advanced]",
+    "anchor": "mcp-stdio",
+    "text": "Use stdio transport to integrate with Claude Desktop or other local MCP hosts that launch the tool server as a child process communicating over stdin/stdout. application.properties spring.ai.mcp.server.transport=STDIO\nspring.ai.mcp.server.name=my-local-tools\n# Package as a fat jar and run with: java"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "BeanOutputConverter (1.x) [Basic]",
+    "anchor": "structured-bean-converter",
+    "text": "BeanOutputConverter (1.x) [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "BeanOutputConverter (1.x) [Basic]",
+    "anchor": "structured-bean-converter",
+    "text": "BeanOutputConverter generates a JSON schema from a Java record or class, appends formatting instructions to the prompt, and parses the model's response back to a typed object. This is the primary structured output mechanism in Spring AI 1.x. Example import org.springframework.ai.converter.BeanOutput"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "ListOutputConverter and MapOutputConverter [Basic]",
+    "anchor": "structured-list-converter",
+    "text": "ListOutputConverter and MapOutputConverter [Basic]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "ListOutputConverter and MapOutputConverter [Basic]",
+    "anchor": "structured-list-converter",
+    "text": "Use ListOutputConverter to get a List<String> , or MapOutputConverter when the response schema is dynamic. Example import org.springframework.ai.converter.ListOutputConverter;\nimport org.springframework.ai.converter.MapOutputConverter;\n\n// List of items\nListOutputConverter listConverter = new ListOu"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Provider-Native JSON Mode [Intermediate]",
+    "anchor": "structured-native-json",
+    "text": "Provider-Native JSON Mode [Intermediate]"
+  },
+  {
+    "page": "Spring AI 1.x",
+    "href": "spring-ai/spring-ai-1x.html",
+    "section": "Provider-Native JSON Mode [Intermediate]",
+    "anchor": "structured-native-json",
+    "text": "Force raw JSON output from the model using provider-specific response format options. This bypasses Spring AI's parsing — you receive a raw JSON string and parse it yourself. Example (OpenAI) import org.springframework.ai.openai.OpenAiChatOptions;\nimport org.springframework.ai.openai.api.OpenAiApi.C"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Spring AI 2.x",
+    "anchor": "",
+    "text": "Spring AI 2.x"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Spring AI 2.x",
+    "anchor": "",
+    "text": "Spring AI 2.x Spring Boot 4 baseline • GA: 2.0.0 (Jun 12, 2026) • Spring Framework 7 required Spring AI 2.0 (GA June 2026) is the current major release, built on Spring Boot 4 and Spring Framework 7. The biggest architectural shift is moving the tool-calling loop out of ChatModel and into the open a"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "BOM + Maven / Gradle Setup",
+    "anchor": "2x-bom-setup",
+    "text": "BOM + Maven / Gradle Setup"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "BOM + Maven / Gradle Setup",
+    "anchor": "2x-bom-setup",
+    "text": "Import the Spring AI BOM so you never have to specify individual artifact versions. Add the provider starter for your chosen model (OpenAI shown) and any infrastructure starters you need (e.g. PgVector for RAG). Maven — pom.xml <dependencyManagement>\n  <dependencies>\n    <dependency>\n      <groupId>"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "First ChatClient Call (2.x)",
+    "anchor": "2x-first-call",
+    "text": "First ChatClient Call (2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "First ChatClient Call (2.x)",
+    "anchor": "2x-first-call",
+    "text": "Inject ChatClient.Builder , build a client, and call .text() to get the response string. In Spring AI 2.x, text() replaces the 1.x content() method. Example import org.springframework.ai.chat.client.ChatClient;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class AssistantService {\n"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Key Differences from Spring AI 1.x",
+    "anchor": "2x-vs-1x-glance",
+    "text": "Key Differences from Spring AI 1.x"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Key Differences from Spring AI 1.x",
+    "anchor": "2x-vs-1x-glance",
+    "text": "A quick reference for teams migrating from 1.x or starting fresh on 2.x. Area 1.x 2.x Spring Boot baseline 3.x (Spring Framework 6) 4.x (Spring Framework 7) Get response text getContent() / content() getText() / text() RAG advisor QuestionAnswerAdvisor RetrievalAugmentationAdvisor Tool-calling loop "
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Basic Chat — system, user, call",
+    "anchor": "2x-basic-chat",
+    "text": "Basic Chat — system, user, call"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Basic Chat — system, user, call",
+    "anchor": "2x-basic-chat",
+    "text": "The fluent ChatClient API is the primary entry point. Set a system prompt for persona, pass the user message, and call .text() for a simple string result. // Stateless call with inline system prompt\nString reply = chatClient.prompt()\n    .system(\"You are a concise technical writer.\")\n    .user(\"Expl"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Streaming",
+    "anchor": "2x-streaming",
+    "text": "Streaming"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Streaming",
+    "anchor": "2x-streaming",
+    "text": "Use .stream().text() to receive a Flux<String> of incremental tokens — useful for displaying output progressively in a UI. import reactor.core.publisher.Flux;\n\n// Stream tokens as they arrive\nFlux<String> tokens = chatClient.prompt()\n    .user(\"Write a short poem about Spring Framework.\")\n    .strea"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Chat Memory — Conversation History",
+    "anchor": "2x-chat-memory",
+    "text": "Chat Memory — Conversation History"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Chat Memory — Conversation History",
+    "anchor": "2x-chat-memory",
+    "text": "MessageChatMemoryAdvisor maintains conversation history per session. The API is unchanged from Spring AI 1.x. import org.springframework.ai.chat.memory.InMemoryChatMemory;\nimport org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;\n\nInMemoryChatMemory memory = new InMemoryChatMemory("
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Multimodal Input (Images, Audio)",
+    "anchor": "2x-multimodal",
+    "text": "Multimodal Input (Images, Audio)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Multimodal Input (Images, Audio)",
+    "anchor": "2x-multimodal",
+    "text": "Pass images or audio alongside text using Media objects in a UserMessage . Only providers that support the modality will process it. import org.springframework.ai.chat.messages.UserMessage;\nimport org.springframework.ai.model.Media;\nimport org.springframework.util.MimeTypeUtils;\nimport org.springfra"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Virtual Threads + ChatClient",
+    "anchor": "2x-virtual-threads",
+    "text": "Virtual Threads + ChatClient"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Virtual Threads + ChatClient",
+    "anchor": "2x-virtual-threads",
+    "text": "With spring.threads.virtual.enabled=true (Spring Boot 4 + Java 21), synchronous .call() runs on virtual threads. You get high concurrency without reactive code. import java.util.concurrent.CompletableFuture;\n\n// Fan out multiple questions concurrently — each runs on a virtual thread\nList<String> que"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "RetrievalAugmentationAdvisor (2.x RAG)",
+    "anchor": "2x-retrieval-advisor",
+    "text": "RetrievalAugmentationAdvisor (2.x RAG)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "RetrievalAugmentationAdvisor (2.x RAG)",
+    "anchor": "2x-retrieval-advisor",
+    "text": "The 2.x replacement for QuestionAnswerAdvisor . It uses a modular pipeline — QueryTransformer → DocumentRetriever → DocumentPostProcessor — before augmenting the prompt with retrieved context. Each stage is pluggable. Dependency <dependency>\n  <groupId>org.springframework.ai</groupId>\n  <artifactId>"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Document Ingestion Pipeline",
+    "anchor": "2x-doc-ingestion",
+    "text": "Document Ingestion Pipeline"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Document Ingestion Pipeline",
+    "anchor": "2x-doc-ingestion",
+    "text": "Load documents from any source, split into chunks, embed them, and store in a VectorStore . Run this once (or on a schedule) to build the knowledge base your RAG advisor will query. import org.springframework.ai.document.Document;\nimport org.springframework.ai.reader.tika.TikaDocumentReader;\nimport "
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Query Transformation (2.x)",
+    "anchor": "2x-query-transform",
+    "text": "Query Transformation (2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Query Transformation (2.x)",
+    "anchor": "2x-query-transform",
+    "text": "RewriteQueryTransformer rewrites a vague or conversational user question into a retrieval-optimised query before hitting the vector store. Improves recall significantly for multi-turn conversations. import org.springframework.ai.rag.query.transformer.RewriteQueryTransformer;\n\nRetrievalAugmentationAd"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "VectorStore Implementations",
+    "anchor": "2x-vectorstore-impl",
+    "text": "VectorStore Implementations"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "VectorStore Implementations",
+    "anchor": "2x-vectorstore-impl",
+    "text": "Spring AI 2.x supports all 1.x stores plus newer additions. Switch providers by changing the starter dependency and properties — no application code changes. Store Starter artifact Notes PgVector spring-ai-pgvector-store-spring-boot-starter PostgreSQL extension; easiest to self-host Redis spring-ai-"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallingAdvisor — Tool Loop in the Advisor Chain",
+    "anchor": "2x-tool-calling-advisor",
+    "text": "ToolCallingAdvisor — Tool Loop in the Advisor Chain"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallingAdvisor — Tool Loop in the Advisor Chain",
+    "anchor": "2x-tool-calling-advisor",
+    "text": "In Spring AI 2.x, the tool-calling loop (detect tool call → dispatch → feed result back → repeat) runs as ToolCallingAdvisor in the open advisor chain instead of being hidden inside ChatModel . It is auto-registered when tools are present — no explicit wiring needed for standard use. // Standard usa"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@Tool Annotation (unchanged, works in 2.x)",
+    "anchor": "2x-tool-annotation",
+    "text": "@Tool Annotation (unchanged, works in 2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@Tool Annotation (unchanged, works in 2.x)",
+    "anchor": "2x-tool-annotation",
+    "text": "The @Tool annotation is unchanged from 1.x. Annotate any Spring service method to make it callable by the model. import org.springframework.ai.tool.annotation.Tool;\nimport org.springframework.ai.tool.annotation.ToolParam;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class WeatherS"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolContext — Injecting Runtime State into Tools",
+    "anchor": "2x-tool-context",
+    "text": "ToolContext — Injecting Runtime State into Tools"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolContext — Injecting Runtime State into Tools",
+    "anchor": "2x-tool-context",
+    "text": "ToolContext is the 2.x mechanism for passing request-scoped state (user ID, tenant, auth token) into tool methods securely — without putting sensitive values in the prompt where the model can see them. import org.springframework.ai.tool.ToolContext;\n\n@Service\npublic class OrderService {\n\n    @Tool(d"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallbackProvider — Global Tool Registration",
+    "anchor": "2x-tool-callback-provider",
+    "text": "ToolCallbackProvider — Global Tool Registration"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallbackProvider — Global Tool Registration",
+    "anchor": "2x-tool-callback-provider",
+    "text": "Implement ToolCallbackProvider as a Spring bean to register a set of tools globally. They are available to every ChatClient call without being passed per-request. import org.springframework.ai.tool.ToolCallbackProvider;\nimport org.springframework.ai.tool.method.MethodToolCallbackProvider;\n\n@Configur"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallingManager — Programmatic Tool Dispatch",
+    "anchor": "2x-tool-calling-manager",
+    "text": "ToolCallingManager — Programmatic Tool Dispatch"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "ToolCallingManager — Programmatic Tool Dispatch",
+    "anchor": "2x-tool-calling-manager",
+    "text": "For advanced scenarios where you need to resolve and execute tools outside the advisor chain — e.g. in a custom agentic loop — inject ToolCallingManager directly. import org.springframework.ai.tool.execution.ToolCallingManager;\n\n@Service\npublic class CustomAgentLoop {\n\n    private final ChatClient c"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Advisor Chain Architecture (2.x)",
+    "anchor": "2x-advisor-chain",
+    "text": "Advisor Chain Architecture (2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Advisor Chain Architecture (2.x)",
+    "anchor": "2x-advisor-chain",
+    "text": "Advisors wrap the chat call in a chain, from highest to lowest priority. In 2.x, ToolCallingAdvisor joins the chain as a first-class participant — it must have lower priority than RAG and memory advisors so that the augmented prompt reaches the model before tools are dispatched. import org.springfra"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MessageChatMemoryAdvisor",
+    "anchor": "2x-memory-advisor",
+    "text": "MessageChatMemoryAdvisor"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MessageChatMemoryAdvisor",
+    "anchor": "2x-memory-advisor",
+    "text": "Maintains conversation history keyed by conversation ID. Unchanged from Spring AI 1.x. InMemoryChatMemory memory = new InMemoryChatMemory();\nMessageChatMemoryAdvisor memoryAdvisor = new MessageChatMemoryAdvisor(memory, 20); // keep 20 messages\n\nString reply = chatClient.prompt()\n    .user(\"Remember:"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "RecursiveAdvisor — Self-Refining Loops",
+    "anchor": "2x-recursive-advisor",
+    "text": "RecursiveAdvisor — Self-Refining Loops"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "RecursiveAdvisor — Self-Refining Loops",
+    "anchor": "2x-recursive-advisor",
+    "text": "Introduced in Spring AI 1.1.x and continued in 2.x. Feeds the model's own response back as context for iterative refinement (e.g. critique → rewrite → critique). import org.springframework.ai.chat.client.advisor.RecursiveAdvisor;\n\nString refined = chatClient.prompt()\n    .user(\"Write a technical blo"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Writing a Custom Advisor",
+    "anchor": "2x-custom-advisor",
+    "text": "Writing a Custom Advisor"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Writing a Custom Advisor",
+    "anchor": "2x-custom-advisor",
+    "text": "Implement CallAdvisor to intercept requests and responses. The order() method controls priority — lower numbers run first (outermost). import org.springframework.ai.chat.client.advisor.api.*;\nimport org.springframework.core.Ordered;\n\npublic class TimingAdvisor implements CallAdvisor {\n\n    @Override"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MCP Client — Connecting to an External Tool Server",
+    "anchor": "2x-mcp-client",
+    "text": "MCP Client — Connecting to an External Tool Server"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MCP Client — Connecting to an External Tool Server",
+    "anchor": "2x-mcp-client",
+    "text": "Add the MCP client starter and configure the server URL. Spring AI auto-discovers available tools from the server and makes them available to ChatClient . Dependency <dependency>\n  <groupId>org.springframework.ai</groupId>\n  <artifactId>spring-ai-mcp-client-spring-boot-starter</artifactId>\n</depende"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpTool — Explicit MCP Tool Declaration",
+    "anchor": "2x-mcp-tool",
+    "text": "@McpTool — Explicit MCP Tool Declaration"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpTool — Explicit MCP Tool Declaration",
+    "anchor": "2x-mcp-tool",
+    "text": "@McpTool is the 2.x annotation for explicitly marking a method as an MCP tool. It gives more control than @Tool — you can set the MCP name separately from the Java method name, mark it read-only, or exclude it from auto-export. import org.springframework.ai.mcp.server.annotation.McpTool;\nimport org."
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpResource — URI-Addressable Data",
+    "anchor": "2x-mcp-resource",
+    "text": "@McpResource — URI-Addressable Data"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpResource — URI-Addressable Data",
+    "anchor": "2x-mcp-resource",
+    "text": "New in Spring AI 2.x. Expose a method as an MCP resource — a named, URI-addressable piece of data that MCP clients can read by URI template. Unlike tools, resources represent data, not actions. import org.springframework.ai.mcp.server.annotation.McpResource;\n\n@Component\npublic class UserProfileMcpRe"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpPrompt — Reusable Prompt Templates",
+    "anchor": "2x-mcp-prompt",
+    "text": "@McpPrompt — Reusable Prompt Templates"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "@McpPrompt — Reusable Prompt Templates",
+    "anchor": "2x-mcp-prompt",
+    "text": "Expose a method as an MCP prompt template . MCP clients call the prompt endpoint with variable values and receive a ready-to-send prompt string — useful for standardising prompt formats across teams or services. import org.springframework.ai.mcp.server.annotation.McpPrompt;\n\n@Component\npublic class "
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MCP Server Configuration",
+    "anchor": "2x-mcp-server-config",
+    "text": "MCP Server Configuration"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MCP Server Configuration",
+    "anchor": "2x-mcp-server-config",
+    "text": "Add the MCP server starter and configure transport. In 2.x, only methods annotated with @McpTool , @McpResource , or @McpPrompt are exported — unlike 1.x where all @Tool beans were auto-exposed. Dependency <dependency>\n  <groupId>org.springframework.ai</groupId>\n  <artifactId>spring-ai-mcp-server-sp"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": ".entity() — One-Step Structured Output (2.x)",
+    "anchor": "2x-entity-shortcut",
+    "text": ".entity() — One-Step Structured Output (2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": ".entity() — One-Step Structured Output (2.x)",
+    "anchor": "2x-entity-shortcut",
+    "text": "The 2.x .entity(Class<T>) shortcut combines BeanOutputConverter , JSON schema injection, and response parsing into a single call. The model is instructed to return valid JSON matching your class's schema, and Spring AI parses the result into the target type automatically. import jakarta.validation.c"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "BeanOutputConverter (still supported in 2.x)",
+    "anchor": "2x-bean-output-converter",
+    "text": "BeanOutputConverter (still supported in 2.x)"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "BeanOutputConverter (still supported in 2.x)",
+    "anchor": "2x-bean-output-converter",
+    "text": "The 1.x manual approach still works in 2.x and is useful when you need the raw JSON string alongside the converted object, or when you want to customise the schema. import org.springframework.ai.converter.BeanOutputConverter;\n\nrecord SentimentResult(String sentiment, double confidence, String reason"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MapOutputConverter",
+    "anchor": "2x-map-output",
+    "text": "MapOutputConverter"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "MapOutputConverter",
+    "anchor": "2x-map-output",
+    "text": "Use MapOutputConverter when the output schema is dynamic or not known at compile time. Returns a Map<String, Object> . import org.springframework.ai.converter.MapOutputConverter;\n\nMapOutputConverter converter = new MapOutputConverter();\n\nString prompt = \"List the top 3 programming languages with the"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Provider-Native JSON Schema Mode",
+    "anchor": "2x-native-json-mode",
+    "text": "Provider-Native JSON Schema Mode"
+  },
+  {
+    "page": "Spring AI 2.x",
+    "href": "spring-ai/spring-ai-2x.html",
+    "section": "Provider-Native JSON Schema Mode",
+    "anchor": "2x-native-json-mode",
+    "text": "For providers that support structured output natively (OpenAI, Gemini), you can request JSON Schema-constrained output. Combined with .entity() , this gives guaranteed schema conformance at the provider level. import org.springframework.ai.openai.OpenAiChatOptions;\nimport org.springframework.ai.open"
   },
   {
     "page": "Spring AI Structured Output",
