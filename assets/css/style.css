@@ -109,23 +109,100 @@ body {
 .section-card-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
 .section-card h3 { margin: 0 0 0.4rem; font-size: 1rem; color: var(--text); }
 .section-card p  { margin: 0; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
-#sidebar .nav-group { margin-bottom: 0.25rem; }
-#sidebar .nav-group-label {
-  padding: 0.35rem 1.25rem;
-  font-size: 0.7rem;
+/* ── Tree navigation ─────────────────────────────── */
+#sidebar .nav-group {
+  margin-bottom: 0.125rem;
+}
+
+/* Group toggle button (the parent row) */
+#sidebar .nav-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.42rem 1rem 0.42rem 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-align: left;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
 }
+#sidebar .nav-group-toggle:hover {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+/* Chevron rotates when group is open */
+#sidebar .nav-group-chevron {
+  display: inline-block;
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+#sidebar .nav-group.open .nav-group-chevron {
+  transform: rotate(90deg);
+}
+
+/* Children container — hidden when group is collapsed */
+#sidebar .nav-children {
+  display: none;
+  padding-left: 1.5rem;
+  position: relative;
+  margin-bottom: 0.25rem;
+}
+#sidebar .nav-group.open .nav-children {
+  display: block;
+}
+
+/* Vertical tree line */
+#sidebar .nav-children::before {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 0;
+  bottom: 0.75rem;
+  width: 1px;
+  background: var(--border);
+}
+
+/* Each child row */
+#sidebar .nav-tree-row {
+  position: relative;
+}
+
+/* Horizontal connector from the tree line to each item */
+#sidebar .nav-tree-row::before {
+  content: '';
+  position: absolute;
+  left: -0.25rem;
+  top: 50%;
+  width: 0.6rem;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Child link */
 #sidebar a.nav-item {
   display: block;
-  padding: 0.35rem 1.25rem 0.35rem 2rem;
+  padding: 0.32rem 0.75rem 0.32rem 0.85rem;
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 0.875rem;
-  border-left: 3px solid transparent;
+  font-size: 0.845rem;
+  border-radius: 5px;
+  border-left: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #sidebar a.nav-item:hover {
   color: var(--text);
@@ -135,8 +212,23 @@ body {
   color: var(--accent);
   border-left-color: var(--accent);
   background: var(--surface-2);
+  font-weight: 500;
 }
 #sidebar a.nav-item.locked { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* Top-level single links (Home) */
+#sidebar > a.nav-item {
+  padding: 0.42rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  border-left: none;
+  margin: 0 0.5rem;
+}
+#sidebar > a.nav-item.active {
+  background: var(--surface-2);
+  color: var(--accent);
+  border-left: none;
+}
 
 /* ── Main content ────────────────────────────────── */
 #main {

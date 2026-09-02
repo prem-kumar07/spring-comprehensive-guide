@@ -85,6 +85,14 @@
     return path.endsWith('/' + hrefEnd) || path.endsWith(hrefEnd);
   }
 
+  // Persist which groups are open in localStorage
+  function loadOpenGroups() {
+    try { return JSON.parse(localStorage.getItem('nav-open-groups') || '{}'); } catch { return {}; }
+  }
+  function saveOpenGroups(state) {
+    try { localStorage.setItem('nav-open-groups', JSON.stringify(state)); } catch {}
+  }
+
   function render() {
     // Inject favicon once
     if (!document.querySelector('link[rel="icon"]')) {
@@ -103,6 +111,8 @@
     logo.innerHTML = `<svg class="logo-leaf" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C10 4 5 10 6 19c2-5 6-8 11-9-4 4-7 9-8 15 4 3 9 1 12-5 4-7 3-17-5-18z" fill="#3fb950"/><path d="M13 26C11 21 11 15 14 10" stroke="#1a5c30" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg><span class="logo-text">Spring Guide</span>`;
     sidebar.appendChild(logo);
 
+    const openState = loadOpenGroups();
+
     NAV.forEach(entry => {
       if (entry.href) {
         const a = document.createElement('a');
@@ -112,21 +122,52 @@
         sidebar.appendChild(a);
         return;
       }
-      const group = document.createElement('div');
-      group.className = 'nav-group';
-      const label = document.createElement('div');
-      label.className = 'nav-group-label';
-      label.textContent = entry.group + (entry.locked ? '  🔒' : '');
-      group.appendChild(label);
 
-      (entry.items || []).forEach(item => {
+      // Determine if any child is active (so group stays open)
+      const hasActive = (entry.items || []).some(item => isActive(item.href));
+      // Open if active child present, or previously opened, or not yet in state (default open)
+      const isOpen = hasActive || (openState[entry.group] !== false);
+
+      const group = document.createElement('div');
+      group.className = 'nav-group' + (isOpen ? ' open' : '');
+
+      // Clickable group header with chevron
+      const toggle = document.createElement('button');
+      toggle.className = 'nav-group-toggle';
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.innerHTML =
+        '<span class="nav-group-chevron">&#9654;</span>' +
+        '<span class="nav-group-name">' + entry.group + (entry.locked ? ' 🔒' : '') + '</span>';
+      group.appendChild(toggle);
+
+      // Children container
+      const children = document.createElement('div');
+      children.className = 'nav-children';
+
+      (entry.items || []).forEach((item, idx) => {
+        const isLast = idx === (entry.items.length - 1);
+        const row = document.createElement('div');
+        row.className = 'nav-tree-row' + (isLast ? ' last' : '');
+
         const a = document.createElement('a');
         a.className = 'nav-item' + (isActive(item.href) ? ' active' : '') + (entry.locked ? ' locked' : '');
         a.href = entry.locked ? '#' : item.href;
         a.textContent = item.label;
-        group.appendChild(a);
+        row.appendChild(a);
+        children.appendChild(row);
       });
+
+      group.appendChild(children);
       sidebar.appendChild(group);
+
+      // Toggle expand / collapse
+      toggle.addEventListener('click', () => {
+        const nowOpen = group.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(nowOpen));
+        const state = loadOpenGroups();
+        state[entry.group] = nowOpen;
+        saveOpenGroups(state);
+      });
     });
 
     document.body.prepend(sidebar);
